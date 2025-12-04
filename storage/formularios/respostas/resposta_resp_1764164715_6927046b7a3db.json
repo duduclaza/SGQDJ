@@ -1,0 +1,32 @@
+{
+    "id": "resp_1764164715_6927046b7a3db",
+    "formulario_id": "form_1764163928_6927015857a8d",
+    "formulario_titulo": "Pesquisa de satisfação do Cliente - Técnico residente ( Alisson Rodrigues)",
+    "nome": "Teste",
+    "email": "giullia.rodrigues@djlocacao.com.br",
+    "respostas": [
+        {
+            "pergunta": "De modo geral, em uma escala de 0 a 10, quão satisfeito você está com o trabalho do colaborador(a)?",
+            "resposta": "10"
+        },
+        {
+            "pergunta": "O colaborador(a) demonstra conhecimento técnico necessário para solucionar as ocorrências referente aos equipamentos?",
+            "resposta": "Sim"
+        },
+        {
+            "pergunta": "O colaborador(a) tem um bom relacionamento profissional com os usuários?",
+            "resposta": "Sim"
+        },
+        {
+            "pergunta": "Nas horas vagas o colaborador(a) tem realizado manutenções preventivas e atendido de forma proativa ?",
+            "resposta": "Sim"
+        },
+        {
+            "pergunta": "Você teria alguma sugestão de melhoria para aprimorar o nosso serviço prestado?",
+            "resposta": "Não "
+        }
+    ],
+    "ip": "191.24.44.255",
+    "user_agent": "Mozilla\/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit\/605.1.15 (KHTML, like Gecko) Version\/26.1 Mobile\/15E148 Safari\/604.1",
+    "respondido_em": "2025-11-26 13:45:15"
+}

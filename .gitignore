@@ -1,0 +1,9 @@
+/.idea/
+/.vscode/
+/node_modules/
+/public/storage/
+.DS_Store
+
+# Permitir vendor/ e composer.lock para deploy
+# !vendor/
+# !composer.lock

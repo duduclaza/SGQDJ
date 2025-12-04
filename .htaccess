@@ -1,0 +1,31 @@
+# Root-level .htaccess - SGQ OTI DJ
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Se arquivo ou diretório existe, serve diretamente
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Arquivos estáticos em public/
+  RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -f
+  RewriteRule ^(.*)$ public/$1 [L]
+
+  # Tudo mais vai para public/index.php
+  RewriteRule ^ public/index.php [L]
+</IfModule>
+
+# Fallback se mod_rewrite não estiver disponível
+<IfModule !mod_rewrite.c>
+  DirectoryIndex public/index.php
+</IfModule>
+
+# No cache headers globally
+<IfModule mod_headers.c>
+  Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+  Header set Pragma "no-cache"
+  Header set Expires "0"
+</IfModule>

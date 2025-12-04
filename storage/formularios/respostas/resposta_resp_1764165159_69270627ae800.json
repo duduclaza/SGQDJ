@@ -1,0 +1,32 @@
+{
+    "id": "resp_1764165159_69270627ae800",
+    "formulario_id": "form_1764163928_6927015857a8d",
+    "formulario_titulo": "Pesquisa de satisfação do Cliente - Técnico residente ( Alisson Rodrigues)",
+    "nome": "Teste",
+    "email": "cinpinhge@gmail.com",
+    "respostas": [
+        {
+            "pergunta": "De modo geral, em uma escala de 0 a 10, quão satisfeito você está com o trabalho do colaborador(a)?",
+            "resposta": "3"
+        },
+        {
+            "pergunta": "O colaborador(a) demonstra conhecimento técnico necessário para solucionar as ocorrências referente aos equipamentos?",
+            "resposta": "Sim"
+        },
+        {
+            "pergunta": "O colaborador(a) tem um bom relacionamento profissional com os usuários?",
+            "resposta": "Sim"
+        },
+        {
+            "pergunta": "Nas horas vagas o colaborador(a) tem realizado manutenções preventivas e atendido de forma proativa ?",
+            "resposta": "Sim"
+        },
+        {
+            "pergunta": "Você teria alguma sugestão de melhoria para aprimorar o nosso serviço prestado?",
+            "resposta": "Serviço muito bem feito!"
+        }
+    ],
+    "ip": "191.24.44.255",
+    "user_agent": "Mozilla\/5.0 (Linux; Android 10; K) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Mobile Safari\/537.36",
+    "respondido_em": "2025-11-26 13:52:39"
+}

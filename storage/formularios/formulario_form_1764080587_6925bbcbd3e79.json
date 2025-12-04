@@ -1,0 +1,21 @@
+{
+    "id": "form_1764080587_6925bbcbd3e79",
+    "titulo": "Pesquisa de processos",
+    "descricao": "Este formulário tem como objetivo, mapear e analisar informações relevantes sobre os processos internos, evidenciando gargalos, ineficiências e oportunidades de padronização, para subsidiar decisões estratégicas e implementar melhorias que impulsionem a performance operaciona",
+    "perguntas": [
+        {
+            "texto": "Qual o seu departamento?",
+            "tipo": "texto"
+        },
+        {
+            "texto": "Quais são as principais dificuldades no seu processo hoje? Exemplo: Perda de tempo, desperdícios, gargalos, erros, etc.",
+            "tipo": "texto"
+        }
+    ],
+    "logo": "storage\/formularios\/logos\/form_1764080587_6925bbcbd3e79.png",
+    "ativo": true,
+    "criado_por": 25,
+    "criado_por_nome": "Rafael Doretto Camargo",
+    "criado_em": "2025-11-25 14:23:07",
+    "atualizado_em": "2025-11-25 14:23:07"
+}
