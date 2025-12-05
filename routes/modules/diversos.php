@@ -108,8 +108,15 @@ $router->post('/cadastro-maquinas/delete', [CadastroMaquinasController::class, '
 
 // ===== CADASTRO DE PEÇAS =====
 
+// ===== CADASTRO DE PEÇAS =====
+
 $router->get('/cadastro-pecas', [CadastroPecasController::class, 'index']);
 $router->post('/cadastro-pecas/store', [CadastroPecasController::class, 'store']);
 $router->post('/cadastro-pecas/update', [CadastroPecasController::class, 'update']);
 $router->post('/cadastro-pecas/delete', [CadastroPecasController::class, 'delete']);
 $router->post('/cadastro-pecas/import', [CadastroPecasController::class, 'import']);
+
+// ===== ROTA DE TESTE DE EMAIL (DEBUG) =====
+use App\Controllers\TesteEmailController;
+$router->get('/teste-smtp-debug', [TesteEmailController::class, 'index']);
+$router->post('/teste-smtp-debug', [TesteEmailController::class, 'index']);
