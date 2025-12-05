@@ -234,7 +234,19 @@ async function verDetalhes(id) {
         document.body.appendChild(modal);
         
         modal.classList.remove('hidden');
-        modal.style.display = 'flex'; // Forçar display flex
+        
+        // FORÇAR ESTILOS CRÍTICOS VIA JS
+        modal.style.display = 'flex';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        modal.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
+        modal.style.zIndex = '99999999';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        
         document.body.style.overflow = 'hidden';
     } else {
         console.error('❌ Modal modalDetalhes não encontrado no DOM');
