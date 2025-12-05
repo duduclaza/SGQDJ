@@ -230,6 +230,9 @@ async function verDetalhes(id) {
     document.getElementById('conteudoDetalhes').innerHTML = html;
     const modal = document.getElementById('modalDetalhes');
     if(modal) {
+        // MOVER PARA O BODY PARA GARANTIR VISIBILIDADE
+        document.body.appendChild(modal);
+        
         modal.classList.remove('hidden');
         modal.style.display = 'flex'; // Forçar display flex
         document.body.style.overflow = 'hidden';
