@@ -41,17 +41,17 @@ class EmailService
     private function configureMailer(): void
     {
         try {
-            // Server settings
+            // Configurações do servidor SMTP (Hostinger)
             $this->mailer->isSMTP();
-            $this->mailer->Host = $this->env('MAIL_HOST', 'smtp.hostinger.com');
-            $this->mailer->SMTPAuth = true;
-            $this->mailer->Username = $this->env('MAIL_USERNAME', 'suporte@sgqoti.com.br');
-            $this->mailer->Password = $this->env('MAIL_PASSWORD', 'Pandora@1989');
-            $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-            $this->mailer->Port = (int)$this->env('MAIL_PORT', 465);
+            $this->mailer->Host       = 'smtp.hostinger.com';
+            $this->mailer->SMTPAuth   = true;
+            $this->mailer->Username   = 'suporte@sgqoti.com.br';
+            $this->mailer->Password   = 'Pandora@1989';
+            $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL (Porta 465)
+            $this->mailer->Port       = 465;
             
             // Timeout settings para melhor performance
-            $this->mailer->Timeout = 10; // 10 segundos
+            $this->mailer->Timeout = 20;
             $this->mailer->SMTPOptions = array(
                 'ssl' => array(
                     'verify_peer' => false,
@@ -61,17 +61,14 @@ class EmailService
             );
             
             // Default sender
-            $this->mailer->setFrom(
-                $this->env('MAIL_FROM_ADDRESS', 'suporte@sgqoti.com.br'),
-                $this->env('MAIL_FROM_NAME', 'SGQ OTI DJ')
-            );
+            $this->mailer->setFrom('suporte@sgqoti.com.br', 'SGQ OTI DJ');
             
             // Content settings
             $this->mailer->isHTML(true);
             $this->mailer->CharSet = 'UTF-8';
             
-            // Debug ativado para troubleshooting
-            $this->mailer->SMTPDebug = 2; // 0 = off, 1 = client, 2 = client and server
+            // Debug ativado para troubleshooting e log
+            $this->mailer->SMTPDebug = 0; // Desligado em produção para não sujar o JSON, erros vão pro catch
             $this->mailer->Debugoutput = function($str, $level) {
                 error_log("PHPMailer Debug [$level]: $str");
             };
