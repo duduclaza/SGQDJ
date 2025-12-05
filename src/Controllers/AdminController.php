@@ -3102,7 +3102,7 @@ class AdminController
                     m.titulo,
                     m.idealizador,
                     m.status,
-                    m.pontuacao_total as pont_global,
+                    m.pontuacao as pont_global,
                     m.created_at as data_criacao,
                     d.nome as departamento_nome
                 FROM melhoria_continua_2 m
