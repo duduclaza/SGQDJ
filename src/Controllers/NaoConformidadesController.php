@@ -673,7 +673,8 @@ class NaoConformidadesController
                 <p>Por favor, acesse o sistema para registrar a ação corretiva.</p>
             ";
 
-            EmailService::send($nc['responsavel_email'], $assunto, $mensagem);
+            $emailService = new \App\Services\EmailService();
+            $emailService->send($nc['responsavel_email'], $assunto, $mensagem);
         } catch (\Exception $e) {
             error_log("Erro ao enviar e-mail de nova NC: " . $e->getMessage());
         }
@@ -713,7 +714,8 @@ class NaoConformidadesController
                 <p><a href='" . $_SERVER['HTTP_HOST'] . "/nao-conformidades' style='background:#3b82f6;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;'>Acessar Sistema</a></p>
             ";
 
-            EmailService::send($nc['criador_email'], $assunto, $mensagem);
+            $emailService = new \App\Services\EmailService();
+            $emailService->send($nc['criador_email'], $assunto, $mensagem);
         } catch (\Exception $e) {
             error_log("Erro ao enviar e-mail de ação registrada: " . $e->getMessage());
         }
@@ -739,28 +741,34 @@ class NaoConformidadesController
 
             if (!$nc) return;
 
-            $assunto = "✅ NC Solucionada: {$nc['titulo']}";
+            $assunto = "🏁 NC Solucionada: {$nc['titulo']}";
             $mensagem = "
-                <h2>Não Conformidade Solucionada</h2>
-                <p>A NC #{$ncId} foi marcada como <strong>SOLUCIONADA</strong>.</p>
+                <h2>Não Conformidade Solucionada!</h2>
+                <p>A NC #{$ncId} foi marcada como solucionada.</p>
                 
                 <h3>Detalhes:</h3>
                 <ul>
                     <li><strong>Título:</strong> {$nc['titulo']}</li>
                     <li><strong>Responsável:</strong> {$nc['responsavel_nome']}</li>
-                    <li><strong>Data de Solução:</strong> " . date('d/m/Y H:i') . "</li>
+                    <li><strong>Data Solução:</strong> " . date('d/m/Y H:i') . "</li>
                 </ul>
+
+                <p style='color:green;font-weight:bold;'>Processo Concluído com Sucesso</p>
                 
-                <p><a href='" . $_SERVER['HTTP_HOST'] . "/nao-conformidades' style='background:#10b981;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;'>Acessar Sistema</a></p>
+                <p><a href='" . $_SERVER['HTTP_HOST'] . "/nao-conformidades' style='background:#3b82f6;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;'>Acessar Sistema</a></p>
             ";
 
             // Enviar para criador e responsável
-            EmailService::send($nc['criador_email'], $assunto, $mensagem);
-            if ($nc['criador_email'] !== $nc['responsavel_email']) {
-                EmailService::send($nc['responsavel_email'], $assunto, $mensagem);
+            $destinatarios = array_unique([$nc['criador_email'], $nc['responsavel_email']]);
+            
+            $emailService = new \App\Services\EmailService();
+            foreach ($destinatarios as $email) {
+                $emailService->send($email, $assunto, $mensagem);
             }
+
         } catch (\Exception $e) {
-            error_log("Erro ao enviar e-mail de NC solucionada: " . $e->getMessage());
+            error_log("Erro ao enviar e-mail de conclusão: " . $e->getMessage());
         }
     }
+
 }
