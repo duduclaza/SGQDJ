@@ -169,7 +169,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Ver detalhes
 async function verDetalhes(id) {
-  console.log('🔍 Iniciando verDetalhes para ID:', id);
+  console.log('🔍 Iniciando verDetalhes dinâmico para ID:', id);
+  
+  // Remover modal anterior se existir
+  const modalAnterior = document.getElementById('modalDetalhesDinamico');
+  if (modalAnterior) modalAnterior.remove();
+
   try {
     const res = await fetch(`/nao-conformidades/detalhes/${id}`);
     const data = await res.json();
@@ -180,92 +185,113 @@ async function verDetalhes(id) {
       const anexos = data.anexos || [];
       const isAdmin = <?= json_encode($isAdmin || $isSuperAdmin) ?>;
       const userId = <?= $_SESSION['user_id'] ?>;
-    const podeRegistrarAcao = (nc.usuario_responsavel_id == userId || isAdmin) && nc.status !== 'solucionada';
-    const podeSolucionar = (nc.usuario_criador_id == userId || nc.usuario_responsavel_id == userId || isAdmin) && nc.status === 'em_andamento';
-    
-    let html = `
-      <div class="space-y-4">
-        <div class="flex items-center gap-2">
-          <h3 class="text-2xl font-bold">${nc.titulo}</h3>
-          <span class="px-3 py-1 rounded-full text-sm ${nc.status === 'pendente' ? 'bg-red-100 text-red-700' : (nc.status === 'em_andamento' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700')}">
-            ${nc.status === 'pendente' ? 'Pendente' : (nc.status === 'em_andamento' ? 'Em Andamento' : 'Solucionada')}
-          </span>
-        </div>
-        <div class="grid grid-cols-2 gap-4 text-sm">
-          <div><strong>ID:</strong> #${nc.id}</div>
-          <div><strong>Criado em:</strong> ${new Date(nc.created_at).toLocaleString('pt-BR')}</div>
-          <div><strong>Apontado por:</strong> ${nc.criador_nome}</div>
-          <div><strong>Responsável:</strong> ${nc.responsavel_nome}</div>
-        </div>
-        <div class="border-t pt-4">
-          <h4 class="font-semibold mb-2">Descrição:</h4>
-          <p class="text-gray-700 whitespace-pre-wrap">${nc.descricao}</p>
+      const podeRegistrarAcao = (nc.usuario_responsavel_id == userId || isAdmin) && nc.status !== 'solucionada';
+      const podeSolucionar = (nc.usuario_criador_id == userId || nc.usuario_responsavel_id == userId || isAdmin) && nc.status === 'em_andamento';
+      
+      let htmlContent = `
+        <div class="space-y-4">
+          <div class="flex items-center gap-2">
+            <h3 class="text-2xl font-bold">${nc.titulo}</h3>
+            <span class="px-3 py-1 rounded-full text-sm ${nc.status === 'pendente' ? 'bg-red-100 text-red-700' : (nc.status === 'em_andamento' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700')}">
+              ${nc.status === 'pendente' ? 'Pendente' : (nc.status === 'em_andamento' ? 'Em Andamento' : 'Solucionada')}
+            </span>
+          </div>
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div><strong>ID:</strong> #${nc.id}</div>
+            <div><strong>Criado em:</strong> ${new Date(nc.created_at).toLocaleString('pt-BR')}</div>
+            <div><strong>Apontado por:</strong> ${nc.criador_nome}</div>
+            <div><strong>Responsável:</strong> ${nc.responsavel_nome}</div>
+          </div>
+          <div class="border-t pt-4">
+            <h4 class="font-semibold mb-2">Descrição:</h4>
+            <p class="text-gray-700 whitespace-pre-wrap">${nc.descricao}</p>
+          </div>`;
+      
+      if (nc.acao_corretiva) {
+        htmlContent += `<div class="border-t pt-4 bg-green-50 p-4 rounded">
+          <h4 class="font-semibold mb-2 text-green-800">✅ Ação Corretiva Registrada:</h4>
+          <p class="text-gray-700 whitespace-pre-wrap">${nc.acao_corretiva}</p>
+          <p class="text-sm text-gray-500 mt-2">Por: ${nc.acao_nome} em ${new Date(nc.data_acao).toLocaleString('pt-BR')}</p>
         </div>`;
-    
-    if (nc.acao_corretiva) {
-      html += `<div class="border-t pt-4 bg-green-50 p-4 rounded">
-        <h4 class="font-semibold mb-2 text-green-800">✅ Ação Corretiva Registrada:</h4>
-        <p class="text-gray-700 whitespace-pre-wrap">${nc.acao_corretiva}</p>
-        <p class="text-sm text-gray-500 mt-2">Por: ${nc.acao_nome} em ${new Date(nc.data_acao).toLocaleString('pt-BR')}</p>
-      </div>`;
-    }
-    
-    if (anexos.length > 0) {
-      html += '<div class="border-t pt-4"><h4 class="font-semibold mb-2">📎 Anexos:</h4><div class="space-y-2">';
-      anexos.forEach(a => {
-        html += `<div class="flex items-center gap-2 p-2 bg-gray-50 rounded"><span>${a.nome_arquivo}</span><a href="/nao-conformidades/anexo/${a.id}" class="text-blue-600 hover:underline text-sm">Download</a></div>`;
-      });
-      html += '</div></div>';
-    }
-    
-    html += '<div class="flex gap-2 pt-4 border-t">';
-    if (podeRegistrarAcao) {
-      html += `<button onclick="abrirModalAcao(${nc.id})" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">✍️ Registrar Ação</button>`;
-    }
-    if (podeSolucionar) {
-      html += `<button onclick="marcarSolucionada(${nc.id})" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">✅ Marcar como Solucionada</button>`;
-    }
-    html += '</div></div>';
-    
-    document.getElementById('conteudoDetalhes').innerHTML = html;
-    const modal = document.getElementById('modalDetalhes');
-    if(modal) {
-        // MOVER PARA O BODY PARA GARANTIR VISIBILIDADE
-        document.body.appendChild(modal);
-        
-        modal.classList.remove('hidden');
-        
-        // FORÇAR ESTILOS CRÍTICOS VIA JS
-        modal.style.display = 'flex';
-        modal.style.position = 'fixed';
-        modal.style.top = '0';
-        modal.style.left = '0';
-        modal.style.width = '100vw';
-        modal.style.height = '100vh';
-        modal.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
-        modal.style.zIndex = '99999999';
-        modal.style.alignItems = 'center';
-        modal.style.justifyContent = 'center';
-        
-        document.body.style.overflow = 'hidden';
+      }
+      
+      if (anexos.length > 0) {
+        htmlContent += '<div class="border-t pt-4"><h4 class="font-semibold mb-2">📎 Anexos:</h4><div class="space-y-2">';
+        anexos.forEach(a => {
+          htmlContent += `<div class="flex items-center gap-2 p-2 bg-gray-50 rounded"><span>${a.nome_arquivo}</span><a href="/nao-conformidades/anexo/${a.id}" class="text-blue-600 hover:underline text-sm">Download</a></div>`;
+        });
+        htmlContent += '</div></div>';
+      }
+      
+      htmlContent += '<div class="flex gap-2 pt-4 border-t">';
+      if (podeRegistrarAcao) {
+        htmlContent += `<button onclick="abrirModalAcao(${nc.id})" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">✍️ Registrar Ação</button>`;
+      }
+      if (podeSolucionar) {
+        htmlContent += `<button onclick="marcarSolucionada(${nc.id})" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">✅ Marcar como Solucionada</button>`;
+      }
+      htmlContent += '</div></div>';
+
+      // CRIAR MODAL DINAMICAMENTE
+      const modalDiv = document.createElement('div');
+      modalDiv.id = 'modalDetalhesDinamico';
+      modalDiv.className = 'modal-overlay'; // Usa classes base
+      modalDiv.style.position = 'fixed';
+      modalDiv.style.top = '0';
+      modalDiv.style.left = '0';
+      modalDiv.style.width = '100vw';
+      modalDiv.style.height = '100vh';
+      modalDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
+      modalDiv.style.zIndex = '99999999';
+      modalDiv.style.display = 'flex';
+      modalDiv.style.alignItems = 'center';
+      modalDiv.style.justifyContent = 'center';
+      
+      modalDiv.innerHTML = `
+        <div class="modal-content bg-white rounded-xl shadow-2xl p-6 w-full max-w-4xl mx-auto relative animate-fade-in-up" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-start mb-4 border-b pb-4">
+              <h2 class="text-2xl font-bold text-gray-800">Detalhes da NC</h2>
+              <button onclick="document.getElementById('modalDetalhesDinamico').remove(); document.body.style.overflow = '';" class="text-gray-400 hover:text-red-500 transition-colors">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+            <div class="overflow-y-auto max-h-[80vh]">
+                ${htmlContent}
+            </div>
+        </div>
+      `;
+
+      // Fechar ao clicar fora
+      modalDiv.onclick = function() {
+          this.remove();
+          document.body.style.overflow = '';
+      };
+
+      document.body.appendChild(modalDiv);
+      document.body.style.overflow = 'hidden'; // Evita scroll na página de fundo
+      console.log('✅ Modal dinâmico inserido no DOM');
+
     } else {
-        console.error('❌ Modal modalDetalhes não encontrado no DOM');
+      alert('Erro ao carregar detalhes: ' + (data.message || 'Erro desconhecido'));
     }
-  } else {
-    alert('Erro ao carregar detalhes: ' + (data.message || 'Erro desconhecido'));
-  }
   } catch (error) {
     console.error('❌ Erro fatal ao ver detalhes:', error);
     alert('Erro ao carregar detalhes. Verifique o console.');
   }
 }
 
+// Função placeholder para compatibilidade caso algo chame fecharModalDetalhes
 function fecharModalDetalhes() {
-  const modal = document.getElementById('modalDetalhes');
+  const modal = document.getElementById('modalDetalhesDinamico');
   if(modal) {
-    modal.classList.add('hidden');
-    modal.style.display = 'none'; // Forçar display none
+    modal.remove();
     document.body.style.overflow = '';
+  }
+  // Tentar fechar o modal antigo também por precaução
+  const modalAntigo = document.getElementById('modalDetalhes');
+  if(modalAntigo && modalAntigo.classList.contains('hidden') === false) {
+      modalAntigo.classList.add('hidden');
+      modalAntigo.style.display = 'none';
   }
 }
 
