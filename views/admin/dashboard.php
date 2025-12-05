@@ -898,7 +898,7 @@
 
 <!-- Modal: Detalhes de Melhorias por Departamento -->
 <div id="modalDetalhesMelhorias" class="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 transition-all duration-300" style="z-index: 99999;">
-  <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="modalDetalhesMelhoriasContent">
+  <div class="bg-white rounded-2xl shadow-2xl w-[95vw] h-[95vh] overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="modalDetalhesMelhoriasContent">
     <!-- Cabeçalho -->
     <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4">
       <div class="flex justify-between items-center">
@@ -917,7 +917,7 @@
     </div>
 
     <!-- Conteúdo -->
-    <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 120px);">
+    <div class="p-6 overflow-y-auto" style="max-height: calc(95vh - 80px);">
       <!-- Loading -->
       <div id="modalMelhoriasLoading" class="flex items-center justify-center py-12">
         <div class="flex flex-col items-center gap-3">
