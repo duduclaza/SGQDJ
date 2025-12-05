@@ -245,7 +245,7 @@
   border-radius: 12px;
   display: flex;
   align-items: center;
-  justify-center;
+  justify-content: center;
 }
 
 .modal-close-btn {
@@ -320,7 +320,7 @@
 .form-select-modern:focus,
 .form-textarea-modern:focus {
   border-color: #dc2626;
-  ring: 2px solid rgba(220, 38, 38, 0.1);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
   outline: none;
 }
 
@@ -353,7 +353,7 @@
   border-radius: 50%;
   display: flex;
   align-items: center;
-  justify-center;
+  justify-content: center;
   margin: 0 auto 1rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
