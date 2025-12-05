@@ -29,9 +29,21 @@ function abrirModalNovaNC() {
     return;
   }
   
-  // Mostrar o modal
+  console.log('📦 Modal encontrado:', modal);
+  console.log('📏 Classes antes:', modal.className);
+  
+  // Mostrar o modal - remover hidden E adicionar active
   modal.classList.remove('hidden');
+  modal.classList.add('active');
   document.body.style.overflow = 'hidden';
+  
+  console.log('📏 Classes depois:', modal.className);
+  
+  // Verificar estilos computados
+  const styles = window.getComputedStyle(modal);
+  console.log('🎨 Display:', styles.display);
+  console.log('🎨 Visibility:', styles.visibility);
+  console.log('🎨 Opacity:', styles.opacity);
   
   console.log('✅ Modal aberto com sucesso!');
 }
@@ -39,6 +51,7 @@ function abrirModalNovaNC() {
 function fecharModalNovaNC() {
   const modal = document.getElementById('modalNovaNC');
   if (modal) {
+    modal.classList.remove('active');
     modal.classList.add('hidden');
     document.body.style.overflow = '';
     // Resetar o formulário
