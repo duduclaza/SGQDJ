@@ -212,6 +212,17 @@
                 <span class="toggle-slider"></span>
               </label>
             </div>
+            
+            <div class="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">⚠️</span>
+                <span class="font-medium text-gray-900">Não Conformidades</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" name="dashboard_tabs[nao_conformidades]" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -646,7 +657,8 @@ function loadDashboardTabPermissions(profileId) {
         amostragens: document.querySelector('input[name="dashboard_tabs[amostragens]"]'),
         fornecedores: document.querySelector('input[name="dashboard_tabs[fornecedores]"]'),
         garantias: document.querySelector('input[name="dashboard_tabs[garantias]"]'),
-        melhorias: document.querySelector('input[name="dashboard_tabs[melhorias]"]')
+        melhorias: document.querySelector('input[name="dashboard_tabs[melhorias]"]'),
+        nao_conformidades: document.querySelector('input[name="dashboard_tabs[nao_conformidades]"]')
       };
       
       Object.keys(tabCheckboxes).forEach(tab => {
