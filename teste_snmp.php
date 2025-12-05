@@ -13,10 +13,14 @@
 // CONFIGURAÇÕES
 // =====================================================
 
-$impressora_ip = '192.168.1.100'; // ALTERE PARA O IP DA SUA IMPRESSORA
+$impressora_ip = '127.0.0.1'; // IP da impressora (localhost para teste)
+$impressora_porta = 1161; // Porta SNMP customizada (padrão é 161)
 $community = 'public'; // Community string SNMP (padrão: public)
 $timeout = 5000000; // Timeout em microsegundos (5 segundos)
 $retries = 3; // Número de tentativas
+
+// Montar string de conexão com porta
+$snmp_host = $impressora_ip . ':' . $impressora_porta;
 
 // =====================================================
 // OIDs PADRÃO (RFC 3805)
@@ -94,6 +98,7 @@ if (!extension_loaded('snmp')) {
 
 exibirResultado("Extensão SNMP", "INSTALADA", true);
 exibirResultado("IP da Impressora", $impressora_ip, true);
+exibirResultado("Porta SNMP", $impressora_porta, true);
 exibirResultado("Community String", $community, true);
 
 echo "\n";
@@ -136,7 +141,7 @@ foreach ($oids as $nome => $oid) {
         snmp_set_oid_output_format(SNMP_OID_OUTPUT_NUMERIC);
         
         // Tentar ler o OID
-        $valor = @snmpget($impressora_ip, $community, $oid, $timeout, $retries);
+        $valor = @snmpget($snmp_host, $community, $oid, $timeout, $retries);
         
         if ($valor !== false) {
             // Limpar o valor (remover aspas, espaços, etc)
