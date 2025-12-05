@@ -25,8 +25,8 @@ class Amostragens2Controller
         $userId = $_SESSION['user_id'];
         $userRole = $_SESSION['user_role'] ?? 'user';
         
-        // Admin vê todas
-        if ($userRole === 'admin') {
+        // Admin e superadmin veem todas
+        if (in_array($userRole, ['admin', 'superadmin'])) {
             return true;
         }
         
@@ -49,7 +49,7 @@ class Amostragens2Controller
     {
         try {
             // Verificar permissão
-            $isAdmin = $_SESSION['user_role'] === 'admin';
+            $isAdmin = in_array($_SESSION['user_role'], ['admin', 'superadmin']);
             if (!$isAdmin && !PermissionService::hasPermission($_SESSION['user_id'], 'amostragens_2', 'view')) {
                 http_response_code(403);
                 echo "Acesso negado";
@@ -103,7 +103,7 @@ class Amostragens2Controller
             $userId = $_SESSION['user_id'];
             $userRole = $_SESSION['user_role'] ?? 'user';
             
-            if ($userRole !== 'admin') {
+            if (!in_array($userRole, ['admin', 'superadmin'])) {
                 // Usuário comum: só vê amostragens onde está na lista de responsáveis
                 $where[] = "(FIND_IN_SET(:user_id_responsavel, a.responsaveis) > 0 OR a.user_id = :user_id_criador)";
                 $params[':user_id_responsavel'] = $userId;
