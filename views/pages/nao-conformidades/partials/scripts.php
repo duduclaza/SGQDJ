@@ -248,14 +248,14 @@ async function verDetalhes(id) {
       modalDiv.style.justifyContent = 'center';
       
       modalDiv.innerHTML = `
-        <div class="modal-content bg-white rounded-xl shadow-2xl p-6 w-full max-w-4xl mx-auto relative animate-fade-in-up" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-start mb-4 border-b pb-4">
-              <h2 class="text-2xl font-bold text-gray-800">Detalhes da NC</h2>
-              <button onclick="document.getElementById('modalDetalhesDinamico').remove(); document.body.style.overflow = '';" class="text-gray-400 hover:text-red-500 transition-colors">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        <div class="modal-content" style="background: white; border-radius: 12px; padding: 24px; width: 100%; max-width: 800px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);" onclick="event.stopPropagation()">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px; border-bottom: 1px solid #eee; padding-bottom: 16px;">
+              <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937; margin: 0;">Detalhes da NC</h2>
+              <button onclick="document.getElementById('modalDetalhesDinamico').remove(); document.body.style.overflow = '';" style="background: none; border: none; cursor: pointer; color: #9ca3af; padding: 4px;">
+                <svg style="width: 32px; height: 32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             </div>
-            <div class="overflow-y-auto max-h-[80vh]">
+            <div style="overflow-y: auto; max-height: 80vh;">
                 ${htmlContent}
             </div>
         </div>
