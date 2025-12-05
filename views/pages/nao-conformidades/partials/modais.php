@@ -172,7 +172,7 @@
 
 /* Header */
 .modal-header {
-  padding: 1.25rem;
+  padding: 1rem;
   border-bottom: 1px solid #f3f4f6;
   display: flex;
   align-items: center;
@@ -201,14 +201,14 @@
 
 /* Body */
 .modal-body {
-  padding: 1.5rem;
+  padding: 1rem;
   overflow-y: auto;
   max-height: 70vh;
 }
 
 /* Footer */
 .modal-footer {
-  padding: 1rem 1.5rem;
+  padding: 0.875rem 1rem;
   background: #f9fafb;
   border-top: 1px solid #f3f4f6;
   display: flex;
