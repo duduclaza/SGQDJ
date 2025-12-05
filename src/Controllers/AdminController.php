@@ -3098,16 +3098,17 @@ class AdminController
             // Buscar melhorias do departamento
             $sql = "
                 SELECT 
-                    id,
-                    ideias_inovacao,
-                    departamento,
-                    status,
-                    nome_idealizador,
-                    pont_global,
-                    created_at as data_criacao
-                FROM melhoria_continua_2
-                WHERE departamento = ?
-                ORDER BY created_at DESC
+                    m.id,
+                    m.titulo,
+                    m.idealizador,
+                    m.status,
+                    m.pontuacao_total as pont_global,
+                    m.created_at as data_criacao,
+                    d.nome as departamento_nome
+                FROM melhoria_continua_2 m
+                LEFT JOIN departamentos d ON m.departamento_id = d.id
+                WHERE d.nome = ?
+                ORDER BY m.created_at DESC
             ";
             
             $stmt = $this->db->prepare($sql);

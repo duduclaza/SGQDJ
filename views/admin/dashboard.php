@@ -3894,8 +3894,8 @@ function preencherModalMelhorias(melhorias) {
   
   // Calcular estatísticas
   const total = melhorias.length;
-  const concluidas = melhorias.filter(m => m.status === 'concluida').length;
-  const emAndamento = melhorias.filter(m => m.status === 'em_andamento').length;
+  const concluidas = melhorias.filter(m => m.status === 'Concluída' || m.status === 'concluida').length;
+  const emAndamento = melhorias.filter(m => m.status === 'Em andamento' || m.status === 'em_andamento').length;
   const pontuacaoMedia = melhorias.length > 0 
     ? (melhorias.reduce((acc, m) => acc + (parseFloat(m.pont_global) || 0), 0) / melhorias.length).toFixed(2)
     : '0.00';
@@ -3923,8 +3923,8 @@ function preencherModalMelhorias(melhorias) {
       row.className = 'hover:bg-gray-50 transition-colors';
       row.innerHTML = `
         <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">#${melhoria.id}</td>
-        <td class="px-4 py-3 text-sm text-gray-900">${escapeHtml(melhoria.ideias_inovacao)}</td>
-        <td class="px-4 py-3 text-sm text-gray-600">${escapeHtml(melhoria.nome_idealizador || '-')}</td>
+        <td class="px-4 py-3 text-sm text-gray-900">${escapeHtml(melhoria.titulo)}</td>
+        <td class="px-4 py-3 text-sm text-gray-600">${escapeHtml(melhoria.idealizador || '-')}</td>
         <td class="px-4 py-3 whitespace-nowrap">
           ${getStatusBadge(melhoria.status)}
         </td>
@@ -3948,11 +3948,17 @@ function preencherModalMelhorias(melhorias) {
 
 function getStatusBadge(status) {
   const statusMap = {
+    'Pendente análise': { text: 'Pendente Análise', color: 'gray', icon: '⏳' },
     'pendente_analise': { text: 'Pendente Análise', color: 'gray', icon: '⏳' },
+    'Enviado para Aprovação': { text: 'Enviado p/ Aprovação', color: 'indigo', icon: '📤' },
     'enviado_aprovacao': { text: 'Enviado p/ Aprovação', color: 'indigo', icon: '📤' },
+    'Em andamento': { text: 'Em Andamento', color: 'blue', icon: '🔄' },
     'em_andamento': { text: 'Em Andamento', color: 'blue', icon: '🔄' },
+    'Concluída': { text: 'Concluída', color: 'green', icon: '✅' },
     'concluida': { text: 'Concluída', color: 'green', icon: '✅' },
+    'Recusada': { text: 'Recusada', color: 'red', icon: '❌' },
     'reprovada': { text: 'Reprovada', color: 'red', icon: '❌' },
+    'Pendente Adaptação': { text: 'Pendente Adaptação', color: 'purple', icon: '📝' },
     'cancelada': { text: 'Cancelada', color: 'gray', icon: '🚫' }
   };
   
