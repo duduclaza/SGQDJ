@@ -153,7 +153,7 @@
 
 .modal-content-compact {
   background: white;
-  border-radius: 16px;
+  border-radius: 8px;
   width: 100%;
   max-width: 600px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
