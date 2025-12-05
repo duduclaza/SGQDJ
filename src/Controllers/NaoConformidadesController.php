@@ -150,20 +150,47 @@ class NaoConformidadesController
             $stmt->execute([$titulo, $descricao, $_SESSION['user_id'], $responsavelId]);
             $ncId = $this->db->lastInsertId();
 
-            // Processar uploads
-            if (isset($_FILES['anexos']) && !empty($_FILES['anexos']['name'][0])) {
-                $this->processarUploads($ncId, $_FILES['anexos'], 'evidencia_inicial', $_SESSION['user_id']);
-            }
-
             $this->db->commit();
 
-            // Enviar e-mail para responsável
-            $this->enviarEmailNovaNc($ncId, $responsavelId);
+            // Processar uploads (pode falhar sem bloquear a criação)
+            $uploadErro = null;
+            if (isset($_FILES['anexos']) && !empty($_FILES['anexos']['name'][0])) {
+                try {
+                    // Verificar se diretório existe
+                    if (!is_dir($this->uploadDir)) {
+                        mkdir($this->uploadDir, 0755, true);
+                    }
+                    
+                    // Verificar permissão de escrita
+                    if (!is_writable($this->uploadDir)) {
+                        throw new \Exception("Diretório de uploads sem permissão de escrita: " . $this->uploadDir);
+                    }
+                    
+                    $this->processarUploads($ncId, $_FILES['anexos'], 'evidencia_inicial', $_SESSION['user_id']);
+                } catch (\Exception $uploadError) {
+                    $uploadErro = $uploadError->getMessage();
+                    error_log("Erro ao processar uploads da NC #{$ncId}: " . $uploadErro);
+                }
+            }
+
+            // Tentar enviar e-mail para responsável (não bloqueia se falhar)
+            try {
+                $this->enviarEmailNovaNc($ncId, $responsavelId);
+            } catch (\Exception $emailError) {
+                error_log("Erro ao enviar e-mail de nova NC: " . $emailError->getMessage());
+                // Continua mesmo se email falhar
+            }
+
+            $mensagem = 'NC criada com sucesso!';
+            if ($uploadErro) {
+                $mensagem .= ' ATENÇÃO: Erro ao salvar anexos: ' . $uploadErro;
+            }
 
             echo json_encode([
                 'success' => true,
-                'message' => 'NC criada com sucesso!',
-                'nc_id' => $ncId
+                'message' => $mensagem,
+                'nc_id' => $ncId,
+                'upload_erro' => $uploadErro
             ]);
 
         } catch (\Exception $e) {
@@ -171,6 +198,7 @@ class NaoConformidadesController
                 $this->db->rollBack();
             }
             error_log("Erro ao criar NC: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             echo json_encode(['success' => false, 'message' => 'Erro ao criar NC: ' . $e->getMessage()]);
         }
         exit;
