@@ -2414,6 +2414,7 @@ class AdminController
      */
     public function getNaoConformidadesData()
     {
+        ob_start(); // Iniciar buffer
         header('Content-Type: application/json');
         
         try {
@@ -2540,15 +2541,26 @@ class AdminController
             // 3. Buscar lista de departamentos para filtro (se existir a coluna)
             $departamentosDisponiveis = [];
             if ($hasDepartamentoId) {
+                // MUDANÇA: Buscar TODOS os departamentos, não apenas os que têm NCs
                 $stmtDeptList = $this->db->query("
-                    SELECT DISTINCT d.nome 
-                    FROM departamentos d
-                    INNER JOIN nao_conformidades nc ON nc.departamento_id = d.id
-                    WHERE d.nome IS NOT NULL
-                    ORDER BY d.nome
+                    SELECT nome 
+                    FROM departamentos
+                    WHERE nome IS NOT NULL
+                    ORDER BY nome
                 ");
                 $departamentosDisponiveis = $stmtDeptList->fetchAll(\PDO::FETCH_COLUMN);
             }
+            
+            // DEBUG: Log para verificar o que está sendo retornado
+            error_log("=== DEBUG NC Dashboard ===");
+            error_log("User ID: " . $userId);
+            error_log("User Role: " . $userRole);
+            error_log("Pendentes: " . $pendentes);
+            error_log("Em Andamento: " . $emAndamento);
+            error_log("Solucionadas: " . $solucionadas);
+            error_log("Departamentos disponíveis: " . count($departamentosDisponiveis));
+            error_log("Tem departamento_id: " . ($hasDepartamentoId ? 'SIM' : 'NÃO'));
+            error_log("========================");
             
             // Montar resposta
             $response = [
@@ -2573,11 +2585,13 @@ class AdminController
                 ]
             ];
             
+            ob_clean(); // Limpar buffer antes de enviar JSON
             echo json_encode($response);
             
         } catch (\Exception $e) {
             error_log("Erro ao carregar dados de NCs: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
+            ob_clean(); // Limpar buffer antes de enviar JSON de erro
             http_response_code(500);
             echo json_encode([
                 'success' => false,
