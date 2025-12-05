@@ -400,6 +400,9 @@ class NaoConformidadesController
                 exit;
             }
 
+            // Enviar e-mail ao criador notificando que o responsável iniciou o tratamento
+            $this->enviarEmailTratamentoIniciado($id);
+
             ob_clean();
             echo json_encode(['success' => true, 'message' => 'NC movida para Em Andamento!']);
 
@@ -816,6 +819,52 @@ class NaoConformidadesController
 
         } catch (\Exception $e) {
             error_log("Erro ao enviar e-mail de conclusão: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Enviar e-mail ao criador quando o responsável inicia o tratamento
+     */
+    private function enviarEmailTratamentoIniciado($ncId)
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT nc.*, 
+                       c.email as criador_email, c.name as criador_nome,
+                       r.name as responsavel_nome
+                FROM nao_conformidades nc
+                JOIN users c ON nc.usuario_criador_id = c.id
+                JOIN users r ON nc.usuario_responsavel_id = r.id
+                WHERE nc.id = ?
+            ");
+            $stmt->execute([$ncId]);
+            $nc = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$nc) return;
+
+            $assunto = "🚀 Tratamento Iniciado - NC #{$ncId}: {$nc['titulo']}";
+            $mensagem = "
+                <h2>Tratamento da NC Iniciado!</h2>
+                <p>Olá <strong>{$nc['criador_nome']}</strong>,</p>
+                <p>O responsável <strong>{$nc['responsavel_nome']}</strong> iniciou o tratamento da NC #{$ncId}.</p>
+                
+                <h3>Detalhes da NC:</h3>
+                <ul>
+                    <li><strong>Título:</strong> {$nc['titulo']}</li>
+                    <li><strong>Status:</strong> <span style='color: #f59e0b; font-weight: bold;'>Em Andamento</span></li>
+                    <li><strong>Responsável:</strong> {$nc['responsavel_nome']}</li>
+                </ul>
+
+                <p style='color: #059669; font-weight: bold;'>✅ O responsável está trabalhando na solução!</p>
+                
+                <p><a href='" . $_SERVER['HTTP_HOST'] . "/nao-conformidades' style='background:#3b82f6;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;'>Acessar Sistema</a></p>
+            ";
+
+            $emailService = new \App\Services\EmailService();
+            $emailService->send($nc['criador_email'], $assunto, $mensagem);
+
+        } catch (\Exception $e) {
+            error_log("Erro ao enviar e-mail de tratamento iniciado: " . $e->getMessage());
         }
     }
 
