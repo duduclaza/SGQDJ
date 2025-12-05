@@ -3075,4 +3075,58 @@ class AdminController
         
         return $tabs;
     }
+    
+    /**
+     * Get melhorias por departamento
+     * Usado no modal do dashboard quando clica em um departamento
+     */
+    public function getMelhoriasPorDepartamento()
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            $departamento = $_GET['departamento'] ?? '';
+            
+            if (empty($departamento)) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Departamento não informado'
+                ]);
+                exit;
+            }
+            
+            // Buscar melhorias do departamento
+            $sql = "
+                SELECT 
+                    id,
+                    ideias_inovacao,
+                    departamento,
+                    status,
+                    nome_idealizador,
+                    pont_global,
+                    created_at as data_criacao
+                FROM melhoria_continua_2
+                WHERE departamento = ?
+                ORDER BY created_at DESC
+            ";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$departamento]);
+            $melhorias = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            echo json_encode([
+                'success' => true,
+                'melhorias' => $melhorias,
+                'departamento' => $departamento,
+                'total' => count($melhorias)
+            ]);
+            
+        } catch (\Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erro ao carregar melhorias: ' . $e->getMessage()
+            ]);
+        }
+        exit;
+    }
 }    

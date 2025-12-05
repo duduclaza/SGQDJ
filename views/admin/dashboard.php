@@ -896,6 +896,84 @@
 
 </section>
 
+<!-- Modal: Detalhes de Melhorias por Departamento -->
+<div id="modalDetalhesMelhorias" class="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 transition-all duration-300" style="z-index: 99999;">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="modalDetalhesMelhoriasContent">
+    <!-- Cabeçalho -->
+    <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+          </svg>
+          <span>Melhorias do Departamento: <span id="modalMelhoriasDepartamento" class="font-extrabold">-</span></span>
+        </h3>
+        <button onclick="fecharModalMelhorias()" class="text-white hover:text-gray-200 transition-colors p-2 hover:bg-white hover:bg-opacity-20 rounded-lg">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 120px);">
+      <!-- Loading -->
+      <div id="modalMelhoriasLoading" class="flex items-center justify-center py-12">
+        <div class="flex flex-col items-center gap-3">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          <p class="text-gray-600">Carregando melhorias...</p>
+        </div>
+      </div>
+
+      <!-- Conteúdo das Melhorias -->
+      <div id="modalMelhoriasConteudo" class="hidden">
+        <!-- Resumo -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div class="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+            <p class="text-sm text-blue-600 font-medium">Total de Melhorias</p>
+            <p id="melhorias-total" class="text-2xl font-bold text-blue-700">0</p>
+          </div>
+          <div class="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
+            <p class="text-sm text-green-600 font-medium">Concluídas</p>
+            <p id="melhorias-concluidas" class="text-2xl font-bold text-green-700">0</p>
+          </div>
+          <div class="bg-yellow-50 rounded-lg p-4 border-l-4 border-yellow-500">
+            <p class="text-sm text-yellow-600 font-medium">Em Andamento</p>
+            <p id="melhorias-andamento" class="text-2xl font-bold text-yellow-700">0</p>
+          </div>
+          <div class="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+            <p class="text-sm text-purple-600 font-medium">Pontuação Média</p>
+            <p id="melhorias-pontuacao" class="text-2xl font-bold text-purple-700">0.0</p>
+          </div>
+        </div>
+
+        <!-- Tabela de Melhorias -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Idealizador</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pontuação</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                </tr>
+              </thead>
+              <tbody id="modalMelhoriasTabela" class="bg-white divide-y divide-gray-200">
+                <!-- Será preenchido via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- Modal de Escolha - Ver Itens Aprovados ou Reprovados do Fornecedor -->
 <div id="modalDetalhesFornecedor" class="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 transition-all duration-300" style="z-index: 99999;">
   <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="modalDetalhesFornecedorContent">
@@ -3732,6 +3810,13 @@ function renderChartMelhoriasDepartamentos(deptData) {
       indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: true,
+      onClick: (event, activeElements) => {
+        if (activeElements.length > 0) {
+          const index = activeElements[0].index;
+          const departamento = labels[index];
+          abrirDetalhesDeptoMelhorias(departamento);
+        }
+      },
       plugins: {
         legend: {
           display: false
@@ -3751,10 +3836,182 @@ function renderChartMelhoriasDepartamentos(deptData) {
             stepSize: 1
           }
         }
+      },
+      // Adicionar cursor pointer quando hover
+      onHover: (event, activeElements) => {
+        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
       }
     }
   });
 }
+
+// =========================================================================
+// FUNÇÕES DO MODAL DE MELHORIAS POR DEPARTAMENTO
+// =========================================================================
+
+function abrirDetalhesDeptoMelhorias(departamento) {
+  const modal = document.getElementById('modalDetalhesMelhorias');
+  const modalContent = document.getElementById('modalDetalhesMelhoriasContent');
+  const loadingElement = document.getElementById('modalMelhoriasLoading');
+  const conteudoElement = document.getElementById('modalMelhoriasConteudo');
+  
+  // Atualizar nome do departamento
+  document.getElementById('modalMelhoriasDepartamento').textContent = departamento;
+  
+  // Mostrar modal
+  modal.classList.remove('hidden');
+  setTimeout(() => {
+    modalContent.classList.remove('scale-95', 'opacity-0');
+    modalContent.classList.add('scale-100', 'opacity-100');
+  }, 10);
+  
+  // Mostrar loading e esconder conteúdo
+  loadingElement.classList.remove('hidden');
+  conteudoElement.classList.add('hidden');
+  
+  // Buscar dados via AJAX
+  fetch(`/admin/melhorias/por-departamento?departamento=${encodeURIComponent(departamento)}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        preencherModalMelhorias(data.melhorias);
+      } else {
+        alert('Erro ao carregar melhorias: ' + (data.message || 'Erro desconhecido'));
+        fecharModalMelhorias();
+      }
+    })
+    .catch(error => {
+      console.error('Erro:', error);
+      alert('Erro ao carregar melhorias');
+      fecharModalMelhorias();
+    });
+}
+
+function preencherModalMelhorias(melhorias) {
+  const loadingElement = document.getElementById('modalMelhoriasLoading');
+  const conteudoElement = document.getElementById('modalMelhoriasConteudo');
+  const tabelaBody = document.getElementById('modalMelhoriasTabela');
+  
+  // Calcular estatísticas
+  const total = melhorias.length;
+  const concluidas = melhorias.filter(m => m.status === 'concluida').length;
+  const emAndamento = melhorias.filter(m => m.status === 'em_andamento').length;
+  const pontuacaoMedia = melhorias.length > 0 
+    ? (melhorias.reduce((acc, m) => acc + (parseFloat(m.pont_global) || 0), 0) / melhorias.length).toFixed(2)
+    : '0.00';
+  
+  // Atualizar cards de resumo
+  document.getElementById('melhorias-total').textContent = total;
+  document.getElementById('melhorias-concluidas').textContent = concluidas;
+  document.getElementById('melhorias-andamento').textContent = emAndamento;
+  document.getElementById('melhorias-pontuacao').textContent = pontuacaoMedia;
+  
+  // Preencher tabela
+  tabelaBody.innerHTML = '';
+  
+  if (melhorias.length === 0) {
+    tabelaBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+          Nenhuma melhoria encontrada para este departamento
+        </td>
+      </tr>
+    `;
+  } else {
+    melhorias.forEach(melhoria => {
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-gray-50 transition-colors';
+      row.innerHTML = `
+        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">#${melhoria.id}</td>
+        <td class="px-4 py-3 text-sm text-gray-900">${escapeHtml(melhoria.ideias_inovacao)}</td>
+        <td class="px-4 py-3 text-sm text-gray-600">${escapeHtml(melhoria.nome_idealizador || '-')}</td>
+        <td class="px-4 py-3 whitespace-nowrap">
+          ${getStatusBadge(melhoria.status)}
+        </td>
+        <td class="px-4 py-3 whitespace-nowrap text-sm">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+            ⭐ ${melhoria.pont_global || '0'}
+          </span>
+        </td>
+        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+          ${formatarData(melhoria.data_criacao)}
+        </td>
+      `;
+      tabelaBody.appendChild(row);
+    });
+  }
+  
+  // Esconder loading e mostrar conteúdo
+  loadingElement.classList.add('hidden');
+  conteudoElement.classList.remove('hidden');
+}
+
+function getStatusBadge(status) {
+  const statusMap = {
+    'pendente_analise': { text: 'Pendente Análise', color: 'gray', icon: '⏳' },
+    'enviado_aprovacao': { text: 'Enviado p/ Aprovação', color: 'indigo', icon: '📤' },
+    'em_andamento': { text: 'Em Andamento', color: 'blue', icon: '🔄' },
+    'concluida': { text: 'Concluída', color: 'green', icon: '✅' },
+    'reprovada': { text: 'Reprovada', color: 'red', icon: '❌' },
+    'cancelada': { text: 'Cancelada', color: 'gray', icon: '🚫' }
+  };
+  
+  const info = statusMap[status] || { text: status, color: 'gray', icon: '•' };
+  
+  return `
+    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${info.color}-100 text-${info.color}-800">
+      ${info.icon} ${info.text}
+    </span>
+  `;
+}
+
+function formatarData(data) {
+  if (!data) return  '-';
+  const date = new Date(data);
+  return date.toLocaleDateString('pt-BR');
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.toString().replace(/[&<>"']/g, m => map[m]);
+}
+
+function fecharModalMelhorias() {
+  const modal = document.getElementById('modalDetalhesMelhorias');
+  const modalContent = document.getElementById('modalDetalhesMelhoriasContent');
+  
+  modalContent.classList.remove('scale-100', 'opacity-100');
+  modalContent.classList.add('scale-95', 'opacity-0');
+  
+  setTimeout(() => {
+    modal.classList.add('hidden');
+  }, 300);
+}
+
+// Fechar modal ao clicar fora
+document.getElementById('modalDetalhesMelhorias')?.addEventListener('click', function(e) {
+  if (e.target === this) {
+    fecharModalMelhorias();
+  }
+});
+
+// Fechar modal com ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('modalDetalhesMelhorias');
+    if (modal && !modal.classList.contains('hidden')) {
+      fecharModalMelhorias();
+    }
+  }
+});
+
 
 <?php include __DIR__ . '/dashboard_garantias_js.php'; ?>
 

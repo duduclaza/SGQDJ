@@ -165,6 +165,7 @@ $router->get('/admin/dashboard/fornecedores-data', [App\Controllers\AdminControl
 $router->get('/admin/fornecedor-itens', [App\Controllers\AdminController::class, 'fornecedorItens']);
 $router->get('/admin/dashboard/melhorias-data', [App\Controllers\AdminController::class, 'getMelhoriasData']);
 $router->get('/admin/dashboard/departamentos', [App\Controllers\AdminController::class, 'getDepartamentos']);
+$router->get('/admin/melhorias/por-departamento', [App\Controllers\AdminController::class, 'getMelhoriasPorDepartamento']);
 // Rota de diagnóstico detalhado do dashboard (apenas para debug)
 $router->get('/admin/dashboard/diagnostico', [App\Controllers\AdminController::class, 'diagnosticoDashboard']);
 $router->get('/admin/users', [App\Controllers\AdminController::class, 'users']);
