@@ -205,6 +205,7 @@ class NaoConformidadesController
      */
     public function detalhes($id)
     {
+        ob_start(); // Inicia buffer
         header('Content-Type: application/json');
 
         try {
@@ -228,6 +229,7 @@ class NaoConformidadesController
             $nc = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$nc) {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'NC não encontrada']);
                 exit;
             }
@@ -243,6 +245,7 @@ class NaoConformidadesController
             $stmt->execute([$id]);
             $anexos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+            ob_clean(); // Limpa sujeira
             echo json_encode([
                 'success' => true,
                 'nc' => $nc,
@@ -251,6 +254,7 @@ class NaoConformidadesController
 
         } catch (\Exception $e) {
             error_log("Erro ao buscar detalhes da NC: " . $e->getMessage());
+            ob_clean();
             echo json_encode(['success' => false, 'message' => 'Erro ao buscar detalhes']);
         }
         exit;

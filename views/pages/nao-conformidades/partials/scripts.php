@@ -169,13 +169,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Ver detalhes
 async function verDetalhes(id) {
-  const res = await fetch(`/nao-conformidades/detalhes/${id}`);
-  const data = await res.json();
-  if (data.success) {
-    const nc = data.nc;
-    const anexos = data.anexos || [];
-    const isAdmin = <?= json_encode($isAdmin || $isSuperAdmin) ?>;
-    const userId = <?= $_SESSION['user_id'] ?>;
+  console.log('🔍 Iniciando verDetalhes para ID:', id);
+  try {
+    const res = await fetch(`/nao-conformidades/detalhes/${id}`);
+    const data = await res.json();
+    console.log('📦 Dados recebidos:', data);
+
+    if (data.success) {
+      const nc = data.nc;
+      const anexos = data.anexos || [];
+      const isAdmin = <?= json_encode($isAdmin || $isSuperAdmin) ?>;
+      const userId = <?= $_SESSION['user_id'] ?>;
     const podeRegistrarAcao = (nc.usuario_responsavel_id == userId || isAdmin) && nc.status !== 'solucionada';
     const podeSolucionar = (nc.usuario_criador_id == userId || nc.usuario_responsavel_id == userId || isAdmin) && nc.status === 'em_andamento';
     
@@ -225,15 +229,29 @@ async function verDetalhes(id) {
     
     document.getElementById('conteudoDetalhes').innerHTML = html;
     const modal = document.getElementById('modalDetalhes');
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+    if(modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex'; // Forçar display flex
+        document.body.style.overflow = 'hidden';
+    } else {
+        console.error('❌ Modal modalDetalhes não encontrado no DOM');
+    }
+  } else {
+    alert('Erro ao carregar detalhes: ' + (data.message || 'Erro desconhecido'));
+  }
+  } catch (error) {
+    console.error('❌ Erro fatal ao ver detalhes:', error);
+    alert('Erro ao carregar detalhes. Verifique o console.');
   }
 }
 
 function fecharModalDetalhes() {
   const modal = document.getElementById('modalDetalhes');
-  modal.classList.add('hidden');
-  document.body.style.overflow = '';
+  if(modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none'; // Forçar display none
+    document.body.style.overflow = '';
+  }
 }
 
 // Modal Ação
