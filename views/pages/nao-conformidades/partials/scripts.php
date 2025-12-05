@@ -235,17 +235,24 @@ async function verDetalhes(id) {
       // CRIAR MODAL DINAMICAMENTE
       const modalDiv = document.createElement('div');
       modalDiv.id = 'modalDetalhesDinamico';
-      modalDiv.className = 'modal-overlay'; // Usa classes base
-      modalDiv.style.position = 'fixed';
-      modalDiv.style.top = '0';
-      modalDiv.style.left = '0';
-      modalDiv.style.width = '100vw';
-      modalDiv.style.height = '100vh';
-      modalDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
-      modalDiv.style.zIndex = '99999999';
-      modalDiv.style.display = 'flex';
-      modalDiv.style.alignItems = 'center';
-      modalDiv.style.justifyContent = 'center';
+      modalDiv.className = 'modal-overlay';
+      
+      // FORÇAR ESTILOS COM !IMPORTANT VIA setAttribute
+      modalDiv.setAttribute('style', `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background-color: rgba(0, 0, 0, 0.75) !important;
+        z-index: 999999999 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        pointer-events: auto !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      `.trim());
       
       modalDiv.innerHTML = `
         <div class="modal-content" style="background: white; border-radius: 12px; padding: 24px; width: 100%; max-width: 800px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);" onclick="event.stopPropagation()">
@@ -268,8 +275,22 @@ async function verDetalhes(id) {
       };
 
       document.body.appendChild(modalDiv);
-      document.body.style.overflow = 'hidden'; // Evita scroll na página de fundo
+      document.body.style.overflow = 'hidden';
+      
+      // DEBUG: Verificar estilos computados
+      const computedStyles = window.getComputedStyle(modalDiv);
       console.log('✅ Modal dinâmico inserido no DOM');
+      console.log('📊 Estilos computados do modal:', {
+        display: computedStyles.display,
+        visibility: computedStyles.visibility,
+        opacity: computedStyles.opacity,
+        zIndex: computedStyles.zIndex,
+        position: computedStyles.position,
+        width: computedStyles.width,
+        height: computedStyles.height,
+        backgroundColor: computedStyles.backgroundColor
+      });
+      console.log('📍 Posição no DOM:', modalDiv.parentElement?.tagName, 'ID do modal:', modalDiv.id);
 
     } else {
       alert('Erro ao carregar detalhes: ' + (data.message || 'Erro desconhecido'));
