@@ -4018,6 +4018,20 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
+// =========================================================================
+// MOVER MODAL PARA O CONTAINER GLOBAL (fora do dashboard)
+// =========================================================================
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('modalDetalhesMelhorias');
+  const globalContainer = document.getElementById('global-modals-container');
+  
+  if (modal && globalContainer) {
+    // Mover modal para fora do dashboard, no container global do body
+    globalContainer.appendChild(modal);
+    console.log('✅ Modal de melhorias movido para global-modals-container');
+  }
+});
+
 
 <?php include __DIR__ . '/dashboard_garantias_js.php'; ?>
 
