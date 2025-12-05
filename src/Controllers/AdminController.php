@@ -2282,7 +2282,7 @@ class AdminController
             $userId = $_SESSION['user_id'];
             $userRole = $_SESSION['user_role'] ?? 'user';
             
-            if ($userRole !== 'admin') {
+            if ($userRole !== 'admin' && $userRole !== 'super_admin') {
                 // Usuário comum: só vê amostragens onde está na lista de responsáveis
                 $where[] = "(FIND_IN_SET(:user_id_responsavel, a.responsaveis) > 0 OR a.user_id = :user_id_criador)";
                 $params[':user_id_responsavel'] = $userId;
