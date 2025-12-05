@@ -2420,7 +2420,13 @@ class AdminController
             $userId = $_SESSION['user_id'];
             $userRole = $_SESSION['user_role'] ?? 'user';
             
-            // WHERE clause baseado nas permissões
+            // Parâmetros de filtro
+            $filtroDepartamento = $_GET['departamento'] ?? '';
+            $filtroStatus = $_GET['status'] ?? '';
+            $dataInicial = $_GET['data_inicial'] ?? '';
+            $dataFinal = $_GET['data_final'] ?? '';
+            
+            // WHERE clause baseado nas permissões e filtros
             $where = [];
             $params = [];
             
@@ -2428,6 +2434,24 @@ class AdminController
             if ($userRole !== 'admin' && $userRole !== 'super_admin') {
                 $where[] = "(nc.usuario_responsavel_id = :user_id OR nc.usuario_criador_id = :user_id)";
                 $params[':user_id'] = $userId;
+            }
+            
+            // Filtro de status
+            if (!empty($filtroStatus)) {
+                $where[] = "nc.status = :status";
+                $params[':status'] = $filtroStatus;
+            }
+            
+            // Filtro de data inicial
+            if (!empty($dataInicial)) {
+                $where[] = "DATE(nc.created_at) >= :data_inicial";
+                $params[':data_inicial'] = $dataInicial;
+            }
+            
+            // Filtro de data final
+            if (!empty($dataFinal)) {
+                $where[] = "DATE(nc.created_at) <= :data_final";
+                $params[':data_final'] = $dataFinal;
             }
             
             $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
@@ -2454,24 +2478,9 @@ class AdminController
                 if ($row['status'] === 'solucionada') $solucionadas = (int)$row['total'];
             }
             
-            // 2. Top 10 Departamentos com mais NCs
-            $stmtDepartamentos = $this->db->prepare("
-                SELECT 
-                    d.nome as departamento,
-                    COUNT(nc.id) as total_ncs,
-                    SUM(CASE WHEN nc.status = 'pendente' THEN 1 ELSE 0 END) as pendentes,
-                    SUM(CASE WHEN nc.status = 'em_andamento' THEN 1 ELSE 0 END) as em_andamento,
-                    SUM(CASE WHEN nc.status = 'solucionada' THEN 1 ELSE 0 END) as solucionadas
-                FROM nao_conformidades nc
-                LEFT JOIN departamentos d ON nc.departamento_id = d.id
-                $whereClause
-                GROUP BY d.id, d.nome
-                HAVING COUNT(nc.id) > 0
-                ORDER BY total_ncs DESC
-                LIMIT 10
-            ");
-            $stmtDepartamentos->execute($params);
-            $departamentosData = $stmtDepartamentos->fetchAll(\PDO::FETCH_ASSOC);
+            // 2. Verificar se a coluna departamento_id existe
+            $checkColumn = $this->db->query("SHOW COLUMNS FROM nao_conformidades LIKE 'departamento_id'");
+            $hasDepartamentoId = $checkColumn->rowCount() > 0;
             
             $departamentosLabels = [];
             $departamentosTotal = [];
@@ -2479,12 +2488,66 @@ class AdminController
             $departamentosEmAndamento = [];
             $departamentosSolucionadas = [];
             
-            foreach ($departamentosData as $dept) {
-                $departamentosLabels[] = $dept['departamento'] ?? 'Sem Departamento';
-                $departamentosTotal[] = (int)$dept['total_ncs'];
-                $departamentosPendentes[] = (int)$dept['pendentes'];
-                $departamentosEmAndamento[] = (int)$dept['em_andamento'];
-                $departamentosSolucionadas[] = (int)$dept['solucionadas'];
+            if ($hasDepartamentoId) {
+                // Se tem departamento_id, fazer query com JOIN
+                $whereDept = $where;
+                $paramsDept = $params;
+                
+                // Filtro de departamento
+                if (!empty($filtroDepartamento)) {
+                    $whereDept[] = "d.nome = :departamento";
+                    $paramsDept[':departamento'] = $filtroDepartamento;
+                }
+                
+                $whereClauseDept = !empty($whereDept) ? 'WHERE ' . implode(' AND ', $whereDept) : '';
+                
+                $stmtDepartamentos = $this->db->prepare("
+                    SELECT 
+                        COALESCE(d.nome, 'Sem Departamento') as departamento,
+                        COUNT(nc.id) as total_ncs,
+                        SUM(CASE WHEN nc.status = 'pendente' THEN 1 ELSE 0 END) as pendentes,
+                        SUM(CASE WHEN nc.status = 'em_andamento' THEN 1 ELSE 0 END) as em_andamento,
+                        SUM(CASE WHEN nc.status = 'solucionada' THEN 1 ELSE 0 END) as solucionadas
+                    FROM nao_conformidades nc
+                    LEFT JOIN departamentos d ON nc.departamento_id = d.id
+                    $whereClauseDept
+                    GROUP BY d.id, d.nome
+                    HAVING COUNT(nc.id) > 0
+                    ORDER BY total_ncs DESC
+                    LIMIT 10
+                ");
+                $stmtDepartamentos->execute($paramsDept);
+                $departamentosData = $stmtDepartamentos->fetchAll(\PDO::FETCH_ASSOC);
+                
+                foreach ($departamentosData as $dept) {
+                    $departamentosLabels[] = $dept['departamento'];
+                    $departamentosTotal[] = (int)$dept['total_ncs'];
+                    $departamentosPendentes[] = (int)$dept['pendentes'];
+                    $departamentosEmAndamento[] = (int)$dept['em_andamento'];
+                    $departamentosSolucionadas[] = (int)$dept['solucionadas'];
+                }
+            } else {
+                // Se não tem departamento_id, mostrar apenas "Todas as NCs"
+                if ($pendentes > 0 || $emAndamento > 0 || $solucionadas > 0) {
+                    $departamentosLabels[] = 'Todas as NCs';
+                    $departamentosTotal[] = $pendentes + $emAndamento + $solucionadas;
+                    $departamentosPendentes[] = $pendentes;
+                    $departamentosEmAndamento[] = $emAndamento;
+                    $departamentosSolucionadas[] = $solucionadas;
+                }
+            }
+            
+            // 3. Buscar lista de departamentos para filtro (se existir a coluna)
+            $departamentosDisponiveis = [];
+            if ($hasDepartamentoId) {
+                $stmtDeptList = $this->db->query("
+                    SELECT DISTINCT d.nome 
+                    FROM departamentos d
+                    INNER JOIN nao_conformidades nc ON nc.departamento_id = d.id
+                    WHERE d.nome IS NOT NULL
+                    ORDER BY d.nome
+                ");
+                $departamentosDisponiveis = $stmtDeptList->fetchAll(\PDO::FETCH_COLUMN);
             }
             
             // Montar resposta
@@ -2502,6 +2565,10 @@ class AdminController
                         'pendentes' => $departamentosPendentes,
                         'em_andamento' => $departamentosEmAndamento,
                         'solucionadas' => $departamentosSolucionadas
+                    ],
+                    'filtros' => [
+                        'departamentos_disponiveis' => $departamentosDisponiveis,
+                        'tem_departamento_id' => $hasDepartamentoId
                     ]
                 ]
             ];
@@ -2509,6 +2576,8 @@ class AdminController
             echo json_encode($response);
             
         } catch (\Exception $e) {
+            error_log("Erro ao carregar dados de NCs: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             http_response_code(500);
             echo json_encode([
                 'success' => false,

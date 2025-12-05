@@ -1,6 +1,55 @@
 <!-- CONTEÚDO ABA NÃO CONFORMIDADES -->
 <div id="content-nao-conformidades" class="tab-content space-y-6">
   
+  <!-- Filtros -->
+  <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-red-500">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+      <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z"></path>
+      </svg>
+      🔍 Filtros de Análise
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">🏢 Departamento</label>
+        <select id="filtroNcDepartamento" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500">
+          <option value="">Todos os Departamentos</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">📊 Status</label>
+        <select id="filtroNcStatus" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500">
+          <option value="">Todos os Status</option>
+          <option value="pendente">⏳ Pendente</option>
+          <option value="em_andamento">🔄 Em Andamento</option>
+          <option value="solucionada">✅ Solucionada</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">📅 Data Inicial</label>
+        <input type="date" id="filtroNcDataInicial" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">📅 Data Final</label>
+        <input type="date" id="filtroNcDataFinal" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500">
+      </div>
+    </div>
+    <div class="mt-4 flex space-x-3">
+      <button onclick="aplicarFiltrosNC()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <span>Aplicar Filtros</span>
+      </button>
+      <button onclick="limparFiltrosNC()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        <span>Limpar</span>
+      </button>
+    </div>
+  </div>
+  
   <!-- Cards de Status -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     

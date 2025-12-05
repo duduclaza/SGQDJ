@@ -36,8 +36,8 @@
                  placeholder="Ex: Produto com defeito na embalagem">
         </div>
 
-        <!-- Grid: Responsável e Anexos -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Grid: Responsável, Departamento e Anexos -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Responsável -->
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Responsável <span class="text-red-500">*</span></label>
@@ -45,6 +45,17 @@
               <option value="">Selecione...</option>
               <?php if (!empty($usuarios)): foreach ($usuarios as $u): ?>
                 <option value="<?= $u['id'] ?>"><?= htmlspecialchars($u['name']) ?></option>
+              <?php endforeach; endif; ?>
+            </select>
+          </div>
+
+          <!-- Departamento -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Departamento <span class="text-red-500">*</span></label>
+            <select name="departamento_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all text-sm bg-white">
+              <option value="">Selecione...</option>
+              <?php if (!empty($departamentos)): foreach ($departamentos as $d): ?>
+                <option value="<?= $d['id'] ?>"><?= htmlspecialchars($d['nome']) ?></option>
               <?php endforeach; endif; ?>
             </select>
           </div>

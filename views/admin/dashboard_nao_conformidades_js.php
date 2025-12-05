@@ -5,11 +5,27 @@ let ncPorDepartamentoChart = null;
 // Carregar dados de Não Conformidades
 async function loadDashboardNaoConformidades() {
   try {
-    const res = await fetch('/admin/dashboard/nao-conformidades-data');
+    // Pegar valores dos filtros
+    const departamento = document.getElementById('filtroNcDepartamento')?.value || '';
+    const status = document.getElementById('filtroNcStatus')?.value || '';
+    const dataInicial = document.getElementById('filtroNcDataInicial')?.value || '';
+    const dataFinal = document.getElementById('filtroNcDataFinal')?.value || '';
+    
+    // Montar URL com parâmetros
+    const params = new URLSearchParams();
+    if (departamento) params.append('departamento', departamento);
+    if (status) params.append('status', status);
+    if (dataInicial) params.append('data_inicial', dataInicial);
+    if (dataFinal) params.append('data_final', dataFinal);
+    
+    const url = `/admin/dashboard/nao-conformidades-data${params.toString() ? '?' + params.toString() : ''}`;
+    
+    const res = await fetch(url);
     const response = await res.json();
     
     if (!response.success) {
       console.error('Erro ao carregar dados de NCs:', response.message);
+      alert('Erro ao carregar dados: ' + response.message);
       return;
     }
     
@@ -24,12 +40,31 @@ async function loadDashboardNaoConformidades() {
     if (ncEmAndamentoEl) ncEmAndamentoEl.textContent = data.cards.em_andamento;
     if (ncSolucionadasEl) ncSolucionadasEl.textContent = data.cards.solucionadas;
     
+    // Popular select de departamentos (apenas na primeira vez)
+    if (data.filtros && data.filtros.departamentos_disponiveis && data.filtros.departamentos_disponiveis.length > 0) {
+      const selectDept = document.getElementById('filtroNcDepartamento');
+      if (selectDept && selectDept.options.length === 1) { // Só tem a opção "Todos"
+        data.filtros.departamentos_disponiveis.forEach(dept => {
+          const option = document.createElement('option');
+          option.value = dept;
+          option.textContent = dept;
+          selectDept.appendChild(option);
+        });
+      }
+    }
+    
     // Criar/Atualizar gráfico de departamentos
     const ctx = document.getElementById('ncPorDepartamentoChart');
     if (!ctx) return;
     
     if (ncPorDepartamentoChart) {
       ncPorDepartamentoChart.destroy();
+    }
+    
+    // Se não houver dados, mostrar mensagem
+    if (!data.departamentos.labels || data.departamentos.labels.length === 0) {
+      ctx.parentElement.innerHTML = '<p class="text-center text-gray-500 py-8">Nenhum dado disponível para exibir</p>';
+      return;
     }
     
     ncPorDepartamentoChart = new Chart(ctx, {
@@ -111,7 +146,22 @@ async function loadDashboardNaoConformidades() {
     
   } catch (error) {
     console.error('Erro ao carregar dashboard de NCs:', error);
+    alert('Erro ao carregar dashboard: ' + error.message);
   }
+}
+
+// Aplicar filtros
+function aplicarFiltrosNC() {
+  loadDashboardNaoConformidades();
+}
+
+// Limpar filtros
+function limparFiltrosNC() {
+  document.getElementById('filtroNcDepartamento').value = '';
+  document.getElementById('filtroNcStatus').value = '';
+  document.getElementById('filtroNcDataInicial').value = '';
+  document.getElementById('filtroNcDataFinal').value = '';
+  loadDashboardNaoConformidades();
 }
 
 // Função para abrir modal com detalhes das NCs do departamento

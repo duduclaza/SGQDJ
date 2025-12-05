@@ -103,6 +103,16 @@ class NaoConformidadesController
                 $stmt = $this->db->query("SELECT id, name, email FROM users ORDER BY name");
                 $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
+            
+            // Buscar todos os departamentos para o combo
+            $departamentos = [];
+            try {
+                $stmt = $this->db->query("SELECT id, nome FROM departamentos ORDER BY nome");
+                $departamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (\Exception $e) {
+                error_log("Erro ao buscar departamentos: " . $e->getMessage());
+                // Continua com array vazio
+            }
 
         } catch (\Exception $e) {
             error_log("Erro ao carregar NCs: " . $e->getMessage());
@@ -136,8 +146,9 @@ class NaoConformidadesController
             $titulo = trim($_POST['titulo'] ?? '');
             $descricao = trim($_POST['descricao'] ?? '');
             $responsavelId = (int)($_POST['responsavel_id'] ?? 0);
+            $departamentoId = (int)($_POST['departamento_id'] ?? 0);
 
-            if (empty($titulo) || empty($descricao) || !$responsavelId) {
+            if (empty($titulo) || empty($descricao) || !$responsavelId || !$departamentoId) {
                 ob_clean();
                 echo json_encode(['success' => false, 'message' => 'Preencha todos os campos obrigatórios']);
                 exit;
@@ -148,10 +159,10 @@ class NaoConformidadesController
             // Inserir NC
             $stmt = $this->db->prepare("
                 INSERT INTO nao_conformidades 
-                (titulo, descricao, usuario_criador_id, usuario_responsavel_id, status, created_at)
-                VALUES (?, ?, ?, ?, 'pendente', NOW())
+                (titulo, descricao, usuario_criador_id, usuario_responsavel_id, departamento_id, status, created_at)
+                VALUES (?, ?, ?, ?, ?, 'pendente', NOW())
             ");
-            $stmt->execute([$titulo, $descricao, $_SESSION['user_id'], $responsavelId]);
+            $stmt->execute([$titulo, $descricao, $_SESSION['user_id'], $responsavelId, $departamentoId]);
             $ncId = $this->db->lastInsertId();
 
             $this->db->commit();
