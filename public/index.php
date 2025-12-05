@@ -646,6 +646,10 @@ $router->get('/area-tecnica/checklists/buscar', [App\Controllers\AreaTecnicaCont
 $router->get('/area-tecnica/checklists/listar', [App\Controllers\AreaTecnicaController::class, 'listarTodosChecklists']);
 $router->get('/area-tecnica/checklists/{id}', [App\Controllers\AreaTecnicaController::class, 'verChecklist']);
 
+// Rota de Teste de E-mail (Diagnóstico Debug)
+$router->get('/teste-smtp-debug', [App\Controllers\TesteEmailController::class, 'index']);
+$router->post('/teste-smtp-debug', [App\Controllers\TesteEmailController::class, 'index']);
+
 // Dispatch
 try {
     $currentRoute = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
@@ -664,7 +668,8 @@ try {
         strpos($currentRoute, '/access-request') === 0 ||
         strpos($currentRoute, '/nps/responder/') === 0 ||  // Formulário público NPS
         strpos($currentRoute, '/nps/salvar-resposta') === 0 ||  // Salvar resposta pública NPS
-        strpos($currentRoute, '/area-tecnica/checklist') === 0  // Checklist Virtual público
+        strpos($currentRoute, '/area-tecnica/checklist') === 0 || // Checklist Virtual público
+        $currentRoute === '/teste-smtp-debug' // Teste debug email
     );
 
     if (!$isPublicAuthRoute) {
