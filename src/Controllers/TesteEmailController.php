@@ -37,7 +37,7 @@ class TesteEmailController
                 $mail->isSMTP();
                 $mail->Host       = 'smtp.hostinger.com';
                 $mail->SMTPAuth   = true;
-                $mail->Username   = 'suporte@sgqoti.com.br';
+                $mail->Username   = 'suporte@djbr.sgqoti.com.br';
                 $mail->Password   = 'Pandora@1989';
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL
                 $mail->Port       = 465;
@@ -47,7 +47,7 @@ class TesteEmailController
                 $mail->Debugoutput = 'html'; // Formato HTML para o log
 
                 // Remetente e destinatário
-                $mail->setFrom('suporte@sgqoti.com.br', 'SGQ OTI DJ - Diagnóstico');
+                $mail->setFrom('suporte@djbr.sgqoti.com.br', 'SGQ OTI DJ - Diagnóstico');
                 $mail->addAddress($destinatario);
 
                 // Conteúdo do email
