@@ -35,6 +35,7 @@ class NaoConformidadesController
 
         $userId = $_SESSION['user_id'];
         $isAdmin = isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'super_admin']);
+        $isSuperAdmin = \App\Services\PermissionService::isSuperAdmin($userId);
 
         // Inicializar arrays vazios
         $todasNcs = [];
@@ -44,8 +45,8 @@ class NaoConformidadesController
         $usuarios = [];
 
         try {
-            // Buscar todas as NCs
-            $stmt = $this->db->prepare("
+            // Buscar NCs baseado na permissão
+            $sql = "
                 SELECT 
                     nc.*,
                     uc.name as criador_nome,
@@ -60,10 +61,23 @@ class NaoConformidadesController
                 LEFT JOIN users ua ON nc.usuario_acao_id = ua.id
                 LEFT JOIN users us ON nc.usuario_solucao_id = us.id
                 LEFT JOIN nao_conformidades_anexos a ON nc.id = a.nc_id
-                GROUP BY nc.id
-                ORDER BY nc.created_at DESC
-            ");
-            $stmt->execute();
+            ";
+            
+            // Se NÃO for admin, filtrar apenas NCs onde o usuário é responsável
+            if (!$isAdmin && !$isSuperAdmin) {
+                $sql .= " WHERE nc.usuario_responsavel_id = ?";
+            }
+            
+            $sql .= " GROUP BY nc.id ORDER BY nc.created_at DESC";
+            
+            $stmt = $this->db->prepare($sql);
+            
+            if (!$isAdmin && !$isSuperAdmin) {
+                $stmt->execute([$userId]);
+            } else {
+                $stmt->execute();
+            }
+            
             $todasNcs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // Separar por status
@@ -293,6 +307,63 @@ class NaoConformidadesController
     }
 
     /**
+     * Mover NC de Pendente para Em Andamento
+     */
+    public function moverParaEmAndamento($id)
+    {
+        header('Content-Type: application/json');
+
+        try {
+            if (!isset($_SESSION['user_id'])) {
+                echo json_encode(['success' => false, 'message' => 'Não autenticado']);
+                exit;
+            }
+
+            // Verificar se é o responsável
+            $stmt = $this->db->prepare("
+                SELECT usuario_responsavel_id, status 
+                FROM nao_conformidades WHERE id = ?
+            ");
+            $stmt->execute([$id]);
+            $nc = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$nc) {
+                echo json_encode(['success' => false, 'message' => 'NC não encontrada']);
+                exit;
+            }
+
+            // Verificar permissão
+            $isAdmin = isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'super_admin']);
+            if ($nc['usuario_responsavel_id'] != $_SESSION['user_id'] && !$isAdmin) {
+                echo json_encode(['success' => false, 'message' => 'Apenas o responsável pode mover esta NC']);
+                exit;
+            }
+
+            // Verificar se está pendente
+            if ($nc['status'] !== 'pendente') {
+                echo json_encode(['success' => false, 'message' => 'Apenas NCs pendentes podem ser movidas para em andamento']);
+                exit;
+            }
+
+            // Atualizar status
+            $stmt = $this->db->prepare("
+                UPDATE nao_conformidades 
+                SET status = 'em_andamento', 
+                    updated_at = NOW()
+                WHERE id = ?
+            ");
+            $stmt->execute([$id]);
+
+            echo json_encode(['success' => true, 'message' => 'NC movida para Em Andamento!']);
+
+        } catch (\Exception $e) {
+            error_log("Erro ao mover NC: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Erro ao mover NC']);
+        }
+        exit;
+    }
+
+    /**
      * Marcar NC como solucionada
      */
     public function marcarSolucionada($id)
@@ -305,9 +376,9 @@ class NaoConformidadesController
                 exit;
             }
 
-            // Verificar permissão (criador ou responsável)
+            // Verificar permissão (criador ou responsável) E se tem ação corretiva
             $stmt = $this->db->prepare("
-                SELECT usuario_criador_id, usuario_responsavel_id 
+                SELECT usuario_criador_id, usuario_responsavel_id, acao_corretiva, status
                 FROM nao_conformidades WHERE id = ?
             ");
             $stmt->execute([$id]);
@@ -315,6 +386,22 @@ class NaoConformidadesController
 
             if (!$nc) {
                 echo json_encode(['success' => false, 'message' => 'NC não encontrada']);
+                exit;
+            }
+
+            // VERIFICAR SE TEM AÇÃO CORRETIVA PREENCHIDA
+            if (empty($nc['acao_corretiva'])) {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'É necessário registrar a ação corretiva antes de marcar como solucionada!',
+                    'needs_action' => true
+                ]);
+                exit;
+            }
+
+            // Verificar se está em andamento
+            if ($nc['status'] !== 'em_andamento') {
+                echo json_encode(['success' => false, 'message' => 'Apenas NC em andamento podem ser marcadas como solucionadas']);
                 exit;
             }
 

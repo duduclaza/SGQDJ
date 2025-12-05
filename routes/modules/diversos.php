@@ -51,6 +51,7 @@ $router->get('/nao-conformidades', [NaoConformidadesController::class, 'index'])
 $router->post('/nao-conformidades/criar', [NaoConformidadesController::class, 'criar']);
 $router->get('/nao-conformidades/detalhes/{id}', [NaoConformidadesController::class, 'detalhes']);
 $router->post('/nao-conformidades/registrar-acao/{id}', [NaoConformidadesController::class, 'registrarAcao']);
+$router->post('/nao-conformidades/mover-em-andamento/{id}', [NaoConformidadesController::class, 'moverParaEmAndamento']);
 $router->post('/nao-conformidades/marcar-solucionada/{id}', [NaoConformidadesController::class, 'marcarSolucionada']);
 $router->get('/nao-conformidades/anexo/{id}', [NaoConformidadesController::class, 'downloadAnexo']);
 $router->post('/nao-conformidades/excluir/{id}', [NaoConformidadesController::class, 'excluir']);
