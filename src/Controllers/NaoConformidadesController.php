@@ -651,6 +651,20 @@ class NaoConformidadesController
 
             if (!$nc) return;
 
+            // Buscar anexos
+            $stmtAnexos = $this->db->prepare("SELECT caminho_arquivo FROM nao_conformidades_anexos WHERE nc_id = ?");
+            $stmtAnexos->execute([$ncId]);
+            $anexosDb = $stmtAnexos->fetchAll(PDO::FETCH_COLUMN);
+            
+            $caminhosAnexos = [];
+            foreach ($anexosDb as $arquivo) {
+                // Montar caminho absoluto do arquivo
+                $caminhoCompleto = $this->uploadDir . $arquivo;
+                if (file_exists($caminhoCompleto)) {
+                    $caminhosAnexos[] = $caminhoCompleto;
+                }
+            }
+
             $assunto = "🚨 Nova Não Conformidade: {$nc['titulo']}";
             $mensagem = "
                 <h2>Nova Não Conformidade Registrada</h2>
@@ -674,7 +688,8 @@ class NaoConformidadesController
             ";
 
             $emailService = new \App\Services\EmailService();
-            $emailService->send($nc['responsavel_email'], $assunto, $mensagem);
+            // Passar anexos como 5º argumento
+            $emailService->send($nc['responsavel_email'], $assunto, $mensagem, null, $caminhosAnexos);
         } catch (\Exception $e) {
             error_log("Erro ao enviar e-mail de nova NC: " . $e->getMessage());
         }
