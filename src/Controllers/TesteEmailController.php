@@ -14,7 +14,7 @@ class TesteEmailController
         echo '<div class="container">';
         echo '<h1>🕵️ Teste de Diagnóstico SMTP</h1>';
         echo '<p>Configuração usada: <strong>smtp.hostinger.com:465 (SSL)</strong></p>';
-        echo '<p>Usuário: <strong>suporte@sgqoti.com.br</strong></p>';
+        echo '<p>Usuário: <strong>suporte@djbr.sgqoti.com.br</strong></p>';
 
         $destinatario = $_POST['email'] ?? '';
 

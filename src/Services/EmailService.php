@@ -45,7 +45,7 @@ class EmailService
             $this->mailer->isSMTP();
             $this->mailer->Host       = 'smtp.hostinger.com';
             $this->mailer->SMTPAuth   = true;
-            $this->mailer->Username   = 'suporte@sgqoti.com.br';
+            $this->mailer->Username   = 'suporte@djbr.sgqoti.com.br';
             $this->mailer->Password   = 'Pandora@1989';
             $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL (Porta 465)
             $this->mailer->Port       = 465;
@@ -61,7 +61,7 @@ class EmailService
             );
             
             // Default sender
-            $this->mailer->setFrom('suporte@sgqoti.com.br', 'SGQ OTI DJ');
+            $this->mailer->setFrom('suporte@djbr.sgqoti.com.br', 'SGQ OTI DJ');
             
             // Content settings
             $this->mailer->isHTML(true);
