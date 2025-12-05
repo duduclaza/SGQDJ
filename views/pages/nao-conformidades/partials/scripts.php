@@ -99,10 +99,23 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
       console.log('📤 Enviando formulário NC...');
       
-      const submitBtn = formNovaNC.querySelector('button[type="submit"]');
-      const originalBtnText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '⏳ Salvando...';
+      // Botão pode estar fora do form (no footer), então busca pelo atributo form ou dentro do form
+      let submitBtn = formNovaNC.querySelector('button[type="submit"]');
+      if (!submitBtn) {
+        submitBtn = document.querySelector('button[type="submit"][form="formNovaNC"]');
+      }
+      
+      // Se ainda não achou (fallback), pega o último botão do footer
+      if (!submitBtn) {
+         submitBtn = document.querySelector('#modalNovaNC .modal-footer button[type="submit"]');
+      }
+
+      const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Salvar';
+      
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '⏳ Salvando...';
+      }
       
       try {
         const formData = new FormData(e.target);
@@ -119,14 +132,18 @@ document.addEventListener('DOMContentLoaded', function() {
           location.reload();
         } else {
           alert('Erro: ' + data.message);
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+          }
         }
       } catch (error) {
         console.error('❌ Erro ao criar NC:', error);
         alert('Erro ao criar NC: ' + error.message);
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnText;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+        }
       }
     });
   }
