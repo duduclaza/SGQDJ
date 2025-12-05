@@ -34,13 +34,42 @@ $ncsExibir = $ncs ?? $pendentes ?? [];
               <?php endif; ?>
             </div>
           </div>
-          <div class="flex gap-2 ml-4">
-            <button onclick="verDetalhes(<?= $nc['id'] ?>)" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+          <div class="flex flex-col gap-2 ml-4">
+            <button onclick="verDetalhes(<?= $nc['id'] ?>)" class="w-full px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
               Ver Detalhes
             </button>
+            
+            <?php 
+            $isResponsavel = $_SESSION['user_id'] == $nc['usuario_responsavel_id'];
+            $isCriador = $_SESSION['user_id'] == $nc['usuario_criador_id'];
+            $podeMover = $isResponsavel || $isAdmin || $isSuperAdmin;
+            $podeAcao = ($isResponsavel || $isAdmin || $isSuperAdmin) && $nc['status'] !== 'solucionada';
+            $podeSolucionar = ($isCriador || $isResponsavel || $isAdmin || $isSuperAdmin) && $nc['status'] === 'em_andamento';
+            ?>
+
+            <?php if ($nc['status'] === 'pendente' && $podeMover): ?>
+              <button onclick="moverParaEmAndamento(<?= $nc['id'] ?>)" class="w-full px-3 py-2 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600 flex items-center justify-center gap-1 shadow-sm">
+                <span>🚀</span> Iniciar
+              </button>
+            <?php endif; ?>
+
+            <?php if ($nc['status'] === 'em_andamento'): ?>
+              <?php if ($podeAcao): ?>
+                <button onclick="abrirModalAcao(<?= $nc['id'] ?>)" class="w-full px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+                  ✍️ Registrar Ação
+                </button>
+              <?php endif; ?>
+              
+              <?php if ($podeSolucionar): ?>
+                <button onclick="marcarSolucionada(<?= $nc['id'] ?>)" class="w-full px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+                  ✅ Solucionar
+                </button>
+              <?php endif; ?>
+            <?php endif; ?>
+
             <?php if ($isAdmin || $isSuperAdmin): ?>
-            <button onclick="excluirNC(<?= $nc['id'] ?>, '<?= htmlspecialchars(addslashes($nc['titulo'])) ?>')" class="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700" title="Excluir NC">
-              🗑️
+            <button onclick="excluirNC(<?= $nc['id'] ?>, '<?= htmlspecialchars(addslashes($nc['titulo'])) ?>')" class="w-full px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 border border-red-200" title="Excluir NC">
+              🗑️ Excluir
             </button>
             <?php endif; ?>
           </div>

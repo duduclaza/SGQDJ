@@ -97,14 +97,36 @@ document.addEventListener('DOMContentLoaded', function() {
   if (formNovaNC) {
     formNovaNC.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const formData = new FormData(e.target);
-      const res = await fetch('/nao-conformidades/criar', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (data.success) {
-        alert(data.message);
-        location.reload();
-      } else {
-        alert('Erro: ' + data.message);
+      console.log('📤 Enviando formulário NC...');
+      
+      const submitBtn = formNovaNC.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '⏳ Salvando...';
+      
+      try {
+        const formData = new FormData(e.target);
+        const res = await fetch('/nao-conformidades/criar', { method: 'POST', body: formData });
+        
+        console.log('📥 Resposta recebida:', res.status);
+        
+        const data = await res.json();
+        console.log('📊 Dados:', data);
+        
+        if (data.success) {
+          alert(data.message);
+          fecharModalNovaNC();
+          location.reload();
+        } else {
+          alert('Erro: ' + data.message);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+        }
+      } catch (error) {
+        console.error('❌ Erro ao criar NC:', error);
+        alert('Erro ao criar NC: ' + error.message);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
       }
     });
   }
@@ -212,16 +234,51 @@ function fecharModalAcao() {
   document.body.style.overflow = '';
 }
 
+// Mover para Em Andamento
+async function moverParaEmAndamento(ncId) {
+  if (!confirm('Deseja iniciar o tratamento desta NC? Ela será movida para "Em Andamento".')) return;
+  
+  try {
+    const res = await fetch(`/nao-conformidades/mover-em-andamento/${ncId}`, { method: 'POST' });
+    const data = await res.json();
+    
+    if (data.success) {
+      alert(data.message);
+      location.reload();
+    } else {
+      alert('Erro: ' + data.message);
+    }
+  } catch (error) {
+    console.error('Erro ao mover NC:', error);
+    alert('Erro ao processar solicitação.');
+  }
+}
+
 // Marcar como solucionada
 async function marcarSolucionada(ncId) {
+  // Se não for confirmado, cancela
   if (!confirm('Confirma que esta NC foi solucionada?')) return;
-  const res = await fetch(`/nao-conformidades/marcar-solucionada/${ncId}`, { method: 'POST' });
-  const data = await res.json();
-  if (data.success) {
-    alert(data.message);
-    location.reload();
-  } else {
-    alert('Erro: ' + data.message);
+  
+  try {
+    const res = await fetch(`/nao-conformidades/marcar-solucionada/${ncId}`, { method: 'POST' });
+    const data = await res.json();
+    
+    if (data.success) {
+      alert(data.message);
+      location.reload();
+    } 
+    // Se precisar de ação corretiva antes
+    else if (data.needs_action) {
+      alert(data.message);
+      // Abrir modal de ação automaticamente
+      abrirModalAcao(ncId);
+    } 
+    else {
+      alert('Erro: ' + data.message);
+    }
+  } catch (error) {
+    console.error('Erro ao marcar como solucionada:', error);
+    alert('Erro ao processar solicitação.');
   }
 }
 
