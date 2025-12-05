@@ -265,16 +265,19 @@ class NaoConformidadesController
      */
     public function registrarAcao($id)
     {
+        ob_start(); // Iniciar buffer
         header('Content-Type: application/json');
 
         try {
             if (!isset($_SESSION['user_id'])) {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'Não autenticado']);
                 exit;
             }
 
             $acao = trim($_POST['acao_corretiva'] ?? '');
             if (empty($acao)) {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'Digite a ação corretiva']);
                 exit;
             }
@@ -285,6 +288,7 @@ class NaoConformidadesController
             $nc = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$nc) {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'NC não encontrada']);
                 exit;
             }
@@ -293,6 +297,7 @@ class NaoConformidadesController
                 // Permitir admin também
                 $isAdmin = isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'super_admin']);
                 if (!$isAdmin) {
+                    ob_clean();
                     echo json_encode(['success' => false, 'message' => 'Apenas o responsável pode registrar ação']);
                     exit;
                 }
@@ -300,14 +305,13 @@ class NaoConformidadesController
 
             $this->db->beginTransaction();
 
-            // Atualizar NC
+            // Atualizar NC (removido updated_at)
             $stmt = $this->db->prepare("
                 UPDATE nao_conformidades 
                 SET acao_corretiva = ?, 
                     usuario_acao_id = ?, 
                     data_acao = NOW(),
-                    status = 'em_andamento',
-                    updated_at = NOW()
+                    status = 'em_andamento'
                 WHERE id = ?
             ");
             $stmt->execute([$acao, $_SESSION['user_id'], $id]);
@@ -322,6 +326,7 @@ class NaoConformidadesController
             // Enviar e-mail para o criador
             $this->enviarEmailAcaoRegistrada($id);
 
+            ob_clean();
             echo json_encode(['success' => true, 'message' => 'Ação registrada com sucesso!']);
 
         } catch (\Exception $e) {
@@ -329,6 +334,8 @@ class NaoConformidadesController
                 $this->db->rollBack();
             }
             error_log("Erro ao registrar ação: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            ob_clean();
             echo json_encode(['success' => false, 'message' => 'Erro ao registrar ação: ' . $e->getMessage()]);
         }
         exit;
@@ -339,10 +346,12 @@ class NaoConformidadesController
      */
     public function moverParaEmAndamento($id)
     {
+        ob_start(); // Iniciar buffer
         header('Content-Type: application/json');
 
         try {
             if (!isset($_SESSION['user_id'])) {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'Não autenticado']);
                 exit;
             }
@@ -356,6 +365,7 @@ class NaoConformidadesController
             $nc = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$nc) {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'NC não encontrada']);
                 exit;
             }
@@ -363,12 +373,14 @@ class NaoConformidadesController
             // Verificar permissão
             $isAdmin = isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'super_admin']);
             if ($nc['usuario_responsavel_id'] != $_SESSION['user_id'] && !$isAdmin) {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'Apenas o responsável pode mover esta NC']);
                 exit;
             }
 
             // Verificar se está pendente
             if ($nc['status'] !== 'pendente') {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'Apenas NCs pendentes podem ser movidas para em andamento']);
                 exit;
             }
@@ -376,17 +388,26 @@ class NaoConformidadesController
             // Atualizar status
             $stmt = $this->db->prepare("
                 UPDATE nao_conformidades 
-                SET status = 'em_andamento', 
-                    updated_at = NOW()
+                SET status = 'em_andamento'
                 WHERE id = ?
             ");
-            $stmt->execute([$id]);
+            $result = $stmt->execute([$id]);
+            
+            if (!$result) {
+                error_log("Erro SQL ao atualizar status: " . print_r($stmt->errorInfo(), true));
+                ob_clean();
+                echo json_encode(['success' => false, 'message' => 'Erro ao atualizar status no banco']);
+                exit;
+            }
 
+            ob_clean();
             echo json_encode(['success' => true, 'message' => 'NC movida para Em Andamento!']);
 
         } catch (\Exception $e) {
-            error_log("Erro ao mover NC: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => 'Erro ao mover NC']);
+            error_log("Erro ao mover NC para Em Andamento: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            ob_clean();
+            echo json_encode(['success' => false, 'message' => 'Erro ao mover NC: ' . $e->getMessage()]);
         }
         exit;
     }
@@ -396,10 +417,12 @@ class NaoConformidadesController
      */
     public function marcarSolucionada($id)
     {
+        ob_start(); // Iniciar buffer
         header('Content-Type: application/json');
 
         try {
             if (!isset($_SESSION['user_id'])) {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'Não autenticado']);
                 exit;
             }
@@ -413,12 +436,14 @@ class NaoConformidadesController
             $nc = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$nc) {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'NC não encontrada']);
                 exit;
             }
 
             // VERIFICAR SE TEM AÇÃO CORRETIVA PREENCHIDA
             if (empty($nc['acao_corretiva'])) {
+                ob_clean();
                 echo json_encode([
                     'success' => false, 
                     'message' => 'É necessário registrar a ação corretiva antes de marcar como solucionada!',
@@ -429,6 +454,7 @@ class NaoConformidadesController
 
             // Verificar se está em andamento
             if ($nc['status'] !== 'em_andamento') {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'Apenas NC em andamento podem ser marcadas como solucionadas']);
                 exit;
             }
@@ -439,17 +465,17 @@ class NaoConformidadesController
                            $isAdmin;
 
             if (!$isAutorizado) {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'Sem permissão']);
                 exit;
             }
 
-            // Atualizar NC
+            // Atualizar NC (removido updated_at)
             $stmt = $this->db->prepare("
                 UPDATE nao_conformidades 
                 SET status = 'solucionada',
                     usuario_solucao_id = ?,
-                    data_solucao = NOW(),
-                    updated_at = NOW()
+                    data_solucao = NOW()
                 WHERE id = ?
             ");
             $stmt->execute([$_SESSION['user_id'], $id]);
@@ -457,11 +483,14 @@ class NaoConformidadesController
             // Enviar e-mail de conclusão
             $this->enviarEmailNcSolucionada($id);
 
+            ob_clean();
             echo json_encode(['success' => true, 'message' => 'NC marcada como solucionada!']);
 
         } catch (\Exception $e) {
             error_log("Erro ao marcar como solucionada: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => 'Erro ao marcar como solucionada']);
+            error_log("Stack trace: " . $e->getTraceAsString());
+            ob_clean();
+            echo json_encode(['success' => false, 'message' => 'Erro ao marcar como solucionada: ' . $e->getMessage()]);
         }
         exit;
     }
