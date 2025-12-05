@@ -120,11 +120,14 @@ class NaoConformidadesController
      */
     public function criar()
     {
+        // Iniciar buffer de saída para evitar vazamento de texto antes do JSON
+        ob_start();
         header('Content-Type: application/json');
 
         try {
             // Verificar se usuário está logado
             if (!isset($_SESSION['user_id'])) {
+                ob_clean(); // Limpa buffer
                 echo json_encode(['success' => false, 'message' => 'Não autenticado']);
                 exit;
             }
@@ -135,6 +138,7 @@ class NaoConformidadesController
             $responsavelId = (int)($_POST['responsavel_id'] ?? 0);
 
             if (empty($titulo) || empty($descricao) || !$responsavelId) {
+                ob_clean();
                 echo json_encode(['success' => false, 'message' => 'Preencha todos os campos obrigatórios']);
                 exit;
             }
@@ -152,54 +156,46 @@ class NaoConformidadesController
 
             $this->db->commit();
 
-            // Processar uploads (pode falhar sem bloquear a criação)
+            // Processar uploads
             $uploadErro = null;
             if (isset($_FILES['anexos']) && !empty($_FILES['anexos']['name'][0])) {
                 try {
-                    // Verificar se diretório existe
-                    if (!is_dir($this->uploadDir)) {
-                        mkdir($this->uploadDir, 0755, true);
-                    }
-                    
-                    // Verificar permissão de escrita
-                    if (!is_writable($this->uploadDir)) {
-                        throw new \Exception("Diretório de uploads sem permissão de escrita: " . $this->uploadDir);
-                    }
-                    
+                    if (!is_dir($this->uploadDir)) { mkdir($this->uploadDir, 0755, true); }
+                    if (!is_writable($this->uploadDir)) { throw new \Exception("Sem permissão de escrita"); }
                     $this->processarUploads($ncId, $_FILES['anexos'], 'evidencia_inicial', $_SESSION['user_id']);
-                } catch (\Exception $uploadError) {
+                } catch (\Throwable $uploadError) {
                     $uploadErro = $uploadError->getMessage();
-                    error_log("Erro ao processar uploads da NC #{$ncId}: " . $uploadErro);
+                    error_log("Erro upload NC #{$ncId}: " . $uploadErro);
                 }
             }
 
-            // Tentar enviar e-mail para responsável (não bloqueia se falhar)
+            // Enviar e-mail
             try {
                 $this->enviarEmailNovaNc($ncId, $responsavelId);
-            } catch (\Exception $emailError) {
-                error_log("Erro ao enviar e-mail de nova NC: " . $emailError->getMessage());
-                // Continua mesmo se email falhar
+            } catch (\Throwable $emailError) {
+                error_log("Erro email NC #{$ncId}: " . $emailError->getMessage());
             }
 
+            // Gera mensagem final
             $mensagem = 'NC criada com sucesso!';
             if ($uploadErro) {
-                $mensagem .= ' ATENÇÃO: Erro ao salvar anexos: ' . $uploadErro;
+                $mensagem .= ' (Erro no anexo: ' . $uploadErro . ')';
             }
 
+            ob_clean(); // Garante que não tem sujeira
             echo json_encode([
                 'success' => true,
                 'message' => $mensagem,
-                'nc_id' => $ncId,
-                'upload_erro' => $uploadErro
+                'nc_id' => $ncId
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
-            error_log("Erro ao criar NC: " . $e->getMessage());
-            error_log("Stack trace: " . $e->getTraceAsString());
-            echo json_encode(['success' => false, 'message' => 'Erro ao criar NC: ' . $e->getMessage()]);
+            error_log("Erro fatal criar NC: " . $e->getMessage());
+            ob_clean();
+            echo json_encode(['success' => false, 'message' => 'Erro: ' . $e->getMessage()]);
         }
         exit;
     }
