@@ -320,15 +320,44 @@ function fecharModalDetalhes() {
 function abrirModalAcao(ncId) {
   document.getElementById('acaoNcId').value = ncId;
   fecharModalDetalhes();
+  
   const modal = document.getElementById('modalAcao');
-  modal.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+  if (modal) {
+    // Mover para o body
+    document.body.appendChild(modal);
+    
+    modal.classList.remove('hidden');
+    
+    // FORÇAR ESTILOS COM !IMPORTANT
+    modal.setAttribute('style', `
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background-color: rgba(0, 0, 0, 0.75) !important;
+      z-index: 999999999 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    `.trim());
+    
+    document.body.style.overflow = 'hidden';
+  } else {
+    console.error('❌ Modal modalAcao não encontrado no DOM');
+  }
 }
+
 function fecharModalAcao() {
   const modal = document.getElementById('modalAcao');
-  modal.classList.add('hidden');
-  document.getElementById('formAcao').reset();
-  document.body.style.overflow = '';
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+    document.getElementById('formAcao').reset();
+    document.body.style.overflow = '';
+  }
 }
 
 // Mover para Em Andamento
