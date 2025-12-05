@@ -109,21 +109,139 @@
 
   </div>
 
-  <!-- Gráfico: NCs por Departamento -->
-  <div class="bg-white rounded-lg shadow-lg border-l-4 border-red-500">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-        <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-        </svg>
-        🏢 Top 10 Departamentos - Não Conformidades
-      </h3>
-      <p class="text-sm text-gray-600 mt-1">Clique em uma barra para ver detalhes</p>
+  <!-- Gráficos: 3 gráficos separados por status -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <!-- Gráfico 1: NCs Pendentes por Departamento -->
+    <div class="bg-white rounded-lg shadow-lg border-l-4 border-red-500">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          ⏳ NCs Pendentes
+        </h3>
+        <p class="text-sm text-gray-600 mt-1">Clique em uma barra para ver detalhes</p>
+      </div>
+      <div class="p-6">
+        <canvas id="ncPendentesPorDepartamentoChart" width="400" height="300"></canvas>
+      </div>
     </div>
-    <div class="p-6">
-      <canvas id="ncPorDepartamentoChart" width="400" height="300"></canvas>
+
+    <!-- Gráfico 2: NCs Em Andamento por Departamento -->
+    <div class="bg-white rounded-lg shadow-lg border-l-4 border-yellow-500">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          🔄 NCs Em Andamento
+        </h3>
+        <p class="text-sm text-gray-600 mt-1">Clique em uma barra para ver detalhes</p>
+      </div>
+      <div class="p-6">
+        <canvas id="ncEmAndamentoPorDepartamentoChart" width="400" height="300"></canvas>
+      </div>
     </div>
+
+    <!-- Gráfico 3: NCs Solucionadas por Departamento -->
+    <div class="bg-white rounded-lg shadow-lg border-l-4 border-green-500">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          ✅ NCs Solucionadas
+        </h3>
+        <p class="text-sm text-gray-600 mt-1">Clique em uma barra para ver detalhes</p>
+      </div>
+      <div class="p-6">
+        <canvas id="ncSolucionadasPorDepartamentoChart" width="400" height="300"></canvas>
+      </div>
+    </div>
+
   </div>
 
 </div>
 <!-- FIM CONTEÚDO ABA NÃO CONFORMIDADES -->
+
+<!-- Modal: Detalhes de NCs por Departamento -->
+<div id="modalDetalhesNcDepartamento" class="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 transition-all duration-300" style="z-index: 99999;">
+  <div class="bg-white rounded-2xl shadow-2xl w-[95vw] h-[95vh] overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="modalDetalhesNcContent">
+    <!-- Cabeçalho -->
+    <div class="bg-gradient-to-r from-red-600 to-orange-600 px-6 py-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          <span>NCs do Departamento: <span id="modalNcDepartamento" class="font-extrabold">-</span></span>
+          <span class="ml-2 text-sm font-normal">(<span id="modalNcStatus">-</span>)</span>
+        </h3>
+        <button onclick="fecharModalNcDepartamento()" class="text-white hover:text-gray-200 transition-colors p-2 hover:bg-white hover:bg-opacity-20 rounded-lg">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="h-[calc(95vh-80px)] overflow-y-auto p-6">
+      <!-- Loading -->
+      <div id="modalNcLoading" class="flex flex-col items-center justify-center py-16">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-red-600 mb-4"></div>
+        <p class="text-gray-600">Carregando NCs...</p>
+      </div>
+
+      <!-- Cards de Resumo -->
+      <div id="modalNcResumo" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-red-50 rounded-lg p-4 border-l-4 border-red-500">
+          <p class="text-sm text-red-600 font-medium">⏳ Pendentes</p>
+          <p id="modalNcPendentes" class="text-2xl font-bold text-red-700">0</p>
+        </div>
+        <div class="bg-yellow-50 rounded-lg p-4 border-l-4 border-yellow-500">
+          <p class="text-sm text-yellow-600 font-medium">🔄 Em Andamento</p>
+          <p id="modalNcEmAndamento" class="text-2xl font-bold text-yellow-700">0</p>
+        </div>
+        <div class="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
+          <p class="text-sm text-green-600 font-medium">✅ Solucionadas</p>
+          <p id="modalNcSolucionadas" class="text-2xl font-bold text-green-700">0</p>
+        </div>
+      </div>
+
+      <!-- Tabela de NCs -->
+      <div id="modalNcTabela" class="hidden bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responsável</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criado em</th>
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="modalNcTabelaBody" class="bg-white divide-y divide-gray-200">
+              <!-- Preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Erro -->
+      <div id="modalNcErro" class="hidden text-center py-16">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+          <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        <p class="text-gray-600 font-medium">Erro ao carregar NCs</p>
+        <p id="modalNcErroMensagem" class="text-sm text-gray-500 mt-2"></p>
+      </div>
+    </div>
+  </div>
+</div>
+

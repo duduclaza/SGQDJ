@@ -205,6 +205,16 @@ $router->get('/melhoria-continua-2/{id}/view', [App\Controllers\MelhoriaContinua
 $router->post('/melhoria-continua-2/delete', [App\Controllers\MelhoriaContinua2Controller::class, 'delete']);
 $router->get('/melhoria-continua-2/export', [App\Controllers\MelhoriaContinua2Controller::class, 'exportExcel']);
 
+// Não Conformidades routes
+$router->get('/nao-conformidades', [App\Controllers\NaoConformidadesController::class, 'index']);
+$router->post('/nao-conformidades/criar', [App\Controllers\NaoConformidadesController::class, 'criar']);
+$router->get('/nao-conformidades/por-departamento', [App\Controllers\NaoConformidadesController::class, 'porDepartamento']);
+$router->post('/nao-conformidades/{id}/registrar-acao', [App\Controllers\NaoConformidadesController::class, 'registrarAcao']);
+$router->post('/nao-conformidades/{id}/mover-em-andamento', [App\Controllers\NaoConformidadesController::class, 'moverParaEmAndamento']);
+$router->post('/nao-conformidades/{id}/marcar-solucionada', [App\Controllers\NaoConformidadesController::class, 'marcarSolucionada']);
+$router->post('/nao-conformidades/{id}/excluir', [App\Controllers\NaoConformidadesController::class, 'excluir']);
+$router->get('/nao-conformidades/{id}/download-anexo', [App\Controllers\NaoConformidadesController::class, 'downloadAnexo']);
+
 // Amostragens 2.0 routes
 $router->get('/amostragens-2', [App\Controllers\Amostragens2Controller::class, 'index']);
 $router->post('/amostragens-2/store', [App\Controllers\Amostragens2Controller::class, 'store']);

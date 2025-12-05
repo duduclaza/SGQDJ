@@ -878,5 +878,98 @@ class NaoConformidadesController
             error_log("Erro ao enviar e-mail de tratamento iniciado: " . $e->getMessage());
         }
     }
+    
+    /**
+     * Buscar NCs por departamento (para modal do dashboard)
+     */
+    public function porDepartamento()
+    {
+        ob_start();
+        header('Content-Type: application/json');
+        
+        try {
+            if (!isset($_SESSION['user_id'])) {
+                ob_clean();
+                echo json_encode(['success' => false, 'message' => 'Não autenticado']);
+                exit;
+            }
+            
+            $departamento = $_GET['departamento'] ?? '';
+            $status = $_GET['status'] ?? '';
+            
+            if (empty($departamento)) {
+                ob_clean();
+                echo json_encode(['success' => false, 'message' => 'Departamento não informado']);
+                exit;
+            }
+            
+            $userId = $_SESSION['user_id'];
+            $isAdmin = isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'super_admin']);
+            
+            // Buscar NCs do departamento
+            $sql = "
+                SELECT 
+                    nc.*,
+                    uc.name as criador_nome,
+                    ur.name as responsavel_nome,
+                    d.nome as departamento_nome
+                FROM nao_conformidades nc
+                LEFT JOIN users uc ON nc.usuario_criador_id = uc.id
+                LEFT JOIN users ur ON nc.usuario_responsavel_id = ur.id
+                LEFT JOIN departamentos d ON nc.departamento_id = d.id
+                WHERE d.nome = ?
+            ";
+            
+            $params = [$departamento];
+            
+            // Filtrar por status se informado
+            if (!empty($status)) {
+                $sql .= " AND nc.status = ?";
+                $params[] = $status;
+            }
+            
+            // Se não for admin, filtrar apenas NCs onde é responsável ou criador
+            if (!$isAdmin) {
+                $sql .= " AND (nc.usuario_responsavel_id = ? OR nc.usuario_criador_id = ?)";
+                $params[] = $userId;
+                $params[] = $userId;
+            }
+            
+            $sql .= " ORDER BY nc.created_at DESC";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $ncs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Calcular resumo
+            $resumo = [
+                'pendentes' => 0,
+                'em_andamento' => 0,
+                'solucionadas' => 0
+            ];
+            
+            foreach ($ncs as $nc) {
+                if ($nc['status'] === 'pendente') $resumo['pendentes']++;
+                if ($nc['status'] === 'em_andamento') $resumo['em_andamento']++;
+                if ($nc['status'] === 'solucionada') $resumo['solucionadas']++;
+            }
+            
+            ob_clean();
+            echo json_encode([
+                'success' => true,
+                'ncs' => $ncs,
+                'resumo' => $resumo
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("Erro ao buscar NCs por departamento: " . $e->getMessage());
+            ob_clean();
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erro ao buscar NCs: ' . $e->getMessage()
+            ]);
+        }
+        exit;
+    }
 
 }
