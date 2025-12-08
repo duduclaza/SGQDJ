@@ -143,6 +143,84 @@ if (!function_exists('flash')) {
       
       <!-- Content -->
       <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+        <!-- Aviso de Migração do Servidor de E-mail -->
+        <?php if (!isset($_COOKIE['aviso_email_fechado_v2'])): ?>
+        <div id="avisoMigracaoEmail" class="mb-4 animate-fade-in">
+          <div class="relative overflow-hidden bg-gradient-to-r from-amber-50 via-orange-50 to-yellow-50 border border-amber-200 rounded-xl shadow-lg">
+            <!-- Ícone decorativo de fundo -->
+            <div class="absolute -right-4 -top-4 text-amber-100 text-8xl opacity-20 pointer-events-none select-none">📧</div>
+            
+            <div class="relative p-4">
+              <div class="flex items-start gap-4">
+                <!-- Ícone principal -->
+                <div class="flex-shrink-0 hidden sm:block">
+                  <div class="w-11 h-11 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                  </div>
+                </div>
+                
+                <!-- Conteúdo -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                      🔧 Manutenção
+                    </span>
+                  </div>
+                  <h4 class="text-sm font-bold text-gray-800 mb-1">
+                    📧 Migração do Servidor de Notificações por E-mail
+                  </h4>
+                  <p class="text-xs text-gray-600 leading-relaxed">
+                    Estamos migrando nosso servidor de e-mails para melhorar o serviço. 
+                    As notificações por e-mail estão <strong>temporariamente suspensas</strong>.
+                  </p>
+                  <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <div class="inline-flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-amber-200 shadow-sm">
+                      <svg class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                      <span class="text-xs font-semibold text-gray-700">Retorno previsto: <span class="text-green-600">16/12/2025</span></span>
+                    </div>
+                    <span class="text-xs text-gray-500">🙏 Agradecemos a compreensão!</span>
+                  </div>
+                </div>
+                
+                <!-- Botão Fechar -->
+                <button onclick="fecharAvisoEmail()" class="flex-shrink-0 p-1 rounded-lg hover:bg-amber-100 transition-colors group" title="Fechar aviso">
+                  <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <script>
+          function fecharAvisoEmail() {
+            const aviso = document.getElementById('avisoMigracaoEmail');
+            aviso.style.transition = 'all 0.3s ease-out';
+            aviso.style.opacity = '0';
+            aviso.style.transform = 'translateY(-10px)';
+            aviso.style.marginBottom = '0';
+            aviso.style.maxHeight = '0';
+            aviso.style.padding = '0';
+            setTimeout(() => {
+              aviso.remove();
+              // Cookie expira em 12 horas
+              document.cookie = 'aviso_email_fechado_v2=1; path=/; max-age=43200';
+            }, 300);
+          }
+        </script>
+        <style>
+          @keyframes fade-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fade-in { animation: fade-in 0.4s ease-out; }
+        </style>
+        <?php endif; ?>
+        
         <?php if ($msg = flash('success')): ?>
           <div class="mb-4 rounded-md border border-green-200 bg-green-50 text-green-800 px-4 py-2 text-sm"><?= e($msg) ?></div>
         <?php endif; ?>
