@@ -1373,6 +1373,7 @@
 
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
 <script>
 // Variáveis globais para os gráficos
@@ -1814,6 +1815,7 @@ function updateRankingClientesChart(data) {
   // Criar novo gráfico
   rankingClientesChart = new Chart(ctx.getContext('2d'), {
     type: 'bar',
+    plugins: [ChartDataLabels],
     data: {
       labels: data.labels,
       datasets: [{
@@ -1876,6 +1878,22 @@ function updateRankingClientesChart(data) {
             afterLabel: function(context) {
               return '🖱️ Clique para ver detalhes';
             }
+          }
+        },
+        datalabels: {
+          display: true,
+          anchor: 'end',
+          align: 'end',
+          color: '#6366f1',
+          font: {
+            size: 11,
+            weight: 'bold'
+          },
+          formatter: function(value) {
+            return value;
+          },
+          padding: {
+            left: 4
           }
         }
       },
@@ -1980,6 +1998,7 @@ function criarGraficoRankingExpandido() {
   
   rankingClientesChartExpandido = new Chart(ctx.getContext('2d'), {
     type: 'bar',
+    plugins: [ChartDataLabels],
     data: {
       labels: dadosAtuais.labels,
       datasets: [{
@@ -2050,6 +2069,22 @@ function criarGraficoRankingExpandido() {
             afterLabel: function(context) {
               return '🖱️ Clique para ver detalhes';
             }
+          }
+        },
+        datalabels: {
+          display: true,
+          anchor: 'end',
+          align: 'end',
+          color: '#fde047',
+          font: {
+            size: 14,
+            weight: 'bold'
+          },
+          formatter: function(value) {
+            return value;
+          },
+          padding: {
+            left: 6
           }
         }
       },
