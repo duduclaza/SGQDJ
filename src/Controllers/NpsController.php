@@ -204,7 +204,8 @@ class NpsController
             $formulario = json_decode(file_get_contents($filename), true);
             
             // Verificar permissão
-            if ($formulario['criado_por'] != $userId && ($_SESSION['user_role'] ?? '') !== 'admin') {
+            $userRole = $_SESSION['user_role'] ?? '';
+            if ($formulario['criado_por'] != $userId && !in_array($userRole, ['admin', 'super_admin'])) {
                 echo json_encode(['success' => false, 'message' => 'Sem permissão para editar este formulário']);
                 exit;
             }
@@ -232,6 +233,30 @@ class NpsController
             $formulario['descricao'] = trim($_POST['descricao'] ?? $formulario['descricao']);
             $formulario['perguntas'] = json_decode($_POST['perguntas'] ?? '[]', true) ?: $formulario['perguntas'];
             $formulario['atualizado_em'] = date('Y-m-d H:i:s');
+            
+            // Processar upload de logo (se enviado novo)
+            if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
+                $logosDir = $this->storageDir . '/logos';
+                if (!is_dir($logosDir)) {
+                    mkdir($logosDir, 0755, true);
+                }
+                
+                // Remover logo antigo se existir
+                if (!empty($formulario['logo'])) {
+                    $oldLogoPath = __DIR__ . '/../../' . $formulario['logo'];
+                    if (file_exists($oldLogoPath)) {
+                        unlink($oldLogoPath);
+                    }
+                }
+                
+                $fileExtension = pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION);
+                $logoFilename = $formularioId . '.' . $fileExtension;
+                $logoFullPath = $logosDir . '/' . $logoFilename;
+                
+                if (move_uploaded_file($_FILES['logo']['tmp_name'], $logoFullPath)) {
+                    $formulario['logo'] = 'storage/formularios/logos/' . $logoFilename;
+                }
+            }
             
             // Salvar
             file_put_contents($filename, json_encode($formulario, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
@@ -556,7 +581,8 @@ class NpsController
             $formulario = json_decode(file_get_contents($filename), true);
             
             // Verificar permissão
-            if ($formulario['criado_por'] != $userId && ($_SESSION['user_role'] ?? '') !== 'admin') {
+            $userRole = $_SESSION['user_role'] ?? '';
+            if ($formulario['criado_por'] != $userId && !in_array($userRole, ['admin', 'super_admin'])) {
                 echo json_encode(['success' => false, 'message' => 'Sem permissão']);
                 exit;
             }

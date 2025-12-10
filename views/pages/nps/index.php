@@ -229,6 +229,13 @@ function renderFormularios(formularios) {
             Ver Respostas
           </button>
           <div class="flex items-center space-x-2">
+            <!-- Botão Editar (só se não tiver respostas) -->
+            <button onclick="editarFormulario('${f.id}', ${f.total_respostas})" class="p-2 ${parseInt(f.total_respostas) === 0 ? 'text-blue-600 hover:text-blue-700' : 'text-gray-300 cursor-not-allowed'}" title="${parseInt(f.total_respostas) === 0 ? '✏️ Editar formulário' : '🔒 Não é possível editar formulário com respostas ('+f.total_respostas+' respostas)'}">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+            </button>
+            
             <!-- Ícone de Chave/Cadeado para Ativo/Inativo -->
             <button onclick="toggleStatus('${f.id}')" class="p-2 ${f.ativo ? 'text-green-600 hover:text-green-700' : 'text-gray-400 hover:text-gray-600'}" title="${f.ativo ? '🔓 Formulário Aberto (clique para fechar)' : '🔒 Formulário Fechado (clique para abrir)'}">
               ${f.ativo ? `
@@ -333,10 +340,68 @@ function removerLogo() {
   document.getElementById('btnRemoverLogo').classList.add('hidden');
 }
 
-// Submeter formulário (CRIAR apenas)
+// Editar formulário existente
+function editarFormulario(id, totalRespostas) {
+  if (parseInt(totalRespostas) > 0) {
+    alert('Não é possível editar! Este formulário possui ' + totalRespostas + ' resposta(s).');
+    return;
+  }
+  
+  // Carregar dados do formulário
+  fetch('/nps/' + id + '/detalhes', {
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      const f = data.formulario;
+      
+      // Preencher formulário
+      document.getElementById('modalTitulo').textContent = 'Editar Formulário';
+      document.getElementById('formulario_id').value = f.id;
+      document.getElementById('titulo').value = f.titulo;
+      document.getElementById('descricao').value = f.descricao || '';
+      
+      // Limpar e adicionar perguntas existentes
+      perguntas = [];
+      document.getElementById('perguntasContainer').innerHTML = '';
+      
+      if (f.perguntas && f.perguntas.length > 0) {
+        f.perguntas.forEach((p, i) => {
+          adicionarPergunta();
+          document.getElementById(`pergunta_${i}`).value = p.texto;
+          document.getElementById(`tipo_${i}`).value = p.tipo;
+        });
+      } else {
+        adicionarPergunta();
+      }
+      
+      // Mostrar logo existente se houver
+      if (f.logo) {
+        document.getElementById('logoPreviewImg').src = '/' + f.logo;
+        document.getElementById('logoPreview').classList.remove('hidden');
+        document.getElementById('btnRemoverLogo').classList.remove('hidden');
+      } else {
+        document.getElementById('logoPreview').classList.add('hidden');
+        document.getElementById('btnRemoverLogo').classList.add('hidden');
+      }
+      
+      document.getElementById('modalFormulario').classList.remove('hidden');
+    } else {
+      alert('Erro: ' + data.message);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert('Erro ao carregar formulário');
+  });
+}
+
+// Submeter formulário (CRIAR ou EDITAR)
 document.getElementById('formularioForm').addEventListener('submit', function(e) {
   e.preventDefault();
   
+  const formularioId = document.getElementById('formulario_id').value;
   const titulo = document.getElementById('titulo').value.trim();
   const descricao = document.getElementById('descricao').value.trim();
   const logoFile = document.getElementById('logo').files[0];
@@ -364,7 +429,15 @@ document.getElementById('formularioForm').addEventListener('submit', function(e)
     formData.append('logo', logoFile);
   }
   
-  fetch('/nps/criar', {
+  // Determinar se é criação ou edição
+  const isEditing = formularioId !== '';
+  const url = isEditing ? '/nps/editar' : '/nps/criar';
+  
+  if (isEditing) {
+    formData.append('formulario_id', formularioId);
+  }
+  
+  fetch(url, {
     method: 'POST',
     body: formData
   })
@@ -372,7 +445,7 @@ document.getElementById('formularioForm').addEventListener('submit', function(e)
   .then(data => {
     if (data.success) {
       alert(data.message);
-      if (data.link_publico) {
+      if (!isEditing && data.link_publico) {
         alert('Link público: ' + data.link_publico);
       }
       fecharModal();
