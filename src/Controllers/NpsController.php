@@ -57,13 +57,19 @@ class NpsController
             $formularios = [];
             $files = glob($this->storageDir . '/formulario_*.json');
             
+            // Verificar se usuário tem permissão de visualização no módulo NPS
+            $hasViewPermission = PermissionService::hasPermission($userId, 'nps', 'view');
+            
             foreach ($files as $file) {
                 $data = json_decode(file_get_contents($file), true);
                 
                 $userRole = $_SESSION['user_role'] ?? '';
                 
-                // Filtrar apenas formulários do usuário ou se for admin/super_admin
-                if ($data['criado_por'] == $userId || $userRole === 'admin' || $userRole === 'super_admin') {
+                // Filtrar formulários:
+                // 1. Criador do formulário
+                // 2. Admin ou Super Admin
+                // 3. Usuário com permissão 'view' no módulo 'nps' (ex: supervisores)
+                if ($data['criado_por'] == $userId || $userRole === 'admin' || $userRole === 'super_admin' || $hasViewPermission) {
                     // Contar respostas
                     $totalRespostas = $this->contarRespostas($data['id']);
                     
@@ -509,8 +515,16 @@ class NpsController
         
         $formulario = json_decode(file_get_contents($formFilename), true);
         
+        // Verificar permissão:
+        // 1. Criador do formulário
+        // 2. Admin ou Super Admin
+        // 3. Qualquer usuário com permissão 'view' no módulo 'nps' (ex: supervisores)
         $userRole = $_SESSION['user_role'] ?? '';
-        if ($formulario['criado_por'] != $userId && $userRole !== 'admin' && $userRole !== 'super_admin') {
+        $isOwner = $formulario['criado_por'] == $userId;
+        $isAdminOrSuper = in_array($userRole, ['admin', 'super_admin']);
+        $hasViewPermission = PermissionService::hasPermission($userId, 'nps', 'view');
+        
+        if (!$isOwner && !$isAdminOrSuper && !$hasViewPermission) {
             echo 'Sem permissão para ver as respostas';
             exit;
         }
@@ -580,9 +594,16 @@ class NpsController
             
             $formulario = json_decode(file_get_contents($filename), true);
             
-            // Verificar permissão
+            // Verificar permissão:
+            // 1. Criador do formulário
+            // 2. Admin ou Super Admin
+            // 3. Usuário com permissão 'view' no módulo 'nps' (ex: supervisores)
             $userRole = $_SESSION['user_role'] ?? '';
-            if ($formulario['criado_por'] != $userId && !in_array($userRole, ['admin', 'super_admin'])) {
+            $isOwner = $formulario['criado_por'] == $userId;
+            $isAdminOrSuper = in_array($userRole, ['admin', 'super_admin']);
+            $hasViewPermission = PermissionService::hasPermission($userId, 'nps', 'view');
+            
+            if (!$isOwner && !$isAdminOrSuper && !$hasViewPermission) {
                 echo json_encode(['success' => false, 'message' => 'Sem permissão']);
                 exit;
             }
@@ -651,13 +672,16 @@ class NpsController
         $userId = $_SESSION['user_id'];
         $userRole = $_SESSION['user_role'] ?? '';
         
+        // Verificar se usuário tem permissão de visualização no módulo NPS
+        $hasViewPermission = PermissionService::hasPermission($userId, 'nps', 'view');
+        
         // Buscar lista de formulários para o filtro
         $formularios = [];
         $formFiles = glob($this->storageDir . '/formulario_*.json');
         foreach ($formFiles as $file) {
             $form = json_decode(file_get_contents($file), true);
-            // Filtrar por usuário ou admin
-            if ($form['criado_por'] == $userId || $userRole === 'admin' || $userRole === 'super_admin') {
+            // Filtrar por usuário, admin ou permissão de visualização (supervisores)
+            if ($form['criado_por'] == $userId || $userRole === 'admin' || $userRole === 'super_admin' || $hasViewPermission) {
                 $formularios[] = [
                     'id' => $form['id'],
                     'titulo' => $form['titulo']
@@ -671,7 +695,7 @@ class NpsController
         });
         
         // Coletar estatísticas gerais (sem filtro)
-        $stats = $this->coletarEstatisticas($userId, $userRole);
+        $stats = $this->coletarEstatisticas($userId, $userRole, null, $hasViewPermission);
         
         $title = 'Dashboard NPS - SGQ OTI DJ';
         $viewFile = __DIR__ . '/../../views/pages/nps/dashboard.php';
@@ -780,8 +804,9 @@ class NpsController
      * @param int $userId ID do usuário
      * @param string $userRole Role do usuário
      * @param string|null $formularioId ID do formulário para filtrar (opcional)
+     * @param bool $hasViewPermission Se usuário tem permissão de visualização no módulo NPS
      */
-    private function coletarEstatisticas($userId, $userRole, $formularioId = null)
+    private function coletarEstatisticas($userId, $userRole, $formularioId = null, $hasViewPermission = false)
     {
         $stats = [
             'total_formularios' => 0,
@@ -800,8 +825,8 @@ class NpsController
         $formFiles = glob($this->storageDir . '/formulario_*.json');
         foreach ($formFiles as $file) {
             $form = json_decode(file_get_contents($file), true);
-            // Filtrar por usuário ou admin
-            if ($form['criado_por'] == $userId || $userRole === 'admin' || $userRole === 'super_admin') {
+            // Filtrar por usuário, admin ou permissão de visualização (supervisores)
+            if ($form['criado_por'] == $userId || $userRole === 'admin' || $userRole === 'super_admin' || $hasViewPermission) {
                 $stats['total_formularios']++;
                 if ($form['ativo']) {
                     $stats['formularios_ativos']++;
@@ -830,8 +855,8 @@ class NpsController
             
             $form = json_decode(file_get_contents($formFile), true);
             
-            // Verificar se a resposta pertence a um formulário do usuário
-            if ($form['criado_por'] == $userId || $userRole === 'admin' || $userRole === 'super_admin') {
+            // Verificar se a resposta pertence a um formulário do usuário ou se tem permissão
+            if ($form['criado_por'] == $userId || $userRole === 'admin' || $userRole === 'super_admin' || $hasViewPermission) {
                 $stats['total_respostas']++;
                 
                 // Analisar respostas para calcular NPS
@@ -900,13 +925,16 @@ class NpsController
             $userRole = $_SESSION['user_role'] ?? '';
             $formularioId = $_GET['formulario_id'] ?? null;
             
+            // Verificar se usuário tem permissão de visualização no módulo NPS
+            $hasViewPermission = PermissionService::hasPermission($userId, 'nps', 'view');
+            
             // Se formulario_id for 'todos', passar null para ver todos
             if ($formularioId === 'todos') {
                 $formularioId = null;
             }
             
             // Coletar estatísticas (com ou sem filtro)
-            $stats = $this->coletarEstatisticas($userId, $userRole, $formularioId);
+            $stats = $this->coletarEstatisticas($userId, $userRole, $formularioId, $hasViewPermission);
             
             echo json_encode([
                 'success' => true,
@@ -934,6 +962,10 @@ class NpsController
         $userId = $_SESSION['user_id'];
         $userRole = $_SESSION['user_role'] ?? '';
         
+        // Verificar se usuário tem permissão de exportação ou visualização no módulo NPS
+        $hasExportPermission = PermissionService::hasPermission($userId, 'nps', 'export');
+        $hasViewPermission = PermissionService::hasPermission($userId, 'nps', 'view');
+        
         // Coletar todas as respostas
         $dadosExportacao = [];
         $respostaFiles = glob($this->respostasDir . '/resposta_*.json');
@@ -941,12 +973,12 @@ class NpsController
         foreach ($respostaFiles as $file) {
             $resposta = json_decode(file_get_contents($file), true);
             
-            // Verificar se pertence a formulário do usuário
+            // Verificar se pertence a formulário do usuário ou se tem permissão
             $formFile = $this->storageDir . '/formulario_' . $resposta['formulario_id'] . '.json';
             if (file_exists($formFile)) {
                 $form = json_decode(file_get_contents($formFile), true);
                 
-                if ($form['criado_por'] == $userId || $userRole === 'admin' || $userRole === 'super_admin') {
+                if ($form['criado_por'] == $userId || $userRole === 'admin' || $userRole === 'super_admin' || $hasExportPermission || $hasViewPermission) {
                     // Preparar dados para exportação
                     $linha = [
                         'formulario' => $resposta['formulario_titulo'] ?? $form['titulo'],
