@@ -87,6 +87,24 @@ function construirUrlPaginacao($pagina) {
           <input type="number" name="quantidade_recebida" id="quantidadeRecebida" min="1" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
         </div>
 
+        <!-- Quantidade Testada -->
+        <div>
+          <label class="block text-sm font-medium text-gray-200 mb-1">Quantidade Testada <span class="text-red-400">*</span></label>
+          <input type="number" name="quantidade_testada" id="quantidadeTestada" min="0" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- Quantidade Aprovada -->
+        <div>
+          <label class="block text-sm font-medium text-gray-200 mb-1">Quantidade Aprovada <span class="text-red-400">*</span></label>
+          <input type="number" name="quantidade_aprovada" id="quantidadeAprovada" min="0" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- Quantidade Reprovada -->
+        <div>
+          <label class="block text-sm font-medium text-gray-200 mb-1">Quantidade Reprovada <span class="text-red-400">*</span></label>
+          <input type="number" name="quantidade_reprovada" id="quantidadeReprovada" min="0" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
+        </div>
+
         <!-- Checkbox Lote Reprovado -->
         <div class="flex items-center">
           <div class="bg-red-900/30 border border-red-500/50 rounded-lg p-4 w-full">
@@ -99,42 +117,9 @@ function construirUrlPaginacao($pagina) {
               </span>
             </label>
             <p class="text-xs text-red-400 mt-2 ml-8">
-              Marque se TODO o lote foi reprovado. Os campos de teste serão preenchidos automaticamente.
+              Marque esta opção se o lote inteiro foi reprovado. O status será definido automaticamente como "Reprovado".
             </p>
           </div>
-        </div>
-
-        <!-- Quantidade Testada -->
-        <div id="divQuantidadeTestada">
-          <label class="block text-sm font-medium text-gray-200 mb-1">
-            Quantidade Testada 
-            <span id="labelTestadaReq" class="text-red-400">*</span>
-            <span id="labelTestadaOpt" class="text-gray-400 text-xs hidden">(Opcional)</span>
-          </label>
-          <input type="number" name="quantidade_testada" id="quantidadeTestada" min="0" value="" 
-                 class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
-        </div>
-
-        <!-- Quantidade Aprovada -->
-        <div id="divQuantidadeAprovada">
-          <label class="block text-sm font-medium text-gray-200 mb-1">
-            Quantidade Aprovada 
-            <span id="labelAprovadaReq" class="text-red-400">*</span>
-            <span id="labelAprovadaOpt" class="text-gray-400 text-xs hidden">(Opcional)</span>
-          </label>
-          <input type="number" name="quantidade_aprovada" id="quantidadeAprovada" min="0" value="" 
-                 class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
-        </div>
-
-        <!-- Quantidade Reprovada -->
-        <div id="divQuantidadeReprovada">
-          <label class="block text-sm font-medium text-gray-200 mb-1">
-            Quantidade Reprovada 
-            <span id="labelReprovadaReq" class="text-red-400">*</span>
-            <span id="labelReprovadaOpt" class="text-gray-400 text-xs hidden">(Opcional)</span>
-          </label>
-          <input type="number" name="quantidade_reprovada" id="quantidadeReprovada" min="0" value="" 
-                 class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
         </div>
 
         <!-- Fornecedor -->
@@ -694,102 +679,44 @@ const statusSelect = document.getElementById('statusFinalSelect');
 const loteReprovadoCheckbox = document.getElementById('loteReprovado');
 
 // Função para alternar modo "Lote Reprovado"
+// Agora apenas força o status para "Reprovado", sem alterar os campos de quantidade
 function toggleLoteReprovado(checked) {
   if (checked) {
-    // Lote inteiro reprovado: preencher campos automaticamente
-    const qtdRecebida = parseInt(qtdRecebidaInput.value) || 0;
-    
-    // Preencher campos de teste automaticamente
-    qtdTestadaInput.value = qtdRecebida;
-    qtdAprovadaInput.value = 0;
-    qtdReprovadaInput.value = qtdRecebida;
-    
-    // Desabilitar campos de teste
-    qtdTestadaInput.disabled = true;
-    qtdAprovadaInput.disabled = true;
-    qtdReprovadaInput.disabled = true;
-    
-    // Adicionar classe visual para indicar campos desabilitados
-    qtdTestadaInput.classList.add('opacity-50', 'cursor-not-allowed');
-    qtdAprovadaInput.classList.add('opacity-50', 'cursor-not-allowed');
-    qtdReprovadaInput.classList.add('opacity-50', 'cursor-not-allowed');
-    
     // Forçar status Reprovado
     statusSelect.value = 'Reprovado';
     statusSelect.disabled = true;
     statusSelect.classList.add('opacity-50', 'cursor-not-allowed');
-    
-    // Ocultar asteriscos de obrigatório
-    document.getElementById('labelTestadaReq').classList.add('hidden');
-    document.getElementById('labelAprovadaReq').classList.add('hidden');
-    document.getElementById('labelReprovadaReq').classList.add('hidden');
-    document.getElementById('labelTestadaOpt').classList.remove('hidden');
-    document.getElementById('labelAprovadaOpt').classList.remove('hidden');
-    document.getElementById('labelReprovadaOpt').classList.remove('hidden');
-    
+    statusSelect.title = 'Lote reprovado: status definido automaticamente como Reprovado';
   } else {
-    // Modo normal: habilitar campos
-    qtdTestadaInput.disabled = false;
-    qtdAprovadaInput.disabled = false;
-    qtdReprovadaInput.disabled = false;
+    // Liberar seleção de status
     statusSelect.disabled = false;
-    
-    // Remover classe visual
-    qtdTestadaInput.classList.remove('opacity-50', 'cursor-not-allowed');
-    qtdAprovadaInput.classList.remove('opacity-50', 'cursor-not-allowed');
-    qtdReprovadaInput.classList.remove('opacity-50', 'cursor-not-allowed');
     statusSelect.classList.remove('opacity-50', 'cursor-not-allowed');
+    statusSelect.title = '';
     
-    // Limpar valores
-    qtdTestadaInput.value = '';
-    qtdAprovadaInput.value = '';
-    qtdReprovadaInput.value = '';
-    statusSelect.value = 'Pendente';
-    
-    // Mostrar asteriscos de obrigatório
-    document.getElementById('labelTestadaReq').classList.remove('hidden');
-    document.getElementById('labelAprovadaReq').classList.remove('hidden');
-    document.getElementById('labelReprovadaReq').classList.remove('hidden');
-    document.getElementById('labelTestadaOpt').classList.add('hidden');
-    document.getElementById('labelAprovadaOpt').classList.add('hidden');
-    document.getElementById('labelReprovadaOpt').classList.add('hidden');
+    // Verificar se deve manter como Pendente ou permitir seleção
+    verificarCamposTestagem();
   }
-  
-  verificarCamposTestagem();
-}
-
-// Atualizar valores quando quantidade recebida muda (se lote reprovado estiver marcado)
-if (qtdRecebidaInput) {
-  qtdRecebidaInput.addEventListener('input', function() {
-    if (loteReprovadoCheckbox && loteReprovadoCheckbox.checked) {
-      const qtdRecebida = parseInt(this.value) || 0;
-      qtdTestadaInput.value = qtdRecebida;
-      qtdReprovadaInput.value = qtdRecebida;
-    }
-  });
 }
 
 function verificarCamposTestagem() {
   const loteReprovado = loteReprovadoCheckbox && loteReprovadoCheckbox.checked;
+  
+  // Se lote reprovado está marcado, status já está definido como Reprovado
+  if (loteReprovado) {
+    return;
+  }
+  
   const testada = qtdTestadaInput.value.trim();
   const aprovada = qtdAprovadaInput.value.trim();
   const reprovada = qtdReprovadaInput.value.trim();
   
-  // Se lote reprovado está marcado, status já está definido
-  if (loteReprovado) {
-    statusSelect.style.opacity = '0.6';
-    statusSelect.title = 'Lote reprovado: status definido automaticamente';
-    return;
-  }
-  
-  // Se algum campo estiver vazio, forçar status Pendente
-  if (!testada || !aprovada || !reprovada) {
-    statusSelect.value = 'Pendente';
-    statusSelect.style.opacity = '0.6';
-    statusSelect.title = 'Preencha os campos de teste para alterar o status';
-  } else {
+  // Se todos os campos estiverem preenchidos, permitir seleção de status
+  if (testada && aprovada && reprovada) {
     statusSelect.style.opacity = '1';
     statusSelect.title = '';
+  } else {
+    statusSelect.style.opacity = '0.6';
+    statusSelect.title = 'Preencha todos os campos de quantidade para alterar o status';
   }
 }
 
@@ -807,25 +734,20 @@ document.getElementById('amostragemForm').addEventListener('submit', async funct
   
   const loteReprovado = loteReprovadoCheckbox && loteReprovadoCheckbox.checked;
   
-  // Validar campos obrigatórios quando lote não está reprovado
-  if (!loteReprovado) {
-    const testada = qtdTestadaInput.value.trim();
-    const aprovada = qtdAprovadaInput.value.trim();
-    const reprovada = qtdReprovadaInput.value.trim();
-    
-    if (!testada || !aprovada || !reprovada) {
-      alert('⚠️ Preencha todos os campos de quantidade (Testada, Aprovada, Reprovada) ou marque a opção "Lote Inteiro Reprovado".');
-      return;
-    }
+  // Validar campos obrigatórios - SEMPRE obrigatórios
+  const testada = qtdTestadaInput.value.trim();
+  const aprovada = qtdAprovadaInput.value.trim();
+  const reprovada = qtdReprovadaInput.value.trim();
+  
+  if (!testada || !aprovada || !reprovada) {
+    alert('⚠️ Preencha todos os campos de quantidade (Testada, Aprovada, Reprovada).');
+    return;
   }
   
-  // Habilitar temporariamente campos desabilitados para incluir no FormData
-  const disabledFields = [qtdTestadaInput, qtdAprovadaInput, qtdReprovadaInput, statusSelect];
-  disabledFields.forEach(field => {
-    if (field && field.disabled) {
-      field.disabled = false;
-    }
-  });
+  // Habilitar temporariamente o status se estiver desabilitado
+  if (statusSelect && statusSelect.disabled) {
+    statusSelect.disabled = false;
+  }
   
   const formData = new FormData(this);
   
