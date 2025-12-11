@@ -17,32 +17,14 @@ class Amostragens2Controller
     
     /**
      * Verifica se o usuário pode visualizar uma amostragem específica
-     * Admin: vê todas
-     * Usuário comum: só vê se for criador ou responsável
+     * Nova regra: quem tem acesso ao módulo pode ver TODAS as amostragens
      */
     private function podeVisualizarAmostragem($amostragemId): bool
     {
         $userId = $_SESSION['user_id'];
-        $userRole = $_SESSION['user_role'] ?? 'user';
         
-        // Admin e super_admin veem todas
-        if (in_array($userRole, ['admin', 'super_admin'])) {
-            return true;
-        }
-        
-        // Usuário comum: verificar se é criador ou responsável
-        $stmt = $this->db->prepare('
-            SELECT id FROM amostragens_2 
-            WHERE id = :id 
-            AND (user_id = :user_id OR FIND_IN_SET(:user_id_resp, responsaveis) > 0)
-        ');
-        $stmt->execute([
-            ':id' => $amostragemId,
-            ':user_id' => $userId,
-            ':user_id_resp' => $userId
-        ]);
-        
-        return $stmt->fetch() !== false;
+        // Quem tem permissão no módulo amostragens_2 pode ver todas as amostragens
+        return PermissionService::hasPermission($userId, 'amostragens_2', 'view');
     }
 
     public function index(): void
@@ -99,17 +81,9 @@ class Amostragens2Controller
                 $params[':data_fim'] = $_GET['data_fim'];
             }
 
-            // CONTROLE DE VISUALIZAÇÃO: Usuários não-admin só veem amostragens onde são responsáveis
-            $userId = $_SESSION['user_id'];
-            $userRole = $_SESSION['user_role'] ?? 'user';
-            
-            if (!in_array($userRole, ['admin', 'super_admin'])) {
-                // Usuário comum: só vê amostragens onde está na lista de responsáveis
-                $where[] = "(FIND_IN_SET(:user_id_responsavel, a.responsaveis) > 0 OR a.user_id = :user_id_criador)";
-                $params[':user_id_responsavel'] = $userId;
-                $params[':user_id_criador'] = $userId;
-            }
-            // Admin vê todas as amostragens (sem filtro adicional)
+            // CONTROLE DE VISUALIZAÇÃO: 
+            // Nova regra: Quem tem acesso ao módulo pode ver TODAS as amostragens
+            // (filtro por usuário removido conforme nova política)
 
             $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
