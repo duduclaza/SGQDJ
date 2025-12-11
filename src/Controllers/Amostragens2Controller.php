@@ -241,24 +241,53 @@ class Amostragens2Controller
             $nomeProduto = trim($_POST['nome_produto'] ?? '');
             $quantidadeRecebida = (int)($_POST['quantidade_recebida'] ?? 0);
             
-            // Campos de quantidade - SEMPRE obrigatórios (preserva histórico)
-            $quantidadeTestada = isset($_POST['quantidade_testada']) && $_POST['quantidade_testada'] !== '' 
-                ? (int)$_POST['quantidade_testada'] : null;
-            $quantidadeAprovada = isset($_POST['quantidade_aprovada']) && $_POST['quantidade_aprovada'] !== '' 
-                ? (int)$_POST['quantidade_aprovada'] : null;
-            $quantidadeReprovada = isset($_POST['quantidade_reprovada']) && $_POST['quantidade_reprovada'] !== '' 
-                ? (int)$_POST['quantidade_reprovada'] : null;
+            // Processar resultado do lote (pendente, aprovado, parcial, reprovado)
+            $resultadoLote = $_POST['resultado_lote'] ?? 'pendente';
             
-            // Verificar se é lote inteiro reprovado (apenas força status)
-            $loteReprovado = isset($_POST['lote_reprovado']) && $_POST['lote_reprovado'] === '1';
-            
-            if ($loteReprovado) {
-                // Lote inteiro reprovado: forçar status como Reprovado
+            if ($resultadoLote === 'aprovado') {
+                // Lote aprovado: tudo automático
+                $quantidadeTestada = $quantidadeRecebida;
+                $quantidadeAprovada = $quantidadeRecebida;
+                $quantidadeReprovada = 0;
+                $statusFinal = 'Aprovado';
+                
+                error_log("✅ Lote Aprovado - Qtd Recebida: $quantidadeRecebida, Aprovada: $quantidadeAprovada");
+                
+            } elseif ($resultadoLote === 'reprovado') {
+                // Lote reprovado: tudo automático
+                $quantidadeTestada = $quantidadeRecebida;
+                $quantidadeAprovada = 0;
+                $quantidadeReprovada = $quantidadeRecebida;
                 $statusFinal = 'Reprovado';
-                error_log("⚠️ Lote Reprovado marcado - Status forçado para: $statusFinal");
+                
+                error_log("❌ Lote Reprovado - Qtd Recebida: $quantidadeRecebida, Reprovada: $quantidadeReprovada");
+                
+            } elseif ($resultadoLote === 'parcial') {
+                // Aprovação parcial: usar valores do formulário
+                $quantidadeTestada = (int)($_POST['quantidade_testada'] ?? 0);
+                $aprovadosNoTeste = (int)($_POST['aprovados_no_teste'] ?? 0);
+                
+                // Calcular não testados (considerados aprovados)
+                $naoTestados = $quantidadeRecebida - $quantidadeTestada;
+                
+                // Aprovados TOTAL = aprovados no teste + não testados
+                $quantidadeAprovada = $aprovadosNoTeste + ($naoTestados > 0 ? $naoTestados : 0);
+                
+                // Reprovados TOTAL = testados - aprovados no teste
+                $quantidadeReprovada = $quantidadeTestada - $aprovadosNoTeste;
+                
+                $statusFinal = 'Aprovado Parcialmente';
+                
+                error_log("🔶 Parcial - Testada: $quantidadeTestada, Aprovados no Teste: $aprovadosNoTeste, Não Testados: $naoTestados, Aprovada Total: $quantidadeAprovada, Reprovada: $quantidadeReprovada");
+                
             } else {
-                // Status normal baseado nos campos
-                $statusFinal = $_POST['status_final'] ?? 'Pendente';
+                // Pendente: aguardando análise
+                $quantidadeTestada = 0;
+                $quantidadeAprovada = 0;
+                $quantidadeReprovada = 0;
+                $statusFinal = 'Pendente';
+                
+                error_log("⏳ Lote Pendente - Aguardando análise");
             }
             
             $fornecedorId = (int)($_POST['fornecedor_id'] ?? 0);

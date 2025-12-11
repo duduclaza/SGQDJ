@@ -84,43 +84,149 @@ function construirUrlPaginacao($pagina) {
         <!-- Quantidade Recebida -->
         <div>
           <label class="block text-sm font-medium text-gray-200 mb-1">Quantidade Recebida *</label>
-          <input type="number" name="quantidade_recebida" id="quantidadeRecebida" min="1" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
+          <input type="number" name="quantidade_recebida" id="quantidadeRecebida" min="1" required 
+                 onchange="atualizarValidacoes()"
+                 class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
         </div>
 
-        <!-- Quantidade Testada -->
-        <div>
-          <label class="block text-sm font-medium text-gray-200 mb-1">Quantidade Testada <span class="text-red-400">*</span></label>
-          <input type="number" name="quantidade_testada" id="quantidadeTestada" min="0" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
-        </div>
+        <!-- Seleção de Status do Lote -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-200 mb-3">Resultado da Amostragem *</label>
+          
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <!-- Opção: Pendente -->
+            <div id="opcaoPendente" class="bg-gray-700/50 border-2 border-gray-500 rounded-lg p-3 cursor-pointer transition-all hover:border-gray-400"
+                 onclick="selecionarResultado('pendente')">
+              <label class="flex items-center cursor-pointer">
+                <input type="radio" name="resultado_lote" value="pendente" id="radioPendente" checked
+                       onchange="selecionarResultado('pendente')"
+                       class="w-4 h-4 text-gray-500 bg-gray-700 border-gray-600">
+                <span class="ml-2 text-sm font-medium text-gray-300">
+                  ⏳ Pendente
+                </span>
+              </label>
+              <p class="text-xs text-gray-400 mt-1 ml-6">Aguardando análise</p>
+            </div>
 
-        <!-- Quantidade Aprovada -->
-        <div>
-          <label class="block text-sm font-medium text-gray-200 mb-1">Quantidade Aprovada <span class="text-red-400">*</span></label>
-          <input type="number" name="quantidade_aprovada" id="quantidadeAprovada" min="0" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
-        </div>
+            <!-- Opção: Lote Aprovado -->
+            <div id="opcaoAprovado" class="bg-green-900/30 border-2 border-green-500/50 rounded-lg p-3 cursor-pointer transition-all hover:border-green-400"
+                 onclick="selecionarResultado('aprovado')">
+              <label class="flex items-center cursor-pointer">
+                <input type="radio" name="resultado_lote" value="aprovado" id="radioAprovado"
+                       onchange="selecionarResultado('aprovado')"
+                       class="w-4 h-4 text-green-600 bg-gray-700 border-gray-600">
+                <span class="ml-2 text-sm font-medium text-green-300">
+                  ✅ Aprovado
+                </span>
+              </label>
+              <p class="text-xs text-green-400 mt-1 ml-6">Lote 100% aprovado</p>
+            </div>
 
-        <!-- Quantidade Reprovada -->
-        <div>
-          <label class="block text-sm font-medium text-gray-200 mb-1">Quantidade Reprovada <span class="text-red-400">*</span></label>
-          <input type="number" name="quantidade_reprovada" id="quantidadeReprovada" min="0" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
-        </div>
+            <!-- Opção: Aprovado Parcialmente -->
+            <div id="opcaoParcial" class="bg-yellow-900/30 border-2 border-yellow-500/50 rounded-lg p-3 cursor-pointer transition-all hover:border-yellow-400"
+                 onclick="selecionarResultado('parcial')">
+              <label class="flex items-center cursor-pointer">
+                <input type="radio" name="resultado_lote" value="parcial" id="radioParcial"
+                       onchange="selecionarResultado('parcial')"
+                       class="w-4 h-4 text-yellow-600 bg-gray-700 border-gray-600">
+                <span class="ml-2 text-sm font-medium text-yellow-300">
+                  🔶 Parcial
+                </span>
+              </label>
+              <p class="text-xs text-yellow-400 mt-1 ml-6">Parte reprovada</p>
+            </div>
 
-        <!-- Checkbox Lote Reprovado -->
-        <div class="flex items-center">
-          <div class="bg-red-900/30 border border-red-500/50 rounded-lg p-4 w-full">
-            <label class="flex items-center cursor-pointer">
-              <input type="checkbox" name="lote_reprovado" id="loteReprovado" 
-                     onchange="toggleLoteReprovado(this.checked)"
-                     class="w-5 h-5 text-red-600 bg-gray-700 border-gray-600 rounded focus:ring-red-500 focus:ring-2">
-              <span class="ml-3 text-sm font-medium text-red-300">
-                ⚠️ Lote Inteiro Reprovado
-              </span>
-            </label>
-            <p class="text-xs text-red-400 mt-2 ml-8">
-              Marque esta opção se o lote inteiro foi reprovado. O status será definido automaticamente como "Reprovado".
-            </p>
+            <!-- Opção: Lote Reprovado -->
+            <div id="opcaoReprovado" class="bg-red-900/30 border-2 border-red-500/50 rounded-lg p-3 cursor-pointer transition-all hover:border-red-400"
+                 onclick="selecionarResultado('reprovado')">
+              <label class="flex items-center cursor-pointer">
+                <input type="radio" name="resultado_lote" value="reprovado" id="radioReprovado"
+                       onchange="selecionarResultado('reprovado')"
+                       class="w-4 h-4 text-red-600 bg-gray-700 border-gray-600">
+                <span class="ml-2 text-sm font-medium text-red-300">
+                  ❌ Reprovado
+                </span>
+              </label>
+              <p class="text-xs text-red-400 mt-1 ml-6">Lote 100% reprovado</p>
+            </div>
           </div>
         </div>
+
+        <!-- Campos de Detalhamento para Aprovado Parcialmente -->
+        <div id="camposParcial" class="md:col-span-2 hidden">
+          <div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">
+            <h4 class="text-sm font-semibold text-yellow-300 mb-4">📊 Detalhamento da Amostragem Parcial</h4>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <!-- Quantidade Testada -->
+              <div>
+                <label class="block text-sm font-medium text-gray-200 mb-1">
+                  Qtd Testada <span class="text-red-400">*</span>
+                </label>
+                <input type="number" name="quantidade_testada" id="quantidadeTestada" min="0" 
+                       onchange="calcularTotais()" oninput="calcularTotais()"
+                       class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-yellow-500">
+                <p class="text-xs text-gray-400 mt-1">≤ Recebida</p>
+              </div>
+
+              <!-- Quantidade Aprovada no Teste -->
+              <div>
+                <label class="block text-sm font-medium text-gray-200 mb-1">
+                  Aprovados no Teste <span class="text-red-400">*</span>
+                </label>
+                <input type="number" name="aprovados_no_teste" id="aprovadosNoTeste" min="0"
+                       onchange="calcularTotais()" oninput="calcularTotais()"
+                       class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-green-500">
+                <p class="text-xs text-gray-400 mt-1">≤ Testada</p>
+              </div>
+
+              <!-- Não Testados (Calculado) -->
+              <div>
+                <label class="block text-sm font-medium text-gray-200 mb-1">
+                  Não Testados <span class="text-gray-400 text-xs">(auto)</span>
+                </label>
+                <input type="number" id="naoTestados" readonly
+                       class="w-full bg-gray-600 border border-gray-500 rounded-lg px-3 py-2 text-blue-300 cursor-not-allowed font-semibold">
+                <p class="text-xs text-blue-400 mt-1">= Recebida - Testada</p>
+              </div>
+
+              <!-- Reprovados no Teste (Calculado) -->
+              <div>
+                <label class="block text-sm font-medium text-gray-200 mb-1">
+                  Reprovados no Teste <span class="text-gray-400 text-xs">(auto)</span>
+                </label>
+                <input type="number" id="reprovadosNoTeste" readonly
+                       class="w-full bg-gray-600 border border-gray-500 rounded-lg px-3 py-2 text-red-300 cursor-not-allowed font-semibold">
+                <p class="text-xs text-red-400 mt-1">= Testada - Aprovados</p>
+              </div>
+            </div>
+
+            <!-- Resumo Final -->
+            <div class="mt-4 p-3 bg-gray-800/50 rounded-lg border border-gray-600">
+              <h5 class="text-sm font-semibold text-gray-200 mb-2">📋 Resultado Final (para salvar):</h5>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="flex items-center">
+                  <span class="text-green-400 font-bold text-lg mr-2">✅</span>
+                  <span class="text-gray-300">Aprovados TOTAL:</span>
+                  <input type="number" name="quantidade_aprovada" id="quantidadeAprovada" readonly
+                         class="ml-2 w-20 bg-green-900/50 border border-green-500 rounded px-2 py-1 text-green-300 font-bold text-center cursor-not-allowed">
+                  <span class="text-xs text-gray-400 ml-2">(Aprovados + Não Testados)</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="text-red-400 font-bold text-lg mr-2">❌</span>
+                  <span class="text-gray-300">Reprovados TOTAL:</span>
+                  <input type="number" name="quantidade_reprovada" id="quantidadeReprovada" readonly
+                         class="ml-2 w-20 bg-red-900/50 border border-red-500 rounded px-2 py-1 text-red-300 font-bold text-center cursor-not-allowed">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campos hidden para valores -->
+        <input type="hidden" id="hiddenTestada" name="quantidade_testada_final" value="">
+        <input type="hidden" id="hiddenAprovada" name="quantidade_aprovada_final" value="">
+        <input type="hidden" id="hiddenReprovada" name="quantidade_reprovada_final" value="">
 
         <!-- Fornecedor -->
         <div>
@@ -405,11 +511,16 @@ function construirUrlPaginacao($pagina) {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-green-600 font-semibold">
               <?= $amostra['quantidade_aprovada'] ?>
+              <?php if ($amostra['quantidade_aprovada'] == $amostra['quantidade_recebida'] && $amostra['quantidade_reprovada'] == 0 && $amostra['quantidade_aprovada'] > 0): ?>
+                <span class="ml-1 bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded-full" title="Lote 100% aprovado">✓</span>
+              <?php endif; ?>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-red-600 font-semibold">
               <?= $amostra['quantidade_reprovada'] ?>
               <?php if ($amostra['quantidade_reprovada'] == $amostra['quantidade_recebida'] && $amostra['quantidade_aprovada'] == 0 && $amostra['quantidade_reprovada'] > 0): ?>
-                <span class="ml-1 bg-red-100 text-red-800 text-xs px-1.5 py-0.5 rounded-full" title="Lote inteiro reprovado">LOTE</span>
+                <span class="ml-1 bg-red-100 text-red-800 text-xs px-1.5 py-0.5 rounded-full" title="Lote 100% reprovado">LOTE</span>
+              <?php elseif ($amostra['quantidade_reprovada'] > 0 && $amostra['quantidade_aprovada'] > 0): ?>
+                <span class="ml-1 bg-yellow-100 text-yellow-800 text-xs px-1.5 py-0.5 rounded-full" title="Aprovação parcial">PARCIAL</span>
               <?php endif; ?>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
@@ -670,78 +781,249 @@ function filtrarProdutos() {
   }
 }
 
-// Monitorar campos de teste e ajustar status automaticamente
+// ===== NOVA LÓGICA DE AMOSTRAGENS =====
 const qtdRecebidaInput = document.getElementById('quantidadeRecebida');
 const qtdTestadaInput = document.getElementById('quantidadeTestada');
 const qtdAprovadaInput = document.getElementById('quantidadeAprovada');
 const qtdReprovadaInput = document.getElementById('quantidadeReprovada');
+const aprovadosNoTesteInput = document.getElementById('aprovadosNoTeste');
+const naoTestadosInput = document.getElementById('naoTestados');
+const reprovadosNoTesteInput = document.getElementById('reprovadosNoTeste');
 const statusSelect = document.getElementById('statusFinalSelect');
-const loteReprovadoCheckbox = document.getElementById('loteReprovado');
+const camposParcial = document.getElementById('camposParcial');
 
-// Função para alternar modo "Lote Reprovado"
-// Agora apenas força o status para "Reprovado", sem alterar os campos de quantidade
-function toggleLoteReprovado(checked) {
-  if (checked) {
-    // Forçar status Reprovado
-    statusSelect.value = 'Reprovado';
-    statusSelect.disabled = true;
-    statusSelect.classList.add('opacity-50', 'cursor-not-allowed');
-    statusSelect.title = 'Lote reprovado: status definido automaticamente como Reprovado';
-  } else {
-    // Liberar seleção de status
-    statusSelect.disabled = false;
-    statusSelect.classList.remove('opacity-50', 'cursor-not-allowed');
-    statusSelect.title = '';
+// Variável para controlar o resultado selecionado
+let resultadoSelecionado = 'pendente';
+
+// Função para selecionar o resultado
+function selecionarResultado(resultado) {
+  resultadoSelecionado = resultado;
+  
+  // Resetar visual de todos os cards
+  ['opcaoPendente', 'opcaoAprovado', 'opcaoParcial', 'opcaoReprovado'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.remove('ring-2', 'ring-gray-500', 'ring-green-500', 'ring-yellow-500', 'ring-red-500');
+      el.style.borderColor = '';
+    }
+  });
+  
+  // Esconder campos de detalhamento por padrão
+  if (camposParcial) camposParcial.classList.add('hidden');
+  
+  if (resultado === 'pendente') {
+    document.getElementById('radioPendente').checked = true;
+    document.getElementById('opcaoPendente').style.borderColor = '#6b7280';
+    document.getElementById('opcaoPendente').classList.add('ring-2', 'ring-gray-500');
     
-    // Verificar se deve manter como Pendente ou permitir seleção
-    verificarCamposTestagem();
+    // Limpar campos
+    limparCampos();
+    
+    // Status Pendente
+    if (statusSelect) {
+      statusSelect.value = 'Pendente';
+      statusSelect.disabled = true;
+      statusSelect.classList.add('opacity-50');
+    }
+    
+  } else if (resultado === 'aprovado') {
+    document.getElementById('radioAprovado').checked = true;
+    document.getElementById('opcaoAprovado').style.borderColor = '#22c55e';
+    document.getElementById('opcaoAprovado').classList.add('ring-2', 'ring-green-500');
+    
+    // Preencher automaticamente: testada = aprovada = recebida, reprovada = 0
+    const qtdRecebida = parseInt(qtdRecebidaInput.value) || 0;
+    if (qtdTestadaInput) qtdTestadaInput.value = qtdRecebida;
+    if (qtdAprovadaInput) qtdAprovadaInput.value = qtdRecebida;
+    if (qtdReprovadaInput) qtdReprovadaInput.value = 0;
+    
+    // Status Aprovado
+    if (statusSelect) {
+      statusSelect.value = 'Aprovado';
+      statusSelect.disabled = true;
+      statusSelect.classList.add('opacity-50');
+    }
+    
+  } else if (resultado === 'parcial') {
+    document.getElementById('radioParcial').checked = true;
+    document.getElementById('opcaoParcial').style.borderColor = '#eab308';
+    document.getElementById('opcaoParcial').classList.add('ring-2', 'ring-yellow-500');
+    
+    // Mostrar campos de detalhamento
+    if (camposParcial) camposParcial.classList.remove('hidden');
+    
+    // Limpar campos para preenchimento manual
+    limparCampos();
+    
+    // Status Aprovado Parcialmente
+    if (statusSelect) {
+      statusSelect.value = 'Aprovado Parcialmente';
+      statusSelect.disabled = true;
+      statusSelect.classList.add('opacity-50');
+    }
+    
+  } else if (resultado === 'reprovado') {
+    document.getElementById('radioReprovado').checked = true;
+    document.getElementById('opcaoReprovado').style.borderColor = '#ef4444';
+    document.getElementById('opcaoReprovado').classList.add('ring-2', 'ring-red-500');
+    
+    // Preencher automaticamente: testada = recebida, aprovada = 0, reprovada = recebida
+    const qtdRecebida = parseInt(qtdRecebidaInput.value) || 0;
+    if (qtdTestadaInput) qtdTestadaInput.value = qtdRecebida;
+    if (qtdAprovadaInput) qtdAprovadaInput.value = 0;
+    if (qtdReprovadaInput) qtdReprovadaInput.value = qtdRecebida;
+    
+    // Status Reprovado
+    if (statusSelect) {
+      statusSelect.value = 'Reprovado';
+      statusSelect.disabled = true;
+      statusSelect.classList.add('opacity-50');
+    }
   }
 }
 
-function verificarCamposTestagem() {
-  const loteReprovado = loteReprovadoCheckbox && loteReprovadoCheckbox.checked;
-  
-  // Se lote reprovado está marcado, status já está definido como Reprovado
-  if (loteReprovado) {
-    return;
-  }
-  
-  const testada = qtdTestadaInput.value.trim();
-  const aprovada = qtdAprovadaInput.value.trim();
-  const reprovada = qtdReprovadaInput.value.trim();
-  
-  // Se todos os campos estiverem preenchidos, permitir seleção de status
-  if (testada && aprovada && reprovada) {
-    statusSelect.style.opacity = '1';
-    statusSelect.title = '';
-  } else {
-    statusSelect.style.opacity = '0.6';
-    statusSelect.title = 'Preencha todos os campos de quantidade para alterar o status';
-  }
+// Limpar todos os campos de quantidade
+function limparCampos() {
+  if (qtdTestadaInput) qtdTestadaInput.value = '';
+  if (qtdAprovadaInput) qtdAprovadaInput.value = '';
+  if (qtdReprovadaInput) qtdReprovadaInput.value = '';
+  if (aprovadosNoTesteInput) aprovadosNoTesteInput.value = '';
+  if (naoTestadosInput) naoTestadosInput.value = '';
+  if (reprovadosNoTesteInput) reprovadosNoTesteInput.value = '';
 }
 
-// Adicionar listeners
-if (qtdTestadaInput) qtdTestadaInput.addEventListener('input', verificarCamposTestagem);
-if (qtdAprovadaInput) qtdAprovadaInput.addEventListener('input', verificarCamposTestagem);
-if (qtdReprovadaInput) qtdReprovadaInput.addEventListener('input', verificarCamposTestagem);
+// Atualizar validações quando quantidade recebida muda
+function atualizarValidacoes() {
+  const qtdRecebida = parseInt(qtdRecebidaInput.value) || 0;
+  
+  if (qtdTestadaInput) {
+    qtdTestadaInput.max = qtdRecebida;
+  }
+  
+  // Se resultado é aprovado, atualizar valores automáticos
+  if (resultadoSelecionado === 'aprovado') {
+    if (qtdTestadaInput) qtdTestadaInput.value = qtdRecebida;
+    if (qtdAprovadaInput) qtdAprovadaInput.value = qtdRecebida;
+    if (qtdReprovadaInput) qtdReprovadaInput.value = 0;
+  } else if (resultadoSelecionado === 'reprovado') {
+    if (qtdTestadaInput) qtdTestadaInput.value = qtdRecebida;
+    if (qtdAprovadaInput) qtdAprovadaInput.value = 0;
+    if (qtdReprovadaInput) qtdReprovadaInput.value = qtdRecebida;
+  }
+  
+  calcularTotais();
+}
 
-// Verificar ao carregar
-verificarCamposTestagem();
+// Calcular totais para aprovação parcial
+function calcularTotais() {
+  const qtdRecebida = parseInt(qtdRecebidaInput.value) || 0;
+  const qtdTestada = parseInt(qtdTestadaInput.value) || 0;
+  const aprovadosNoTeste = parseInt(aprovadosNoTesteInput?.value) || 0;
+  
+  // Validar: testada não pode ser maior que recebida
+  if (qtdTestada > qtdRecebida && qtdTestadaInput) {
+    qtdTestadaInput.value = qtdRecebida;
+    qtdTestadaInput.classList.add('border-red-500');
+    setTimeout(() => qtdTestadaInput.classList.remove('border-red-500'), 1000);
+  }
+  
+  const testadaAtual = parseInt(qtdTestadaInput?.value) || 0;
+  
+  // Validar: aprovados no teste não pode ser maior que testada
+  if (aprovadosNoTeste > testadaAtual && aprovadosNoTesteInput) {
+    aprovadosNoTesteInput.value = testadaAtual;
+    aprovadosNoTesteInput.classList.add('border-red-500');
+    setTimeout(() => aprovadosNoTesteInput.classList.remove('border-red-500'), 1000);
+  }
+  
+  const aprovadosAtual = parseInt(aprovadosNoTesteInput?.value) || 0;
+  
+  // Calcular não testados = recebida - testada
+  const naoTestados = qtdRecebida - testadaAtual;
+  if (naoTestadosInput) {
+    naoTestadosInput.value = naoTestados >= 0 ? naoTestados : 0;
+  }
+  
+  // Calcular reprovados no teste = testada - aprovados
+  const reprovadosNoTeste = testadaAtual - aprovadosAtual;
+  if (reprovadosNoTesteInput) {
+    reprovadosNoTesteInput.value = reprovadosNoTeste >= 0 ? reprovadosNoTeste : 0;
+  }
+  
+  // Calcular totais finais
+  // Aprovados TOTAL = Aprovados no teste + Não testados
+  const aprovadosTotal = aprovadosAtual + (naoTestados >= 0 ? naoTestados : 0);
+  if (qtdAprovadaInput) {
+    qtdAprovadaInput.value = aprovadosTotal;
+  }
+  
+  // Reprovados TOTAL = Reprovados no teste
+  const reprovadosTotal = reprovadosNoTeste >= 0 ? reprovadosNoTeste : 0;
+  if (qtdReprovadaInput) {
+    qtdReprovadaInput.value = reprovadosTotal;
+  }
+  
+  // Atualizar testada final
+  if (qtdTestadaInput) {
+    // Manter o valor original da testada
+  }
+}
 
 // Submit do formulário
 document.getElementById('amostragemForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   
-  const loteReprovado = loteReprovadoCheckbox && loteReprovadoCheckbox.checked;
+  const qtdRecebida = parseInt(qtdRecebidaInput.value) || 0;
   
-  // Validar campos obrigatórios - SEMPRE obrigatórios
-  const testada = qtdTestadaInput.value.trim();
-  const aprovada = qtdAprovadaInput.value.trim();
-  const reprovada = qtdReprovadaInput.value.trim();
-  
-  if (!testada || !aprovada || !reprovada) {
-    alert('⚠️ Preencha todos os campos de quantidade (Testada, Aprovada, Reprovada).');
+  if (qtdRecebida <= 0) {
+    alert('⚠️ Informe a quantidade recebida.');
     return;
+  }
+  
+  // Validar baseado no resultado selecionado
+  if (resultadoSelecionado === 'pendente') {
+    // Pendente: preencher com zeros
+    if (qtdTestadaInput) qtdTestadaInput.value = 0;
+    if (qtdAprovadaInput) qtdAprovadaInput.value = 0;
+    if (qtdReprovadaInput) qtdReprovadaInput.value = 0;
+    
+  } else if (resultadoSelecionado === 'aprovado') {
+    // Aprovado: preencher automaticamente
+    if (qtdTestadaInput) qtdTestadaInput.value = qtdRecebida;
+    if (qtdAprovadaInput) qtdAprovadaInput.value = qtdRecebida;
+    if (qtdReprovadaInput) qtdReprovadaInput.value = 0;
+    
+  } else if (resultadoSelecionado === 'reprovado') {
+    // Reprovado: preencher automaticamente
+    if (qtdTestadaInput) qtdTestadaInput.value = qtdRecebida;
+    if (qtdAprovadaInput) qtdAprovadaInput.value = 0;
+    if (qtdReprovadaInput) qtdReprovadaInput.value = qtdRecebida;
+    
+  } else if (resultadoSelecionado === 'parcial') {
+    // Parcial: validar campos
+    const testada = parseInt(qtdTestadaInput?.value) || 0;
+    const aprovadosNoTeste = parseInt(aprovadosNoTesteInput?.value) || 0;
+    
+    if (testada <= 0) {
+      alert('⚠️ Informe a quantidade testada.');
+      if (qtdTestadaInput) qtdTestadaInput.focus();
+      return;
+    }
+    
+    if (testada > qtdRecebida) {
+      alert('⚠️ Quantidade testada não pode ser maior que a quantidade recebida.');
+      if (qtdTestadaInput) qtdTestadaInput.focus();
+      return;
+    }
+    
+    if (aprovadosNoTeste > testada) {
+      alert('⚠️ Aprovados no teste não pode ser maior que a quantidade testada.');
+      if (aprovadosNoTesteInput) aprovadosNoTesteInput.focus();
+      return;
+    }
+    
+    // Garantir que totais estão calculados
+    calcularTotais();
   }
   
   // Habilitar temporariamente o status se estiver desabilitado
@@ -751,10 +1033,8 @@ document.getElementById('amostragemForm').addEventListener('submit', async funct
   
   const formData = new FormData(this);
   
-  // Adicionar flag de lote reprovado
-  if (loteReprovado) {
-    formData.set('lote_reprovado', '1');
-  }
+  // Adicionar resultado selecionado
+  formData.set('resultado_lote', resultadoSelecionado);
   
   try {
     const response = await fetch(this.action, {
