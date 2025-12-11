@@ -241,21 +241,37 @@ class Amostragens2Controller
             $nomeProduto = trim($_POST['nome_produto'] ?? '');
             $quantidadeRecebida = (int)($_POST['quantidade_recebida'] ?? 0);
             
-            // Campos opcionais - podem estar vazios
-            $quantidadeTestada = !empty($_POST['quantidade_testada']) ? (int)$_POST['quantidade_testada'] : null;
-            $quantidadeAprovada = !empty($_POST['quantidade_aprovada']) ? (int)$_POST['quantidade_aprovada'] : null;
-            $quantidadeReprovada = !empty($_POST['quantidade_reprovada']) ? (int)$_POST['quantidade_reprovada'] : null;
+            // Verificar se é lote inteiro reprovado
+            $loteReprovado = isset($_POST['lote_reprovado']) && $_POST['lote_reprovado'] === '1';
+            
+            if ($loteReprovado) {
+                // Lote inteiro reprovado: preencher campos automaticamente
+                $quantidadeTestada = $quantidadeRecebida;
+                $quantidadeAprovada = 0;
+                $quantidadeReprovada = $quantidadeRecebida;
+                $statusFinal = 'Reprovado';
+                
+                error_log("⚠️ Lote Reprovado marcado - Qtd Recebida: $quantidadeRecebida, Qtd Reprovada: $quantidadeReprovada");
+            } else {
+                // Campos normais - agora são obrigatórios
+                $quantidadeTestada = isset($_POST['quantidade_testada']) && $_POST['quantidade_testada'] !== '' 
+                    ? (int)$_POST['quantidade_testada'] : null;
+                $quantidadeAprovada = isset($_POST['quantidade_aprovada']) && $_POST['quantidade_aprovada'] !== '' 
+                    ? (int)$_POST['quantidade_aprovada'] : null;
+                $quantidadeReprovada = isset($_POST['quantidade_reprovada']) && $_POST['quantidade_reprovada'] !== '' 
+                    ? (int)$_POST['quantidade_reprovada'] : null;
+                
+                // Status automático: se campos de teste vazios, sempre "Pendente"
+                if ($quantidadeTestada === null || $quantidadeAprovada === null || $quantidadeReprovada === null) {
+                    $statusFinal = 'Pendente';
+                } else {
+                    $statusFinal = $_POST['status_final'] ?? 'Pendente';
+                }
+            }
             
             $fornecedorId = (int)($_POST['fornecedor_id'] ?? 0);
             $responsaveis = $_POST['responsaveis'] ?? [];
             $observacoes = trim($_POST['observacoes'] ?? '');
-            
-            // Status automático: se campos de teste vazios, sempre "Pendente"
-            if ($quantidadeTestada === null || $quantidadeAprovada === null || $quantidadeReprovada === null) {
-                $statusFinal = 'Pendente';
-            } else {
-                $statusFinal = $_POST['status_final'] ?? 'Pendente';
-            }
 
             error_log("Dados recebidos - NF: $numeroNf, Tipo: $tipoProduto, Produto: $produtoId, Fornecedor: $fornecedorId, Status: $statusFinal");
 
