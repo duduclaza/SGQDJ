@@ -241,53 +241,38 @@ class Amostragens2Controller
             $nomeProduto = trim($_POST['nome_produto'] ?? '');
             $quantidadeRecebida = (int)($_POST['quantidade_recebida'] ?? 0);
             
-            // Processar resultado do lote (pendente, aprovado, parcial, reprovado)
-            $resultadoLote = $_POST['resultado_lote'] ?? 'pendente';
+            // Processar status selecionado (pendente, aprovado, parcial, reprovado)
+            $statusSelecionado = $_POST['status_selecionado'] ?? 'pendente';
             
-            if ($resultadoLote === 'aprovado') {
-                // Lote aprovado: tudo automático
-                $quantidadeTestada = $quantidadeRecebida;
-                $quantidadeAprovada = $quantidadeRecebida;
-                $quantidadeReprovada = 0;
-                $statusFinal = 'Aprovado';
-                
-                error_log("✅ Lote Aprovado - Qtd Recebida: $quantidadeRecebida, Aprovada: $quantidadeAprovada");
-                
-            } elseif ($resultadoLote === 'reprovado') {
-                // Lote reprovado: tudo automático
-                $quantidadeTestada = $quantidadeRecebida;
-                $quantidadeAprovada = 0;
-                $quantidadeReprovada = $quantidadeRecebida;
-                $statusFinal = 'Reprovado';
-                
-                error_log("❌ Lote Reprovado - Qtd Recebida: $quantidadeRecebida, Reprovada: $quantidadeReprovada");
-                
-            } elseif ($resultadoLote === 'parcial') {
-                // Aprovação parcial: usar valores do formulário
-                $quantidadeTestada = (int)($_POST['quantidade_testada'] ?? 0);
-                $aprovadosNoTeste = (int)($_POST['aprovados_no_teste'] ?? 0);
-                
-                // Calcular não testados (considerados aprovados)
-                $naoTestados = $quantidadeRecebida - $quantidadeTestada;
-                
-                // Aprovados TOTAL = aprovados no teste + não testados
-                $quantidadeAprovada = $aprovadosNoTeste + ($naoTestados > 0 ? $naoTestados : 0);
-                
-                // Reprovados TOTAL = testados - aprovados no teste
-                $quantidadeReprovada = $quantidadeTestada - $aprovadosNoTeste;
-                
-                $statusFinal = 'Aprovado Parcialmente';
-                
-                error_log("🔶 Parcial - Testada: $quantidadeTestada, Aprovados no Teste: $aprovadosNoTeste, Não Testados: $naoTestados, Aprovada Total: $quantidadeAprovada, Reprovada: $quantidadeReprovada");
-                
-            } else {
-                // Pendente: aguardando análise
-                $quantidadeTestada = 0;
-                $quantidadeAprovada = 0;
-                $quantidadeReprovada = 0;
-                $statusFinal = 'Pendente';
-                
-                error_log("⏳ Lote Pendente - Aguardando análise");
+            // Pegar valores dos campos hidden (já calculados no frontend)
+            $quantidadeTestada = (int)($_POST['quantidade_testada'] ?? 0);
+            $quantidadeAprovada = (int)($_POST['quantidade_aprovada'] ?? 0);
+            $quantidadeReprovada = (int)($_POST['quantidade_reprovada'] ?? 0);
+            
+            // Definir status final baseado na seleção
+            switch ($statusSelecionado) {
+                case 'aprovado':
+                    $statusFinal = 'Aprovado';
+                    error_log("✅ Lote Aprovado - Testada: $quantidadeTestada, Aprovada: $quantidadeAprovada");
+                    break;
+                    
+                case 'parcial':
+                    $statusFinal = 'Aprovado Parcialmente';
+                    error_log("🔶 Parcial - Testada: $quantidadeTestada, Aprovada: $quantidadeAprovada, Reprovada: $quantidadeReprovada");
+                    break;
+                    
+                case 'reprovado':
+                    $statusFinal = 'Reprovado';
+                    error_log("❌ Lote Reprovado - Testada: $quantidadeTestada, Reprovada: $quantidadeReprovada");
+                    break;
+                    
+                default: // pendente
+                    $statusFinal = 'Pendente';
+                    $quantidadeTestada = 0;
+                    $quantidadeAprovada = 0;
+                    $quantidadeReprovada = 0;
+                    error_log("⏳ Lote Pendente - Aguardando análise");
+                    break;
             }
             
             $fornecedorId = (int)($_POST['fornecedor_id'] ?? 0);
