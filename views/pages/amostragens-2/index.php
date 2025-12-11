@@ -89,65 +89,91 @@ function construirUrlPaginacao($pagina) {
                  class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
         </div>
 
-        <!-- Seleção de Status do Lote -->
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-200 mb-3">Resultado da Amostragem *</label>
-          
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <!-- Opção: Pendente -->
-            <div id="opcaoPendente" class="bg-gray-700/50 border-2 border-gray-500 rounded-lg p-3 cursor-pointer transition-all hover:border-gray-400"
-                 onclick="selecionarResultado('pendente')">
-              <label class="flex items-center cursor-pointer">
-                <input type="radio" name="resultado_lote" value="pendente" id="radioPendente" checked
-                       onchange="selecionarResultado('pendente')"
-                       class="w-4 h-4 text-gray-500 bg-gray-700 border-gray-600">
-                <span class="ml-2 text-sm font-medium text-gray-300">
-                  ⏳ Pendente
-                </span>
-              </label>
-              <p class="text-xs text-gray-400 mt-1 ml-6">Aguardando análise</p>
-            </div>
+        <!-- Fornecedor -->
+        <div>
+          <label class="block text-sm font-medium text-gray-200 mb-1">Fornecedor *</label>
+          <select name="fornecedor_id" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
+            <option value="">Selecione...</option>
+            <?php foreach ($fornecedores as $forn): ?>
+              <option value="<?= $forn['id'] ?>"><?= e($forn['nome']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
 
+        <!-- Responsáveis -->
+        <div>
+          <label class="block text-sm font-medium text-gray-200 mb-1">Responsáveis pelo Teste *</label>
+          <select name="responsaveis[]" multiple required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500" size="4">
+            <?php foreach ($usuarios as $user): ?>
+              <option value="<?= $user['id'] ?>"><?= e($user['name']) ?></option>
+            <?php endforeach; ?>
+          </select>
+          <p class="text-xs text-gray-400 mt-1">Segure Ctrl/Cmd para selecionar múltiplos</p>
+        </div>
+
+        <!-- Observação -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-200 mb-1">Observação <span class="text-gray-400 text-xs">(Opcional)</span></label>
+          <textarea name="observacoes" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500" placeholder="Informações adicionais sobre a amostragem..."></textarea>
+        </div>
+
+        <!-- Evidências (Fotos) -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-200 mb-1">Evidências (Fotos - Máx 5 arquivos de 10MB cada)</label>
+          <input type="file" name="evidencias[]" multiple accept="image/*" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200">
+          <p class="text-xs text-gray-400 mt-1">Opcional - Máximo 5 fotos</p>
+          <div id="evidenciasExistentes" class="hidden mt-3">
+            <p class="text-sm font-medium text-gray-200 mb-2">Evidências atuais:</p>
+            <div id="listaEvidencias" class="grid grid-cols-2 md:grid-cols-3 gap-2"></div>
+            <p class="text-xs text-gray-500 mt-2">Novas evidências serão adicionadas às existentes</p>
+          </div>
+        </div>
+
+        <!-- ========== DECISÃO FINAL ========== -->
+        <div class="md:col-span-2 mt-6 pt-6 border-t border-gray-600">
+          <label class="block text-lg font-bold text-gray-100 mb-4">📋 Resultado da Amostragem *</label>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Opção: Lote Aprovado -->
-            <div id="opcaoAprovado" class="bg-green-900/30 border-2 border-green-500/50 rounded-lg p-3 cursor-pointer transition-all hover:border-green-400"
+            <div id="opcaoAprovado" class="bg-green-900/30 border-2 border-green-500/50 rounded-lg p-4 cursor-pointer transition-all hover:border-green-400 hover:bg-green-900/40"
                  onclick="selecionarResultado('aprovado')">
               <label class="flex items-center cursor-pointer">
                 <input type="radio" name="resultado_lote" value="aprovado" id="radioAprovado"
                        onchange="selecionarResultado('aprovado')"
-                       class="w-4 h-4 text-green-600 bg-gray-700 border-gray-600">
-                <span class="ml-2 text-sm font-medium text-green-300">
+                       class="w-5 h-5 text-green-600 bg-gray-700 border-gray-600">
+                <span class="ml-3 text-base font-semibold text-green-300">
                   ✅ Aprovado
                 </span>
               </label>
-              <p class="text-xs text-green-400 mt-1 ml-6">Lote 100% aprovado</p>
+              <p class="text-xs text-green-400 mt-2 ml-8">Lote 100% aprovado</p>
             </div>
 
             <!-- Opção: Aprovado Parcialmente -->
-            <div id="opcaoParcial" class="bg-yellow-900/30 border-2 border-yellow-500/50 rounded-lg p-3 cursor-pointer transition-all hover:border-yellow-400"
+            <div id="opcaoParcial" class="bg-yellow-900/30 border-2 border-yellow-500/50 rounded-lg p-4 cursor-pointer transition-all hover:border-yellow-400 hover:bg-yellow-900/40"
                  onclick="selecionarResultado('parcial')">
               <label class="flex items-center cursor-pointer">
                 <input type="radio" name="resultado_lote" value="parcial" id="radioParcial"
                        onchange="selecionarResultado('parcial')"
-                       class="w-4 h-4 text-yellow-600 bg-gray-700 border-gray-600">
-                <span class="ml-2 text-sm font-medium text-yellow-300">
-                  🔶 Parcial
+                       class="w-5 h-5 text-yellow-600 bg-gray-700 border-gray-600">
+                <span class="ml-3 text-base font-semibold text-yellow-300">
+                  🔶 Aprovado Parcialmente
                 </span>
               </label>
-              <p class="text-xs text-yellow-400 mt-1 ml-6">Parte reprovada</p>
+              <p class="text-xs text-yellow-400 mt-2 ml-8">Houve reprovações</p>
             </div>
 
             <!-- Opção: Lote Reprovado -->
-            <div id="opcaoReprovado" class="bg-red-900/30 border-2 border-red-500/50 rounded-lg p-3 cursor-pointer transition-all hover:border-red-400"
+            <div id="opcaoReprovado" class="bg-red-900/30 border-2 border-red-500/50 rounded-lg p-4 cursor-pointer transition-all hover:border-red-400 hover:bg-red-900/40"
                  onclick="selecionarResultado('reprovado')">
               <label class="flex items-center cursor-pointer">
                 <input type="radio" name="resultado_lote" value="reprovado" id="radioReprovado"
                        onchange="selecionarResultado('reprovado')"
-                       class="w-4 h-4 text-red-600 bg-gray-700 border-gray-600">
-                <span class="ml-2 text-sm font-medium text-red-300">
+                       class="w-5 h-5 text-red-600 bg-gray-700 border-gray-600">
+                <span class="ml-3 text-base font-semibold text-red-300">
                   ❌ Reprovado
                 </span>
               </label>
-              <p class="text-xs text-red-400 mt-1 ml-6">Lote 100% reprovado</p>
+              <p class="text-xs text-red-400 mt-2 ml-8">Lote 100% reprovado</p>
             </div>
           </div>
         </div>
@@ -203,7 +229,7 @@ function construirUrlPaginacao($pagina) {
 
             <!-- Resumo Final -->
             <div class="mt-4 p-3 bg-gray-800/50 rounded-lg border border-gray-600">
-              <h5 class="text-sm font-semibold text-gray-200 mb-2">📋 Resultado Final (para salvar):</h5>
+              <h5 class="text-sm font-semibold text-gray-200 mb-2">📋 Resultado Final:</h5>
               <div class="grid grid-cols-2 gap-4">
                 <div class="flex items-center">
                   <span class="text-green-400 font-bold text-lg mr-2">✅</span>
@@ -223,62 +249,10 @@ function construirUrlPaginacao($pagina) {
           </div>
         </div>
 
-        <!-- Campos hidden para valores -->
+        <!-- Campos hidden -->
         <input type="hidden" id="hiddenTestada" name="quantidade_testada_final" value="">
         <input type="hidden" id="hiddenAprovada" name="quantidade_aprovada_final" value="">
         <input type="hidden" id="hiddenReprovada" name="quantidade_reprovada_final" value="">
-
-        <!-- Fornecedor -->
-        <div>
-          <label class="block text-sm font-medium text-gray-200 mb-1">Fornecedor *</label>
-          <select name="fornecedor_id" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
-            <option value="">Selecione...</option>
-            <?php foreach ($fornecedores as $forn): ?>
-              <option value="<?= $forn['id'] ?>"><?= e($forn['nome']) ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-
-        <!-- Responsáveis -->
-        <div>
-          <label class="block text-sm font-medium text-gray-200 mb-1">Responsáveis pelo Teste *</label>
-          <select name="responsaveis[]" multiple required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500" size="4">
-            <?php foreach ($usuarios as $user): ?>
-              <option value="<?= $user['id'] ?>"><?= e($user['name']) ?></option>
-            <?php endforeach; ?>
-          </select>
-          <p class="text-xs text-gray-400 mt-1">Segure Ctrl/Cmd para selecionar múltiplos</p>
-        </div>
-
-        <!-- Status Final -->
-        <div>
-          <label class="block text-sm font-medium text-gray-200 mb-1">Status Final <span class="text-gray-400 text-xs">(Automático se campos vazios)</span></label>
-          <select name="status_final" id="statusFinalSelect" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
-            <option value="Pendente">Pendente</option>
-            <option value="Aprovado">Aprovado</option>
-            <option value="Aprovado Parcialmente">Aprovado Parcialmente</option>
-            <option value="Reprovado">Reprovado</option>
-          </select>
-          <p class="text-xs text-gray-400 mt-1">💡 Status será "Pendente" automaticamente se não houver resultados de testes</p>
-        </div>
-
-        <!-- Observação -->
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-200 mb-1">Observação <span class="text-gray-400 text-xs">(Opcional)</span></label>
-          <textarea name="observacoes" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500" placeholder="Informações adicionais sobre a amostragem..."></textarea>
-        </div>
-
-        <!-- Evidências (Fotos) -->
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-200 mb-1">Evidências (Fotos - Máx 5 arquivos de 10MB cada)</label>
-          <input type="file" name="evidencias[]" multiple accept="image/*" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200">
-          <p class="text-xs text-gray-400 mt-1">Opcional - Máximo 5 fotos</p>
-          <div id="evidenciasExistentes" class="hidden mt-3">
-            <p class="text-sm font-medium text-gray-200 mb-2">Evidências atuais:</p>
-            <div id="listaEvidencias" class="grid grid-cols-2 md:grid-cols-3 gap-2"></div>
-            <p class="text-xs text-gray-500 mt-2">Novas evidências serão adicionadas às existentes</p>
-          </div>
-        </div>
       </div>
 
       <div class="flex justify-end space-x-3 pt-4">
@@ -789,21 +763,20 @@ const qtdReprovadaInput = document.getElementById('quantidadeReprovada');
 const aprovadosNoTesteInput = document.getElementById('aprovadosNoTeste');
 const naoTestadosInput = document.getElementById('naoTestados');
 const reprovadosNoTesteInput = document.getElementById('reprovadosNoTeste');
-const statusSelect = document.getElementById('statusFinalSelect');
 const camposParcial = document.getElementById('camposParcial');
 
-// Variável para controlar o resultado selecionado
-let resultadoSelecionado = 'pendente';
+// Variável para controlar o resultado selecionado (nenhum selecionado inicialmente)
+let resultadoSelecionado = null;
 
 // Função para selecionar o resultado
 function selecionarResultado(resultado) {
   resultadoSelecionado = resultado;
   
   // Resetar visual de todos os cards
-  ['opcaoPendente', 'opcaoAprovado', 'opcaoParcial', 'opcaoReprovado'].forEach(id => {
+  ['opcaoAprovado', 'opcaoParcial', 'opcaoReprovado'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-      el.classList.remove('ring-2', 'ring-gray-500', 'ring-green-500', 'ring-yellow-500', 'ring-red-500');
+      el.classList.remove('ring-2', 'ring-green-500', 'ring-yellow-500', 'ring-red-500');
       el.style.borderColor = '';
     }
   });
@@ -811,22 +784,7 @@ function selecionarResultado(resultado) {
   // Esconder campos de detalhamento por padrão
   if (camposParcial) camposParcial.classList.add('hidden');
   
-  if (resultado === 'pendente') {
-    document.getElementById('radioPendente').checked = true;
-    document.getElementById('opcaoPendente').style.borderColor = '#6b7280';
-    document.getElementById('opcaoPendente').classList.add('ring-2', 'ring-gray-500');
-    
-    // Limpar campos
-    limparCampos();
-    
-    // Status Pendente
-    if (statusSelect) {
-      statusSelect.value = 'Pendente';
-      statusSelect.disabled = true;
-      statusSelect.classList.add('opacity-50');
-    }
-    
-  } else if (resultado === 'aprovado') {
+  if (resultado === 'aprovado') {
     document.getElementById('radioAprovado').checked = true;
     document.getElementById('opcaoAprovado').style.borderColor = '#22c55e';
     document.getElementById('opcaoAprovado').classList.add('ring-2', 'ring-green-500');
@@ -837,12 +795,6 @@ function selecionarResultado(resultado) {
     if (qtdAprovadaInput) qtdAprovadaInput.value = qtdRecebida;
     if (qtdReprovadaInput) qtdReprovadaInput.value = 0;
     
-    // Status Aprovado
-    if (statusSelect) {
-      statusSelect.value = 'Aprovado';
-      statusSelect.disabled = true;
-      statusSelect.classList.add('opacity-50');
-    }
     
   } else if (resultado === 'parcial') {
     document.getElementById('radioParcial').checked = true;
@@ -855,13 +807,6 @@ function selecionarResultado(resultado) {
     // Limpar campos para preenchimento manual
     limparCampos();
     
-    // Status Aprovado Parcialmente
-    if (statusSelect) {
-      statusSelect.value = 'Aprovado Parcialmente';
-      statusSelect.disabled = true;
-      statusSelect.classList.add('opacity-50');
-    }
-    
   } else if (resultado === 'reprovado') {
     document.getElementById('radioReprovado').checked = true;
     document.getElementById('opcaoReprovado').style.borderColor = '#ef4444';
@@ -872,13 +817,6 @@ function selecionarResultado(resultado) {
     if (qtdTestadaInput) qtdTestadaInput.value = qtdRecebida;
     if (qtdAprovadaInput) qtdAprovadaInput.value = 0;
     if (qtdReprovadaInput) qtdReprovadaInput.value = qtdRecebida;
-    
-    // Status Reprovado
-    if (statusSelect) {
-      statusSelect.value = 'Reprovado';
-      statusSelect.disabled = true;
-      statusSelect.classList.add('opacity-50');
-    }
   }
 }
 
@@ -980,14 +918,14 @@ document.getElementById('amostragemForm').addEventListener('submit', async funct
     return;
   }
   
+  // Validar se resultado foi selecionado
+  if (!resultadoSelecionado) {
+    alert('⚠️ Selecione o resultado da amostragem (Aprovado, Aprovado Parcialmente ou Reprovado).');
+    return;
+  }
+  
   // Validar baseado no resultado selecionado
-  if (resultadoSelecionado === 'pendente') {
-    // Pendente: preencher com zeros
-    if (qtdTestadaInput) qtdTestadaInput.value = 0;
-    if (qtdAprovadaInput) qtdAprovadaInput.value = 0;
-    if (qtdReprovadaInput) qtdReprovadaInput.value = 0;
-    
-  } else if (resultadoSelecionado === 'aprovado') {
+  if (resultadoSelecionado === 'aprovado') {
     // Aprovado: preencher automaticamente
     if (qtdTestadaInput) qtdTestadaInput.value = qtdRecebida;
     if (qtdAprovadaInput) qtdAprovadaInput.value = qtdRecebida;
@@ -1024,11 +962,6 @@ document.getElementById('amostragemForm').addEventListener('submit', async funct
     
     // Garantir que totais estão calculados
     calcularTotais();
-  }
-  
-  // Habilitar temporariamente o status se estiver desabilitado
-  if (statusSelect && statusSelect.disabled) {
-    statusSelect.disabled = false;
   }
   
   const formData = new FormData(this);
