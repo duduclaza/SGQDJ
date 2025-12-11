@@ -225,22 +225,34 @@ function mostrarStepTour() {
       highlight.style.height = (rect.height + padding * 2) + 'px';
       highlight.style.opacity = '1';
       
+      // Definir largura do tooltip
+      const tooltipWidth = 340;
+      tooltip.style.width = tooltipWidth + 'px';
+      
       // Posicionar tooltip
-      const tooltipRect = tooltip.getBoundingClientRect();
       let tooltipTop = rect.bottom + 16;
       let tooltipLeft = rect.left;
       
-      // Ajustar se sair da tela
-      if (tooltipTop + 200 > window.innerHeight) {
-        tooltipTop = rect.top - 200 - 16;
+      // Se elemento está na direita da tela, posicionar tooltip à esquerda dele
+      if (rect.left > window.innerWidth / 2) {
+        tooltipLeft = rect.right - tooltipWidth;
       }
-      if (tooltipLeft + 350 > window.innerWidth) {
-        tooltipLeft = window.innerWidth - 370;
+      
+      // Ajustar se sair da tela - vertical
+      if (tooltipTop + 220 > window.innerHeight) {
+        tooltipTop = rect.top - 220;
+      }
+      if (tooltipTop < 16) tooltipTop = 16;
+      
+      // Ajustar se sair da tela - horizontal
+      if (tooltipLeft + tooltipWidth > window.innerWidth - 16) {
+        tooltipLeft = window.innerWidth - tooltipWidth - 20;
       }
       if (tooltipLeft < 16) tooltipLeft = 16;
       
       tooltip.style.top = tooltipTop + 'px';
       tooltip.style.left = tooltipLeft + 'px';
+      tooltip.style.transform = '';
       
       // Scroll para elemento
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
