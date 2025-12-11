@@ -36,17 +36,27 @@
                  placeholder="Ex: Produto com defeito na embalagem">
         </div>
 
-        <!-- Grid: Responsável, Departamento e Anexos -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Responsável -->
+        <!-- Grid: Notificar, Responsável, Departamento e Anexos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Notificar (antigo Responsável - select de usuários) -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">Responsável <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Notificar <span class="text-red-500">*</span></label>
             <select name="responsavel_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all text-sm bg-white">
-              <option value="">Selecione...</option>
+              <option value="">Selecione quem notificar...</option>
               <?php if (!empty($usuarios)): foreach ($usuarios as $u): ?>
                 <option value="<?= $u['id'] ?>"><?= htmlspecialchars($u['name']) ?></option>
               <?php endforeach; endif; ?>
             </select>
+            <p class="text-xs text-gray-500 mt-1">Usuário que será notificado por e-mail</p>
+          </div>
+
+          <!-- Responsável (novo campo texto livre) -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Responsável <span class="text-red-500">*</span></label>
+            <input type="text" name="responsavel_nome" required 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all text-sm"
+                   placeholder="Nome do responsável pela ação">
+            <p class="text-xs text-gray-500 mt-1">Quem é responsável por resolver</p>
           </div>
 
           <!-- Departamento -->

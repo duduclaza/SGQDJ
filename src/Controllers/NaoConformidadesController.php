@@ -146,9 +146,10 @@ class NaoConformidadesController
             $titulo = trim($_POST['titulo'] ?? '');
             $descricao = trim($_POST['descricao'] ?? '');
             $responsavelId = (int)($_POST['responsavel_id'] ?? 0);
+            $responsavelNome = trim($_POST['responsavel_nome'] ?? '');
             $departamentoId = (int)($_POST['departamento_id'] ?? 0);
 
-            if (empty($titulo) || empty($descricao) || !$responsavelId || !$departamentoId) {
+            if (empty($titulo) || empty($descricao) || !$responsavelId || empty($responsavelNome) || !$departamentoId) {
                 ob_clean();
                 echo json_encode(['success' => false, 'message' => 'Preencha todos os campos obrigatórios']);
                 exit;
@@ -159,10 +160,10 @@ class NaoConformidadesController
             // Inserir NC
             $stmt = $this->db->prepare("
                 INSERT INTO nao_conformidades 
-                (titulo, descricao, usuario_criador_id, usuario_responsavel_id, departamento_id, status, created_at)
-                VALUES (?, ?, ?, ?, ?, 'pendente', NOW())
+                (titulo, descricao, usuario_criador_id, usuario_responsavel_id, responsavel_nome, departamento_id, status, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, 'pendente', NOW())
             ");
-            $stmt->execute([$titulo, $descricao, $_SESSION['user_id'], $responsavelId, $departamentoId]);
+            $stmt->execute([$titulo, $descricao, $_SESSION['user_id'], $responsavelId, $responsavelNome, $departamentoId]);
             $ncId = $this->db->lastInsertId();
 
             $this->db->commit();
