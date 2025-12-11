@@ -80,6 +80,7 @@ $isSuperAdmin = \App\Services\PermissionService::isSuperAdmin($_SESSION['user_id
 
 <?php include 'partials/modais.php'; ?>
 <?php include 'partials/scripts.php'; ?>
+<?php include 'partials/tour.php'; ?>
 
 <!-- Script de Correção de Layout -->
 <script>
