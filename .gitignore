@@ -1,8 +1,51 @@
+# IDEs e Editores
 /.idea/
 /.vscode/
+*.swp
+*.swo
+
+# Dependências
 /node_modules/
+
+# Storage público
 /public/storage/
+
+# Sistema operacional
 .DS_Store
+Thumbs.db
+
+# =============================================
+# 🔒 ARQUIVOS SENSÍVEIS - NUNCA COMMITAR!
+# =============================================
+
+# Variáveis de ambiente (contém senhas!)
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+
+# Logs
+/storage/logs/*.log
+*.log
+
+# Uploads de usuários (podem conter dados sensíveis)
+/uploads/*
+!/uploads/.gitkeep
+
+# Cache
+/storage/cache/*
+!/storage/cache/.gitkeep
+
+# Backups
+*.sql
+*.sql.gz
+*.bak
+*.backup
+
+# Arquivos temporários
+/temp/*
+*.tmp
 
 # Permitir vendor/ e composer.lock para deploy
 # !vendor/
