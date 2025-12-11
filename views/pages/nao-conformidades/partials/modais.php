@@ -174,15 +174,16 @@
 
 .modal-content-compact {
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 100%;
-  max-width: 600px;
+  max-width: 650px;
+  max-height: 90vh;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
   animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
-  margin: auto; /* Garante centralização */
+  margin: auto;
   position: relative;
 }
 
@@ -224,17 +225,19 @@
 .modal-body {
   padding: 1rem;
   overflow-y: auto;
-  max-height: 70vh;
+  max-height: calc(90vh - 140px);
+  flex: 1;
 }
 
-/* Footer */
+/* Footer - sempre visível */
 .modal-footer {
-  padding: 0.875rem 1rem;
+  padding: 1rem 1.25rem;
   background: #f9fafb;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid #e5e7eb;
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 /* Garantir que modais no container global fiquem acima de tudo */
