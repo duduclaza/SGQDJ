@@ -253,7 +253,10 @@ class Amostragens2Controller
             switch ($statusSelecionado) {
                 case 'aprovado':
                     $statusFinal = 'Aprovado';
-                    error_log("✅ Lote Aprovado - Testada: $quantidadeTestada, Aprovada: $quantidadeAprovada");
+                    // Lote 100% aprovado: reprovada deve ser 0, aprovada = recebida
+                    $quantidadeAprovada = $quantidadeRecebida;
+                    $quantidadeReprovada = 0;
+                    error_log("✅ Lote Aprovado - Testada: $quantidadeTestada, Aprovada: $quantidadeAprovada, Reprovada: 0");
                     break;
                     
                 case 'parcial':
@@ -263,7 +266,10 @@ class Amostragens2Controller
                     
                 case 'reprovado':
                     $statusFinal = 'Reprovado';
-                    error_log("❌ Lote Reprovado - Testada: $quantidadeTestada, Reprovada: $quantidadeReprovada");
+                    // Lote 100% reprovado: aprovada deve ser 0, reprovada = recebida
+                    $quantidadeAprovada = 0;
+                    $quantidadeReprovada = $quantidadeRecebida;
+                    error_log("❌ Lote Reprovado - Testada: $quantidadeTestada, Aprovada: 0, Reprovada: $quantidadeReprovada");
                     break;
                     
                 default: // pendente

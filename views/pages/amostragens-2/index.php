@@ -451,7 +451,12 @@ function construirUrlPaginacao($pagina) {
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <?php foreach ($amostragens as $amostra): ?>
-          <tr class="hover:bg-gray-50">
+          <?php 
+            // Linha amarela se não tem quantidade testada preenchida (precisa atualizar)
+            $precisaAtualizar = empty($amostra['quantidade_testada']) || $amostra['quantidade_testada'] == 0;
+            $classeLinhaAmarela = $precisaAtualizar ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50';
+          ?>
+          <tr class="<?= $classeLinhaAmarela ?>" <?php if($precisaAtualizar): ?>title="⚠️ Quantidade testada não informada - Precisa atualizar"<?php endif; ?>>
             <td class="px-6 py-4 whitespace-nowrap text-sm">
               <?= date('d/m/Y', strtotime($amostra['created_at'])) ?>
             </td>
@@ -474,22 +479,22 @@ function construirUrlPaginacao($pagina) {
               <?= e($amostra['fornecedor_nome']) ?>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
-              <?= $amostra['quantidade_recebida'] ?>
+              <?= $amostra['quantidade_recebida'] ?? 0 ?>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
-              <?= $amostra['quantidade_testada'] ?>
+              <?= $amostra['quantidade_testada'] ?? 0 ?>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-green-600 font-semibold">
-              <?= $amostra['quantidade_aprovada'] ?>
-              <?php if ($amostra['quantidade_aprovada'] == $amostra['quantidade_recebida'] && $amostra['quantidade_reprovada'] == 0 && $amostra['quantidade_aprovada'] > 0): ?>
+              <?= $amostra['quantidade_aprovada'] ?? 0 ?>
+              <?php if (($amostra['quantidade_aprovada'] ?? 0) == ($amostra['quantidade_recebida'] ?? 0) && ($amostra['quantidade_reprovada'] ?? 0) == 0 && ($amostra['quantidade_aprovada'] ?? 0) > 0): ?>
                 <span class="ml-1 bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded-full" title="Lote 100% aprovado">✓</span>
               <?php endif; ?>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-red-600 font-semibold">
-              <?= $amostra['quantidade_reprovada'] ?>
-              <?php if ($amostra['quantidade_reprovada'] == $amostra['quantidade_recebida'] && $amostra['quantidade_aprovada'] == 0 && $amostra['quantidade_reprovada'] > 0): ?>
+              <?= $amostra['quantidade_reprovada'] ?? 0 ?>
+              <?php if (($amostra['quantidade_reprovada'] ?? 0) == ($amostra['quantidade_recebida'] ?? 0) && ($amostra['quantidade_aprovada'] ?? 0) == 0 && ($amostra['quantidade_reprovada'] ?? 0) > 0): ?>
                 <span class="ml-1 bg-red-100 text-red-800 text-xs px-1.5 py-0.5 rounded-full" title="Lote 100% reprovado">LOTE</span>
-              <?php elseif ($amostra['quantidade_reprovada'] > 0 && $amostra['quantidade_aprovada'] > 0): ?>
+              <?php elseif (($amostra['quantidade_reprovada'] ?? 0) > 0 && ($amostra['quantidade_aprovada'] ?? 0) > 0): ?>
                 <span class="ml-1 bg-yellow-100 text-yellow-800 text-xs px-1.5 py-0.5 rounded-full" title="Aprovação parcial">PARCIAL</span>
               <?php endif; ?>
             </td>
