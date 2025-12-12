@@ -152,7 +152,7 @@ const tourStepsMC = [
   {
     element: "form[method='GET'][action='/melhoria-continua-2']",
     title: "🔍 Filtros Avançados",
-    description: "Use os filtros para encontrar melhorias específicas. Você pode filtrar por departamento, status, idealizador, pontuação e período.",
+    description: "Use os filtros para encontrar melhorias específicas. Você pode filtrar por departamento, status, idealizador e período.",
     icon: "🎛️",
     action: null
   },
