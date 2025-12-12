@@ -176,43 +176,7 @@ $title = $title ?? 'OTI - Login';
   
   <!-- Papai Noel voando -->
   <div class="santa-container">
-    <svg class="santa-sleigh" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-      <!-- Trenó -->
-      <path d="M20,60 Q30,70 60,65 L140,55 Q160,52 170,45 L175,40 Q178,35 175,32 L160,35 L140,38 L60,48 Q40,52 20,60" fill="#8B4513"/>
-      <path d="M25,58 Q35,65 60,62 L135,53 Q155,50 165,44" stroke="#5D3A1A" stroke-width="2" fill="none"/>
-      
-      <!-- Patins do trenó -->
-      <path d="M15,68 Q10,70 8,68 Q5,65 10,62 L50,58 Q60,56 70,58 L150,48 Q165,45 175,40" stroke="#C0C0C0" stroke-width="3" fill="none"/>
-      
-      <!-- Corpo Papai Noel -->
-      <ellipse cx="100" cy="35" rx="20" ry="18" fill="#CC0000"/>
-      
-      <!-- Cabeça -->
-      <circle cx="105" cy="18" r="12" fill="#FFE4C4"/>
-      
-      <!-- Gorro -->
-      <path d="M95,12 Q100,0 120,8 Q125,10 122,15 L95,15 Z" fill="#CC0000"/>
-      <circle cx="122" cy="8" r="4" fill="white"/>
-      <path d="M93,14 Q105,18 120,14" stroke="white" stroke-width="4" fill="none"/>
-      
-      <!-- Barba -->
-      <path d="M97,22 Q105,32 113,22" fill="white"/>
-      
-      <!-- Braços -->
-      <path d="M85,30 L70,25 L65,28" stroke="#CC0000" stroke-width="6" fill="none"/>
-      <circle cx="65" cy="27" r="4" fill="#FFE4C4"/>
-      
-      <!-- Renas (silhueta simplificada) -->
-      <g transform="translate(-30, 10)">
-        <ellipse cx="45" cy="35" rx="12" ry="8" fill="#8B4513"/>
-        <circle cx="52" cy="30" r="5" fill="#8B4513"/>
-        <path d="M54,26 L58,18 M56,26 L62,20" stroke="#5D3A1A" stroke-width="2"/>
-        <circle cx="54" cy="31" r="1" fill="red"/>
-      </g>
-      
-      <!-- Cordas -->
-      <path d="M65,28 L35,38" stroke="#8B5A2B" stroke-width="2"/>
-    </svg>
+    <img src="/assets/papai.svg" alt="Papai Noel" class="santa-sleigh">
   </div>
   
   <!-- Montanhas de fundo -->
