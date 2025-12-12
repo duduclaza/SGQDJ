@@ -1621,3 +1621,5 @@ async function enviarEmailDetalhes(id) {
   }
 }
 </script>
+
+<?php include __DIR__ . '/partials/tour.php'; ?>
