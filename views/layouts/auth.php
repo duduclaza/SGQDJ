@@ -80,31 +80,31 @@ $title = $title ?? 'OTI - Login';
       }
     }
     
-    /* Papai Noel voando */
+    /* Papai Noel voando (da Direita para Esquerda) */
     .santa-container {
       position: fixed;
       top: 12%;
       z-index: 100;
       pointer-events: none;
-      animation: fly-santa 18s linear infinite;
+      animation: fly-santa 25s linear infinite; /* Mais lento para ser mais majestoso */
     }
     
     @keyframes fly-santa {
       0% {
-        left: -200px;
+        left: 110%; /* Começa fora da tela na direita */
         top: 12%;
       }
       50% {
         top: 8%;
       }
       100% {
-        left: 110%;
+        left: -300px; /* Termina fora da tela na esquerda */
         top: 15%;
       }
     }
     
     .santa-sleigh {
-      width: 150px;
+      width: 200px; /* Aumentei um pouco pois PNG costuma ter margem */
       height: auto;
       filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
     }
@@ -176,7 +176,7 @@ $title = $title ?? 'OTI - Login';
   
   <!-- Papai Noel voando -->
   <div class="santa-container">
-    <img src="/assets/papai.svg" alt="Papai Noel" class="santa-sleigh">
+    <img src="/assets/papai.png" alt="Papai Noel" class="santa-sleigh">
   </div>
   
   <!-- Montanhas de fundo -->
