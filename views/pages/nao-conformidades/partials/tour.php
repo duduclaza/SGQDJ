@@ -17,81 +17,6 @@
   </span>
 </button>
 
-<!-- Overlay do Tour -->
-<div id="tourOverlay" class="fixed inset-0 z-[99999] hidden">
-  <!-- Máscara escura com buraco -->
-  <div id="tourMask" class="absolute inset-0 bg-black/70 transition-all duration-300"></div>
-  
-  <!-- Highlight do elemento atual -->
-  <div id="tourHighlight" class="absolute border-4 border-blue-400 rounded-xl shadow-[0_0_0_9999px_rgba(0,0,0,0.7)] transition-all duration-300 pointer-events-none"></div>
-  
-  <!-- Tooltip do Tour -->
-  <div id="tourTooltip" class="absolute bg-white rounded-2xl shadow-2xl p-5 max-w-sm z-[100000] transition-all duration-300">
-    <div class="flex items-start gap-3 mb-3">
-      <div id="tourIcon" class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 flex-shrink-0">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-      </div>
-      <div>
-        <h3 id="tourTitle" class="font-bold text-gray-900 text-lg">Título</h3>
-        <p id="tourDesc" class="text-gray-600 text-sm mt-1">Descrição</p>
-      </div>
-    </div>
-    
-    <!-- Progress bar -->
-    <div class="w-full bg-gray-200 rounded-full h-1.5 mb-4">
-      <div id="tourProgress" class="bg-blue-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-    </div>
-    
-    <!-- Botões -->
-    <div class="flex items-center justify-between">
-      <button onclick="pularTourNC()" class="text-sm text-gray-500 hover:text-gray-700 transition-colors">
-        Pular Tutorial
-      </button>
-      <div class="flex gap-2">
-        <button id="btnTourAnterior" onclick="tourAnterior()" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors hidden">
-          ← Anterior
-        </button>
-        <button id="btnTourProximo" onclick="tourProximo()" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
-          Próximo →
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal de Boas-vindas (primeira vez) -->
-<div id="tourWelcome" class="fixed inset-0 z-[99999] hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-  <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 text-center animate-bounce-in">
-    <div class="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-500/30">
-      <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-      </svg>
-    </div>
-    
-    <h2 class="text-2xl font-bold text-gray-900 mb-3">Bem-vindo às Não Conformidades! 🎯</h2>
-    <p class="text-gray-600 mb-6">
-      Este módulo ajuda você a gerenciar ocorrências e garantir a qualidade. 
-      <br><br>
-      Quer fazer um <strong>tour rápido</strong> para conhecer as funcionalidades?
-    </p>
-    
-    <div class="flex gap-3 justify-center">
-      <button onclick="fecharWelcome(false)" class="px-6 py-3 text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors font-medium">
-        Agora não
-      </button>
-      <button onclick="fecharWelcome(true)" class="px-6 py-3 text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all font-medium shadow-lg shadow-blue-500/30">
-        🚀 Iniciar Tour
-      </button>
-    </div>
-    
-    <p class="text-xs text-gray-400 mt-4">
-      Você pode reiniciar o tour a qualquer momento clicando no botão <strong>❓</strong> no canto inferior direito.
-    </p>
-  </div>
-</div>
-
 <style>
 @keyframes bounce-in {
   0% { opacity: 0; transform: scale(0.8); }
@@ -116,6 +41,28 @@
 @keyframes pulse-ring {
   0% { transform: scale(0.9); opacity: 0.5; }
   100% { transform: scale(1.3); opacity: 0; }
+}
+
+/* Tour Styles - fora do container */
+.tour-overlay-global {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 999999 !important;
+}
+
+.tour-tooltip-global {
+  position: fixed !important;
+  z-index: 9999999 !important;
+}
+
+.tour-highlight-global {
+  position: fixed !important;
+  z-index: 999998 !important;
 }
 </style>
 
@@ -162,20 +109,121 @@ const tourSteps = [
 
 let tourAtual = 0;
 const TOUR_KEY = 'nc_tour_visto';
+let tourOverlayEl = null;
+let tourTooltipEl = null;
+let tourHighlightEl = null;
+let tourWelcomeEl = null;
+
+// Criar elementos do tour diretamente no body
+function criarElementosTour() {
+  // Remover elementos existentes se houver
+  document.getElementById('tourOverlayGlobal')?.remove();
+  document.getElementById('tourWelcomeGlobal')?.remove();
+  
+  // Criar overlay do tour
+  tourOverlayEl = document.createElement('div');
+  tourOverlayEl.id = 'tourOverlayGlobal';
+  tourOverlayEl.className = 'tour-overlay-global hidden';
+  tourOverlayEl.innerHTML = `
+    <!-- Máscara escura -->
+    <div id="tourMaskGlobal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);z-index:999997;"></div>
+    
+    <!-- Highlight do elemento atual -->
+    <div id="tourHighlightGlobal" class="tour-highlight-global" style="border:4px solid #60a5fa;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.75);transition:all 0.3s;pointer-events:none;opacity:0;"></div>
+    
+    <!-- Tooltip do Tour -->
+    <div id="tourTooltipGlobal" class="tour-tooltip-global bg-white rounded-2xl shadow-2xl p-5" style="max-width:360px;width:360px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
+        <div id="tourIconGlobal" style="width:40px;height:40px;background:#dbeafe;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="font-size:24px;">🎯</span>
+        </div>
+        <div>
+          <h3 id="tourTitleGlobal" style="font-weight:700;color:#111827;font-size:18px;margin:0;">Título</h3>
+          <p id="tourDescGlobal" style="color:#6b7280;font-size:14px;margin-top:4px;line-height:1.5;">Descrição</p>
+        </div>
+      </div>
+      
+      <!-- Progress bar -->
+      <div style="width:100%;background:#e5e7eb;border-radius:9999px;height:6px;margin-bottom:16px;">
+        <div id="tourProgressGlobal" style="background:#3b82f6;height:6px;border-radius:9999px;transition:all 0.3s;width:0%;"></div>
+      </div>
+      
+      <!-- Botões -->
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <button onclick="pularTourNC()" style="font-size:14px;color:#6b7280;background:none;border:none;cursor:pointer;">
+          Pular Tutorial
+        </button>
+        <div style="display:flex;gap:8px;">
+          <button id="btnTourAnteriorGlobal" onclick="tourAnterior()" style="padding:8px 16px;font-size:14px;font-weight:500;color:#4b5563;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer;display:none;">
+            ← Anterior
+          </button>
+          <button id="btnTourProximoGlobal" onclick="tourProximo()" style="padding:8px 16px;font-size:14px;font-weight:500;color:white;background:#2563eb;border:none;border-radius:8px;cursor:pointer;">
+            Próximo →
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(tourOverlayEl);
+  
+  // Criar modal de boas-vindas
+  tourWelcomeEl = document.createElement('div');
+  tourWelcomeEl.id = 'tourWelcomeGlobal';
+  tourWelcomeEl.className = 'tour-overlay-global hidden';
+  tourWelcomeEl.style.cssText = 'display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
+  tourWelcomeEl.innerHTML = `
+    <div class="animate-bounce-in" style="background:white;border-radius:24px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);max-width:400px;width:100%;padding:32px;text-align:center;">
+      <div style="width:80px;height:80px;background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 10px 15px -3px rgba(239,68,68,0.3);">
+        <svg style="width:40px;height:40px;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+      </div>
+      
+      <h2 style="font-size:24px;font-weight:700;color:#111827;margin-bottom:12px;">Bem-vindo às Não Conformidades! 🎯</h2>
+      <p style="color:#6b7280;margin-bottom:24px;line-height:1.6;">
+        Este módulo ajuda você a gerenciar ocorrências e garantir a qualidade. 
+        <br><br>
+        Quer fazer um <strong>tour rápido</strong> para conhecer as funcionalidades?
+      </p>
+      
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button onclick="fecharWelcome(false)" style="padding:12px 24px;color:#4b5563;background:#f3f4f6;border:none;border-radius:12px;cursor:pointer;font-weight:500;">
+          Agora não
+        </button>
+        <button onclick="fecharWelcome(true)" style="padding:12px 24px;color:white;background:linear-gradient(135deg,#3b82f6,#2563eb);border:none;border-radius:12px;cursor:pointer;font-weight:500;box-shadow:0 10px 15px -3px rgba(59,130,246,0.3);">
+          🚀 Iniciar Tour
+        </button>
+      </div>
+      
+      <p style="font-size:12px;color:#9ca3af;margin-top:16px;">
+        Você pode reiniciar o tour a qualquer momento clicando no botão <strong>❓</strong> no canto inferior direito.
+      </p>
+    </div>
+  `;
+  document.body.appendChild(tourWelcomeEl);
+  
+  // Event listener para fechar ao clicar na máscara
+  document.getElementById('tourMaskGlobal')?.addEventListener('click', pularTourNC);
+}
 
 // Verificar se é primeira visita
 document.addEventListener('DOMContentLoaded', function() {
+  criarElementosTour();
+  
   const tourVisto = localStorage.getItem(TOUR_KEY);
   if (!tourVisto) {
     setTimeout(() => {
-      document.getElementById('tourWelcome').classList.remove('hidden');
+      document.getElementById('tourWelcomeGlobal').classList.remove('hidden');
+      document.getElementById('tourWelcomeGlobal').style.display = 'flex';
     }, 500);
   }
 });
 
 // Fechar welcome e iniciar ou não o tour
 function fecharWelcome(iniciar) {
-  document.getElementById('tourWelcome').classList.add('hidden');
+  const welcome = document.getElementById('tourWelcomeGlobal');
+  welcome.classList.add('hidden');
+  welcome.style.display = 'none';
   localStorage.setItem(TOUR_KEY, 'true');
   
   if (iniciar) {
@@ -186,30 +234,31 @@ function fecharWelcome(iniciar) {
 // Iniciar tour
 function iniciarTourNC() {
   tourAtual = 0;
-  document.getElementById('tourOverlay').classList.remove('hidden');
+  const overlay = document.getElementById('tourOverlayGlobal');
+  overlay.classList.remove('hidden');
+  overlay.style.display = 'block';
   mostrarStepTour();
 }
 
 // Mostrar step atual
 function mostrarStepTour() {
   const step = tourSteps[tourAtual];
-  const overlay = document.getElementById('tourOverlay');
-  const highlight = document.getElementById('tourHighlight');
-  const tooltip = document.getElementById('tourTooltip');
-  const progress = document.getElementById('tourProgress');
+  const highlight = document.getElementById('tourHighlightGlobal');
+  const tooltip = document.getElementById('tourTooltipGlobal');
+  const progress = document.getElementById('tourProgressGlobal');
   
   // Atualizar conteúdo
-  document.getElementById('tourTitle').textContent = step.title;
-  document.getElementById('tourDesc').textContent = step.description;
-  document.getElementById('tourIcon').innerHTML = `<span class="text-2xl">${step.icon}</span>`;
+  document.getElementById('tourTitleGlobal').textContent = step.title;
+  document.getElementById('tourDescGlobal').textContent = step.description;
+  document.getElementById('tourIconGlobal').innerHTML = `<span style="font-size:24px;">${step.icon}</span>`;
   
   // Atualizar progresso
   const progressPercent = ((tourAtual + 1) / tourSteps.length) * 100;
   progress.style.width = progressPercent + '%';
   
   // Atualizar botões
-  document.getElementById('btnTourAnterior').classList.toggle('hidden', tourAtual === 0);
-  document.getElementById('btnTourProximo').textContent = 
+  document.getElementById('btnTourAnteriorGlobal').style.display = tourAtual === 0 ? 'none' : 'block';
+  document.getElementById('btnTourProximoGlobal').textContent = 
     tourAtual === tourSteps.length - 1 ? '✓ Finalizar' : 'Próximo →';
   
   // Posicionar highlight e tooltip
@@ -219,17 +268,15 @@ function mostrarStepTour() {
       const rect = el.getBoundingClientRect();
       const padding = 8;
       
+      // Posicionar highlight
       highlight.style.left = (rect.left - padding) + 'px';
       highlight.style.top = (rect.top - padding) + 'px';
       highlight.style.width = (rect.width + padding * 2) + 'px';
       highlight.style.height = (rect.height + padding * 2) + 'px';
       highlight.style.opacity = '1';
       
-      // Definir largura do tooltip
-      const tooltipWidth = 340;
-      tooltip.style.width = tooltipWidth + 'px';
-      
-      // Posicionar tooltip
+      // Calcular posição do tooltip
+      const tooltipWidth = 360;
       let tooltipTop = rect.bottom + 16;
       let tooltipLeft = rect.left;
       
@@ -252,7 +299,7 @@ function mostrarStepTour() {
       
       tooltip.style.top = tooltipTop + 'px';
       tooltip.style.left = tooltipLeft + 'px';
-      tooltip.style.transform = '';
+      tooltip.style.transform = 'none';
       
       // Scroll para elemento
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -267,8 +314,8 @@ function mostrarStepTour() {
 }
 
 function centralizarTooltip() {
-  const tooltip = document.getElementById('tourTooltip');
-  const highlight = document.getElementById('tourHighlight');
+  const tooltip = document.getElementById('tourTooltipGlobal');
+  const highlight = document.getElementById('tourHighlightGlobal');
   
   highlight.style.opacity = '0';
   tooltip.style.top = '50%';
@@ -280,7 +327,7 @@ function centralizarTooltip() {
 function tourProximo() {
   if (tourAtual < tourSteps.length - 1) {
     tourAtual++;
-    document.getElementById('tourTooltip').style.transform = '';
+    document.getElementById('tourTooltipGlobal').style.transform = 'none';
     mostrarStepTour();
   } else {
     finalizarTour();
@@ -291,7 +338,7 @@ function tourProximo() {
 function tourAnterior() {
   if (tourAtual > 0) {
     tourAtual--;
-    document.getElementById('tourTooltip').style.transform = '';
+    document.getElementById('tourTooltipGlobal').style.transform = 'none';
     mostrarStepTour();
   }
 }
@@ -303,14 +350,10 @@ function pularTourNC() {
 
 // Finalizar tour
 function finalizarTour() {
-  document.getElementById('tourOverlay').classList.add('hidden');
+  const overlay = document.getElementById('tourOverlayGlobal');
+  overlay.classList.add('hidden');
+  overlay.style.display = 'none';
   localStorage.setItem(TOUR_KEY, 'true');
 }
-
-// Fechar tour ao clicar fora
-document.getElementById('tourMask')?.addEventListener('click', function(e) {
-  if (e.target === this) {
-    pularTourNC();
-  }
-});
 </script>
+
