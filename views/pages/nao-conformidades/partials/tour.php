@@ -280,7 +280,10 @@ function toggleNarracao() {
   }
 }
 
-// Carregar vozes (necessário para alguns navegadores)
+// Verificar suporte a Web Speech API (usado apenas como fallback)
+const speechSupported = 'speechSynthesis' in window;
+
+// Carregar vozes (necessário para alguns navegadores) - apenas para fallback
 if (speechSupported) {
   speechSynthesis.onvoiceschanged = () => {
     speechSynthesis.getVoices();
