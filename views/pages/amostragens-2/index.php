@@ -1315,9 +1315,9 @@ async function editarAmostragem(id) {
     
     // Quantidades
     document.querySelector('input[name="quantidade_recebida"]').value = amostra.quantidade_recebida || '';
-    document.querySelector('input[name="quantidade_testada"]').value = amostra.quantidade_testada || '';
-    document.querySelector('input[name="quantidade_aprovada"]').value = amostra.quantidade_aprovada || '';
-    document.querySelector('input[name="quantidade_reprovada"]').value = amostra.quantidade_reprovada || '';
+    document.getElementById('hiddenTestada').value = amostra.quantidade_testada || '';
+    document.getElementById('hiddenAprovada').value = amostra.quantidade_aprovada || '';
+    document.getElementById('hiddenReprovada').value = amostra.quantidade_reprovada || '';
     
     // Fornecedor
     document.querySelector('select[name="fornecedor_id"]').value = amostra.fornecedor_id || '';
@@ -1332,8 +1332,28 @@ async function editarAmostragem(id) {
       }
     }
     
-    // Status
-    document.querySelector('select[name="status_final"]').value = amostra.status_final || 'Pendente';
+    // Status - Selecionar o botão correspondente ao status salvo
+    if (amostra.status_final) {
+      const statusMap = {
+        'Pendente': 'pendente',
+        'Aprovado': 'aprovado',
+        'Aprovado Parcialmente': 'parcial',
+        'Reprovado': 'reprovado'
+      };
+      const statusKey = statusMap[amostra.status_final] || 'pendente';
+      selecionarStatus(statusKey);
+      
+      // Preencher os campos de quantidade baseado no status
+      if (statusKey === 'aprovado') {
+        document.getElementById('qtdTestadaAprovado').value = amostra.quantidade_testada || '';
+      } else if (statusKey === 'parcial') {
+        document.getElementById('qtdTestadaParcial').value = amostra.quantidade_testada || '';
+        document.getElementById('qtdAprovadaParcial').value = amostra.quantidade_aprovada || '';
+        calcularParcial();
+      } else if (statusKey === 'reprovado') {
+        document.getElementById('qtdTestadaReprovado').value = amostra.quantidade_testada || '';
+      }
+    }
     
     // Descrição do Defeito ou Observações
     document.getElementById('observacoesInput').value = amostra.observacoes || '';
