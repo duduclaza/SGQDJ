@@ -159,7 +159,7 @@ const tourStepsMC = [
   {
     element: "#melhoriaTable",
     title: "📊 Tabela de Melhorias",
-    description: "Aqui você visualiza todas as melhorias cadastradas. A tabela é interativa: você pode redimensionar as colunas e as configurações são salvas automaticamente!",
+    description: "Aqui você visualiza todas as melhorias cadastradas. As colunas mostram: Data do registro, Departamento, Título, Descrição, Resultado Esperado, Status atual, Idealizador da ideia, quem Criou o registro, Responsáveis pela execução, Data Prevista e as Ações disponíveis.",
     icon: "📋",
     action: null
   },
