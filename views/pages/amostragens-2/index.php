@@ -111,10 +111,11 @@ function construirUrlPaginacao($pagina) {
           <p class="text-xs text-gray-400 mt-1">Segure Ctrl/Cmd para selecionar múltiplos</p>
         </div>
 
-        <!-- Observação -->
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-200 mb-1">Observação <span class="text-gray-400 text-xs">(Opcional)</span></label>
-          <textarea name="observacoes" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500" placeholder="Informações adicionais sobre a amostragem..."></textarea>
+        <!-- Descrição do Defeito ou Observações -->
+        <div class="md:col-span-2" id="observacoesContainer">
+          <label id="observacoesLabel" class="block text-sm font-medium text-gray-200 mb-1">Descrição do Defeito ou Observações <span id="observacoesOptional" class="text-gray-400 text-xs">(Opcional)</span><span id="observacoesRequired" class="text-red-400 text-xs hidden">* Obrigatório</span></label>
+          <textarea name="observacoes" id="observacoesInput" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500" placeholder="Informações adicionais sobre a amostragem..."></textarea>
+          <p id="observacoesError" class="text-red-400 text-sm mt-1 hidden">⚠️ Por favor, preencha a Descrição do Defeito ou Observações.</p>
         </div>
 
         <!-- Evidências (Fotos) -->
@@ -676,6 +677,19 @@ function construirUrlPaginacao($pagina) {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.8; }
 }
+
+/* Estilos para campo obrigatório */
+.observacoes-required {
+  border-color: #f87171 !important;
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
 </style>
 
 <script>
@@ -776,6 +790,9 @@ function selecionarStatus(status) {
   
   const qtdRecebida = parseInt(qtdRecebidaInput?.value) || 0;
   
+  // Atualizar obrigatoriedade do campo de observações
+  atualizarObrigatoriedadeObservacoes(status);
+  
   // Ativar botão e mostrar painel correspondente
   if (status === 'pendente') {
     document.getElementById('btnPendente').classList.add('ring-4', 'ring-gray-400', 'scale-105');
@@ -801,6 +818,59 @@ function selecionarStatus(status) {
     document.getElementById('resumoReprovado').textContent = qtdRecebida;
   }
 }
+
+// Função para atualizar a obrigatoriedade do campo de observações
+function atualizarObrigatoriedadeObservacoes(status) {
+  const observacoesInput = document.getElementById('observacoesInput');
+  const observacoesOptional = document.getElementById('observacoesOptional');
+  const observacoesRequired = document.getElementById('observacoesRequired');
+  const observacoesError = document.getElementById('observacoesError');
+  
+  if (status === 'aprovado') {
+    // Status aprovado: campo opcional
+    observacoesOptional.classList.remove('hidden');
+    observacoesRequired.classList.add('hidden');
+    observacoesInput.classList.remove('observacoes-required');
+    observacoesError.classList.add('hidden');
+  } else {
+    // Outros status: campo obrigatório
+    observacoesOptional.classList.add('hidden');
+    observacoesRequired.classList.remove('hidden');
+  }
+}
+
+// Função para validar o campo de observações
+function validarObservacoes() {
+  const observacoesInput = document.getElementById('observacoesInput');
+  const observacoesError = document.getElementById('observacoesError');
+  
+  // Se status não é aprovado, o campo é obrigatório
+  if (statusSelecionado && statusSelecionado !== 'aprovado') {
+    const valor = observacoesInput.value.trim();
+    
+    if (!valor) {
+      // Campo vazio - mostrar erro
+      observacoesInput.classList.add('observacoes-required');
+      observacoesError.classList.remove('hidden');
+      observacoesInput.focus();
+      observacoesInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    }
+  }
+  
+  // Campo válido - remover erro
+  observacoesInput.classList.remove('observacoes-required');
+  observacoesError.classList.add('hidden');
+  return true;
+}
+
+// Remover erro quando o usuário digitar no campo
+document.getElementById('observacoesInput')?.addEventListener('input', function() {
+  if (this.value.trim()) {
+    this.classList.remove('observacoes-required');
+    document.getElementById('observacoesError').classList.add('hidden');
+  }
+});
 
 // Calcular valores para Aprovação Parcial
 function calcularParcial() {
@@ -865,6 +935,12 @@ document.getElementById('amostragemForm').addEventListener('submit', async funct
   // Validar se status foi selecionado
   if (!statusSelecionado) {
     alert('⚠️ Selecione o Status Final (Pendente, Aprovado, Parcial ou Reprovado).');
+    return;
+  }
+  
+  // Validar campo de observações (obrigatório se não for aprovado)
+  if (!validarObservacoes()) {
+    alert('⚠️ Por favor, preencha o campo "Descrição do Defeito ou Observações". Este campo é obrigatório quando o status não é "Aprovado".');
     return;
   }
   
@@ -1088,8 +1164,8 @@ async function editarAmostragem(id) {
     // Status
     document.querySelector('select[name="status_final"]').value = amostra.status_final || 'Pendente';
     
-    // Observações
-    document.querySelector('textarea[name="observacoes"]').value = amostra.observacoes || '';
+    // Descrição do Defeito ou Observações
+    document.getElementById('observacoesInput').value = amostra.observacoes || '';
     
     // Mostrar anexo NF existente se houver
     if (amostra.anexo_nf_nome) {
