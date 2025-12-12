@@ -186,6 +186,7 @@ const TOUR_KEY = 'nc_tour_visto';
 let darkOverlay = null;
 let spotlightEl = null;
 let tooltipEl = null;
+let avisosOcultos = []; // Guardar avisos que foram ocultados
 
 // Criar elementos do tour
 function criarElementosTour() {
@@ -308,16 +309,88 @@ function fecharWelcome(iniciar) {
 function iniciarTourNC() {
   tourAtual = 0;
   
-  // Mostrar overlay escuro
-  darkOverlay.style.display = 'block';
-  tooltipEl.style.display = 'block';
+  // 1. Rolar para o topo da página
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   
-  // Pequeno delay para garantir que elementos estão no DOM
-  requestAnimationFrame(() => {
+  // 2. Esconder avisos do sistema (ex: aviso de manutenção de email)
+  ocultarAvisos();
+  
+  // 3. Aguardar scroll completar antes de mostrar o tour
+  setTimeout(() => {
+    // Mostrar overlay escuro
+    darkOverlay.style.display = 'block';
+    tooltipEl.style.display = 'block';
+    
+    // Pequeno delay para garantir que elementos estão no DOM
     requestAnimationFrame(() => {
-      mostrarStepTour();
+      requestAnimationFrame(() => {
+        mostrarStepTour();
+      });
     });
+  }, 400);
+}
+
+// Função para ocultar avisos do sistema durante o tour
+function ocultarAvisos() {
+  avisosOcultos = [];
+  
+  // Lista de IDs de avisos que podem estar visíveis
+  const avisoIds = [
+    'avisoMigracaoEmail',    // Aviso de migração de email
+    'avisoManutencao',       // Possível aviso de manutenção genérico
+    'avisoSistema',          // Outro possível aviso
+    'alertaBanner'           // Banners de alerta
+  ];
+  
+  avisoIds.forEach(id => {
+    const aviso = document.getElementById(id);
+    if (aviso && aviso.style.display !== 'none' && !aviso.classList.contains('hidden')) {
+      avisosOcultos.push({
+        element: aviso,
+        display: aviso.style.display || 'block',
+        opacity: aviso.style.opacity || '1'
+      });
+      aviso.style.transition = 'all 0.3s ease';
+      aviso.style.opacity = '0';
+      setTimeout(() => {
+        aviso.style.display = 'none';
+      }, 300);
+    }
   });
+  
+  // Também ocultar qualquer elemento com classe de aviso
+  document.querySelectorAll('.aviso-sistema, .banner-alerta, [data-aviso]').forEach(aviso => {
+    if (aviso.style.display !== 'none' && !aviso.classList.contains('hidden')) {
+      const jaAdicionado = avisosOcultos.some(a => a.element === aviso);
+      if (!jaAdicionado) {
+        avisosOcultos.push({
+          element: aviso,
+          display: aviso.style.display || 'block',
+          opacity: aviso.style.opacity || '1'
+        });
+        aviso.style.transition = 'all 0.3s ease';
+        aviso.style.opacity = '0';
+        setTimeout(() => {
+          aviso.style.display = 'none';
+        }, 300);
+      }
+    }
+  });
+}
+
+// Função para restaurar avisos após o tour
+function restaurarAvisos() {
+  avisosOcultos.forEach(({ element, display, opacity }) => {
+    if (element && document.body.contains(element)) {
+      element.style.display = display;
+      element.style.opacity = '0';
+      // Forçar reflow
+      element.offsetHeight;
+      element.style.transition = 'all 0.3s ease';
+      element.style.opacity = opacity;
+    }
+  });
+  avisosOcultos = [];
 }
 
 function mostrarStepTour() {
@@ -479,6 +552,9 @@ function finalizarTour() {
   darkOverlay.style.display = 'none';
   spotlightEl.style.display = 'none';
   tooltipEl.style.display = 'none';
+  
+  // Restaurar avisos que foram ocultos
+  restaurarAvisos();
   
   localStorage.setItem(TOUR_KEY, 'true');
 }
