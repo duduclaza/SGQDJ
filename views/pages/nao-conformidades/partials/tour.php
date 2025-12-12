@@ -188,6 +188,85 @@ let spotlightEl = null;
 let tooltipEl = null;
 let avisosOcultos = []; // Guardar avisos que foram ocultados
 
+// ===== CONFIGURAÇÕES DE NARRAÇÃO =====
+let narracaoAtiva = true; // Narração ativada por padrão
+let narracaoAtual = null; // Referência à narração atual
+const NARRACAO_RATE = 1.0; // Velocidade da fala (0.5 a 2.0)
+const NARRACAO_PITCH = 1.0; // Tom da voz (0 a 2)
+
+// Verificar suporte a Speech Synthesis
+const speechSupported = 'speechSynthesis' in window;
+
+// Função para narrar texto
+function narrar(texto) {
+  if (!speechSupported || !narracaoAtiva) return;
+  
+  // Cancelar narração anterior
+  pararNarracao();
+  
+  // Limpar emojis e caracteres especiais para leitura mais natural
+  const textoLimpo = texto
+    .replace(/[📋➕📝✍️📎📋✖️🔄🔴🟡🟢❓🎯⏳🔧✅💡🚀]/g, '')
+    .replace(/•/g, '. ')
+    .replace(/\n/g, '. ')
+    .trim();
+  
+  const utterance = new SpeechSynthesisUtterance(textoLimpo);
+  utterance.lang = 'pt-BR';
+  utterance.rate = NARRACAO_RATE;
+  utterance.pitch = NARRACAO_PITCH;
+  
+  // Tentar usar voz brasileira
+  const vozes = speechSynthesis.getVoices();
+  const vozPtBr = vozes.find(v => v.lang.includes('pt-BR') || v.lang.includes('pt_BR'));
+  if (vozPtBr) {
+    utterance.voice = vozPtBr;
+  }
+  
+  narracaoAtual = utterance;
+  speechSynthesis.speak(utterance);
+}
+
+// Função para parar narração
+function pararNarracao() {
+  if (speechSupported) {
+    speechSynthesis.cancel();
+    narracaoAtual = null;
+  }
+}
+
+// Alternar narração (mute/unmute)
+function toggleNarracao() {
+  narracaoAtiva = !narracaoAtiva;
+  
+  // Atualizar ícone do botão
+  const btnMute = document.getElementById('btnTourMute');
+  if (btnMute) {
+    btnMute.innerHTML = narracaoAtiva 
+      ? '🔊' 
+      : '🔇';
+    btnMute.title = narracaoAtiva ? 'Desativar narração' : 'Ativar narração';
+  }
+  
+  // Se desativou, parar narração atual
+  if (!narracaoAtiva) {
+    pararNarracao();
+  } else {
+    // Se ativou, narrar passo atual
+    const step = tourSteps[tourAtual];
+    if (step) {
+      narrar(step.title + '. ' + step.description);
+    }
+  }
+}
+
+// Carregar vozes (necessário para alguns navegadores)
+if (speechSupported) {
+  speechSynthesis.onvoiceschanged = () => {
+    speechSynthesis.getVoices();
+  };
+}
+
 // Criar elementos do tour
 function criarElementosTour() {
   // Remover existentes
@@ -234,7 +313,10 @@ function criarElementosTour() {
       <button onclick="pularTourNC()" style="font-size:13px;color:#9ca3af;background:none;border:none;cursor:pointer;padding:8px 0;">
         Pular Tutorial
       </button>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="btnTourMute" onclick="toggleNarracao()" style="padding:8px;font-size:16px;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer;transition:all 0.2s;" title="Desativar narração">
+          🔊
+        </button>
         <button id="btnTourPrev" onclick="tourAnterior()" style="padding:10px 18px;font-size:14px;font-weight:600;color:#4b5563;background:#f3f4f6;border:none;border-radius:10px;cursor:pointer;display:none;transition:all 0.2s;">
           ← Anterior
         </button>
@@ -421,6 +503,9 @@ function atualizarConteudo(step) {
   document.getElementById('btnTourPrev').style.display = tourAtual === 0 ? 'none' : 'inline-block';
   document.getElementById('btnTourNext').textContent = 
     tourAtual === tourSteps.length - 1 ? '✓ Finalizar' : 'Próximo →';
+  
+  // Narrar o conteúdo do passo
+  narrar(step.title + '. ' + step.description);
 }
 
 function posicionarElementos(step) {
@@ -541,6 +626,9 @@ function pularTourNC() {
 }
 
 function finalizarTour() {
+  // Parar narração
+  pararNarracao();
+  
   // Fechar modal se aberto
   const modal = document.getElementById('modalNovaNC');
   if (modal) {
