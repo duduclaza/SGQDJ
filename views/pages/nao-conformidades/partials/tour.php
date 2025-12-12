@@ -1,9 +1,9 @@
 <?php
 /**
  * Tour/Demo Interativo para módulo de Não Conformidades
- * - Spotlight sem escurecimento no elemento focado
- * - Abre o formulário para explicar os campos
- * - Posicionamento corrigido
+ * - Overlay escuro sempre visível durante o tour
+ * - Spotlight no elemento focado
+ * - Abre o formulário durante o tour
  */
 ?>
 
@@ -45,65 +45,66 @@
   100% { transform: scale(1.3); opacity: 0; }
 }
 
-/* Tour Spotlight - elemento fica visível sem escurecimento */
-.tour-spotlight {
-  position: fixed !important;
-  border: 3px solid #3b82f6 !important;
-  border-radius: 12px !important;
-  box-shadow: 
-    0 0 0 9999px rgba(0, 0, 0, 0.8),
-    0 0 30px rgba(59, 130, 246, 0.5),
-    inset 0 0 0 2px rgba(255,255,255,0.3) !important;
-  z-index: 999998 !important;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  pointer-events: none !important;
-  background: transparent !important;
-}
-
-.tour-spotlight::before {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border: 2px dashed rgba(59, 130, 246, 0.5);
-  border-radius: 16px;
-  animation: pulse-border 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse-border {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
-
-.tour-tooltip {
-  position: fixed !important;
-  z-index: 9999999 !important;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  padding: 20px;
-  max-width: 380px;
-  width: 380px;
-  animation: tooltip-appear 0.3s ease-out;
-}
-
-@keyframes tooltip-appear {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.tour-overlay {
+/* Overlay escuro do tour - SEMPRE visível durante o tour */
+#tourDarkOverlay {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
+  background: rgba(0, 0, 0, 0.75) !important;
   z-index: 999990 !important;
-  pointer-events: none;
+  pointer-events: auto;
+}
+
+/* Spotlight - buraco no escuro */
+#tourSpotlight {
+  position: fixed !important;
+  border: 3px solid #3b82f6 !important;
+  border-radius: 12px !important;
+  box-shadow: 
+    0 0 0 9999px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(59, 130, 246, 0.6) !important;
+  z-index: 999995 !important;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  pointer-events: none !important;
+  background: transparent !important;
+}
+
+#tourSpotlight::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 2px dashed rgba(59, 130, 246, 0.6);
+  border-radius: 16px;
+  animation: pulse-border 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+/* Tooltip do tour */
+#tourTooltipBox {
+  position: fixed !important;
+  z-index: 9999999 !important;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  padding: 20px;
+  max-width: 380px;
+  width: 380px;
+}
+
+@keyframes tooltip-appear {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 </style>
 
 <script>
-// ===== CONFIGURAÇÃO DO TOUR COM FORMULÁRIO =====
+// ===== CONFIGURAÇÃO DO TOUR =====
 const tourSteps = [
   {
     element: null,
@@ -125,7 +126,6 @@ const tourSteps = [
     description: "Aqui você preenche os dados da ocorrência: título, descrição detalhada, seleciona o responsável e pode anexar fotos como evidência.",
     icon: "✍️",
     action: () => {
-      // Abrir o modal de nova NC
       if (typeof abrirModalNovaNC === 'function') {
         abrirModalNovaNC();
       }
@@ -133,18 +133,17 @@ const tourSteps = [
   },
   {
     element: "#modalNovaNC",
-    title: "📎 Campos do Formulário",
-    description: "• Título: Resumo da ocorrência\n• Descrição: Detalhes completos\n• Responsável: Quem vai tratar\n• Anexos: Fotos de evidência",
+    title: "📎 Campos Importantes",
+    description: "• Título: Resumo claro da ocorrência\n• Descrição: Detalhes completos\n• Responsável: Quem vai resolver\n• Anexos: Fotos de evidência",
     icon: "📋",
     action: null
   },
   {
     element: null,
     title: "✖️ Fechando o Formulário",
-    description: "Agora vamos fechar o formulário e continuar o tour pelos outros elementos.",
+    description: "Vamos fechar o formulário e continuar conhecendo as abas de status.",
     icon: "🔄",
     action: () => {
-      // Fechar o modal
       const modal = document.getElementById('modalNovaNC');
       if (modal) {
         modal.classList.add('hidden');
@@ -155,21 +154,21 @@ const tourSteps = [
   {
     element: "#tab-pendentes",
     title: "🔴 Aba Pendentes",
-    description: "Aqui ficam as NCs que acabaram de ser registradas e aguardam início do tratamento.",
+    description: "NCs recém registradas que aguardam início do tratamento.",
     icon: "⏳",
     action: null
   },
   {
     element: "#tab-em_andamento",
     title: "🟡 Aba Em Andamento",
-    description: "NCs que já estão sendo tratadas. O responsável pode registrar ações corretivas aqui.",
+    description: "NCs que estão sendo tratadas. O responsável registra ações corretivas.",
     icon: "🔧",
     action: null
   },
   {
     element: "#tab-solucionadas",
     title: "🟢 Aba Solucionadas",
-    description: "Histórico de todas as NCs que foram resolvidas. Ótimo para consultas e auditorias!",
+    description: "Histórico de NCs resolvidas. Ótimo para consultas e auditorias!",
     icon: "✅",
     action: null
   },
@@ -184,27 +183,36 @@ const tourSteps = [
 
 let tourAtual = 0;
 const TOUR_KEY = 'nc_tour_visto';
+let darkOverlay = null;
 let spotlightEl = null;
 let tooltipEl = null;
 
 // Criar elementos do tour
 function criarElementosTour() {
   // Remover existentes
+  document.getElementById('tourDarkOverlay')?.remove();
   document.getElementById('tourSpotlight')?.remove();
   document.getElementById('tourTooltipBox')?.remove();
   document.getElementById('tourWelcomeModal')?.remove();
   
-  // Criar spotlight (buraco na escuridão)
+  // Overlay escuro (sempre visível durante o tour)
+  darkOverlay = document.createElement('div');
+  darkOverlay.id = 'tourDarkOverlay';
+  darkOverlay.style.display = 'none';
+  darkOverlay.onclick = (e) => {
+    if (e.target === darkOverlay) pularTourNC();
+  };
+  document.body.appendChild(darkOverlay);
+  
+  // Spotlight
   spotlightEl = document.createElement('div');
   spotlightEl.id = 'tourSpotlight';
-  spotlightEl.className = 'tour-spotlight';
   spotlightEl.style.display = 'none';
   document.body.appendChild(spotlightEl);
   
-  // Criar tooltip
+  // Tooltip
   tooltipEl = document.createElement('div');
   tooltipEl.id = 'tourTooltipBox';
-  tooltipEl.className = 'tour-tooltip';
   tooltipEl.style.display = 'none';
   tooltipEl.innerHTML = `
     <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
@@ -240,7 +248,7 @@ function criarElementosTour() {
   // Modal de boas-vindas
   const welcomeEl = document.createElement('div');
   welcomeEl.id = 'tourWelcomeModal';
-  welcomeEl.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:9999999;display:none;align-items:center;justify-content:center;padding:20px;';
+  welcomeEl.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);z-index:9999999;display:none;align-items:center;justify-content:center;padding:20px;';
   welcomeEl.innerHTML = `
     <div class="animate-bounce-in" style="background:white;border-radius:24px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);max-width:420px;width:100%;padding:36px;text-align:center;">
       <div style="width:80px;height:80px;background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 10px 25px -5px rgba(239,68,68,0.4);">
@@ -253,20 +261,20 @@ function criarElementosTour() {
       <p style="color:#6b7280;margin-bottom:28px;line-height:1.7;font-size:15px;">
         Este módulo ajuda você a gerenciar ocorrências e garantir a qualidade. 
         <br><br>
-        Quer fazer um <strong>tour interativo</strong> para conhecer as funcionalidades? Vamos até abrir o formulário para você ver!
+        Quer fazer um <strong>tour interativo</strong>? Vamos até abrir o formulário para você ver!
       </p>
       
       <div style="display:flex;gap:12px;justify-content:center;">
-        <button onclick="fecharWelcome(false)" style="padding:14px 28px;color:#4b5563;background:#f3f4f6;border:none;border-radius:12px;cursor:pointer;font-weight:600;font-size:15px;transition:all 0.2s;">
+        <button onclick="fecharWelcome(false)" style="padding:14px 28px;color:#4b5563;background:#f3f4f6;border:none;border-radius:12px;cursor:pointer;font-weight:600;font-size:15px;">
           Agora não
         </button>
-        <button onclick="fecharWelcome(true)" style="padding:14px 28px;color:white;background:linear-gradient(135deg,#3b82f6,#2563eb);border:none;border-radius:12px;cursor:pointer;font-weight:600;font-size:15px;box-shadow:0 8px 20px -4px rgba(59,130,246,0.4);transition:all 0.2s;">
+        <button onclick="fecharWelcome(true)" style="padding:14px 28px;color:white;background:linear-gradient(135deg,#3b82f6,#2563eb);border:none;border-radius:12px;cursor:pointer;font-weight:600;font-size:15px;box-shadow:0 8px 20px -4px rgba(59,130,246,0.4);">
           🚀 Iniciar Tour
         </button>
       </div>
       
       <p style="font-size:12px;color:#9ca3af;margin-top:20px;">
-        Você pode reiniciar o tour clicando no botão <strong style="color:#3b82f6;">❓</strong> no canto inferior direito.
+        Clique no botão <strong style="color:#3b82f6;">❓</strong> para reiniciar o tour.
       </p>
     </div>
   `;
@@ -275,14 +283,17 @@ function criarElementosTour() {
 
 // Verificar primeira visita
 document.addEventListener('DOMContentLoaded', function() {
-  criarElementosTour();
-  
-  const tourVisto = localStorage.getItem(TOUR_KEY);
-  if (!tourVisto) {
-    setTimeout(() => {
-      document.getElementById('tourWelcomeModal').style.display = 'flex';
-    }, 600);
-  }
+  // Aguardar layout carregar completamente
+  setTimeout(() => {
+    criarElementosTour();
+    
+    const tourVisto = localStorage.getItem(TOUR_KEY);
+    if (!tourVisto) {
+      setTimeout(() => {
+        document.getElementById('tourWelcomeModal').style.display = 'flex';
+      }, 300);
+    }
+  }, 100);
 });
 
 function fecharWelcome(iniciar) {
@@ -290,109 +301,131 @@ function fecharWelcome(iniciar) {
   localStorage.setItem(TOUR_KEY, 'true');
   
   if (iniciar) {
-    setTimeout(() => iniciarTourNC(), 300);
+    setTimeout(() => iniciarTourNC(), 200);
   }
 }
 
 function iniciarTourNC() {
   tourAtual = 0;
-  spotlightEl.style.display = 'block';
+  
+  // Mostrar overlay escuro
+  darkOverlay.style.display = 'block';
   tooltipEl.style.display = 'block';
-  mostrarStepTour();
+  
+  // Pequeno delay para garantir que elementos estão no DOM
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      mostrarStepTour();
+    });
+  });
 }
 
 function mostrarStepTour() {
   const step = tourSteps[tourAtual];
   
-  // Executar ação do step (como abrir modal)
+  // Executar ação primeiro (como abrir modal)
   if (step.action) {
     step.action();
-    // Aguardar animação do modal
-    setTimeout(() => posicionarElementos(step), 350);
-  } else {
-    posicionarElementos(step);
   }
+  
+  // Aguardar animações e layout estabilizar
+  setTimeout(() => {
+    atualizarConteudo(step);
+    posicionarElementos(step);
+  }, step.action ? 400 : 50);
 }
 
-function posicionarElementos(step) {
-  // Atualizar conteúdo
+function atualizarConteudo(step) {
   document.getElementById('tourTitleBox').textContent = step.title;
   document.getElementById('tourDescBox').textContent = step.description;
   document.getElementById('tourIconBox').innerHTML = `<span style="font-size:24px;">${step.icon}</span>`;
   
-  // Atualizar progresso
+  // Progresso
   const progressPercent = ((tourAtual + 1) / tourSteps.length) * 100;
   document.getElementById('tourProgressBox').style.width = progressPercent + '%';
   
-  // Atualizar botões
+  // Botões
   document.getElementById('btnTourPrev').style.display = tourAtual === 0 ? 'none' : 'inline-block';
   document.getElementById('btnTourNext').textContent = 
     tourAtual === tourSteps.length - 1 ? '✓ Finalizar' : 'Próximo →';
-  
-  // Posicionar spotlight e tooltip
+}
+
+function posicionarElementos(step) {
   if (step.element) {
     const el = document.querySelector(step.element);
     if (el) {
+      // Forçar recálculo de layout
+      el.offsetHeight;
+      
       const rect = el.getBoundingClientRect();
       const padding = 12;
       
-      // Posicionar spotlight
+      // Posicionar spotlight - usar coordenadas de viewport diretamente
       spotlightEl.style.display = 'block';
-      spotlightEl.style.left = (rect.left - padding + window.scrollX) + 'px';
-      spotlightEl.style.top = (rect.top - padding + window.scrollY) + 'px';
+      spotlightEl.style.left = (rect.left - padding) + 'px';
+      spotlightEl.style.top = (rect.top - padding) + 'px';
       spotlightEl.style.width = (rect.width + padding * 2) + 'px';
       spotlightEl.style.height = (rect.height + padding * 2) + 'px';
       
       // Posicionar tooltip
       posicionarTooltip(rect);
       
-      // Scroll suave
-      if (rect.top < 100 || rect.bottom > window.innerHeight - 100) {
+      // Scroll se necessário
+      if (rect.top < 50 || rect.bottom > window.innerHeight - 50) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Recalcular posição após scroll
+        setTimeout(() => {
+          const newRect = el.getBoundingClientRect();
+          spotlightEl.style.left = (newRect.left - padding) + 'px';
+          spotlightEl.style.top = (newRect.top - padding) + 'px';
+          posicionarTooltip(newRect);
+        }, 400);
       }
     } else {
+      esconderSpotlight();
       centralizarTooltip();
     }
   } else {
-    spotlightEl.style.display = 'none';
+    esconderSpotlight();
     centralizarTooltip();
   }
 }
 
 function posicionarTooltip(rect) {
   const tooltipWidth = 380;
-  const tooltipHeight = 220;
+  const tooltipHeight = tooltipEl.offsetHeight || 200;
   const margin = 20;
   
   let top, left;
   
-  // Tentar posicionar embaixo
+  // Tentar embaixo primeiro
   if (rect.bottom + tooltipHeight + margin < window.innerHeight) {
     top = rect.bottom + margin;
-    left = rect.left;
+    left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
   } 
-  // Tentar posicionar em cima
+  // Tentar em cima
   else if (rect.top - tooltipHeight - margin > 0) {
     top = rect.top - tooltipHeight - margin;
-    left = rect.left;
+    left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
   }
-  // Posicionar ao lado
+  // Posicionar ao lado direito
+  else if (rect.right + tooltipWidth + margin < window.innerWidth) {
+    top = rect.top + (rect.height / 2) - (tooltipHeight / 2);
+    left = rect.right + margin;
+  }
+  // Posicionar ao lado esquerdo
   else {
-    top = Math.max(margin, rect.top);
-    if (rect.right + tooltipWidth + margin < window.innerWidth) {
-      left = rect.right + margin;
-    } else {
-      left = rect.left - tooltipWidth - margin;
-    }
+    top = rect.top + (rect.height / 2) - (tooltipHeight / 2);
+    left = rect.left - tooltipWidth - margin;
   }
   
-  // Ajustar horizontalmente
+  // Ajustar limites da tela - horizontal
   if (left + tooltipWidth > window.innerWidth - margin) {
     left = window.innerWidth - tooltipWidth - margin;
   }
   if (left < margin) left = margin;
   
-  // Ajustar verticalmente
+  // Ajustar limites da tela - vertical
   if (top + tooltipHeight > window.innerHeight - margin) {
     top = window.innerHeight - tooltipHeight - margin;
   }
@@ -401,6 +434,10 @@ function posicionarTooltip(rect) {
   tooltipEl.style.top = top + 'px';
   tooltipEl.style.left = left + 'px';
   tooltipEl.style.transform = 'none';
+}
+
+function esconderSpotlight() {
+  spotlightEl.style.display = 'none';
 }
 
 function centralizarTooltip() {
@@ -431,15 +468,28 @@ function pularTourNC() {
 }
 
 function finalizarTour() {
-  // Fechar modal de NC se estiver aberto
+  // Fechar modal se aberto
   const modal = document.getElementById('modalNovaNC');
   if (modal) {
     modal.classList.add('hidden');
     modal.style.display = 'none';
   }
   
+  // Esconder todos os elementos do tour
+  darkOverlay.style.display = 'none';
   spotlightEl.style.display = 'none';
   tooltipEl.style.display = 'none';
+  
   localStorage.setItem(TOUR_KEY, 'true');
 }
+
+// Atualizar posição ao redimensionar a janela
+window.addEventListener('resize', () => {
+  if (darkOverlay && darkOverlay.style.display === 'block') {
+    const step = tourSteps[tourAtual];
+    if (step && step.element) {
+      setTimeout(() => posicionarElementos(step), 100);
+    }
+  }
+});
 </script>
