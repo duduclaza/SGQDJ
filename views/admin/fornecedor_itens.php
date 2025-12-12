@@ -115,7 +115,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">#</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Código</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Descrição</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Descrição do Defeito/Obs.</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Tipo</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Quantidade</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Data</th>

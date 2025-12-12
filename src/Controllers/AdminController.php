@@ -2921,7 +2921,7 @@ class AdminController
                 $sql = "
                     SELECT 
                         a.codigo_produto as codigo,
-                        a.nome_produto as descricao,
+                        a.observacoes as descricao,
                         a.tipo_produto as tipo,
                         a.quantidade_reprovada as quantidade,
                         a.created_at as data_registro,
@@ -2956,7 +2956,7 @@ class AdminController
                 $sql = "
                     SELECT 
                         a.codigo_produto as codigo,
-                        a.nome_produto as descricao,
+                        a.observacoes as descricao,
                         a.tipo_produto as tipo,
                         a.quantidade_aprovada as quantidade,
                         a.created_at as data_registro,
