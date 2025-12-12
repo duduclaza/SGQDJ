@@ -661,6 +661,9 @@ function construirUrlPaginacao($pagina) {
   </div>
 </div>
 
+<!-- Toast/Notificação Customizada -->
+<div id="toastContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
 <style>
 .beta-badge {
   background: linear-gradient(45deg, #ff6b6b, #feca57);
@@ -690,6 +693,127 @@ function construirUrlPaginacao($pagina) {
   25% { transform: translateX(-5px); }
   75% { transform: translateX(5px); }
 }
+
+/* Toast/Notificação Styles */
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  animation: toastSlideIn 0.4s ease-out forwards;
+  max-width: 420px;
+  min-width: 320px;
+}
+
+.toast.toast-exit {
+  animation: toastSlideOut 0.3s ease-in forwards;
+}
+
+.toast-warning {
+  background: linear-gradient(135deg, #ff8c00 0%, #ff6600 100%);
+  border-left: 4px solid #fff;
+}
+
+.toast-error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-left: 4px solid #fff;
+}
+
+.toast-success {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  border-left: 4px solid #fff;
+}
+
+.toast-info {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-left: 4px solid #fff;
+}
+
+.toast-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.toast-content {
+  flex: 1;
+}
+
+.toast-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: white;
+  margin-bottom: 4px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.toast-message {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+}
+
+.toast-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.toast-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 0 0 0 12px;
+  animation: toastProgress 5s linear forwards;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(100%) scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes toastSlideOut {
+  from {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%) scale(0.8);
+    opacity: 0;
+  }
+}
+
+@keyframes toastProgress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
 </style>
 
 <script>
@@ -698,6 +822,48 @@ const produtosData = {
   pecas: <?= json_encode($pecas ?? []) ?>,
   maquinas: <?= json_encode($maquinas ?? []) ?>
 };
+
+// ========== Sistema de Toast/Notificação ==========
+function showToast(type, title, message, duration = 5000) {
+  const container = document.getElementById('toastContainer');
+  
+  const icons = {
+    warning: '⚠️',
+    error: '❌',
+    success: '✅',
+    info: 'ℹ️'
+  };
+  
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type] || '📢'}</span>
+    <div class="toast-content">
+      <div class="toast-title">${title}</div>
+      <div class="toast-message">${message}</div>
+    </div>
+    <button class="toast-close" onclick="closeToast(this.parentElement)">✕</button>
+    <div class="toast-progress"></div>
+  `;
+  
+  container.appendChild(toast);
+  
+  // Auto-remover após duração
+  setTimeout(() => {
+    closeToast(toast);
+  }, duration);
+  
+  return toast;
+}
+
+function closeToast(toast) {
+  if (!toast || toast.classList.contains('toast-exit')) return;
+  
+  toast.classList.add('toast-exit');
+  setTimeout(() => {
+    toast.remove();
+  }, 300);
+}
 
 function openAmostragemModal() {
   document.getElementById('amostragemFormContainer').classList.remove('hidden');
@@ -940,7 +1106,12 @@ document.getElementById('amostragemForm').addEventListener('submit', async funct
   
   // Validar campo de observações (obrigatório se não for aprovado)
   if (!validarObservacoes()) {
-    alert('⚠️ Por favor, preencha o campo "Descrição do Defeito ou Observações". Este campo é obrigatório quando o status não é "Aprovado".');
+    showToast(
+      'warning', 
+      'Campo Obrigatório', 
+      'Por favor, preencha o campo "Descrição do Defeito ou Observações". Este campo é obrigatório quando o status não é "Aprovado".',
+      6000
+    );
     return;
   }
   
