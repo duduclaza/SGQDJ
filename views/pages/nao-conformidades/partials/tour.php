@@ -1,7 +1,9 @@
 <?php
 /**
  * Tour/Demo Interativo para módulo de Não Conformidades
- * Aparece na primeira visita e pode ser reiniciado pelo botão de ajuda
+ * - Spotlight sem escurecimento no elemento focado
+ * - Abre o formulário para explicar os campos
+ * - Posicionamento corrigido
  */
 ?>
 
@@ -43,187 +45,248 @@
   100% { transform: scale(1.3); opacity: 0; }
 }
 
-/* Tour Styles - fora do container */
-.tour-overlay-global {
+/* Tour Spotlight - elemento fica visível sem escurecimento */
+.tour-spotlight {
+  position: fixed !important;
+  border: 3px solid #3b82f6 !important;
+  border-radius: 12px !important;
+  box-shadow: 
+    0 0 0 9999px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(59, 130, 246, 0.5),
+    inset 0 0 0 2px rgba(255,255,255,0.3) !important;
+  z-index: 999998 !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  pointer-events: none !important;
+  background: transparent !important;
+}
+
+.tour-spotlight::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 2px dashed rgba(59, 130, 246, 0.5);
+  border-radius: 16px;
+  animation: pulse-border 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.tour-tooltip {
+  position: fixed !important;
+  z-index: 9999999 !important;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 20px;
+  max-width: 380px;
+  width: 380px;
+  animation: tooltip-appear 0.3s ease-out;
+}
+
+@keyframes tooltip-appear {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tour-overlay {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  z-index: 999999 !important;
-}
-
-.tour-tooltip-global {
-  position: fixed !important;
-  z-index: 9999999 !important;
-}
-
-.tour-highlight-global {
-  position: fixed !important;
-  z-index: 999998 !important;
+  z-index: 999990 !important;
+  pointer-events: none;
 }
 </style>
 
 <script>
-// ===== CONFIGURAÇÃO DO TOUR =====
+// ===== CONFIGURAÇÃO DO TOUR COM FORMULÁRIO =====
 const tourSteps = [
   {
-    element: null, // Sem elemento = intro geral
+    element: null,
     title: "📋 Módulo de Não Conformidades",
     description: "Aqui você gerencia todas as ocorrências de qualidade da empresa. Vamos conhecer as principais funcionalidades!",
-    icon: "🎯"
+    icon: "🎯",
+    action: null
   },
   {
     element: "button[onclick='abrirModalNovaNC()']",
     title: "➕ Nova Ocorrência",
-    description: "Clique aqui para registrar uma nova não conformidade. Você vai preencher título, descrição, responsável e anexar evidências.",
-    icon: "📝"
+    description: "Este botão abre o formulário para registrar uma nova não conformidade. Vamos abrir para você ver os campos!",
+    icon: "📝",
+    action: null
+  },
+  {
+    element: "#modalNovaNC",
+    title: "📝 Formulário de Nova NC",
+    description: "Aqui você preenche os dados da ocorrência: título, descrição detalhada, seleciona o responsável e pode anexar fotos como evidência.",
+    icon: "✍️",
+    action: () => {
+      // Abrir o modal de nova NC
+      if (typeof abrirModalNovaNC === 'function') {
+        abrirModalNovaNC();
+      }
+    }
+  },
+  {
+    element: "#modalNovaNC",
+    title: "📎 Campos do Formulário",
+    description: "• Título: Resumo da ocorrência\n• Descrição: Detalhes completos\n• Responsável: Quem vai tratar\n• Anexos: Fotos de evidência",
+    icon: "📋",
+    action: null
+  },
+  {
+    element: null,
+    title: "✖️ Fechando o Formulário",
+    description: "Agora vamos fechar o formulário e continuar o tour pelos outros elementos.",
+    icon: "🔄",
+    action: () => {
+      // Fechar o modal
+      const modal = document.getElementById('modalNovaNC');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      }
+    }
   },
   {
     element: "#tab-pendentes",
     title: "🔴 Aba Pendentes",
     description: "Aqui ficam as NCs que acabaram de ser registradas e aguardam início do tratamento.",
-    icon: "⏳"
+    icon: "⏳",
+    action: null
   },
   {
     element: "#tab-em_andamento",
     title: "🟡 Aba Em Andamento",
     description: "NCs que já estão sendo tratadas. O responsável pode registrar ações corretivas aqui.",
-    icon: "🔧"
+    icon: "🔧",
+    action: null
   },
   {
     element: "#tab-solucionadas",
     title: "🟢 Aba Solucionadas",
     description: "Histórico de todas as NCs que foram resolvidas. Ótimo para consultas e auditorias!",
-    icon: "✅"
+    icon: "✅",
+    action: null
   },
   {
     element: "#btnTourNC",
     title: "❓ Botão de Ajuda",
     description: "Sempre que precisar, clique aqui para ver este tutorial novamente. Bom trabalho! 🚀",
-    icon: "💡"
+    icon: "💡",
+    action: null
   }
 ];
 
 let tourAtual = 0;
 const TOUR_KEY = 'nc_tour_visto';
-let tourOverlayEl = null;
-let tourTooltipEl = null;
-let tourHighlightEl = null;
-let tourWelcomeEl = null;
+let spotlightEl = null;
+let tooltipEl = null;
 
-// Criar elementos do tour diretamente no body
+// Criar elementos do tour
 function criarElementosTour() {
-  // Remover elementos existentes se houver
-  document.getElementById('tourOverlayGlobal')?.remove();
-  document.getElementById('tourWelcomeGlobal')?.remove();
+  // Remover existentes
+  document.getElementById('tourSpotlight')?.remove();
+  document.getElementById('tourTooltipBox')?.remove();
+  document.getElementById('tourWelcomeModal')?.remove();
   
-  // Criar overlay do tour
-  tourOverlayEl = document.createElement('div');
-  tourOverlayEl.id = 'tourOverlayGlobal';
-  tourOverlayEl.className = 'tour-overlay-global hidden';
-  tourOverlayEl.innerHTML = `
-    <!-- Máscara escura -->
-    <div id="tourMaskGlobal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);z-index:999997;"></div>
-    
-    <!-- Highlight do elemento atual -->
-    <div id="tourHighlightGlobal" class="tour-highlight-global" style="border:4px solid #60a5fa;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.75);transition:all 0.3s;pointer-events:none;opacity:0;"></div>
-    
-    <!-- Tooltip do Tour -->
-    <div id="tourTooltipGlobal" class="tour-tooltip-global bg-white rounded-2xl shadow-2xl p-5" style="max-width:360px;width:360px;">
-      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
-        <div id="tourIconGlobal" style="width:40px;height:40px;background:#dbeafe;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <span style="font-size:24px;">🎯</span>
-        </div>
-        <div>
-          <h3 id="tourTitleGlobal" style="font-weight:700;color:#111827;font-size:18px;margin:0;">Título</h3>
-          <p id="tourDescGlobal" style="color:#6b7280;font-size:14px;margin-top:4px;line-height:1.5;">Descrição</p>
-        </div>
+  // Criar spotlight (buraco na escuridão)
+  spotlightEl = document.createElement('div');
+  spotlightEl.id = 'tourSpotlight';
+  spotlightEl.className = 'tour-spotlight';
+  spotlightEl.style.display = 'none';
+  document.body.appendChild(spotlightEl);
+  
+  // Criar tooltip
+  tooltipEl = document.createElement('div');
+  tooltipEl.id = 'tourTooltipBox';
+  tooltipEl.className = 'tour-tooltip';
+  tooltipEl.style.display = 'none';
+  tooltipEl.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
+      <div id="tourIconBox" style="width:44px;height:44px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <span style="font-size:24px;">🎯</span>
       </div>
-      
-      <!-- Progress bar -->
-      <div style="width:100%;background:#e5e7eb;border-radius:9999px;height:6px;margin-bottom:16px;">
-        <div id="tourProgressGlobal" style="background:#3b82f6;height:6px;border-radius:9999px;transition:all 0.3s;width:0%;"></div>
+      <div style="flex:1;">
+        <h3 id="tourTitleBox" style="font-weight:700;color:#1f2937;font-size:17px;margin:0 0 6px 0;">Título</h3>
+        <p id="tourDescBox" style="color:#6b7280;font-size:14px;margin:0;line-height:1.6;white-space:pre-line;">Descrição</p>
       </div>
-      
-      <!-- Botões -->
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <button onclick="pularTourNC()" style="font-size:14px;color:#6b7280;background:none;border:none;cursor:pointer;">
-          Pular Tutorial
+    </div>
+    
+    <div style="width:100%;background:#e5e7eb;border-radius:999px;height:4px;margin-bottom:16px;">
+      <div id="tourProgressBox" style="background:linear-gradient(90deg,#3b82f6,#2563eb);height:4px;border-radius:999px;transition:width 0.4s ease;width:0%;"></div>
+    </div>
+    
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <button onclick="pularTourNC()" style="font-size:13px;color:#9ca3af;background:none;border:none;cursor:pointer;padding:8px 0;">
+        Pular Tutorial
+      </button>
+      <div style="display:flex;gap:8px;">
+        <button id="btnTourPrev" onclick="tourAnterior()" style="padding:10px 18px;font-size:14px;font-weight:600;color:#4b5563;background:#f3f4f6;border:none;border-radius:10px;cursor:pointer;display:none;transition:all 0.2s;">
+          ← Anterior
         </button>
-        <div style="display:flex;gap:8px;">
-          <button id="btnTourAnteriorGlobal" onclick="tourAnterior()" style="padding:8px 16px;font-size:14px;font-weight:500;color:#4b5563;background:#f3f4f6;border:none;border-radius:8px;cursor:pointer;display:none;">
-            ← Anterior
-          </button>
-          <button id="btnTourProximoGlobal" onclick="tourProximo()" style="padding:8px 16px;font-size:14px;font-weight:500;color:white;background:#2563eb;border:none;border-radius:8px;cursor:pointer;">
-            Próximo →
-          </button>
-        </div>
+        <button id="btnTourNext" onclick="tourProximo()" style="padding:10px 18px;font-size:14px;font-weight:600;color:white;background:linear-gradient(135deg,#3b82f6,#2563eb);border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 12px rgba(59,130,246,0.3);transition:all 0.2s;">
+          Próximo →
+        </button>
       </div>
     </div>
   `;
-  document.body.appendChild(tourOverlayEl);
+  document.body.appendChild(tooltipEl);
   
-  // Criar modal de boas-vindas
-  tourWelcomeEl = document.createElement('div');
-  tourWelcomeEl.id = 'tourWelcomeGlobal';
-  tourWelcomeEl.className = 'tour-overlay-global hidden';
-  tourWelcomeEl.style.cssText = 'display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
-  tourWelcomeEl.innerHTML = `
-    <div class="animate-bounce-in" style="background:white;border-radius:24px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);max-width:400px;width:100%;padding:32px;text-align:center;">
-      <div style="width:80px;height:80px;background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 10px 15px -3px rgba(239,68,68,0.3);">
+  // Modal de boas-vindas
+  const welcomeEl = document.createElement('div');
+  welcomeEl.id = 'tourWelcomeModal';
+  welcomeEl.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:9999999;display:none;align-items:center;justify-content:center;padding:20px;';
+  welcomeEl.innerHTML = `
+    <div class="animate-bounce-in" style="background:white;border-radius:24px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);max-width:420px;width:100%;padding:36px;text-align:center;">
+      <div style="width:80px;height:80px;background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 10px 25px -5px rgba(239,68,68,0.4);">
         <svg style="width:40px;height:40px;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
         </svg>
       </div>
       
-      <h2 style="font-size:24px;font-weight:700;color:#111827;margin-bottom:12px;">Bem-vindo às Não Conformidades! 🎯</h2>
-      <p style="color:#6b7280;margin-bottom:24px;line-height:1.6;">
+      <h2 style="font-size:24px;font-weight:700;color:#1f2937;margin-bottom:12px;">Bem-vindo às Não Conformidades! 🎯</h2>
+      <p style="color:#6b7280;margin-bottom:28px;line-height:1.7;font-size:15px;">
         Este módulo ajuda você a gerenciar ocorrências e garantir a qualidade. 
         <br><br>
-        Quer fazer um <strong>tour rápido</strong> para conhecer as funcionalidades?
+        Quer fazer um <strong>tour interativo</strong> para conhecer as funcionalidades? Vamos até abrir o formulário para você ver!
       </p>
       
       <div style="display:flex;gap:12px;justify-content:center;">
-        <button onclick="fecharWelcome(false)" style="padding:12px 24px;color:#4b5563;background:#f3f4f6;border:none;border-radius:12px;cursor:pointer;font-weight:500;">
+        <button onclick="fecharWelcome(false)" style="padding:14px 28px;color:#4b5563;background:#f3f4f6;border:none;border-radius:12px;cursor:pointer;font-weight:600;font-size:15px;transition:all 0.2s;">
           Agora não
         </button>
-        <button onclick="fecharWelcome(true)" style="padding:12px 24px;color:white;background:linear-gradient(135deg,#3b82f6,#2563eb);border:none;border-radius:12px;cursor:pointer;font-weight:500;box-shadow:0 10px 15px -3px rgba(59,130,246,0.3);">
+        <button onclick="fecharWelcome(true)" style="padding:14px 28px;color:white;background:linear-gradient(135deg,#3b82f6,#2563eb);border:none;border-radius:12px;cursor:pointer;font-weight:600;font-size:15px;box-shadow:0 8px 20px -4px rgba(59,130,246,0.4);transition:all 0.2s;">
           🚀 Iniciar Tour
         </button>
       </div>
       
-      <p style="font-size:12px;color:#9ca3af;margin-top:16px;">
-        Você pode reiniciar o tour a qualquer momento clicando no botão <strong>❓</strong> no canto inferior direito.
+      <p style="font-size:12px;color:#9ca3af;margin-top:20px;">
+        Você pode reiniciar o tour clicando no botão <strong style="color:#3b82f6;">❓</strong> no canto inferior direito.
       </p>
     </div>
   `;
-  document.body.appendChild(tourWelcomeEl);
-  
-  // Event listener para fechar ao clicar na máscara
-  document.getElementById('tourMaskGlobal')?.addEventListener('click', pularTourNC);
+  document.body.appendChild(welcomeEl);
 }
 
-// Verificar se é primeira visita
+// Verificar primeira visita
 document.addEventListener('DOMContentLoaded', function() {
   criarElementosTour();
   
   const tourVisto = localStorage.getItem(TOUR_KEY);
   if (!tourVisto) {
     setTimeout(() => {
-      document.getElementById('tourWelcomeGlobal').classList.remove('hidden');
-      document.getElementById('tourWelcomeGlobal').style.display = 'flex';
-    }, 500);
+      document.getElementById('tourWelcomeModal').style.display = 'flex';
+    }, 600);
   }
 });
 
-// Fechar welcome e iniciar ou não o tour
 function fecharWelcome(iniciar) {
-  const welcome = document.getElementById('tourWelcomeGlobal');
-  welcome.classList.add('hidden');
-  welcome.style.display = 'none';
+  document.getElementById('tourWelcomeModal').style.display = 'none';
   localStorage.setItem(TOUR_KEY, 'true');
   
   if (iniciar) {
@@ -231,129 +294,152 @@ function fecharWelcome(iniciar) {
   }
 }
 
-// Iniciar tour
 function iniciarTourNC() {
   tourAtual = 0;
-  const overlay = document.getElementById('tourOverlayGlobal');
-  overlay.classList.remove('hidden');
-  overlay.style.display = 'block';
+  spotlightEl.style.display = 'block';
+  tooltipEl.style.display = 'block';
   mostrarStepTour();
 }
 
-// Mostrar step atual
 function mostrarStepTour() {
   const step = tourSteps[tourAtual];
-  const highlight = document.getElementById('tourHighlightGlobal');
-  const tooltip = document.getElementById('tourTooltipGlobal');
-  const progress = document.getElementById('tourProgressGlobal');
   
+  // Executar ação do step (como abrir modal)
+  if (step.action) {
+    step.action();
+    // Aguardar animação do modal
+    setTimeout(() => posicionarElementos(step), 350);
+  } else {
+    posicionarElementos(step);
+  }
+}
+
+function posicionarElementos(step) {
   // Atualizar conteúdo
-  document.getElementById('tourTitleGlobal').textContent = step.title;
-  document.getElementById('tourDescGlobal').textContent = step.description;
-  document.getElementById('tourIconGlobal').innerHTML = `<span style="font-size:24px;">${step.icon}</span>`;
+  document.getElementById('tourTitleBox').textContent = step.title;
+  document.getElementById('tourDescBox').textContent = step.description;
+  document.getElementById('tourIconBox').innerHTML = `<span style="font-size:24px;">${step.icon}</span>`;
   
   // Atualizar progresso
   const progressPercent = ((tourAtual + 1) / tourSteps.length) * 100;
-  progress.style.width = progressPercent + '%';
+  document.getElementById('tourProgressBox').style.width = progressPercent + '%';
   
   // Atualizar botões
-  document.getElementById('btnTourAnteriorGlobal').style.display = tourAtual === 0 ? 'none' : 'block';
-  document.getElementById('btnTourProximoGlobal').textContent = 
+  document.getElementById('btnTourPrev').style.display = tourAtual === 0 ? 'none' : 'inline-block';
+  document.getElementById('btnTourNext').textContent = 
     tourAtual === tourSteps.length - 1 ? '✓ Finalizar' : 'Próximo →';
   
-  // Posicionar highlight e tooltip
+  // Posicionar spotlight e tooltip
   if (step.element) {
     const el = document.querySelector(step.element);
     if (el) {
       const rect = el.getBoundingClientRect();
-      const padding = 8;
+      const padding = 12;
       
-      // Posicionar highlight
-      highlight.style.left = (rect.left - padding) + 'px';
-      highlight.style.top = (rect.top - padding) + 'px';
-      highlight.style.width = (rect.width + padding * 2) + 'px';
-      highlight.style.height = (rect.height + padding * 2) + 'px';
-      highlight.style.opacity = '1';
+      // Posicionar spotlight
+      spotlightEl.style.display = 'block';
+      spotlightEl.style.left = (rect.left - padding + window.scrollX) + 'px';
+      spotlightEl.style.top = (rect.top - padding + window.scrollY) + 'px';
+      spotlightEl.style.width = (rect.width + padding * 2) + 'px';
+      spotlightEl.style.height = (rect.height + padding * 2) + 'px';
       
-      // Calcular posição do tooltip
-      const tooltipWidth = 360;
-      let tooltipTop = rect.bottom + 16;
-      let tooltipLeft = rect.left;
+      // Posicionar tooltip
+      posicionarTooltip(rect);
       
-      // Se elemento está na direita da tela, posicionar tooltip à esquerda dele
-      if (rect.left > window.innerWidth / 2) {
-        tooltipLeft = rect.right - tooltipWidth;
+      // Scroll suave
+      if (rect.top < 100 || rect.bottom > window.innerHeight - 100) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-      
-      // Ajustar se sair da tela - vertical
-      if (tooltipTop + 220 > window.innerHeight) {
-        tooltipTop = rect.top - 220;
-      }
-      if (tooltipTop < 16) tooltipTop = 16;
-      
-      // Ajustar se sair da tela - horizontal
-      if (tooltipLeft + tooltipWidth > window.innerWidth - 16) {
-        tooltipLeft = window.innerWidth - tooltipWidth - 20;
-      }
-      if (tooltipLeft < 16) tooltipLeft = 16;
-      
-      tooltip.style.top = tooltipTop + 'px';
-      tooltip.style.left = tooltipLeft + 'px';
-      tooltip.style.transform = 'none';
-      
-      // Scroll para elemento
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
       centralizarTooltip();
     }
   } else {
-    // Sem elemento, centralizar tooltip
-    highlight.style.opacity = '0';
+    spotlightEl.style.display = 'none';
     centralizarTooltip();
   }
 }
 
-function centralizarTooltip() {
-  const tooltip = document.getElementById('tourTooltipGlobal');
-  const highlight = document.getElementById('tourHighlightGlobal');
+function posicionarTooltip(rect) {
+  const tooltipWidth = 380;
+  const tooltipHeight = 220;
+  const margin = 20;
   
-  highlight.style.opacity = '0';
-  tooltip.style.top = '50%';
-  tooltip.style.left = '50%';
-  tooltip.style.transform = 'translate(-50%, -50%)';
+  let top, left;
+  
+  // Tentar posicionar embaixo
+  if (rect.bottom + tooltipHeight + margin < window.innerHeight) {
+    top = rect.bottom + margin;
+    left = rect.left;
+  } 
+  // Tentar posicionar em cima
+  else if (rect.top - tooltipHeight - margin > 0) {
+    top = rect.top - tooltipHeight - margin;
+    left = rect.left;
+  }
+  // Posicionar ao lado
+  else {
+    top = Math.max(margin, rect.top);
+    if (rect.right + tooltipWidth + margin < window.innerWidth) {
+      left = rect.right + margin;
+    } else {
+      left = rect.left - tooltipWidth - margin;
+    }
+  }
+  
+  // Ajustar horizontalmente
+  if (left + tooltipWidth > window.innerWidth - margin) {
+    left = window.innerWidth - tooltipWidth - margin;
+  }
+  if (left < margin) left = margin;
+  
+  // Ajustar verticalmente
+  if (top + tooltipHeight > window.innerHeight - margin) {
+    top = window.innerHeight - tooltipHeight - margin;
+  }
+  if (top < margin) top = margin;
+  
+  tooltipEl.style.top = top + 'px';
+  tooltipEl.style.left = left + 'px';
+  tooltipEl.style.transform = 'none';
 }
 
-// Próximo step
+function centralizarTooltip() {
+  spotlightEl.style.display = 'none';
+  tooltipEl.style.top = '50%';
+  tooltipEl.style.left = '50%';
+  tooltipEl.style.transform = 'translate(-50%, -50%)';
+}
+
 function tourProximo() {
   if (tourAtual < tourSteps.length - 1) {
     tourAtual++;
-    document.getElementById('tourTooltipGlobal').style.transform = 'none';
     mostrarStepTour();
   } else {
     finalizarTour();
   }
 }
 
-// Step anterior
 function tourAnterior() {
   if (tourAtual > 0) {
     tourAtual--;
-    document.getElementById('tourTooltipGlobal').style.transform = 'none';
     mostrarStepTour();
   }
 }
 
-// Pular tour
 function pularTourNC() {
   finalizarTour();
 }
 
-// Finalizar tour
 function finalizarTour() {
-  const overlay = document.getElementById('tourOverlayGlobal');
-  overlay.classList.add('hidden');
-  overlay.style.display = 'none';
+  // Fechar modal de NC se estiver aberto
+  const modal = document.getElementById('modalNovaNC');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
+  
+  spotlightEl.style.display = 'none';
+  tooltipEl.style.display = 'none';
   localStorage.setItem(TOUR_KEY, 'true');
 }
 </script>
-
