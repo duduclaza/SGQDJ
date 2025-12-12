@@ -190,48 +190,71 @@ let avisosOcultos = []; // Guardar avisos que foram ocultados
 
 // ===== CONFIGURAÇÕES DE NARRAÇÃO =====
 let narracaoAtiva = true; // Narração ativada por padrão
-let narracaoAtual = null; // Referência à narração atual
-const NARRACAO_RATE = 1.0; // Velocidade da fala (0.5 a 2.0)
-const NARRACAO_PITCH = 1.0; // Tom da voz (0 a 2)
+let audioAtual = null; // Referência ao áudio atual
+const NARRACAO_RATE = 1.0; // Para fallback Web Speech
 
-// Verificar suporte a Speech Synthesis
-const speechSupported = 'speechSynthesis' in window;
+// Caminho dos áudios pré-gravados (gerados uma única vez pelo Eleven Labs)
+const AUDIO_BASE_PATH = '/audio/tour-nc';
 
-// Função para narrar texto
-function narrar(texto) {
-  if (!speechSupported || !narracaoAtiva) return;
+// Função para narrar usando arquivos de áudio pré-gravados
+function narrar(stepNumber) {
+  if (!narracaoAtiva) return;
   
-  // Cancelar narração anterior
+  // Parar narração anterior
   pararNarracao();
   
-  // Limpar emojis e caracteres especiais para leitura mais natural
+  // Caminho do arquivo de áudio para este passo
+  const audioPath = `${AUDIO_BASE_PATH}/step-${stepNumber}.mp3`;
+  
+  // Tentar reproduzir o áudio pré-gravado
+  audioAtual = new Audio(audioPath);
+  
+  audioAtual.onerror = () => {
+    console.warn(`Áudio não encontrado: ${audioPath}, usando fallback`);
+    // Fallback: usar texto do passo atual com Web Speech API
+    const step = tourSteps[tourAtual];
+    if (step) {
+      narrarFallback(step.title + '. ' + step.description);
+    }
+  };
+  
+  audioAtual.play().catch(err => {
+    console.warn('Erro ao reproduzir áudio:', err);
+  });
+}
+
+// Fallback usando Web Speech API (quando áudio não existe)
+function narrarFallback(texto) {
+  if (!('speechSynthesis' in window)) return;
+  
+  // Limpar emojis
   const textoLimpo = texto
     .replace(/[📋➕📝✍️📎📋✖️🔄🔴🟡🟢❓🎯⏳🔧✅💡🚀]/g, '')
-    .replace(/•/g, '. ')
+    .replace(/•/g, ', ')
     .replace(/\n/g, '. ')
     .trim();
   
   const utterance = new SpeechSynthesisUtterance(textoLimpo);
   utterance.lang = 'pt-BR';
   utterance.rate = NARRACAO_RATE;
-  utterance.pitch = NARRACAO_PITCH;
   
-  // Tentar usar voz brasileira
   const vozes = speechSynthesis.getVoices();
-  const vozPtBr = vozes.find(v => v.lang.includes('pt-BR') || v.lang.includes('pt_BR'));
-  if (vozPtBr) {
-    utterance.voice = vozPtBr;
-  }
+  const vozPtBr = vozes.find(v => v.lang.includes('pt-BR'));
+  if (vozPtBr) utterance.voice = vozPtBr;
   
-  narracaoAtual = utterance;
   speechSynthesis.speak(utterance);
 }
 
+
 // Função para parar narração
 function pararNarracao() {
-  if (speechSupported) {
+  if (audioAtual) {
+    audioAtual.pause();
+    audioAtual.currentTime = 0;
+    audioAtual = null;
+  }
+  if ('speechSynthesis' in window) {
     speechSynthesis.cancel();
-    narracaoAtual = null;
   }
 }
 
@@ -253,10 +276,7 @@ function toggleNarracao() {
     pararNarracao();
   } else {
     // Se ativou, narrar passo atual
-    const step = tourSteps[tourAtual];
-    if (step) {
-      narrar(step.title + '. ' + step.description);
-    }
+    narrar(tourAtual + 1);
   }
 }
 
@@ -504,8 +524,8 @@ function atualizarConteudo(step) {
   document.getElementById('btnTourNext').textContent = 
     tourAtual === tourSteps.length - 1 ? '✓ Finalizar' : 'Próximo →';
   
-  // Narrar o conteúdo do passo
-  narrar(step.title + '. ' + step.description);
+  // Narrar o conteúdo do passo (usando arquivo de áudio pré-gravado)
+  narrar(tourAtual + 1); // Step number é 1-based nos arquivos
 }
 
 function posicionarElementos(step) {
