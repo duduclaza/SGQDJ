@@ -216,9 +216,31 @@ async function verDetalhes(id) {
       }
       
       if (anexos.length > 0) {
-        htmlContent += '<div class="border-t pt-4"><h4 class="font-semibold mb-2">📎 Anexos:</h4><div class="space-y-2">';
+        htmlContent += '<div class="border-t pt-4"><h4 class="font-semibold mb-2">📎 Anexos:</h4><div class="space-y-3">';
         anexos.forEach(a => {
-          htmlContent += `<div class="flex items-center gap-2 p-2 bg-gray-50 rounded"><span>${a.nome_arquivo}</span><a href="/nao-conformidades/anexo/${a.id}" class="text-blue-600 hover:underline text-sm">Download</a></div>`;
+          const ext = a.nome_arquivo.split('.').pop().toLowerCase();
+          const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+          
+          if (isImage) {
+            // Para imagens: mostrar prévia clicável + download
+            htmlContent += `
+              <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-medium">${a.nome_arquivo}</span>
+                  <a href="/nao-conformidades/anexo/${a.id}" class="text-blue-600 hover:underline text-sm" download>⬇️ Download</a>
+                </div>
+                <img 
+                  src="/nao-conformidades/anexo/${a.id}" 
+                  alt="${a.nome_arquivo}" 
+                  class="max-w-full max-h-64 rounded-lg cursor-pointer hover:opacity-90 transition-opacity shadow-md"
+                  onclick="abrirImagemFullscreen('/nao-conformidades/anexo/${a.id}', '${a.nome_arquivo}')"
+                  title="Clique para ampliar"
+                />
+              </div>`;
+          } else {
+            // Para outros arquivos: apenas nome + download
+            htmlContent += `<div class="flex items-center gap-2 p-2 bg-gray-50 rounded"><span>📄 ${a.nome_arquivo}</span><a href="/nao-conformidades/anexo/${a.id}" class="text-blue-600 hover:underline text-sm" download>⬇️ Download</a></div>`;
+          }
         });
         htmlContent += '</div></div>';
       }
@@ -428,5 +450,48 @@ async function excluirNC(ncId, titulo) {
     console.error('Erro ao excluir NC:', error);
     alert('Erro ao excluir NC: ' + error.message);
   }
+}
+
+// Abrir imagem em tela cheia (lightbox)
+function abrirImagemFullscreen(src, nomeArquivo) {
+  // Remover lightbox anterior se existir
+  const lightboxAnterior = document.getElementById('imagemLightbox');
+  if (lightboxAnterior) lightboxAnterior.remove();
+  
+  const lightbox = document.createElement('div');
+  lightbox.id = 'imagemLightbox';
+  lightbox.setAttribute('style', `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 9999999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    cursor: zoom-out;
+  `);
+  
+  lightbox.innerHTML = `
+    <button onclick="document.getElementById('imagemLightbox').remove()" 
+            style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); border: none; color: white; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 24px; display: flex; align-items: center; justify-content: center;">
+      ✕
+    </button>
+    <img src="${src}" alt="${nomeArquivo}" style="max-width: 95vw; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 50px rgba(0,0,0,0.5);" onclick="event.stopPropagation()"/>
+    <div style="color: white; margin-top: 16px; font-size: 14px; opacity: 0.8;">
+      ${nomeArquivo}
+      <a href="${src}" download style="margin-left: 16px; color: #60a5fa; text-decoration: underline;">⬇️ Baixar</a>
+    </div>
+  `;
+  
+  // Fechar ao clicar no fundo
+  lightbox.onclick = function() {
+    this.remove();
+  };
+  
+  document.body.appendChild(lightbox);
 }
 </script>
