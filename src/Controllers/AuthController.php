@@ -94,6 +94,17 @@ class AuthController
                 // TODOS os usuários são direcionados para a página Início após login
                 $redirectUrl = '/inicio';
                 
+                // 📊 Registrar login no módulo de Usabilidade do SGQ
+                try {
+                    \App\Controllers\UsabilidadeController::registrarLogin(
+                        $user['id'], 
+                        $user['name'], 
+                        $user['email']
+                    );
+                } catch (\Exception $e) {
+                    error_log('Erro ao registrar login: ' . $e->getMessage());
+                }
+                
                 echo json_encode([
                     'success' => true, 
                     'message' => 'Login realizado com sucesso!',

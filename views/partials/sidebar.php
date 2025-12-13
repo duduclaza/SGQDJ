@@ -209,6 +209,19 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
       </li>
       <?php endif; */ ?>
       
+      <!-- 📊 Usabilidade do SGQ - Exclusivo para Super Admin -->
+      <?php if (isSuperAdmin()): ?>
+      <li>
+        <a href="/usabilidade" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-700 <?php echo $current==='/usabilidade'?'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg':'text-slate-300 hover:text-white'; ?>">
+          <span class="text-lg">📊</span>
+          <span class="flex items-center gap-2">
+            Usabilidade do SGQ
+            <span class="px-1.5 py-0.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-yellow-900 text-xs font-bold rounded shadow-sm">SUPER ADMIN</span>
+          </span>
+        </a>
+      </li>
+      <?php endif; ?>
+      
       <?php foreach ($menu as $item):
         $active = rtrim($item['href'], '/') === $current;
         $hasSubmenu = isset($item['submenu']);
