@@ -662,6 +662,12 @@ $router->get('/area-tecnica/checklists/{id}', [App\Controllers\AreaTecnicaContro
 $router->get('/teste-smtp-debug', [App\Controllers\TesteEmailController::class, 'index']);
 $router->post('/teste-smtp-debug', [App\Controllers\TesteEmailController::class, 'index']);
 
+// ===== MÓDULO USABILIDADE DO SGQ (SUPER ADMIN ONLY) =====
+$router->get('/usabilidade', [App\Controllers\UsabilidadeController::class, 'index']);
+$router->get('/usabilidade/api/logins-por-dia', [App\Controllers\UsabilidadeController::class, 'getLoginsPorDia']);
+$router->get('/usabilidade/api/historico', [App\Controllers\UsabilidadeController::class, 'getHistorico']);
+$router->get('/usabilidade/api/estatisticas', [App\Controllers\UsabilidadeController::class, 'getEstatisticas']);
+
 // Dispatch
 try {
     $currentRoute = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
