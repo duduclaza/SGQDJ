@@ -15,6 +15,11 @@
    USABILIDADE DO SGQ - ESTILOS MODERNOS
    ======================================== */
 
+.usabilidade-wrapper {
+    min-height: calc(100vh - 64px);
+    overflow-x: hidden;
+}
+
 .usabilidade-container {
     max-width: 1600px;
     margin: 0 auto;
@@ -50,6 +55,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .usabilidade-header p {
@@ -71,9 +77,21 @@
 /* Cards de Estatísticas */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
     gap: 1.25rem;
     margin-bottom: 2rem;
+}
+
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .stat-card {
@@ -125,6 +143,20 @@
     color: #6b7280;
 }
 
+/* Layout Grid Principal */
+.main-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Gráfico Container */
 .chart-container {
     background: white;
@@ -132,7 +164,6 @@
     padding: 1.5rem;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     border: 1px solid #e5e7eb;
-    margin-bottom: 2rem;
 }
 
 .chart-header {
@@ -151,6 +182,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    margin: 0;
 }
 
 .chart-filters {
@@ -181,9 +213,10 @@
     color: white;
 }
 
-#loginsChart {
-    width: 100%;
+.chart-wrapper {
+    position: relative;
     height: 350px;
+    width: 100%;
 }
 
 /* Tabela de Histórico */
@@ -212,6 +245,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    margin: 0;
 }
 
 .history-filters {
@@ -363,13 +397,14 @@
     padding: 1.5rem;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     border: 1px solid #e5e7eb;
+    height: fit-content;
 }
 
 .top-users-header h3 {
     font-size: 1rem;
     font-weight: 600;
     color: #111827;
-    margin-bottom: 1rem;
+    margin: 0 0 1rem 0;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -397,6 +432,7 @@
     font-weight: 600;
     font-size: 0.75rem;
     margin-right: 0.75rem;
+    flex-shrink: 0;
 }
 
 .top-user-rank.gold { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; }
@@ -406,23 +442,32 @@
 
 .top-user-info {
     flex: 1;
+    min-width: 0;
 }
 
 .top-user-info .name {
     font-weight: 500;
     color: #111827;
     font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .top-user-info .email {
     font-size: 0.75rem;
     color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .top-user-count {
     font-weight: 600;
     color: #2563eb;
     font-size: 0.875rem;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
 }
 
 /* Loading States */
@@ -438,33 +483,21 @@
     100% { background-position: -200% 0; }
 }
 
-/* Responsivo */
-@media (max-width: 1024px) {
-    .usabilidade-container > div[style*="grid-template-columns"] {
-        grid-template-columns: 1fr !important;
-    }
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6b7280;
 }
 
-@media (max-width: 768px) {
-    .usabilidade-header {
-        padding: 1.5rem;
-    }
-    
-    .usabilidade-header h1 {
-        font-size: 1.5rem;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .chart-header, .history-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+.empty-state svg {
+    margin: 0 auto 1rem;
+    display: block;
+    opacity: 0.5;
 }
 </style>
 
+<div class="usabilidade-wrapper">
 <div class="usabilidade-container">
     <!-- Header Premium -->
     <div class="usabilidade-header">
@@ -490,7 +523,7 @@
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
             </div>
-            <div class="stat-value" id="statLoginsHoje">-</div>
+            <div class="stat-value" id="statLoginsHoje">0</div>
             <div class="stat-label">Logins Hoje</div>
         </div>
         
@@ -501,7 +534,7 @@
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                 </svg>
             </div>
-            <div class="stat-value" id="statLogins7dias">-</div>
+            <div class="stat-value" id="statLogins7dias">0</div>
             <div class="stat-label">Logins (7 dias)</div>
         </div>
         
@@ -514,7 +547,7 @@
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
             </div>
-            <div class="stat-value" id="statLogins30dias">-</div>
+            <div class="stat-value" id="statLogins30dias">0</div>
             <div class="stat-label">Logins (30 dias)</div>
         </div>
         
@@ -527,7 +560,7 @@
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
             </div>
-            <div class="stat-value" id="statUsuariosUnicos">-</div>
+            <div class="stat-value" id="statUsuariosUnicos">0</div>
             <div class="stat-label">Usuários Únicos (30d)</div>
         </div>
         
@@ -537,13 +570,13 @@
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
             </div>
-            <div class="stat-value" id="statTotalLogins">-</div>
+            <div class="stat-value" id="statTotalLogins">0</div>
             <div class="stat-label">Total de Logins</div>
         </div>
     </div>
     
     <!-- Layout em Grid: Gráfico + Top Usuários -->
-    <div style="display: grid; grid-template-columns: 1fr 350px; gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="main-grid">
         <!-- Gráfico de Logins -->
         <div class="chart-container">
             <div class="chart-header">
@@ -562,21 +595,21 @@
                     <button onclick="carregarGrafico(60)" data-dias="60">60 dias</button>
                 </div>
             </div>
-            <canvas id="loginsChart"></canvas>
+            <div class="chart-wrapper">
+                <canvas id="loginsChart"></canvas>
+            </div>
         </div>
         
         <!-- Top Usuários -->
         <div class="top-users-container">
-            <div class="top-users-header">
-                <h3>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                    Usuários Mais Ativos (30d)
-                </h3>
-            </div>
+            <h3 class="top-users-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+                Usuários Mais Ativos (30d)
+            </h3>
             <div id="topUsersContainer">
-                <!-- Carregado via JS -->
+                <p style="text-align: center; color: #6b7280; padding: 2rem;">Carregando...</p>
             </div>
         </div>
     </div>
@@ -609,7 +642,7 @@
                 </thead>
                 <tbody id="historicoTableBody">
                     <tr>
-                        <td colspan="4" style="text-align: center; padding: 3rem;">
+                        <td colspan="4" class="empty-state">
                             <div class="skeleton" style="width: 200px; height: 20px; margin: 0 auto;"></div>
                         </td>
                     </tr>
@@ -627,9 +660,10 @@
         </div>
     </div>
 </div>
+</div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
 <script>
 // ================================
@@ -643,6 +677,7 @@ let debounceTimer = null;
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Inicializando módulo Usabilidade...');
     carregarEstatisticas();
     carregarGrafico(30);
     carregarHistorico(1);
@@ -651,20 +686,24 @@ document.addEventListener('DOMContentLoaded', function() {
 // Carregar Estatísticas
 async function carregarEstatisticas() {
     try {
+        console.log('Carregando estatísticas...');
         const response = await fetch('/usabilidade/api/estatisticas');
         const result = await response.json();
+        console.log('Estatísticas:', result);
         
         if (result.success) {
             const data = result.data;
             
-            document.getElementById('statLoginsHoje').textContent = data.logins_hoje.toLocaleString('pt-BR');
-            document.getElementById('statLogins7dias').textContent = data.logins_7_dias.toLocaleString('pt-BR');
-            document.getElementById('statLogins30dias').textContent = data.logins_30_dias.toLocaleString('pt-BR');
-            document.getElementById('statUsuariosUnicos').textContent = data.usuarios_unicos_30_dias.toLocaleString('pt-BR');
-            document.getElementById('statTotalLogins').textContent = data.total_logins.toLocaleString('pt-BR');
+            document.getElementById('statLoginsHoje').textContent = (data.logins_hoje || 0).toLocaleString('pt-BR');
+            document.getElementById('statLogins7dias').textContent = (data.logins_7_dias || 0).toLocaleString('pt-BR');
+            document.getElementById('statLogins30dias').textContent = (data.logins_30_dias || 0).toLocaleString('pt-BR');
+            document.getElementById('statUsuariosUnicos').textContent = (data.usuarios_unicos_30_dias || 0).toLocaleString('pt-BR');
+            document.getElementById('statTotalLogins').textContent = (data.total_logins || 0).toLocaleString('pt-BR');
             
             // Renderizar Top Usuários
-            renderizarTopUsuarios(data.usuarios_mais_ativos);
+            renderizarTopUsuarios(data.usuarios_mais_ativos || []);
+        } else {
+            console.error('Erro nas estatísticas:', result.message);
         }
     } catch (error) {
         console.error('Erro ao carregar estatísticas:', error);
@@ -676,18 +715,17 @@ function renderizarTopUsuarios(usuarios) {
     const container = document.getElementById('topUsersContainer');
     
     if (!usuarios || usuarios.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">Nenhum dado disponível</p>';
+        container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">Nenhum dado disponível ainda.<br><small>Os dados aparecerão após alguns logins.</small></p>';
         return;
     }
     
     let html = '';
     usuarios.forEach((usuario, index) => {
         const rankClass = index === 0 ? 'gold' : (index === 1 ? 'silver' : (index === 2 ? 'bronze' : 'default'));
-        const inicial = usuario.user_name.charAt(0).toUpperCase();
         
         html += `
             <div class="top-user-item">
-                <div style="display: flex; align-items: center;">
+                <div style="display: flex; align-items: center; min-width: 0;">
                     <div class="top-user-rank ${rankClass}">${index + 1}</div>
                     <div class="top-user-info">
                         <div class="name">${escapeHtml(usuario.user_name)}</div>
@@ -704,6 +742,8 @@ function renderizarTopUsuarios(usuarios) {
 
 // Carregar Gráfico
 async function carregarGrafico(dias) {
+    console.log('Carregando gráfico para', dias, 'dias...');
+    
     // Atualizar botões ativos
     document.querySelectorAll('.chart-filters button').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.dias == dias);
@@ -712,27 +752,50 @@ async function carregarGrafico(dias) {
     try {
         const response = await fetch(`/usabilidade/api/logins-por-dia?dias=${dias}`);
         const result = await response.json();
+        console.log('Dados do gráfico:', result);
         
-        if (result.success) {
+        if (result.success && result.data) {
             renderizarGrafico(result.data);
+        } else {
+            console.error('Erro no gráfico:', result.message);
+            // Mostrar gráfico vazio com mensagem
+            renderizarGrafico([]);
         }
     } catch (error) {
         console.error('Erro ao carregar gráfico:', error);
+        renderizarGrafico([]);
     }
 }
 
 // Renderizar Gráfico
 function renderizarGrafico(dados) {
-    const ctx = document.getElementById('loginsChart').getContext('2d');
+    const canvas = document.getElementById('loginsChart');
+    const ctx = canvas.getContext('2d');
     
     // Destruir gráfico anterior se existir
     if (loginsChart) {
         loginsChart.destroy();
+        loginsChart = null;
+    }
+    
+    // Se não há dados, mostrar gráfico com zeros
+    if (!dados || dados.length === 0) {
+        dados = [];
+        const hoje = new Date();
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(hoje);
+            d.setDate(d.getDate() - i);
+            dados.push({
+                data_formatada: d.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}),
+                total_logins: 0,
+                usuarios_unicos: 0
+            });
+        }
     }
     
     const labels = dados.map(d => d.data_formatada);
-    const totalLogins = dados.map(d => d.total_logins);
-    const usuariosUnicos = dados.map(d => d.usuarios_unicos);
+    const totalLogins = dados.map(d => d.total_logins || 0);
+    const usuariosUnicos = dados.map(d => d.usuarios_unicos || 0);
     
     loginsChart = new Chart(ctx, {
         type: 'line',
@@ -787,12 +850,7 @@ function renderizarGrafico(dados) {
                     padding: 12,
                     borderColor: 'rgba(255,255,255,0.1)',
                     borderWidth: 1,
-                    displayColors: true,
-                    callbacks: {
-                        label: function(context) {
-                            return ` ${context.dataset.label}: ${context.parsed.y}`;
-                        }
-                    }
+                    displayColors: true
                 }
             },
             scales: {
@@ -825,6 +883,8 @@ function renderizarGrafico(dados) {
             }
         }
     });
+    
+    console.log('Gráfico renderizado com sucesso');
 }
 
 // Carregar Histórico
@@ -841,13 +901,16 @@ async function carregarHistorico(pagina) {
     try {
         const response = await fetch(url);
         const result = await response.json();
+        console.log('Histórico:', result);
         
         if (result.success) {
-            renderizarHistorico(result.data);
-            renderizarPaginacao(result.pagination);
+            renderizarHistorico(result.data || []);
+            renderizarPaginacao(result.pagination || {page: 1, limit: 50, total: 0, total_pages: 1});
         }
     } catch (error) {
         console.error('Erro ao carregar histórico:', error);
+        renderizarHistorico([]);
+        renderizarPaginacao({page: 1, limit: 50, total: 0, total_pages: 1});
     }
 }
 
@@ -858,14 +921,14 @@ function renderizarHistorico(logs) {
     if (!logs || logs.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="4" style="text-align: center; padding: 3rem; color: #6b7280;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem; display: block; opacity: 0.5;">
+                <td colspan="4" class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <path d="M8 15h8"></path>
                         <path d="M9 9h.01"></path>
                         <path d="M15 9h.01"></path>
                     </svg>
-                    Nenhum registro encontrado
+                    <p>Nenhum registro encontrado ainda.<br><small>Os logins serão registrados a partir de agora.</small></p>
                 </td>
             </tr>
         `;
@@ -874,7 +937,7 @@ function renderizarHistorico(logs) {
     
     let html = '';
     logs.forEach(log => {
-        const inicial = log.user_name.charAt(0).toUpperCase();
+        const inicial = (log.user_name || 'U').charAt(0).toUpperCase();
         const navegador = parseUserAgent(log.user_agent);
         
         html += `
@@ -883,13 +946,13 @@ function renderizarHistorico(logs) {
                     <div class="user-info">
                         <div class="user-avatar">${inicial}</div>
                         <div class="user-details">
-                            <div class="user-name">${escapeHtml(log.user_name)}</div>
-                            <div class="user-email">${escapeHtml(log.user_email)}</div>
+                            <div class="user-name">${escapeHtml(log.user_name || 'Desconhecido')}</div>
+                            <div class="user-email">${escapeHtml(log.user_email || '')}</div>
                         </div>
                     </div>
                 </td>
                 <td>
-                    <span style="font-weight: 500;">${log.login_formatado}</span>
+                    <span style="font-weight: 500;">${log.login_formatado || '-'}</span>
                 </td>
                 <td>
                     <span class="ip-badge">
@@ -929,6 +992,12 @@ function renderizarPaginacao(pagination) {
     const info = document.getElementById('paginationInfo');
     const controls = document.getElementById('paginationControls');
     
+    if (!pagination || pagination.total === 0) {
+        info.textContent = 'Nenhum registro encontrado';
+        controls.innerHTML = '';
+        return;
+    }
+    
     const inicio = ((pagination.page - 1) * pagination.limit) + 1;
     const fim = Math.min(pagination.page * pagination.limit, pagination.total);
     
@@ -942,7 +1011,7 @@ function renderizarPaginacao(pagination) {
     // Números das páginas
     const maxBotoes = 5;
     let inicio_pag = Math.max(1, pagination.page - Math.floor(maxBotoes / 2));
-    let fim_pag = Math.min(pagination.total_pages, inicio_pag + maxBotoes - 1);
+    let fim_pag = Math.min(pagination.total_pages || 1, inicio_pag + maxBotoes - 1);
     
     if (fim_pag - inicio_pag < maxBotoes - 1) {
         inicio_pag = Math.max(1, fim_pag - maxBotoes + 1);
@@ -953,7 +1022,7 @@ function renderizarPaginacao(pagination) {
     }
     
     // Botão Próximo
-    html += `<button onclick="carregarHistorico(${pagination.page + 1})" ${pagination.page >= pagination.total_pages ? 'disabled' : ''}>Próximo →</button>`;
+    html += `<button onclick="carregarHistorico(${pagination.page + 1})" ${pagination.page >= (pagination.total_pages || 1) ? 'disabled' : ''}>Próximo →</button>`;
     
     controls.innerHTML = html;
 }
