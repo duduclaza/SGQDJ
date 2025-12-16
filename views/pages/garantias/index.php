@@ -591,25 +591,32 @@ if (!isset($_SESSION['user_id'])) {
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         <p class="mt-2 text-gray-600">Carregando...</p>
     </div>
+</section>
 
-    <!-- Modal Tratativa Final -->
-    <div id="modal-tratativa-final" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">
-                        <span class="text-green-500">✅</span> Tratativa Final da Garantia
+<!-- Modal Tratativa Final - Expandido Fullscreen (fora da section) -->
+<div id="modal-tratativa-final" class="fixed inset-0 bg-black bg-opacity-70 overflow-y-auto h-full w-full hidden" style="z-index: 9999;">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="relative w-full max-w-4xl bg-white shadow-2xl rounded-xl transform transition-all">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-t-xl px-6 py-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-semibold text-white flex items-center">
+                        <span class="text-2xl mr-2">✅</span> Tratativa Final da Garantia
                     </h3>
-                    <button onclick="fecharModalTratativaFinal()" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button onclick="fecharModalTratativaFinal()" class="text-white hover:text-gray-200 transition-colors">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
-                
-                <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <p class="text-sm text-green-800">
-                        <strong>💡 Importante:</strong> Informe o que foi feito para finalizar esta garantia. Esta informação ficará visível no registro da garantia.
+            </div>
+            
+            <!-- Body -->
+            <div class="p-6">
+                <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <p class="text-green-800 flex items-start">
+                        <span class="text-xl mr-2">💡</span>
+                        <span><strong>Importante:</strong> Informe detalhadamente o que foi feito para finalizar esta garantia. Esta informação ficará visível no registro e no histórico da garantia.</span>
                     </p>
                 </div>
                 
@@ -618,26 +625,36 @@ if (!isset($_SESSION['user_id'])) {
                     <input type="hidden" id="tratativa-select-element">
                     
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tratativa Final: *</label>
-                        <textarea id="tratativa-final-texto" required rows="5" 
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                  placeholder="Descreva o que foi feito para finalizar a garantia...&#10;&#10;Ex: Peça substituída, crédito concedido, produto reparado, etc."></textarea>
-                        <small class="text-gray-500 mt-1 block">Campo obrigatório para concluir a garantia</small>
-                    </div>
-                    
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" onclick="fecharModalTratativaFinal()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md">
-                            Cancelar
-                        </button>
-                        <button type="button" onclick="salvarTratativaFinal()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md">
-                            ✓ Salvar e Finalizar
-                        </button>
+                        <label class="block text-lg font-medium text-gray-700 mb-3">Descreva a Tratativa Final: <span class="text-red-500">*</span></label>
+                        <textarea id="tratativa-final-texto" required rows="8" 
+                                  class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                                  placeholder="Descreva o que foi feito para finalizar a garantia...
+
+Exemplos:
+• Peça substituída por nova unidade
+• Crédito concedido ao cliente
+• Produto reparado e devolvido
+• Item trocado por modelo equivalente"></textarea>
+                        <small class="text-gray-500 mt-2 block">Este campo é obrigatório para concluir a garantia</small>
                     </div>
                 </form>
             </div>
+            
+            <!-- Footer -->
+            <div class="bg-gray-50 rounded-b-xl px-6 py-4 flex justify-end space-x-4">
+                <button type="button" onclick="fecharModalTratativaFinal()" class="px-6 py-3 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition-colors">
+                    Cancelar
+                </button>
+                <button type="button" onclick="salvarTratativaFinal()" class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Salvar e Finalizar
+                </button>
+            </div>
         </div>
     </div>
-</section>
+</div>
 
 <!-- Scripts de Configuração de Colunas e Exportação -->
 <script src="/js/garantias-column-config.js"></script>

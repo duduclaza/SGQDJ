@@ -124,6 +124,20 @@
                 <p class="text-gray-900"><?= nl2br(e($garantia['descricao_defeito'])) ?></p>
             </div>
             <?php endif; ?>
+            
+            <?php if (!empty($garantia['tratativa_final'])): ?>
+            <div class="mt-4 p-4 bg-green-50 rounded-lg border-2 border-green-300">
+                <label class="text-sm text-gray-600 block mb-2 flex items-center">
+                    <span class="text-lg mr-1">✅</span> Tratativa Final
+                    <?php if (!empty($garantia['data_finalizacao'])): ?>
+                        <span class="ml-2 text-xs text-green-600">
+                            (<?= date('d/m/Y H:i', strtotime($garantia['data_finalizacao'])) ?>)
+                        </span>
+                    <?php endif; ?>
+                </label>
+                <p class="text-gray-900 font-medium text-lg"><?= nl2br(e($garantia['tratativa_final'])) ?></p>
+            </div>
+            <?php endif; ?>
         </div>
         
         <!-- Itens da Garantia -->
