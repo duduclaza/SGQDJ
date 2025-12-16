@@ -1713,12 +1713,7 @@ function renderizarTabela(dados) {
                 </div>
             </td>
             <td class="px-4 py-3 text-sm max-w-xs">
-                ${(garantia.tratativa_final && typeof garantia.tratativa_final === 'string' && garantia.tratativa_final.length > 1) ? 
-                    `<div class="truncate bg-green-50 border border-green-200 rounded px-2 py-1" title="${garantia.tratativa_final}">
-                        <span class="text-green-800">${garantia.tratativa_final}</span>
-                    </div>` : 
-                    '<span class="text-gray-400 text-xs">-</span>'
-                }
+                ${getTratativaFinalDisplay(garantia.tratativa_final)}
             </td>
             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-center">
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -1797,6 +1792,32 @@ function getStatusClass(status) {
         'Garantia não coberta': 'bg-red-100 text-red-800'
     };
     return classes[status] || 'bg-gray-100 text-gray-800';
+}
+
+// Função para exibir tratativa final corretamente
+function getTratativaFinalDisplay(tratativa) {
+    // Verifica se é nulo, undefined ou vazio
+    if (!tratativa) {
+        return '<span class="text-gray-400 text-xs">-</span>';
+    }
+    
+    // Converte para string
+    const texto = String(tratativa).trim();
+    
+    // Verifica se é apenas números (não é uma tratativa válida)
+    if (/^\d+$/.test(texto)) {
+        return '<span class="text-gray-400 text-xs">-</span>';
+    }
+    
+    // Verifica se tem conteúdo real (mais que apenas espaços ou caracteres simples)
+    if (texto.length < 3) {
+        return '<span class="text-gray-400 text-xs">-</span>';
+    }
+    
+    // É uma tratativa válida, exibe com destaque
+    return `<div class="truncate bg-green-50 border border-green-200 rounded px-2 py-1" title="${texto}">
+        <span class="text-green-800">${texto}</span>
+    </div>`;
 }
 
 function formatarData(data) {
