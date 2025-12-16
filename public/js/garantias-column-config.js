@@ -15,7 +15,8 @@ const COLUNAS_DISPONIVEIS = [
     { id: 'quantidade', nome: 'Qtd', visivel: true },
     { id: 'status', nome: 'Status', visivel: true },
     { id: 'defeito', nome: 'Descrição do Defeito', visivel: true },
-    { id: 'itens', nome: 'Itens', visível: true },
+    { id: 'tratativa_final', nome: 'Tratativa Final', visivel: true },
+    { id: 'itens', nome: 'Itens', visivel: true },
     { id: 'valor', nome: 'Valor Total', visivel: true },
     { id: 'anexos', nome: 'Anexos', visivel: true },
     { id: 'data', nome: 'Criado em', visivel: true }
