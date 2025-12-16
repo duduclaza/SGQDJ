@@ -410,6 +410,57 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
     </div>
 </div>
 
+<!-- Modal Alterar Status de Andamento -->
+<div id="modal-alterar-andamento" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">
+                    <span class="text-orange-500">🔧</span> Status de Andamento
+                </h3>
+                <button onclick="fecharModalAlterarAndamento()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p class="text-sm text-blue-800">
+                    <strong>💡 Dica:</strong> Use este campo para a área técnica acompanhar o andamento do descarte.
+                </p>
+            </div>
+            
+            <form id="form-alterar-andamento">
+                <input type="hidden" id="andamento-descarte-id">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status Atual:</label>
+                    <p id="andamento-atual-display" class="text-sm text-gray-600 mb-4"></p>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Selecione o novo status: *</label>
+                    <select id="novo-andamento" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <option value="">Selecione...</option>
+                        <option value="Em aberto">🔄 Em aberto</option>
+                        <option value="Concluído">✅ Concluído</option>
+                    </select>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="fecharModalAlterarAndamento()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md">
+                        Cancelar
+                    </button>
+                    <button type="button" onclick="salvarNovoAndamento()" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-md">
+                        Salvar Andamento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 const podeAlterarStatusGlobal = <?= $canAlterarStatus ? 'true' : 'false' ?>;
 let descartes = [];
@@ -501,7 +552,7 @@ function renderizarTabela() {
                 ${getStatusBadge(descarte.status || 'Aguardando Descarte')}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <button onclick="alternarStatusAndamento(${descarte.id}, '${escapeHtml(descarte.status_andamento || 'Em aberto')}')" 
+                <button onclick="abrirModalAlterarAndamento(${descarte.id}, '${escapeHtml(descarte.status_andamento || 'Em aberto')}')" 
                         class="cursor-pointer hover:opacity-80 transition-opacity" 
                         title="Clique para alterar o status de andamento">
                     ${getStatusAndamentoBadge(descarte.status_andamento || 'Em aberto')}
@@ -710,11 +761,27 @@ function getStatusAndamentoBadge(status) {
     return badges[status] || badges['Em aberto'];
 }
 
-// Alternar status de andamento (Em aberto <-> Concluído)
-function alternarStatusAndamento(descarteId, statusAtual) {
-    const novoStatus = statusAtual === 'Em aberto' ? 'Concluído' : 'Em aberto';
+// Abrir modal para alterar status de andamento
+function abrirModalAlterarAndamento(descarteId, statusAtual) {
+    document.getElementById('andamento-descarte-id').value = descarteId;
+    document.getElementById('andamento-atual-display').innerHTML = getStatusAndamentoBadge(statusAtual);
+    // Selecionar o status atual no dropdown
+    document.getElementById('novo-andamento').value = statusAtual;
+    document.getElementById('modal-alterar-andamento').classList.remove('hidden');
+}
+
+// Fechar modal de alterar andamento
+function fecharModalAlterarAndamento() {
+    document.getElementById('modal-alterar-andamento').classList.add('hidden');
+}
+
+// Salvar novo status de andamento
+function salvarNovoAndamento() {
+    const descarteId = document.getElementById('andamento-descarte-id').value;
+    const novoStatus = document.getElementById('novo-andamento').value;
     
-    if (!confirm(`Deseja alterar o status de andamento para "${novoStatus}"?`)) {
+    if (!novoStatus) {
+        alert('Selecione um status de andamento');
         return;
     }
     
@@ -735,6 +802,7 @@ function alternarStatusAndamento(descarteId, statusAtual) {
             if (descarte) {
                 descarte.status_andamento = novoStatus;
             }
+            fecharModalAlterarAndamento();
             renderizarTabela();
             // Pequena notificação de sucesso
             mostrarNotificacao(data.message, 'success');
