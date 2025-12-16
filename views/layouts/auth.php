@@ -152,16 +152,152 @@ $title = $title ?? 'OTI - Login';
     <!-- Painel Direito - Clean Design -->
     <div class="right-panel hidden md:flex md:w-1/2 items-center justify-center p-12" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%);">
       <div class="text-center">
-        <h1 class="text-8xl font-bold mb-4 text-blue-800">OTI</h1>
-        <p class="text-lg text-gray-500 font-light tracking-wide typing-effect" id="typingText"></p>
+        <!-- Logo OTI com efeitos premium -->
+        <div class="oti-logo-container">
+          <h1 class="oti-logo">
+            <span class="oti-letter" data-letter="O">O</span>
+            <span class="oti-letter" data-letter="T">T</span>
+            <span class="oti-letter" data-letter="I">I</span>
+          </h1>
+          <div class="oti-glow"></div>
+          <div class="oti-reflection"></div>
+        </div>
+        <p class="text-lg text-gray-500 font-light tracking-wide typing-effect mt-6" id="typingText"></p>
         
-        <!-- Elemento decorativo -->
-        <div class="mt-12 flex justify-center gap-2">
-          <div class="w-2 h-2 rounded-full bg-blue-400 opacity-60"></div>
-          <div class="w-2 h-2 rounded-full bg-blue-500 opacity-70"></div>
-          <div class="w-2 h-2 rounded-full bg-blue-600 opacity-80"></div>
+        <!-- Elemento decorativo animado -->
+        <div class="mt-12 flex justify-center gap-3">
+          <div class="dot-pulse" style="animation-delay: 0s;"></div>
+          <div class="dot-pulse" style="animation-delay: 0.3s;"></div>
+          <div class="dot-pulse" style="animation-delay: 0.6s;"></div>
         </div>
       </div>
+      
+      <style>
+        /* ===== LOGO OTI - EFEITOS PREMIUM ===== */
+        .oti-logo-container {
+          position: relative;
+          display: inline-block;
+          margin-bottom: 1rem;
+        }
+        
+        .oti-logo {
+          font-size: 8rem;
+          font-weight: 900;
+          letter-spacing: -0.02em;
+          margin: 0;
+          position: relative;
+          z-index: 2;
+          display: flex;
+          justify-content: center;
+          gap: 0.1em;
+        }
+        
+        .oti-letter {
+          display: inline-block;
+          background: linear-gradient(135deg, #1e40af 0%, #3b82f6 25%, #60a5fa 50%, #3b82f6 75%, #1e40af 100%);
+          background-size: 200% 200%;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: gradient-shift 4s ease-in-out infinite;
+          position: relative;
+          text-shadow: none;
+          filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .oti-letter:nth-child(1) { animation-delay: 0s; }
+        .oti-letter:nth-child(2) { animation-delay: 0.15s; }
+        .oti-letter:nth-child(3) { animation-delay: 0.3s; }
+        
+        .oti-letter:hover {
+          transform: translateY(-10px) scale(1.1);
+          filter: drop-shadow(0 8px 20px rgba(59, 130, 246, 0.5));
+        }
+        
+        @keyframes gradient-shift {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        
+        /* Brilho pulsante atrás */
+        .oti-glow {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 300px;
+          height: 150px;
+          background: radial-gradient(ellipse, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
+          border-radius: 50%;
+          z-index: 1;
+          animation: glow-pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes glow-pulse {
+          0%, 100% { 
+            opacity: 0.6; 
+            transform: translate(-50%, -50%) scale(1);
+          }
+          50% { 
+            opacity: 1; 
+            transform: translate(-50%, -50%) scale(1.2);
+          }
+        }
+        
+        /* Reflexo suave abaixo */
+        .oti-reflection {
+          position: absolute;
+          bottom: -30px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 200px;
+          height: 20px;
+          background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.15), transparent);
+          border-radius: 50%;
+          filter: blur(8px);
+          animation: reflection-pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes reflection-pulse {
+          0%, 100% { opacity: 0.5; width: 200px; }
+          50% { opacity: 0.8; width: 250px; }
+        }
+        
+        /* Pontos decorativos pulsantes */
+        .dot-pulse {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+          animation: dot-bounce 1.5s ease-in-out infinite;
+          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+        }
+        
+        @keyframes dot-bounce {
+          0%, 100% { 
+            transform: translateY(0) scale(1); 
+            opacity: 0.6;
+          }
+          50% { 
+            transform: translateY(-8px) scale(1.2); 
+            opacity: 1;
+          }
+        }
+        
+        /* Efeito de borda luminosa ao redor das letras */
+        .oti-logo-container::before {
+          content: '';
+          position: absolute;
+          top: -20px;
+          left: -40px;
+          right: -40px;
+          bottom: -20px;
+          border-radius: 20px;
+          background: linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.05), transparent);
+          z-index: 0;
+        }
+      </style>
     </div>
   </div>
   
