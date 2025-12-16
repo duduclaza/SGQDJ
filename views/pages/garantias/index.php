@@ -593,71 +593,162 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 </section>
 
-<!-- Modal Tratativa Final - FULLSCREEN cobrindo toda a tela incluindo menu -->
-<div id="modal-tratativa-final" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 99999; overflow-y: auto;">
-    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
-        <div style="width: 100%; max-width: 900px; background: white; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
-            <!-- Header -->
-            <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); border-radius: 16px 16px 0 0; padding: 20px 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="font-size: 1.5rem; font-weight: 600; color: white; display: flex; align-items: center; margin: 0;">
-                        <span style="font-size: 1.75rem; margin-right: 12px;">✅</span> Tratativa Final da Garantia
-                    </h3>
-                    <button onclick="fecharModalTratativaFinal()" style="color: white; background: none; border: none; cursor: pointer; padding: 8px;">
-                        <svg style="width: 32px; height: 32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
+<!-- Modal Tratativa Final - Estilo igual ao Nova NC -->
+<div id="modal-tratativa-final" class="modal-tratativa-overlay hidden">
+    <div class="modal-tratativa-content">
+        
+        <!-- Header -->
+        <div class="modal-tratativa-header">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 id="modal-tratativa-titulo" class="text-lg font-bold text-gray-900">Tratativa Final da Garantia</h3>
+                    <p class="text-xs text-gray-500">Descreva o que foi feito para finalizar</p>
                 </div>
             </div>
             
-            <!-- Body -->
-            <div style="padding: 32px;">
-                <div style="margin-bottom: 24px; padding: 16px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px;">
-                    <p style="color: #065f46; display: flex; align-items: flex-start; margin: 0;">
-                        <span style="font-size: 1.5rem; margin-right: 12px;">💡</span>
-                        <span><strong>Importante:</strong> Informe detalhadamente o que foi feito para finalizar esta garantia. Esta informação ficará visível no registro e no histórico da garantia.</span>
-                    </p>
-                </div>
+            <button type="button" onclick="fecharModalTratativaFinal()" class="modal-tratativa-close" title="Fechar">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Body -->
+        <div class="modal-tratativa-body">
+            <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p class="text-sm text-green-800 flex items-start gap-2">
+                    <span class="text-lg">💡</span>
+                    <span><strong>Importante:</strong> Informe o que foi feito para finalizar esta garantia. Esta informação ficará visível no registro.</span>
+                </p>
+            </div>
+            
+            <form id="form-tratativa-final">
+                <input type="hidden" id="tratativa-garantia-id">
+                <input type="hidden" id="tratativa-select-element">
+                <input type="hidden" id="tratativa-modo-edicao" value="false">
                 
-                <form id="form-tratativa-final">
-                    <input type="hidden" id="tratativa-garantia-id">
-                    <input type="hidden" id="tratativa-select-element">
-                    <input type="hidden" id="tratativa-modo-edicao" value="false">
-                    
-                    <div style="margin-bottom: 24px;">
-                        <label style="display: block; font-size: 1.125rem; font-weight: 500; color: #374151; margin-bottom: 12px;">
-                            Descreva a Tratativa Final: <span style="color: #ef4444;">*</span>
-                        </label>
-                        <textarea id="tratativa-final-texto" required rows="10" 
-                                  style="width: 100%; padding: 16px; font-size: 1.125rem; border: 2px solid #d1d5db; border-radius: 8px; resize: vertical; min-height: 200px;"
-                                  placeholder="Descreva o que foi feito para finalizar a garantia...
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Descreva a Tratativa Final <span class="text-red-500">*</span></label>
+                    <textarea id="tratativa-final-texto" required rows="6"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-sm resize-none"
+                              placeholder="Descreva o que foi feito para finalizar a garantia...
 
 Exemplos:
 • Peça substituída por nova unidade
 • Crédito concedido ao cliente
 • Produto reparado e devolvido
 • Item trocado por modelo equivalente"></textarea>
-                        <small style="color: #6b7280; margin-top: 8px; display: block;">Este campo é obrigatório para concluir a garantia</small>
-                    </div>
-                </form>
-            </div>
-            
-            <!-- Footer -->
-            <div style="background: #f9fafb; border-radius: 0 0 16px 16px; padding: 20px 32px; display: flex; justify-content: flex-end; gap: 16px;">
-                <button type="button" onclick="fecharModalTratativaFinal()" style="padding: 14px 28px; color: #374151; background: #e5e7eb; border: none; border-radius: 8px; font-weight: 500; font-size: 1rem; cursor: pointer;">
-                    Cancelar
-                </button>
-                <button type="button" onclick="salvarTratativaFinal()" style="padding: 14px 32px; background: #059669; color: white; border: none; border-radius: 8px; font-weight: 500; font-size: 1rem; cursor: pointer; display: flex; align-items: center;">
-                    <svg style="width: 20px; height: 20px; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Salvar e Finalizar
-                </button>
-            </div>
+                    <small class="text-gray-500 mt-1 block">Campo obrigatório para concluir a garantia</small>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Footer -->
+        <div class="modal-tratativa-footer">
+            <button type="button" onclick="fecharModalTratativaFinal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                Cancelar
+            </button>
+            <button type="button" onclick="salvarTratativaFinal()" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 shadow-sm transition-colors flex items-center gap-2">
+                <span>Salvar</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </button>
         </div>
     </div>
 </div>
+
+<style>
+/* ===== MODAL TRATATIVA FINAL - ESTILO NC ===== */
+.modal-tratativa-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(4px);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999999 !important;
+    padding: 1rem;
+}
+
+.modal-tratativa-overlay.hidden {
+    display: none !important;
+}
+
+.modal-tratativa-content {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 550px;
+    max-height: 90vh;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    animation: modalTratativaPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    margin: auto;
+    position: relative;
+}
+
+@keyframes modalTratativaPop {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-tratativa-header {
+    padding: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+}
+
+.modal-tratativa-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    transition: all 0.2s;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.modal-tratativa-close:hover {
+    background: #f3f4f6;
+    color: #10b981;
+}
+
+.modal-tratativa-body {
+    padding: 1rem;
+    overflow-y: auto;
+    max-height: calc(90vh - 140px);
+    flex: 1;
+}
+
+.modal-tratativa-footer {
+    padding: 1rem 1.25rem;
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+</style>
 
 <!-- Scripts de Configuração de Colunas e Exportação -->
 <script src="/js/garantias-column-config.js"></script>
@@ -2026,9 +2117,9 @@ function abrirModalTratativaFinal(garantiaId, selectElement) {
     selectElementTratativa = selectElement;
     
     // Atualizar título do modal
-    const titulo = document.querySelector('#modal-tratativa-final h3');
+    const titulo = document.getElementById('modal-tratativa-titulo');
     if (titulo) {
-        titulo.innerHTML = '<span style="font-size: 1.75rem; margin-right: 12px;">✅</span> Tratativa Final da Garantia';
+        titulo.textContent = 'Tratativa Final da Garantia';
     }
     
     document.getElementById('modal-tratativa-final').classList.remove('hidden');
@@ -2081,11 +2172,9 @@ function abrirModalEditarTratativa(garantiaId, tratativaAtual) {
     selectElementTratativa = null;
     
     // Mudar título do modal
-    const titulo = document.querySelector('#modal-tratativa-final h3');
+    const titulo = document.getElementById('modal-tratativa-titulo');
     if (titulo) {
-        titulo.innerHTML = tratativaAtual ? 
-            '<span class="text-2xl mr-2">✏️</span> Editar Tratativa Final' : 
-            '<span class="text-2xl mr-2">➕</span> Adicionar Tratativa Final';
+        titulo.textContent = tratativaAtual ? 'Editar Tratativa Final' : 'Adicionar Tratativa Final';
     }
     
     document.getElementById('modal-tratativa-final').classList.remove('hidden');
