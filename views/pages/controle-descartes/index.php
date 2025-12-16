@@ -114,7 +114,7 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
     <!-- Filtros -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Filtros de Busca</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Número de Série</label>
                 <input type="text" id="filtro-numero-serie" placeholder="Digite o número de série" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -139,6 +139,14 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Data Fim</label>
                 <input type="date" id="filtro-data-fim" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Andamento</label>
+                <select id="filtro-andamento" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <option value="">Todos</option>
+                    <option value="Em aberto">🔄 Em aberto</option>
+                    <option value="Concluído">✅ Concluído</option>
+                </select>
             </div>
         </div>
         <div class="mt-4 flex justify-end space-x-3">
@@ -167,6 +175,7 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responsável</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">OS</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Andamento</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Anexo</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                     </tr>
@@ -430,12 +439,14 @@ function carregarDescartes() {
     const filialId = document.getElementById('filtro-filial').value;
     const dataInicio = document.getElementById('filtro-data-inicio').value;
     const dataFim = document.getElementById('filtro-data-fim').value;
+    const statusAndamento = document.getElementById('filtro-andamento').value;
     
     if (numeroSerie) params.append('numero_serie', numeroSerie);
     if (numeroOs) params.append('numero_os', numeroOs);
     if (filialId) params.append('filial_id', filialId);
     if (dataInicio) params.append('data_inicio', dataInicio);
     if (dataFim) params.append('data_fim', dataFim);
+    if (statusAndamento) params.append('status_andamento', statusAndamento);
     
     fetch(`/controle-descartes/list?${params.toString()}`)
         .then(response => response.json())
@@ -489,6 +500,13 @@ function renderizarTabela() {
             <td class="px-6 py-4 whitespace-nowrap text-sm">
                 ${getStatusBadge(descarte.status || 'Aguardando Descarte')}
             </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <button onclick="alternarStatusAndamento(${descarte.id}, '${escapeHtml(descarte.status_andamento || 'Em aberto')}')" 
+                        class="cursor-pointer hover:opacity-80 transition-opacity" 
+                        title="Clique para alterar o status de andamento">
+                    ${getStatusAndamentoBadge(descarte.status_andamento || 'Em aberto')}
+                </button>
+            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 ${descarte.tem_anexo ? 
                     `<a href="/controle-descartes/anexo/${descarte.id}" class="text-blue-600 hover:text-blue-800" title="Baixar anexo">
@@ -539,6 +557,7 @@ function limparFiltros() {
     document.getElementById('filtro-filial').value = '';
     document.getElementById('filtro-data-inicio').value = '';
     document.getElementById('filtro-data-fim').value = '';
+    document.getElementById('filtro-andamento').value = '';
     carregarDescartes();
 }
 
@@ -680,6 +699,70 @@ function getStatusBadge(status) {
         'Descartes Reprovados': '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">❌ Reprovados</span>'
     };
     return badges[status] || badges['Aguardando Descarte'];
+}
+
+// Obter badge de status de andamento (para área técnica)
+function getStatusAndamentoBadge(status) {
+    const badges = {
+        'Em aberto': '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 border border-orange-300">🔄 Em aberto</span>',
+        'Concluído': '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">✅ Concluído</span>'
+    };
+    return badges[status] || badges['Em aberto'];
+}
+
+// Alternar status de andamento (Em aberto <-> Concluído)
+function alternarStatusAndamento(descarteId, statusAtual) {
+    const novoStatus = statusAtual === 'Em aberto' ? 'Concluído' : 'Em aberto';
+    
+    if (!confirm(`Deseja alterar o status de andamento para "${novoStatus}"?`)) {
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('id', descarteId);
+    formData.append('status_andamento', novoStatus);
+    
+    fetch('/controle-descartes/alterar-status-andamento', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Atualizar o status localmente para feedback imediato
+            const descarte = descartes.find(d => d.id == descarteId);
+            if (descarte) {
+                descarte.status_andamento = novoStatus;
+            }
+            renderizarTabela();
+            // Pequena notificação de sucesso
+            mostrarNotificacao(data.message, 'success');
+        } else {
+            alert('Erro: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao alterar status de andamento');
+    });
+}
+
+// Mostrar notificação temporária
+function mostrarNotificacao(mensagem, tipo = 'info') {
+    const container = document.createElement('div');
+    container.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-x-0 ${
+        tipo === 'success' ? 'bg-green-500 text-white' : 
+        tipo === 'error' ? 'bg-red-500 text-white' : 
+        'bg-blue-500 text-white'
+    }`;
+    container.textContent = mensagem;
+    document.body.appendChild(container);
+    
+    setTimeout(() => {
+        container.classList.add('opacity-0', 'translate-x-full');
+        setTimeout(() => container.remove(), 300);
+    }, 3000);
 }
 
 // Abrir modal para alterar status

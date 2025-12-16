@@ -39,6 +39,7 @@ $router->post('/controle-descartes/create', [ControleDescartesController::class,
 $router->post('/controle-descartes/update', [ControleDescartesController::class, 'update']);
 $router->post('/controle-descartes/delete', [ControleDescartesController::class, 'delete']);
 $router->post('/controle-descartes/alterar-status', [ControleDescartesController::class, 'alterarStatus']);
+$router->post('/controle-descartes/alterar-status-andamento', [ControleDescartesController::class, 'alterarStatusAndamento']);
 $router->get('/controle-descartes/{id}', [ControleDescartesController::class, 'getDescarte']);
 $router->get('/controle-descartes/anexo/{id}', [ControleDescartesController::class, 'downloadAnexo']);
 $router->get('/controle-descartes/template', [ControleDescartesController::class, 'downloadTemplate']);

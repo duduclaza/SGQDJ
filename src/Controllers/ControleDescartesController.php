@@ -59,6 +59,7 @@ class ControleDescartesController
             $filial_id = $_GET['filial_id'] ?? '';
             $data_inicio = $_GET['data_inicio'] ?? '';
             $data_fim = $_GET['data_fim'] ?? '';
+            $status_andamento = $_GET['status_andamento'] ?? '';
 
             // Construir query base
             $sql = "
@@ -99,6 +100,12 @@ class ControleDescartesController
             if ($data_fim) {
                 $sql .= " AND d.data_descarte <= ?";
                 $params[] = $data_fim;
+            }
+            
+            // Filtro de status de andamento (para área técnica)
+            if ($status_andamento) {
+                $sql .= " AND COALESCE(d.status_andamento, 'Em aberto') = ?";
+                $params[] = $status_andamento;
             }
 
             $sql .= " ORDER BY d.data_descarte DESC, d.created_at DESC";
@@ -837,6 +844,88 @@ class ControleDescartesController
         } catch (\Exception $e) {
             error_log('Erro ao alterar status: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Erro ao alterar status: ' . $e->getMessage()]);
+        }
+    }
+    
+    // Alterar status de andamento do descarte (para área técnica acompanhar)
+    public function alterarStatusAndamento()
+    {
+        ob_clean();
+        header('Content-Type: application/json');
+        
+        try {
+            $descarte_id = $_POST['id'] ?? 0;
+            $novo_status = $_POST['status_andamento'] ?? '';
+            
+            if (!$descarte_id) {
+                echo json_encode(['success' => false, 'message' => 'ID do descarte é obrigatório']);
+                return;
+            }
+            
+            // Validar status de andamento
+            $status_validos = ['Em aberto', 'Concluído'];
+            if (!in_array($novo_status, $status_validos)) {
+                echo json_encode(['success' => false, 'message' => 'Status de andamento inválido']);
+                return;
+            }
+            
+            // Verificar se usuário tem permissão para visualizar descartes (qualquer um pode alterar andamento)
+            if (!PermissionService::hasPermission($_SESSION['user_id'], 'controle_descartes', 'view')) {
+                echo json_encode(['success' => false, 'message' => 'Sem permissão para alterar status de andamento']);
+                return;
+            }
+            
+            $user_id = $_SESSION['user_id'] ?? 0;
+            
+            // Verificar se descarte existe
+            $descarte = $this->getDescarteById($descarte_id);
+            if (!$descarte) {
+                echo json_encode(['success' => false, 'message' => 'Descarte não encontrado']);
+                return;
+            }
+            
+            // Verificar se coluna existe antes de atualizar
+            try {
+                $checkCol = $this->db->query("SELECT column_name FROM information_schema.columns WHERE table_name = 'controle_descartes' AND column_name = 'status_andamento'");
+                $colunaExiste = $checkCol->rowCount() > 0;
+            } catch (\Exception $e) {
+                $colunaExiste = false;
+            }
+            
+            if (!$colunaExiste) {
+                // Criar coluna se não existir
+                try {
+                    $this->db->exec("ALTER TABLE controle_descartes ADD COLUMN status_andamento VARCHAR(50) DEFAULT 'Em aberto'");
+                    $this->db->exec("ALTER TABLE controle_descartes ADD COLUMN andamento_alterado_por INTEGER");
+                    $this->db->exec("ALTER TABLE controle_descartes ADD COLUMN andamento_alterado_em TIMESTAMP");
+                } catch (\Exception $e) {
+                    error_log("Erro ao criar colunas de status_andamento: " . $e->getMessage());
+                }
+            }
+            
+            // Atualizar status de andamento
+            $stmt = $this->db->prepare("
+                UPDATE controle_descartes 
+                SET status_andamento = ?,
+                    andamento_alterado_por = ?,
+                    andamento_alterado_em = NOW()
+                WHERE id = ?
+            ");
+            
+            $stmt->execute([
+                $novo_status,
+                $user_id,
+                $descarte_id
+            ]);
+            
+            echo json_encode([
+                'success' => true, 
+                'message' => "Status de andamento alterado para '{$novo_status}' com sucesso!"
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log('Erro ao alterar status de andamento: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Erro ao alterar status de andamento: ' . $e->getMessage()]);
         }
     }
     
