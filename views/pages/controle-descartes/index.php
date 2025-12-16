@@ -174,7 +174,6 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Descarte</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responsável</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">OS</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Andamento</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Anexo</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
@@ -549,9 +548,6 @@ function renderizarTabela() {
                 ${descarte.numero_os ? escapeHtml(descarte.numero_os) : '-'}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                ${getStatusBadge(descarte.status || 'Aguardando Descarte')}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
                 <button onclick="abrirModalAlterarAndamento(${descarte.id}, '${escapeHtml(descarte.status_andamento || 'Em aberto')}')" 
                         class="cursor-pointer hover:opacity-80 transition-opacity" 
                         title="Clique para alterar o status de andamento">
@@ -569,13 +565,6 @@ function renderizarTabela() {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
-                    ${podeAlterarStatus() ? 
-                        `<button onclick="abrirModalAlterarStatus(${descarte.id}, '${escapeHtml(descarte.status || 'Aguardando Descarte')}')" class="text-purple-600 hover:text-purple-800" title="Alterar Status">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </button>` : ''
-                    }
                     <?php if ($canEdit): ?>
                     <button onclick="editarDescarte(${descarte.id})" class="text-blue-600 hover:text-blue-800" title="Editar">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
