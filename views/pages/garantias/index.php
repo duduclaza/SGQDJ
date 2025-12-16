@@ -1713,7 +1713,7 @@ function renderizarTabela(dados) {
                 </div>
             </td>
             <td class="px-4 py-3 text-sm max-w-xs">
-                ${garantia.tratativa_final ? 
+                ${(garantia.tratativa_final && typeof garantia.tratativa_final === 'string' && garantia.tratativa_final.length > 1) ? 
                     `<div class="truncate bg-green-50 border border-green-200 rounded px-2 py-1" title="${garantia.tratativa_final}">
                         <span class="text-green-800">${garantia.tratativa_final}</span>
                     </div>` : 
