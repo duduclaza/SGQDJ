@@ -18,7 +18,11 @@ class ResendService
     {
         // API Key do Resend
         $this->apiKey = $this->env('RESEND_API_KEY', 're_PauUxFwk_N3UPnUa3PTsyk5rPA7bmckFR');
-        $this->fromEmail = $this->env('MAIL_FROM_ADDRESS', 'suporte@djbr.sgqoti.com.br');
+        
+        // IMPORTANTE: Enquanto o domínio não estiver verificado no Resend,
+        // use 'onboarding@resend.dev' como remetente de teste.
+        // Após verificar seu domínio, mude para 'suporte@djbr.sgqoti.com.br'
+        $this->fromEmail = $this->env('RESEND_FROM_EMAIL', 'onboarding@resend.dev');
         $this->fromName = $this->env('MAIL_FROM_NAME', 'SGQ OTI DJ');
     }
     
