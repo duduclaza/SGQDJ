@@ -10,11 +10,18 @@ class EmailService
 {
     private PHPMailer $mailer;
     private ?string $lastError = null;
+    private bool $useResend = true; // Usar Resend por padrão
+    private ?ResendService $resendService = null;
     
     public function __construct()
     {
         $this->mailer = new PHPMailer(true);
         $this->configureMailer();
+        
+        // Inicializar Resend Service
+        if ($this->useResend) {
+            $this->resendService = new ResendService();
+        }
     }
     
     /**
@@ -41,7 +48,7 @@ class EmailService
     private function configureMailer(): void
     {
         try {
-            // Configurações do servidor SMTP (Hostinger)
+            // Configurações do servidor SMTP (Hostinger) - FALLBACK
             $this->mailer->isSMTP();
             $this->mailer->Host       = 'smtp.hostinger.com';
             $this->mailer->SMTPAuth   = true;
@@ -67,8 +74,8 @@ class EmailService
             $this->mailer->isHTML(true);
             $this->mailer->CharSet = 'UTF-8';
             
-            // Debug ativado para troubleshooting e log
-            $this->mailer->SMTPDebug = 0; // Desligado em produção para não sujar o JSON, erros vão pro catch
+            // Debug desligado em produção
+            $this->mailer->SMTPDebug = 0;
             $this->mailer->Debugoutput = function($str, $level) {
                 error_log("PHPMailer Debug [$level]: $str");
             };
@@ -79,7 +86,7 @@ class EmailService
     }
     
     /**
-     * Send email
+     * Send email - Usa Resend API por padrão, PHPMailer como fallback
      * 
      * @param string|array $to Recipient email(s)
      * @param string $subject Email subject
@@ -90,9 +97,32 @@ class EmailService
      */
     public function send($to, string $subject, string $body, ?string $altBody = null, array $attachments = []): bool
     {
+        // Tentar Resend primeiro (se não houver anexos)
+        if ($this->useResend && $this->resendService && empty($attachments)) {
+            error_log("📧 Tentando enviar via Resend API...");
+            $result = $this->resendService->send($to, $subject, $body, $altBody);
+            
+            if ($result) {
+                return true;
+            }
+            
+            // Se falhou, usar PHPMailer como fallback
+            error_log("⚠️ Resend falhou, tentando PHPMailer...");
+            $this->lastError = $this->resendService->getLastError();
+        }
+        
+        // PHPMailer (fallback ou quando há anexos)
+        return $this->sendViaPHPMailer($to, $subject, $body, $altBody, $attachments);
+    }
+    
+    /**
+     * Enviar via PHPMailer (SMTP)
+     */
+    private function sendViaPHPMailer($to, string $subject, string $body, ?string $altBody = null, array $attachments = []): bool
+    {
         try {
             $this->lastError = null;
-            error_log("=== TENTANDO ENVIAR EMAIL ===");
+            error_log("=== TENTANDO ENVIAR EMAIL VIA PHPMAILER ===");
             error_log("Para: " . (is_array($to) ? implode(', ', $to) : $to));
             error_log("Assunto: " . $subject);
             error_log("SMTP Host: " . $this->mailer->Host);
@@ -136,7 +166,7 @@ class EmailService
             $result = $this->mailer->send();
             
             if ($result) {
-                error_log("✅ Email enviado com sucesso!");
+                error_log("✅ Email enviado com sucesso via PHPMailer!");
             } else {
                 $this->lastError = $this->mailer->ErrorInfo ?: 'Falha desconhecida ao enviar email';
                 error_log("❌ Falha ao enviar email: " . $this->lastError);
@@ -146,7 +176,7 @@ class EmailService
             
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
-            error_log("❌ ERRO ao enviar email: " . $e->getMessage());
+            error_log("❌ ERRO ao enviar email via PHPMailer: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
             return false;
         }

@@ -121,3 +121,8 @@ $router->post('/cadastro-pecas/import', [CadastroPecasController::class, 'import
 use App\Controllers\TesteEmailController;
 $router->get('/teste-smtp-debug', [TesteEmailController::class, 'index']);
 $router->post('/teste-smtp-debug', [TesteEmailController::class, 'index']);
+
+// ===== ROTA DE TESTE RESEND API =====
+use App\Controllers\TesteResendController;
+$router->get('/teste-resend', [TesteResendController::class, 'index']);
+$router->post('/teste-resend', [TesteResendController::class, 'index']);
