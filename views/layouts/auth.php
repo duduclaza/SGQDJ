@@ -151,7 +151,7 @@ $title = $title ?? 'OTI - Login';
     
     <!-- Painel Direito - Clean Design -->
     <div class="right-panel hidden md:flex md:w-1/2 items-center justify-center p-12" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%);">
-      <div class="text-center">
+      <div class="text-center flex flex-col items-center">
         <!-- Logo OTI com efeitos premium -->
         <div class="oti-logo-container">
           <h1 class="oti-logo">
@@ -162,7 +162,9 @@ $title = $title ?? 'OTI - Login';
           <div class="oti-glow"></div>
           <div class="oti-reflection"></div>
         </div>
-        <p class="text-lg text-gray-500 font-light tracking-wide typing-effect mt-6" id="typingText"></p>
+        
+        <!-- Frase abaixo do logo -->
+        <p class="text-lg text-gray-500 font-light tracking-wide typing-effect mt-8 block w-full" id="typingText"></p>
         
         <!-- Elemento decorativo animado -->
         <div class="mt-12 flex justify-center gap-3">
@@ -176,8 +178,9 @@ $title = $title ?? 'OTI - Login';
         /* ===== LOGO OTI - EFEITOS PREMIUM ===== */
         .oti-logo-container {
           position: relative;
-          display: inline-block;
-          margin-bottom: 1rem;
+          display: block;
+          margin-bottom: 2rem;
+          width: 100%;
         }
         
         .oti-logo {
