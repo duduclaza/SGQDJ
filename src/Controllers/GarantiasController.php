@@ -1145,6 +1145,53 @@ class GarantiasController
         }
     }
 
+    // Atualizar apenas a tratativa final (sem mudar status)
+    public function updateTratativa($id)
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            $tratativa_final = isset($_POST['tratativa_final']) ? trim($_POST['tratativa_final']) : null;
+            
+            error_log("📝 updateTratativa chamado para garantia #{$id}");
+            
+            // Verificar se a garantia existe
+            $stmt = $this->db->prepare("SELECT id FROM garantias WHERE id = ?");
+            $stmt->execute([$id]);
+            if (!$stmt->fetch()) {
+                echo json_encode(['success' => false, 'message' => 'Garantia não encontrada']);
+                return;
+            }
+            
+            // Atualizar tratativa
+            if (empty($tratativa_final)) {
+                // Excluir tratativa
+                $stmt = $this->db->prepare("
+                    UPDATE garantias 
+                    SET tratativa_final = NULL, updated_at = CURRENT_TIMESTAMP 
+                    WHERE id = ?
+                ");
+                $stmt->execute([$id]);
+                error_log("🗑️ Tratativa final excluída para garantia #{$id}");
+            } else {
+                // Atualizar tratativa
+                $stmt = $this->db->prepare("
+                    UPDATE garantias 
+                    SET tratativa_final = ?, updated_at = CURRENT_TIMESTAMP 
+                    WHERE id = ?
+                ");
+                $stmt->execute([$tratativa_final, $id]);
+                error_log("✅ Tratativa final atualizada para garantia #{$id}");
+            }
+            
+            echo json_encode(['success' => true, 'message' => 'Tratativa atualizada com sucesso!']);
+            
+        } catch (\Exception $e) {
+            error_log("❌ Erro em updateTratativa: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Erro ao atualizar tratativa: ' . $e->getMessage()]);
+        }
+    }
+
     // Download de anexo
     public function downloadAnexo($id)
     {

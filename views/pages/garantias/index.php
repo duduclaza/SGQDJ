@@ -593,18 +593,18 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 </section>
 
-<!-- Modal Tratativa Final - Expandido Fullscreen (fora da section) -->
-<div id="modal-tratativa-final" class="fixed inset-0 bg-black bg-opacity-70 overflow-y-auto h-full w-full hidden" style="z-index: 9999;">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="relative w-full max-w-4xl bg-white shadow-2xl rounded-xl transform transition-all">
+<!-- Modal Tratativa Final - FULLSCREEN cobrindo toda a tela incluindo menu -->
+<div id="modal-tratativa-final" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 99999; overflow-y: auto;">
+    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+        <div style="width: 100%; max-width: 900px; background: white; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-t-xl px-6 py-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-semibold text-white flex items-center">
-                        <span class="text-2xl mr-2">✅</span> Tratativa Final da Garantia
+            <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); border-radius: 16px 16px 0 0; padding: 20px 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-size: 1.5rem; font-weight: 600; color: white; display: flex; align-items: center; margin: 0;">
+                        <span style="font-size: 1.75rem; margin-right: 12px;">✅</span> Tratativa Final da Garantia
                     </h3>
-                    <button onclick="fecharModalTratativaFinal()" class="text-white hover:text-gray-200 transition-colors">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button onclick="fecharModalTratativaFinal()" style="color: white; background: none; border: none; cursor: pointer; padding: 8px;">
+                        <svg style="width: 32px; height: 32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
@@ -612,10 +612,10 @@ if (!isset($_SESSION['user_id'])) {
             </div>
             
             <!-- Body -->
-            <div class="p-6">
-                <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p class="text-green-800 flex items-start">
-                        <span class="text-xl mr-2">💡</span>
+            <div style="padding: 32px;">
+                <div style="margin-bottom: 24px; padding: 16px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px;">
+                    <p style="color: #065f46; display: flex; align-items: flex-start; margin: 0;">
+                        <span style="font-size: 1.5rem; margin-right: 12px;">💡</span>
                         <span><strong>Importante:</strong> Informe detalhadamente o que foi feito para finalizar esta garantia. Esta informação ficará visível no registro e no histórico da garantia.</span>
                     </p>
                 </div>
@@ -623,11 +623,14 @@ if (!isset($_SESSION['user_id'])) {
                 <form id="form-tratativa-final">
                     <input type="hidden" id="tratativa-garantia-id">
                     <input type="hidden" id="tratativa-select-element">
+                    <input type="hidden" id="tratativa-modo-edicao" value="false">
                     
-                    <div class="mb-6">
-                        <label class="block text-lg font-medium text-gray-700 mb-3">Descreva a Tratativa Final: <span class="text-red-500">*</span></label>
-                        <textarea id="tratativa-final-texto" required rows="8" 
-                                  class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 1.125rem; font-weight: 500; color: #374151; margin-bottom: 12px;">
+                            Descreva a Tratativa Final: <span style="color: #ef4444;">*</span>
+                        </label>
+                        <textarea id="tratativa-final-texto" required rows="10" 
+                                  style="width: 100%; padding: 16px; font-size: 1.125rem; border: 2px solid #d1d5db; border-radius: 8px; resize: vertical; min-height: 200px;"
                                   placeholder="Descreva o que foi feito para finalizar a garantia...
 
 Exemplos:
@@ -635,18 +638,18 @@ Exemplos:
 • Crédito concedido ao cliente
 • Produto reparado e devolvido
 • Item trocado por modelo equivalente"></textarea>
-                        <small class="text-gray-500 mt-2 block">Este campo é obrigatório para concluir a garantia</small>
+                        <small style="color: #6b7280; margin-top: 8px; display: block;">Este campo é obrigatório para concluir a garantia</small>
                     </div>
                 </form>
             </div>
             
             <!-- Footer -->
-            <div class="bg-gray-50 rounded-b-xl px-6 py-4 flex justify-end space-x-4">
-                <button type="button" onclick="fecharModalTratativaFinal()" class="px-6 py-3 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition-colors">
+            <div style="background: #f9fafb; border-radius: 0 0 16px 16px; padding: 20px 32px; display: flex; justify-content: flex-end; gap: 16px;">
+                <button type="button" onclick="fecharModalTratativaFinal()" style="padding: 14px 28px; color: #374151; background: #e5e7eb; border: none; border-radius: 8px; font-weight: 500; font-size: 1rem; cursor: pointer;">
                     Cancelar
                 </button>
-                <button type="button" onclick="salvarTratativaFinal()" class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="button" onclick="salvarTratativaFinal()" style="padding: 14px 32px; background: #059669; color: white; border: none; border-radius: 8px; font-weight: 500; font-size: 1rem; cursor: pointer; display: flex; align-items: center;">
+                    <svg style="width: 20px; height: 20px; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     Salvar e Finalizar
@@ -1713,7 +1716,7 @@ function renderizarTabela(dados) {
                 </div>
             </td>
             <td class="px-4 py-3 text-sm max-w-xs">
-                ${getTratativaFinalDisplay(garantia.tratativa_final)}
+                ${getTratativaFinalDisplay(garantia.tratativa_final, garantia.id)}
             </td>
             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-center">
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -1794,11 +1797,14 @@ function getStatusClass(status) {
     return classes[status] || 'bg-gray-100 text-gray-800';
 }
 
-// Função para exibir tratativa final corretamente
-function getTratativaFinalDisplay(tratativa) {
+// Função para exibir tratativa final corretamente com botões de ação
+function getTratativaFinalDisplay(tratativa, garantiaId) {
     // Verifica se é nulo, undefined ou vazio
     if (!tratativa) {
-        return '<span class="text-gray-400 text-xs">-</span>';
+        return `<button onclick="abrirModalEditarTratativa(${garantiaId}, '')" 
+                class="text-gray-400 text-xs hover:text-blue-600 hover:underline" title="Adicionar tratativa final">
+                + Adicionar
+        </button>`;
     }
     
     // Converte para string
@@ -1806,17 +1812,40 @@ function getTratativaFinalDisplay(tratativa) {
     
     // Verifica se é apenas números (não é uma tratativa válida)
     if (/^\d+$/.test(texto)) {
-        return '<span class="text-gray-400 text-xs">-</span>';
+        return `<button onclick="abrirModalEditarTratativa(${garantiaId}, '')" 
+                class="text-gray-400 text-xs hover:text-blue-600 hover:underline" title="Adicionar tratativa final">
+                + Adicionar
+        </button>`;
     }
     
     // Verifica se tem conteúdo real (mais que apenas espaços ou caracteres simples)
     if (texto.length < 3) {
-        return '<span class="text-gray-400 text-xs">-</span>';
+        return `<button onclick="abrirModalEditarTratativa(${garantiaId}, '')" 
+                class="text-gray-400 text-xs hover:text-blue-600 hover:underline" title="Adicionar tratativa final">
+                + Adicionar
+        </button>`;
     }
     
-    // É uma tratativa válida, exibe com destaque
-    return `<div class="truncate bg-green-50 border border-green-200 rounded px-2 py-1" title="${texto}">
-        <span class="text-green-800">${texto}</span>
+    // É uma tratativa válida, exibe com destaque e botões de ação
+    const textoEscapado = texto.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+    return `<div class="group relative">
+        <div class="truncate bg-green-50 border border-green-200 rounded px-2 py-1" title="${texto}">
+            <span class="text-green-800 text-xs">${texto.length > 30 ? texto.substring(0, 30) + '...' : texto}</span>
+        </div>
+        <div class="absolute right-0 top-0 hidden group-hover:flex space-x-1 bg-white rounded shadow-sm border p-1">
+            <button onclick="abrirModalEditarTratativa(${garantiaId}, '${textoEscapado}')" 
+                    class="text-blue-600 hover:text-blue-800 p-1" title="Editar">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+                </svg>
+            </button>
+            <button onclick="excluirTratativaFinal(${garantiaId})" 
+                    class="text-red-600 hover:text-red-800 p-1" title="Excluir">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
     </div>`;
 }
 
@@ -1989,11 +2018,19 @@ async function atualizarStatusGarantia(id, newStatus, selectElement, tratativaFi
 // Variável para guardar referência do select
 let selectElementTratativa = null;
 
-// Abrir modal de tratativa final
+// Abrir modal de tratativa final (ao finalizar garantia)
 function abrirModalTratativaFinal(garantiaId, selectElement) {
     document.getElementById('tratativa-garantia-id').value = garantiaId;
     document.getElementById('tratativa-final-texto').value = '';
+    document.getElementById('tratativa-modo-edicao').value = 'false';
     selectElementTratativa = selectElement;
+    
+    // Atualizar título do modal
+    const titulo = document.querySelector('#modal-tratativa-final h3');
+    if (titulo) {
+        titulo.innerHTML = '<span style="font-size: 1.75rem; margin-right: 12px;">✅</span> Tratativa Final da Garantia';
+    }
+    
     document.getElementById('modal-tratativa-final').classList.remove('hidden');
 }
 
@@ -2015,6 +2052,7 @@ function fecharModalTratativaFinal() {
 async function salvarTratativaFinal() {
     const garantiaId = document.getElementById('tratativa-garantia-id').value;
     const tratativaFinal = document.getElementById('tratativa-final-texto').value.trim();
+    const isEditando = document.getElementById('tratativa-modo-edicao').value === 'true';
     
     if (!tratativaFinal) {
         alert('Por favor, informe a tratativa final antes de concluir.');
@@ -2024,10 +2062,99 @@ async function salvarTratativaFinal() {
     // Fechar modal
     document.getElementById('modal-tratativa-final').classList.add('hidden');
     
-    // Atualizar status com a tratativa
-    await atualizarStatusGarantia(garantiaId, 'Finalizado', selectElementTratativa, tratativaFinal);
+    if (isEditando) {
+        // Edição direta da tratativa (sem mudar status)
+        await atualizarTratativaFinal(garantiaId, tratativaFinal);
+    } else {
+        // Atualizar status com a tratativa
+        await atualizarStatusGarantia(garantiaId, 'Finalizado', selectElementTratativa, tratativaFinal);
+    }
     
     selectElementTratativa = null;
+}
+
+// Abrir modal para editar tratativa existente
+function abrirModalEditarTratativa(garantiaId, tratativaAtual) {
+    document.getElementById('tratativa-garantia-id').value = garantiaId;
+    document.getElementById('tratativa-final-texto').value = tratativaAtual || '';
+    document.getElementById('tratativa-modo-edicao').value = 'true';
+    selectElementTratativa = null;
+    
+    // Mudar título do modal
+    const titulo = document.querySelector('#modal-tratativa-final h3');
+    if (titulo) {
+        titulo.innerHTML = tratativaAtual ? 
+            '<span class="text-2xl mr-2">✏️</span> Editar Tratativa Final' : 
+            '<span class="text-2xl mr-2">➕</span> Adicionar Tratativa Final';
+    }
+    
+    document.getElementById('modal-tratativa-final').classList.remove('hidden');
+}
+
+// Atualizar apenas a tratativa final (sem mudar status)
+async function atualizarTratativaFinal(garantiaId, tratativaFinal) {
+    try {
+        console.log('📝 Atualizando tratativa final:', { garantiaId, tratativaFinal });
+        
+        const formData = new FormData();
+        formData.append('tratativa_final', tratativaFinal);
+        
+        const response = await fetch(`/garantias/${garantiaId}/update-tratativa`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result && result.success) {
+            showNotification('Tratativa atualizada com sucesso!', 'success');
+            carregarGarantias();
+        } else {
+            alert('Erro: ' + (result ? result.message : 'Resposta inválida'));
+        }
+    } catch (error) {
+        console.error('❌ Erro ao atualizar tratativa:', error);
+        alert('Erro ao atualizar tratativa: ' + error.message);
+    }
+}
+
+// Excluir tratativa final
+async function excluirTratativaFinal(garantiaId) {
+    if (!confirm('Tem certeza que deseja excluir a tratativa final desta garantia?')) {
+        return;
+    }
+    
+    try {
+        console.log('🗑️ Excluindo tratativa final:', garantiaId);
+        
+        const formData = new FormData();
+        formData.append('tratativa_final', '');
+        
+        const response = await fetch(`/garantias/${garantiaId}/update-tratativa`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result && result.success) {
+            showNotification('Tratativa excluída com sucesso!', 'success');
+            carregarGarantias();
+        } else {
+            alert('Erro: ' + (result ? result.message : 'Resposta inválida'));
+        }
+    } catch (error) {
+        console.error('❌ Erro ao excluir tratativa:', error);
+        alert('Erro ao excluir tratativa: ' + error.message);
+    }
 }
 
 // Download de todos os anexos
