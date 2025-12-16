@@ -2111,6 +2111,13 @@ let selectElementTratativa = null;
 
 // Abrir modal de tratativa final (ao finalizar garantia)
 function abrirModalTratativaFinal(garantiaId, selectElement) {
+    const modal = document.getElementById('modal-tratativa-final');
+    
+    // Mover modal para o body se ainda não estiver lá
+    if (modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+    
     document.getElementById('tratativa-garantia-id').value = garantiaId;
     document.getElementById('tratativa-final-texto').value = '';
     document.getElementById('tratativa-modo-edicao').value = 'false';
@@ -2122,7 +2129,7 @@ function abrirModalTratativaFinal(garantiaId, selectElement) {
         titulo.textContent = 'Tratativa Final da Garantia';
     }
     
-    document.getElementById('modal-tratativa-final').classList.remove('hidden');
+    modal.classList.remove('hidden');
 }
 
 // Fechar modal de tratativa final
@@ -2166,6 +2173,13 @@ async function salvarTratativaFinal() {
 
 // Abrir modal para editar tratativa existente
 function abrirModalEditarTratativa(garantiaId, tratativaAtual) {
+    const modal = document.getElementById('modal-tratativa-final');
+    
+    // Mover modal para o body se ainda não estiver lá
+    if (modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+    
     document.getElementById('tratativa-garantia-id').value = garantiaId;
     document.getElementById('tratativa-final-texto').value = tratativaAtual || '';
     document.getElementById('tratativa-modo-edicao').value = 'true';
@@ -2177,7 +2191,7 @@ function abrirModalEditarTratativa(garantiaId, tratativaAtual) {
         titulo.textContent = tratativaAtual ? 'Editar Tratativa Final' : 'Adicionar Tratativa Final';
     }
     
-    document.getElementById('modal-tratativa-final').classList.remove('hidden');
+    modal.classList.remove('hidden');
 }
 
 // Atualizar apenas a tratativa final (sem mudar status)
