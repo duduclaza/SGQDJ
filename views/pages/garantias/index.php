@@ -554,6 +554,10 @@ if (!isset($_SESSION['user_id'])) {
                             Descrição do Defeito
                             <div class="column-resizer"></div>
                         </th>
+                        <th data-column="tratativa_final" class="resizable-column px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 250px; min-width: 150px;">
+                            Tratativa Final
+                            <div class="column-resizer"></div>
+                        </th>
                         <th data-column="itens" class="resizable-column px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 80px; min-width: 60px;">
                             Itens
                             <div class="column-resizer"></div>
@@ -586,6 +590,52 @@ if (!isset($_SESSION['user_id'])) {
     <div id="loading" class="text-center py-8 hidden">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         <p class="mt-2 text-gray-600">Carregando...</p>
+    </div>
+
+    <!-- Modal Tratativa Final -->
+    <div id="modal-tratativa-final" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        <span class="text-green-500">✅</span> Tratativa Final da Garantia
+                    </h3>
+                    <button onclick="fecharModalTratativaFinal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p class="text-sm text-green-800">
+                        <strong>💡 Importante:</strong> Informe o que foi feito para finalizar esta garantia. Esta informação ficará visível no registro da garantia.
+                    </p>
+                </div>
+                
+                <form id="form-tratativa-final">
+                    <input type="hidden" id="tratativa-garantia-id">
+                    <input type="hidden" id="tratativa-select-element">
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tratativa Final: *</label>
+                        <textarea id="tratativa-final-texto" required rows="5" 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                  placeholder="Descreva o que foi feito para finalizar a garantia...&#10;&#10;Ex: Peça substituída, crédito concedido, produto reparado, etc."></textarea>
+                        <small class="text-gray-500 mt-1 block">Campo obrigatório para concluir a garantia</small>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="fecharModalTratativaFinal()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md">
+                            Cancelar
+                        </button>
+                        <button type="button" onclick="salvarTratativaFinal()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md">
+                            ✓ Salvar e Finalizar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -1645,6 +1695,14 @@ function renderizarTabela(dados) {
                     ${garantia.descricao_defeito ? garantia.descricao_defeito : '<span class="text-gray-400 text-xs">-</span>'}
                 </div>
             </td>
+            <td class="px-4 py-3 text-sm max-w-xs">
+                ${garantia.tratativa_final ? 
+                    `<div class="truncate bg-green-50 border border-green-200 rounded px-2 py-1" title="${garantia.tratativa_final}">
+                        <span class="text-green-800">${garantia.tratativa_final}</span>
+                    </div>` : 
+                    '<span class="text-gray-400 text-xs">-</span>'
+                }
+            </td>
             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-center">
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                     ${parseInt(garantia.total_itens) || 0}
@@ -1830,11 +1888,26 @@ function filtrarGarantias() {
 
 // Atualizar status da garantia no grid
 async function updateGarantiaStatus(id, newStatus, selectElement) {
+    // Se o status é "Finalizado", abrir modal para informar tratativa final
+    if (newStatus === 'Finalizado') {
+        abrirModalTratativaFinal(id, selectElement);
+        return;
+    }
+    
+    // Para outros status, atualizar diretamente
+    await atualizarStatusGarantia(id, newStatus, selectElement);
+}
+
+// Função interna para atualizar status
+async function atualizarStatusGarantia(id, newStatus, selectElement, tratativaFinal = null) {
     try {
-        console.log('🔄 Atualizando status da garantia:', { id, newStatus });
+        console.log('🔄 Atualizando status da garantia:', { id, newStatus, tratativaFinal });
         
         const formData = new FormData();
         formData.append('status', newStatus);
+        if (tratativaFinal) {
+            formData.append('tratativa_final', tratativaFinal);
+        }
         
         const response = await fetch(`/garantias/${id}/update-status`, {
             method: 'POST',
@@ -1858,6 +1931,11 @@ async function updateGarantiaStatus(id, newStatus, selectElement) {
             
             // Mostrar notificação de sucesso
             showNotification('Status atualizado com sucesso!', 'success');
+            
+            // Se foi finalizado, recarregar para mostrar tratativa no grid
+            if (newStatus === 'Finalizado') {
+                carregarGarantias();
+            }
         } else {
             console.error('❌ Erro retornado pela API:', result);
             alert('Erro: ' + (result ? result.message : 'Resposta inválida'));
@@ -1868,6 +1946,50 @@ async function updateGarantiaStatus(id, newStatus, selectElement) {
         alert('Erro ao atualizar status: ' + error.message);
         location.reload();
     }
+}
+
+// Variável para guardar referência do select
+let selectElementTratativa = null;
+
+// Abrir modal de tratativa final
+function abrirModalTratativaFinal(garantiaId, selectElement) {
+    document.getElementById('tratativa-garantia-id').value = garantiaId;
+    document.getElementById('tratativa-final-texto').value = '';
+    selectElementTratativa = selectElement;
+    document.getElementById('modal-tratativa-final').classList.remove('hidden');
+}
+
+// Fechar modal de tratativa final
+function fecharModalTratativaFinal() {
+    document.getElementById('modal-tratativa-final').classList.add('hidden');
+    // Reverter o select para o status anterior
+    if (selectElementTratativa) {
+        const garantiaId = document.getElementById('tratativa-garantia-id').value;
+        const garantia = garantias.find(g => g.id == garantiaId);
+        if (garantia) {
+            selectElementTratativa.value = garantia.status;
+        }
+    }
+    selectElementTratativa = null;
+}
+
+// Salvar tratativa final e atualizar status
+async function salvarTratativaFinal() {
+    const garantiaId = document.getElementById('tratativa-garantia-id').value;
+    const tratativaFinal = document.getElementById('tratativa-final-texto').value.trim();
+    
+    if (!tratativaFinal) {
+        alert('Por favor, informe a tratativa final antes de concluir.');
+        return;
+    }
+    
+    // Fechar modal
+    document.getElementById('modal-tratativa-final').classList.add('hidden');
+    
+    // Atualizar status com a tratativa
+    await atualizarStatusGarantia(garantiaId, 'Finalizado', selectElementTratativa, tratativaFinal);
+    
+    selectElementTratativa = null;
 }
 
 // Download de todos os anexos

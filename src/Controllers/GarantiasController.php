@@ -1055,6 +1055,7 @@ class GarantiasController
         
         try {
             $status = $_POST['status'] ?? '';
+            $tratativa_final = isset($_POST['tratativa_final']) ? trim($_POST['tratativa_final']) : null;
             
             error_log("📧 updateStatus chamado para garantia #{$id} com novo status: {$status}");
             
@@ -1068,6 +1069,12 @@ class GarantiasController
             
             if (!in_array($status, $statusValidos)) {
                 echo json_encode(['success' => false, 'message' => 'Status inválido']);
+                return;
+            }
+            
+            // Validar tratativa final obrigatória para status Finalizado
+            if ($status === 'Finalizado' && empty($tratativa_final)) {
+                echo json_encode(['success' => false, 'message' => 'A tratativa final é obrigatória para finalizar a garantia']);
                 return;
             }
             
@@ -1091,21 +1098,35 @@ class GarantiasController
             error_log("📊 Status anterior: {$statusAnterior}, Usuário notificado: " . ($usuarioNotificadoId ?: 'nenhum'));
             
             // Verificar se houve mudança de status
-            if ($statusAnterior === $status) {
+            if ($statusAnterior === $status && empty($tratativa_final)) {
                 echo json_encode(['success' => true, 'message' => 'Status já está atualizado']);
                 return;
             }
             
-            // Atualizar status
-            $stmt = $this->db->prepare("
-                UPDATE garantias 
-                SET status = ?, updated_at = CURRENT_TIMESTAMP 
-                WHERE id = ?
-            ");
-            $stmt->execute([$status, $id]);
+            // Atualizar status e tratativa final (se Finalizado)
+            if ($status === 'Finalizado' && !empty($tratativa_final)) {
+                $stmt = $this->db->prepare("
+                    UPDATE garantias 
+                    SET status = ?, tratativa_final = ?, data_finalizacao = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
+                    WHERE id = ?
+                ");
+                $stmt->execute([$status, $tratativa_final, $id]);
+                error_log("✅ Status atualizado para Finalizado com tratativa: {$tratativa_final}");
+            } else {
+                $stmt = $this->db->prepare("
+                    UPDATE garantias 
+                    SET status = ?, updated_at = CURRENT_TIMESTAMP 
+                    WHERE id = ?
+                ");
+                $stmt->execute([$status, $id]);
+            }
             
             // Registrar no histórico de status
-            $this->registrarHistoricoStatus($id, $statusAnterior, $status, 'Status atualizado via grid');
+            $observacaoHistorico = 'Status atualizado via grid';
+            if (!empty($tratativa_final)) {
+                $observacaoHistorico .= '. Tratativa: ' . substr($tratativa_final, 0, 200);
+            }
+            $this->registrarHistoricoStatus($id, $statusAnterior, $status, $observacaoHistorico);
             error_log("✅ Histórico de status registrado");
             
             // Enviar notificação se houver usuário configurado
