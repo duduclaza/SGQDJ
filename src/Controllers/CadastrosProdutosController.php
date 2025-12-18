@@ -37,7 +37,8 @@ class CadastrosProdutosController
         // Estatísticas
         $stats = $this->getEstatisticas();
 
-        require __DIR__ . '/../../views/pages/cadastros-2/index.php';
+        $viewFile = __DIR__ . '/../../views/pages/cadastros-2/index.php';
+        include __DIR__ . '/../../views/layouts/main.php';
     }
 
     /**
