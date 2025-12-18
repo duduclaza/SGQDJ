@@ -114,7 +114,8 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
     <!-- Filtros -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Filtros de Busca</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
+        <!-- Primeira linha de filtros -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Número de Série</label>
                 <input type="text" id="filtro-numero-serie" placeholder="Digite o número de série" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -136,6 +137,9 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
                     <?php endforeach; ?>
                 </select>
             </div>
+        </div>
+        <!-- Segunda linha de filtros -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Data Início</label>
                 <input type="date" id="filtro-data-inicio" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -152,14 +156,14 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
                     <option value="Concluído">✅ Concluído</option>
                 </select>
             </div>
-        </div>
-        <div class="mt-4 flex justify-end space-x-3">
-            <button onclick="limparFiltros()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md">
-                Limpar
-            </button>
-            <button onclick="aplicarFiltros()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">
-                Buscar
-            </button>
+            <div class="flex items-end justify-end space-x-3">
+                <button onclick="limparFiltros()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md">
+                    Limpar
+                </button>
+                <button onclick="aplicarFiltros()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">
+                    Buscar
+                </button>
+            </div>
         </div>
     </div>
 
