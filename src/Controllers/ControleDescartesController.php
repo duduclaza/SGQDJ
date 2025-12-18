@@ -55,6 +55,7 @@ class ControleDescartesController
 
             // Filtros
             $numero_serie = $_GET['numero_serie'] ?? '';
+            $codigo_produto = $_GET['codigo_produto'] ?? '';
             $numero_os = $_GET['numero_os'] ?? '';
             $filial_id = $_GET['filial_id'] ?? '';
             $data_inicio = $_GET['data_inicio'] ?? '';
@@ -80,6 +81,12 @@ class ControleDescartesController
             if ($numero_serie) {
                 $sql .= " AND d.numero_serie LIKE ?";
                 $params[] = "%{$numero_serie}%";
+            }
+            
+            // Filtro por código do produto
+            if ($codigo_produto) {
+                $sql .= " AND d.codigo_produto LIKE ?";
+                $params[] = "%{$codigo_produto}%";
             }
             
             if ($numero_os) {

@@ -114,10 +114,14 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
     <!-- Filtros -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Filtros de Busca</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Número de Série</label>
                 <input type="text" id="filtro-numero-serie" placeholder="Digite o número de série" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Código do Produto</label>
+                <input type="text" id="filtro-codigo-produto" placeholder="Buscar por código" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Número da OS</label>
@@ -170,7 +174,8 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número de Série</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filial</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produto</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código Produto</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Descarte</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responsável</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">OS</th>
@@ -468,12 +473,34 @@ let descartes = [];
 document.addEventListener('DOMContentLoaded', function() {
     carregarDescartes();
     
+    // Debounce para busca em tempo real
+    let debounceTimer = null;
+    const debounce = (callback, delay = 400) => {
+        return (...args) => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => callback.apply(this, args), delay);
+        };
+    };
+    
     // Event listeners para filtros
     document.getElementById('filtro-numero-serie').addEventListener('keyup', function(e) {
         if (e.key === 'Enter') aplicarFiltros();
     });
     document.getElementById('filtro-numero-os').addEventListener('keyup', function(e) {
         if (e.key === 'Enter') aplicarFiltros();
+    });
+    
+    // Busca em tempo real por código do produto
+    document.getElementById('filtro-codigo-produto').addEventListener('input', debounce(function() {
+        aplicarFiltros();
+    }, 400));
+    
+    // Enter também funciona para código do produto
+    document.getElementById('filtro-codigo-produto').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            clearTimeout(debounceTimer);
+            aplicarFiltros();
+        }
     });
 });
 
@@ -485,6 +512,7 @@ function carregarDescartes() {
     
     const params = new URLSearchParams();
     const numeroSerie = document.getElementById('filtro-numero-serie').value;
+    const codigoProduto = document.getElementById('filtro-codigo-produto').value;
     const numeroOs = document.getElementById('filtro-numero-os').value;
     const filialId = document.getElementById('filtro-filial').value;
     const dataInicio = document.getElementById('filtro-data-inicio').value;
@@ -492,6 +520,7 @@ function carregarDescartes() {
     const statusAndamento = document.getElementById('filtro-andamento').value;
     
     if (numeroSerie) params.append('numero_serie', numeroSerie);
+    if (codigoProduto) params.append('codigo_produto', codigoProduto);
     if (numeroOs) params.append('numero_os', numeroOs);
     if (filialId) params.append('filial_id', filialId);
     if (dataInicio) params.append('data_inicio', dataInicio);
@@ -534,9 +563,11 @@ function renderizarTabela() {
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 ${escapeHtml(descarte.filial_nome || '')}
             </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <span class="font-mono bg-gray-100 px-2 py-1 rounded">${escapeHtml(descarte.codigo_produto || '-')}</span>
+            </td>
             <td class="px-6 py-4 text-sm text-gray-500">
-                <div class="font-medium">${escapeHtml(descarte.codigo_produto)}</div>
-                <div class="text-gray-400 truncate max-w-xs">${escapeHtml(descarte.descricao_produto)}</div>
+                <div class="truncate max-w-xs" title="${escapeHtml(descarte.descricao_produto || '')}">${escapeHtml(descarte.descricao_produto || '-')}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 ${formatarData(descarte.data_descarte)}
@@ -593,6 +624,7 @@ function aplicarFiltros() {
 // Limpar filtros
 function limparFiltros() {
     document.getElementById('filtro-numero-serie').value = '';
+    document.getElementById('filtro-codigo-produto').value = '';
     document.getElementById('filtro-numero-os').value = '';
     document.getElementById('filtro-filial').value = '';
     document.getElementById('filtro-data-inicio').value = '';
