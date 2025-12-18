@@ -669,6 +669,14 @@ $router->get('/usabilidade/api/logins-por-dia', [App\Controllers\UsabilidadeCont
 $router->get('/usabilidade/api/historico', [App\Controllers\UsabilidadeController::class, 'getHistorico']);
 $router->get('/usabilidade/api/estatisticas', [App\Controllers\UsabilidadeController::class, 'getEstatisticas']);
 
+// ===== MÓDULO CADASTROS 2.0 (SUPER ADMIN ONLY) =====
+$router->get('/cadastros-2', [App\Controllers\CadastrosProdutosController::class, 'index']);
+$router->get('/cadastros-2/list', [App\Controllers\CadastrosProdutosController::class, 'list']);
+$router->get('/cadastros-2/get/{id}', [App\Controllers\CadastrosProdutosController::class, 'get']);
+$router->post('/cadastros-2/store', [App\Controllers\CadastrosProdutosController::class, 'store']);
+$router->post('/cadastros-2/update', [App\Controllers\CadastrosProdutosController::class, 'update']);
+$router->post('/cadastros-2/delete', [App\Controllers\CadastrosProdutosController::class, 'delete']);
+
 // Dispatch
 try {
     $currentRoute = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
