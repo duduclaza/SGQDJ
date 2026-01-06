@@ -13,6 +13,59 @@ class ControleDescartesController
     public function __construct()
     {
         $this->db = Database::getInstance();
+        $this->ensureLogTableExists();
+    }
+    
+    // Garantir que a tabela de log existe
+    private function ensureLogTableExists()
+    {
+        try {
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS controle_descartes_log (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    descarte_id INT NULL,
+                    acao VARCHAR(50) NOT NULL,
+                    dados_anteriores JSON NULL,
+                    dados_novos JSON NULL,
+                    usuario_id INT NOT NULL,
+                    usuario_nome VARCHAR(255) NOT NULL,
+                    ip_address VARCHAR(45) NULL,
+                    descricao VARCHAR(500) NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_descarte_id (descarte_id),
+                    INDEX idx_created_at (created_at),
+                    INDEX idx_usuario_id (usuario_id),
+                    INDEX idx_acao (acao)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+        } catch (\Exception $e) {
+            error_log('Erro ao criar tabela de log de descartes: ' . $e->getMessage());
+        }
+    }
+    
+    // Registrar ação no log
+    private function logAcao($descarteId, $acao, $dadosAnteriores = null, $dadosNovos = null, $descricao = null)
+    {
+        try {
+            $stmt = $this->db->prepare("
+                INSERT INTO controle_descartes_log 
+                (descarte_id, acao, dados_anteriores, dados_novos, usuario_id, usuario_nome, ip_address, descricao)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            
+            $stmt->execute([
+                $descarteId,
+                $acao,
+                $dadosAnteriores ? json_encode($dadosAnteriores) : null,
+                $dadosNovos ? json_encode($dadosNovos) : null,
+                $_SESSION['user_id'] ?? 0,
+                $_SESSION['user_name'] ?? 'Sistema',
+                $_SERVER['REMOTE_ADDR'] ?? null,
+                $descricao
+            ]);
+        } catch (\Exception $e) {
+            error_log('Erro ao registrar log de descartes: ' . $e->getMessage());
+        }
     }
 
     // Página principal - Lista de descartes
@@ -39,7 +92,7 @@ class ControleDescartesController
         }
     }
 
-    // Listar descartes com filtros
+    // Listar descartes com filtros e paginação
     public function listDescartes()
     {
         // Limpar qualquer output anterior
@@ -61,7 +114,15 @@ class ControleDescartesController
             $data_inicio = $_GET['data_inicio'] ?? '';
             $data_fim = $_GET['data_fim'] ?? '';
             $status_andamento = $_GET['status_andamento'] ?? '';
+            
+            // Paginação
+            $page = max(1, intval($_GET['page'] ?? 1));
+            $per_page = max(1, min(100, intval($_GET['per_page'] ?? 10))); // Limite entre 1 e 100
+            $offset = ($page - 1) * $per_page;
 
+            // Construir query base para contagem
+            $countSql = "SELECT COUNT(*) as total FROM controle_descartes d WHERE 1=1";
+            
             // Construir query base
             $sql = "
                 SELECT d.*, 
@@ -76,46 +137,55 @@ class ControleDescartesController
             ";
             
             $params = [];
+            $whereClause = "";
 
             // Filtros
             if ($numero_serie) {
-                $sql .= " AND d.numero_serie LIKE ?";
+                $whereClause .= " AND d.numero_serie LIKE ?";
                 $params[] = "%{$numero_serie}%";
             }
             
             // Filtro por código do produto
             if ($codigo_produto) {
-                $sql .= " AND d.codigo_produto LIKE ?";
+                $whereClause .= " AND d.codigo_produto LIKE ?";
                 $params[] = "%{$codigo_produto}%";
             }
             
             if ($numero_os) {
-                $sql .= " AND d.numero_os LIKE ?";
+                $whereClause .= " AND d.numero_os LIKE ?";
                 $params[] = "%{$numero_os}%";
             }
             
             if ($filial_id) {
-                $sql .= " AND d.filial_id = ?";
+                $whereClause .= " AND d.filial_id = ?";
                 $params[] = $filial_id;
             }
             
             if ($data_inicio) {
-                $sql .= " AND d.data_descarte >= ?";
+                $whereClause .= " AND d.data_descarte >= ?";
                 $params[] = $data_inicio;
             }
             
             if ($data_fim) {
-                $sql .= " AND d.data_descarte <= ?";
+                $whereClause .= " AND d.data_descarte <= ?";
                 $params[] = $data_fim;
             }
             
             // Filtro de status de andamento (para área técnica)
             if ($status_andamento) {
-                $sql .= " AND COALESCE(d.status_andamento, 'Em aberto') = ?";
+                $whereClause .= " AND COALESCE(d.status_andamento, 'Em aberto') = ?";
                 $params[] = $status_andamento;
             }
+            
+            // Contar total de registros
+            $countStmt = $this->db->prepare($countSql . $whereClause);
+            $countStmt->execute($params);
+            $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            $total_pages = ceil($total / $per_page);
 
+            $sql .= $whereClause;
             $sql .= " ORDER BY d.data_descarte DESC, d.created_at DESC";
+            $sql .= " LIMIT {$per_page} OFFSET {$offset}";
 
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
@@ -128,7 +198,16 @@ class ControleDescartesController
                 unset($descarte['anexo_os_blob']);
             }
 
-            echo json_encode(['success' => true, 'data' => $descartes]);
+            echo json_encode([
+                'success' => true, 
+                'data' => $descartes,
+                'pagination' => [
+                    'page' => $page,
+                    'per_page' => $per_page,
+                    'total' => (int)$total,
+                    'total_pages' => (int)$total_pages
+                ]
+            ]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Erro ao carregar descartes: ' . $e->getMessage()]);
         }
@@ -260,6 +339,25 @@ class ControleDescartesController
 
             $descarte_id = $this->db->lastInsertId();
             
+            // Registrar log de criação
+            $dadosNovos = [
+                'numero_serie' => $_POST['numero_serie'],
+                'filial_id' => $_POST['filial_id'],
+                'codigo_produto' => $_POST['codigo_produto'],
+                'descricao_produto' => $_POST['descricao_produto'],
+                'data_descarte' => $data_descarte,
+                'numero_os' => $_POST['numero_os'] ?? null,
+                'responsavel_tecnico' => $_POST['responsavel_tecnico'],
+                'observacoes' => $_POST['observacoes'] ?? null
+            ];
+            $this->logAcao(
+                $descarte_id, 
+                'INSERT', 
+                null, 
+                $dadosNovos, 
+                "Novo descarte criado - Série: {$_POST['numero_serie']}"
+            );
+            
             // Enviar notificação por email para admins e qualidade
             try {
                 $this->notificarNovoDescarte($descarte_id);
@@ -346,6 +444,18 @@ class ControleDescartesController
                 $anexo_tamanho = $file['size'];
             }
 
+            // Guardar dados anteriores para log
+            $dadosAnteriores = [
+                'numero_serie' => $descarte['numero_serie'],
+                'filial_id' => $descarte['filial_id'],
+                'codigo_produto' => $descarte['codigo_produto'],
+                'descricao_produto' => $descarte['descricao_produto'],
+                'data_descarte' => $descarte['data_descarte'],
+                'numero_os' => $descarte['numero_os'],
+                'responsavel_tecnico' => $descarte['responsavel_tecnico'],
+                'observacoes' => $descarte['observacoes']
+            ];
+
             // Atualizar descarte
             $stmt = $this->db->prepare("
                 UPDATE controle_descartes SET 
@@ -373,6 +483,25 @@ class ControleDescartesController
                 $_SESSION['user_id'],
                 $descarte_id
             ]);
+            
+            // Registrar log de atualização
+            $dadosNovos = [
+                'numero_serie' => $_POST['numero_serie'],
+                'filial_id' => $_POST['filial_id'],
+                'codigo_produto' => $_POST['codigo_produto'],
+                'descricao_produto' => $_POST['descricao_produto'],
+                'data_descarte' => $data_descarte,
+                'numero_os' => $_POST['numero_os'] ?? null,
+                'responsavel_tecnico' => $_POST['responsavel_tecnico'],
+                'observacoes' => $_POST['observacoes'] ?? null
+            ];
+            $this->logAcao(
+                $descarte_id, 
+                'UPDATE', 
+                $dadosAnteriores, 
+                $dadosNovos, 
+                "Descarte atualizado - Série: {$_POST['numero_serie']}"
+            );
 
             echo json_encode(['success' => true, 'message' => 'Descarte atualizado com sucesso!']);
         } catch (\Exception $e) {
@@ -380,7 +509,7 @@ class ControleDescartesController
         }
     }
 
-    // Excluir descarte
+    // Excluir descarte (requer senha de admin)
     public function delete()
     {
         // Limpar qualquer output anterior
@@ -389,15 +518,52 @@ class ControleDescartesController
         
         try {
             $descarte_id = $_POST['id'] ?? 0;
+            $admin_password = $_POST['admin_password'] ?? '';
 
             if (!$descarte_id) {
                 echo json_encode(['success' => false, 'message' => 'ID do descarte é obrigatório']);
+                return;
+            }
+            
+            // Verificar se senha foi fornecida
+            if (empty($admin_password)) {
+                echo json_encode(['success' => false, 'message' => 'Senha de administrador é obrigatória para exclusão']);
                 return;
             }
 
             // Verificar permissão
             if (!PermissionService::hasPermission($_SESSION['user_id'], 'controle_descartes', 'delete')) {
                 echo json_encode(['success' => false, 'message' => 'Sem permissão para excluir descartes']);
+                return;
+            }
+            
+            // Verificar senha de um administrador
+            $stmt = $this->db->prepare("
+                SELECT id, password FROM users 
+                WHERE role IN ('admin', 'super_admin') 
+                AND status = 'active'
+            ");
+            $stmt->execute();
+            $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $senhaValida = false;
+            foreach ($admins as $admin) {
+                if (password_verify($admin_password, $admin['password'])) {
+                    $senhaValida = true;
+                    break;
+                }
+            }
+            
+            if (!$senhaValida) {
+                // Registrar tentativa de exclusão falha
+                $this->logAcao(
+                    $descarte_id, 
+                    'DELETE_FAILED', 
+                    null, 
+                    null, 
+                    "Tentativa de exclusão com senha inválida - ID: {$descarte_id}"
+                );
+                echo json_encode(['success' => false, 'message' => 'Senha de administrador inválida']);
                 return;
             }
 
@@ -407,10 +573,31 @@ class ControleDescartesController
                 echo json_encode(['success' => false, 'message' => 'Descarte não encontrado']);
                 return;
             }
+            
+            // Guardar dados para log antes de excluir
+            $dadosAnteriores = [
+                'numero_serie' => $descarte['numero_serie'],
+                'filial_id' => $descarte['filial_id'],
+                'codigo_produto' => $descarte['codigo_produto'],
+                'descricao_produto' => $descarte['descricao_produto'],
+                'data_descarte' => $descarte['data_descarte'],
+                'numero_os' => $descarte['numero_os'],
+                'responsavel_tecnico' => $descarte['responsavel_tecnico'],
+                'observacoes' => $descarte['observacoes']
+            ];
 
             // Excluir descarte
             $stmt = $this->db->prepare("DELETE FROM controle_descartes WHERE id = ?");
             $stmt->execute([$descarte_id]);
+            
+            // Registrar log de exclusão
+            $this->logAcao(
+                $descarte_id, 
+                'DELETE', 
+                $dadosAnteriores, 
+                null, 
+                "Descarte excluído - Série: {$descarte['numero_serie']}"
+            );
 
             echo json_encode(['success' => true, 'message' => 'Descarte excluído com sucesso!']);
         } catch (\Exception $e) {
@@ -482,6 +669,148 @@ class ControleDescartesController
         } catch (\Exception $e) {
             http_response_code(500);
             echo 'Erro ao baixar anexo: ' . $e->getMessage();
+        }
+    }
+    
+    // Listar logs de ações
+    public function listLogs()
+    {
+        ob_clean();
+        header('Content-Type: application/json');
+        
+        try {
+            // Verificar permissão
+            if (!PermissionService::hasPermission($_SESSION['user_id'], 'controle_descartes', 'view')) {
+                echo json_encode(['success' => false, 'message' => 'Sem permissão para visualizar logs']);
+                return;
+            }
+            
+            // Filtros
+            $acao = $_GET['acao'] ?? '';
+            $data_inicio = $_GET['data_inicio'] ?? '';
+            $data_fim = $_GET['data_fim'] ?? '';
+            $page = max(1, intval($_GET['page'] ?? 1));
+            $per_page = max(1, min(50, intval($_GET['per_page'] ?? 20)));
+            $offset = ($page - 1) * $per_page;
+            
+            // Query de contagem
+            $countSql = "SELECT COUNT(*) as total FROM controle_descartes_log WHERE 1=1";
+            $params = [];
+            $whereClause = "";
+            
+            if ($acao) {
+                $whereClause .= " AND acao = ?";
+                $params[] = $acao;
+            }
+            
+            if ($data_inicio) {
+                $whereClause .= " AND DATE(created_at) >= ?";
+                $params[] = $data_inicio;
+            }
+            
+            if ($data_fim) {
+                $whereClause .= " AND DATE(created_at) <= ?";
+                $params[] = $data_fim;
+            }
+            
+            // Contar total
+            $countStmt = $this->db->prepare($countSql . $whereClause);
+            $countStmt->execute($params);
+            $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            $total_pages = ceil($total / $per_page);
+            
+            // Query principal
+            $sql = "
+                SELECT id, descarte_id, acao, dados_anteriores, dados_novos, 
+                       usuario_id, usuario_nome, ip_address, descricao, created_at
+                FROM controle_descartes_log 
+                WHERE 1=1" . $whereClause . "
+                ORDER BY created_at DESC
+                LIMIT {$per_page} OFFSET {$offset}
+            ";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Decodificar JSON dos dados
+            foreach ($logs as &$log) {
+                if ($log['dados_anteriores']) {
+                    $log['dados_anteriores'] = json_decode($log['dados_anteriores'], true);
+                }
+                if ($log['dados_novos']) {
+                    $log['dados_novos'] = json_decode($log['dados_novos'], true);
+                }
+            }
+            
+            echo json_encode([
+                'success' => true,
+                'data' => $logs,
+                'pagination' => [
+                    'page' => $page,
+                    'per_page' => $per_page,
+                    'total' => (int)$total,
+                    'total_pages' => (int)$total_pages
+                ]
+            ]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Erro ao carregar logs: ' . $e->getMessage()]);
+        }
+    }
+    
+    // Obter data do primeiro registro
+    public function getFirstRecordDate()
+    {
+        ob_clean();
+        header('Content-Type: application/json');
+        
+        try {
+            $stmt = $this->db->query("SELECT MIN(data_descarte) as first_date FROM controle_descartes");
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            echo json_encode([
+                'success' => true,
+                'first_date' => $result['first_date'] ?? null
+            ]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Erro ao obter data: ' . $e->getMessage()]);
+        }
+    }
+    
+    // Verificar senha de administrador (para validação prévia)
+    public function verifyAdminPassword()
+    {
+        ob_clean();
+        header('Content-Type: application/json');
+        
+        try {
+            $password = $_POST['password'] ?? '';
+            
+            if (empty($password)) {
+                echo json_encode(['success' => false, 'message' => 'Senha não fornecida']);
+                return;
+            }
+            
+            // Buscar admins ativos
+            $stmt = $this->db->prepare("
+                SELECT id, password FROM users 
+                WHERE role IN ('admin', 'super_admin') 
+                AND status = 'active'
+            ");
+            $stmt->execute();
+            $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $valid = false;
+            foreach ($admins as $admin) {
+                if (password_verify($password, $admin['password'])) {
+                    $valid = true;
+                    break;
+                }
+            }
+            
+            echo json_encode(['success' => true, 'valid' => $valid]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Erro ao verificar senha: ' . $e->getMessage()]);
         }
     }
 

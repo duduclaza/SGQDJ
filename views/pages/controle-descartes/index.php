@@ -83,6 +83,12 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
                 <p class="mt-2 text-gray-600">Gerenciamento de descartes de equipamentos</p>
             </div>
             <div class="flex space-x-3">
+                <button onclick="abrirModalLogs()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Log de Ações
+                </button>
                 <?php if ($canExport): ?>
                 <button onclick="exportarDescartes()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,6 +198,36 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
                     <!-- Dados carregados via JavaScript -->
                 </tbody>
             </table>
+        </div>
+        <!-- Paginação -->
+        <div id="paginacao-container" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between hidden">
+            <div class="flex items-center space-x-2">
+                <label class="text-sm text-gray-600">Itens por página:</label>
+                <select id="per-page-select" onchange="alterarItensPorPagina()" class="border border-gray-300 rounded px-2 py-1 text-sm">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span id="paginacao-info" class="text-sm text-gray-600"></span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="irParaPagina(1)" id="btn-primeira" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50" disabled>
+                    ««
+                </button>
+                <button onclick="paginaAnterior()" id="btn-anterior" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50" disabled>
+                    « Anterior
+                </button>
+                <span id="paginacao-numeros" class="flex items-center space-x-1"></span>
+                <button onclick="proximaPagina()" id="btn-proximo" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50" disabled>
+                    Próximo »
+                </button>
+                <button onclick="irParaPagina(paginacao.total_pages)" id="btn-ultima" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50" disabled>
+                    »»
+                </button>
+            </div>
         </div>
         <div id="no-data" class="text-center py-8 hidden">
             <p class="text-gray-500">Nenhum descarte encontrado.</p>
@@ -469,12 +505,130 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
     </div>
 </div>
 
+<!-- Modal Log de Ações -->
+<div id="modal-logs" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">📋 Log de Ações</h3>
+                <button onclick="fecharModalLogs()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Filtros do Log -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Ação</label>
+                    <select id="log-filtro-acao" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                        <option value="">Todas</option>
+                        <option value="INSERT">Inserção</option>
+                        <option value="UPDATE">Alteração</option>
+                        <option value="DELETE">Exclusão</option>
+                        <option value="DELETE_FAILED">Exclusão Falha</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
+                    <input type="date" id="log-filtro-data-inicio" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
+                    <input type="date" id="log-filtro-data-fim" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="carregarLogs()" class="w-full px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm">
+                        Filtrar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tabela de Logs -->
+            <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50 sticky top-0">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Data/Hora</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Ação</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Usuário</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-logs" class="bg-white divide-y divide-gray-200">
+                        <!-- Dados carregados via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="logs-no-data" class="text-center py-4 hidden">
+                <p class="text-gray-500">Nenhum log encontrado.</p>
+            </div>
+            
+            <!-- Paginação Logs -->
+            <div id="logs-paginacao" class="flex justify-between items-center mt-4 pt-4 border-t hidden">
+                <span id="logs-paginacao-info" class="text-sm text-gray-600"></span>
+                <div class="flex space-x-2">
+                    <button onclick="paginaAnteriorLogs()" id="logs-btn-anterior" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50" disabled>
+                        « Anterior
+                    </button>
+                    <button onclick="proximaPaginaLogs()" id="logs-btn-proximo" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50" disabled>
+                        Próximo »
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Senha Admin para Exclusão -->
+<div id="modal-senha-admin" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">🔐 Confirmação de Exclusão</h3>
+                <button onclick="fecharModalSenhaAdmin()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p class="text-sm text-red-800">
+                    <strong>⚠️ Atenção:</strong> Esta ação é irreversível. Para continuar, insira a senha de um administrador do sistema.
+                </p>
+            </div>
+            
+            <input type="hidden" id="excluir-descarte-id">
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Senha do Administrador *</label>
+                <input type="password" id="admin-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Digite a senha do admin">
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="fecharModalSenhaAdmin()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md">
+                    Cancelar
+                </button>
+                <button type="button" onclick="confirmarExclusao()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md">
+                    🗑️ Confirmar Exclusão
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 const podeAlterarStatusGlobal = <?= $canAlterarStatus ? 'true' : 'false' ?>;
 let descartes = [];
+let paginacao = { page: 1, per_page: 10, total: 0, total_pages: 0 };
+let logsPaginacao = { page: 1, per_page: 20, total: 0, total_pages: 0 };
 
 // Carregar dados ao inicializar
 document.addEventListener('DOMContentLoaded', function() {
+    carregarDataInicial();
     carregarDescartes();
     
     // Debounce para busca em tempo real
@@ -508,11 +662,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Carregar lista de descartes - v2.0 (sem loading)
-function carregarDescartes() {
-    console.log('Carregando descartes - versão sem loading');
-    // Loading removido - carregamento direto
+// Carregar data do primeiro registro para o filtro
+function carregarDataInicial() {
+    fetch('/controle-descartes/first-date')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.first_date) {
+                document.getElementById('filtro-data-inicio').value = data.first_date;
+            }
+        })
+        .catch(error => console.error('Erro ao carregar data inicial:', error));
+}
+
+// Carregar lista de descartes com paginação
+function carregarDescartes(page = null) {
+    if (page !== null) {
+        paginacao.page = page;
+    }
+    
     document.getElementById('no-data').classList.add('hidden');
+    document.getElementById('paginacao-container').classList.add('hidden');
     
     const params = new URLSearchParams();
     const numeroSerie = document.getElementById('filtro-numero-serie').value;
@@ -531,12 +700,18 @@ function carregarDescartes() {
     if (dataFim) params.append('data_fim', dataFim);
     if (statusAndamento) params.append('status_andamento', statusAndamento);
     
+    // Adicionar parâmetros de paginação
+    params.append('page', paginacao.page);
+    params.append('per_page', paginacao.per_page);
+    
     fetch(`/controle-descartes/list?${params.toString()}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 descartes = data.data;
+                paginacao = data.pagination || paginacao;
                 renderizarTabela();
+                atualizarControlesPaginacao();
             } else {
                 alert('Erro ao carregar descartes: ' + data.message);
             }
@@ -622,6 +797,7 @@ function renderizarTabela() {
 
 // Aplicar filtros
 function aplicarFiltros() {
+    paginacao.page = 1; // Resetar para primeira página
     carregarDescartes();
 }
 
@@ -631,9 +807,10 @@ function limparFiltros() {
     document.getElementById('filtro-codigo-produto').value = '';
     document.getElementById('filtro-numero-os').value = '';
     document.getElementById('filtro-filial').value = '';
-    document.getElementById('filtro-data-inicio').value = '';
     document.getElementById('filtro-data-fim').value = '';
     document.getElementById('filtro-andamento').value = '';
+    paginacao.page = 1; // Resetar para primeira página
+    carregarDataInicial(); // Recarregar data inicial
     carregarDescartes();
 }
 
@@ -678,12 +855,32 @@ function editarDescarte(id) {
     document.getElementById('modal-descarte').classList.remove('hidden');
 }
 
-// Excluir descarte
+// Excluir descarte - agora abre modal para senha de admin
 function excluirDescarte(id) {
-    if (!confirm('Tem certeza que deseja excluir este descarte?')) return;
+    document.getElementById('excluir-descarte-id').value = id;
+    document.getElementById('admin-password').value = '';
+    document.getElementById('modal-senha-admin').classList.remove('hidden');
+}
+
+// Fechar modal de senha admin
+function fecharModalSenhaAdmin() {
+    document.getElementById('modal-senha-admin').classList.add('hidden');
+    document.getElementById('admin-password').value = '';
+}
+
+// Confirmar exclusão com senha de admin
+function confirmarExclusao() {
+    const id = document.getElementById('excluir-descarte-id').value;
+    const senha = document.getElementById('admin-password').value;
+    
+    if (!senha) {
+        alert('Por favor, insira a senha do administrador');
+        return;
+    }
     
     const formData = new FormData();
     formData.append('id', id);
+    formData.append('admin_password', senha);
     
     fetch('/controle-descartes/delete', {
         method: 'POST',
@@ -693,10 +890,11 @@ function excluirDescarte(id) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Descarte excluído com sucesso!');
+            fecharModalSenhaAdmin();
+            mostrarNotificacao('Descarte excluído com sucesso!', 'success');
             carregarDescartes();
         } else {
-            alert('Erro ao excluir descarte: ' + data.message);
+            alert('Erro: ' + data.message);
         }
     })
     .catch(error => {
@@ -1037,5 +1235,214 @@ function processarImportacao() {
         alert('Erro ao processar importação');
         document.getElementById('btn-importar').disabled = false;
     });
+}
+
+// ===== FUNÇÕES DE PAGINAÇÃO =====
+
+function atualizarControlesPaginacao() {
+    const container = document.getElementById('paginacao-container');
+    
+    if (paginacao.total === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+    
+    container.classList.remove('hidden');
+    
+    // Atualizar info
+    const inicio = ((paginacao.page - 1) * paginacao.per_page) + 1;
+    const fim = Math.min(paginacao.page * paginacao.per_page, paginacao.total);
+    document.getElementById('paginacao-info').textContent = 
+        `Mostrando ${inicio}-${fim} de ${paginacao.total} registros`;
+    
+    // Atualizar seletor de itens por página
+    document.getElementById('per-page-select').value = paginacao.per_page;
+    
+    // Atualizar botões
+    document.getElementById('btn-primeira').disabled = paginacao.page <= 1;
+    document.getElementById('btn-anterior').disabled = paginacao.page <= 1;
+    document.getElementById('btn-proximo').disabled = paginacao.page >= paginacao.total_pages;
+    document.getElementById('btn-ultima').disabled = paginacao.page >= paginacao.total_pages;
+    
+    // Gerar números de página
+    const numerosContainer = document.getElementById('paginacao-numeros');
+    let html = '';
+    const maxVisiveis = 5;
+    let inicio_pg = Math.max(1, paginacao.page - Math.floor(maxVisiveis / 2));
+    let fim_pg = Math.min(paginacao.total_pages, inicio_pg + maxVisiveis - 1);
+    
+    if (fim_pg - inicio_pg < maxVisiveis - 1) {
+        inicio_pg = Math.max(1, fim_pg - maxVisiveis + 1);
+    }
+    
+    for (let i = inicio_pg; i <= fim_pg; i++) {
+        const ativo = i === paginacao.page ? 'bg-blue-600 text-white' : 'hover:bg-gray-100';
+        html += `<button onclick="irParaPagina(${i})" class="px-3 py-1 border border-gray-300 rounded text-sm ${ativo}">${i}</button>`;
+    }
+    
+    numerosContainer.innerHTML = html;
+}
+
+function irParaPagina(page) {
+    if (page < 1 || page > paginacao.total_pages) return;
+    carregarDescartes(page);
+}
+
+function paginaAnterior() {
+    if (paginacao.page > 1) {
+        carregarDescartes(paginacao.page - 1);
+    }
+}
+
+function proximaPagina() {
+    if (paginacao.page < paginacao.total_pages) {
+        carregarDescartes(paginacao.page + 1);
+    }
+}
+
+function alterarItensPorPagina() {
+    paginacao.per_page = parseInt(document.getElementById('per-page-select').value);
+    paginacao.page = 1;
+    carregarDescartes();
+}
+
+// ===== FUNÇÕES DO MODAL DE LOGS =====
+
+function abrirModalLogs() {
+    document.getElementById('modal-logs').classList.remove('hidden');
+    logsPaginacao.page = 1;
+    carregarLogs();
+}
+
+function fecharModalLogs() {
+    document.getElementById('modal-logs').classList.add('hidden');
+}
+
+function carregarLogs() {
+    const params = new URLSearchParams();
+    const acao = document.getElementById('log-filtro-acao').value;
+    const dataInicio = document.getElementById('log-filtro-data-inicio').value;
+    const dataFim = document.getElementById('log-filtro-data-fim').value;
+    
+    if (acao) params.append('acao', acao);
+    if (dataInicio) params.append('data_inicio', dataInicio);
+    if (dataFim) params.append('data_fim', dataFim);
+    params.append('page', logsPaginacao.page);
+    params.append('per_page', logsPaginacao.per_page);
+    
+    fetch(`/controle-descartes/logs?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                logsPaginacao = data.pagination || logsPaginacao;
+                renderizarTabelaLogs(data.data);
+                atualizarControlesPaginacaoLogs();
+            } else {
+                alert('Erro ao carregar logs: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao carregar logs');
+        });
+}
+
+function renderizarTabelaLogs(logs) {
+    const tbody = document.getElementById('tabela-logs');
+    const noData = document.getElementById('logs-no-data');
+    
+    if (logs.length === 0) {
+        tbody.innerHTML = '';
+        noData.classList.remove('hidden');
+        return;
+    }
+    
+    noData.classList.add('hidden');
+    
+    tbody.innerHTML = logs.map(log => {
+        const data = new Date(log.created_at);
+        const dataFormatada = data.toLocaleString('pt-BR');
+        
+        const badgeAcao = getAcaoBadge(log.acao);
+        
+        return `
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-2 text-sm text-gray-500">${dataFormatada}</td>
+                <td class="px-4 py-2 text-sm">${badgeAcao}</td>
+                <td class="px-4 py-2 text-sm text-gray-700">${escapeHtml(log.usuario_nome)}</td>
+                <td class="px-4 py-2 text-sm text-gray-600">${escapeHtml(log.descricao || '-')}</td>
+                <td class="px-4 py-2 text-sm">
+                    ${log.dados_anteriores || log.dados_novos ? 
+                        `<button onclick='verDetalhesLog(${JSON.stringify(log)})' class="text-blue-600 hover:underline text-xs">Ver detalhes</button>` 
+                        : '-'}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function getAcaoBadge(acao) {
+    const badges = {
+        'INSERT': '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">➕ Inserção</span>',
+        'UPDATE': '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">✏️ Alteração</span>',
+        'DELETE': '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">🗑️ Exclusão</span>',
+        'DELETE_FAILED': '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">⚠️ Exclusão Falha</span>'
+    };
+    return badges[acao] || `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">${acao}</span>`;
+}
+
+function verDetalhesLog(log) {
+    let mensagem = `📋 Detalhes do Log\n\nAção: ${log.acao}\nUsuário: ${log.usuario_nome}\nData: ${log.created_at}\n`;
+    
+    if (log.dados_anteriores) {
+        mensagem += '\n--- Dados Anteriores ---\n';
+        for (const [key, value] of Object.entries(log.dados_anteriores)) {
+            mensagem += `${key}: ${value || '-'}\n`;
+        }
+    }
+    
+    if (log.dados_novos) {
+        mensagem += '\n--- Dados Novos ---\n';
+        for (const [key, value] of Object.entries(log.dados_novos)) {
+            mensagem += `${key}: ${value || '-'}\n`;
+        }
+    }
+    
+    alert(mensagem);
+}
+
+function atualizarControlesPaginacaoLogs() {
+    const container = document.getElementById('logs-paginacao');
+    
+    if (logsPaginacao.total === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+    
+    container.classList.remove('hidden');
+    
+    // Atualizar info
+    const inicio = ((logsPaginacao.page - 1) * logsPaginacao.per_page) + 1;
+    const fim = Math.min(logsPaginacao.page * logsPaginacao.per_page, logsPaginacao.total);
+    document.getElementById('logs-paginacao-info').textContent = 
+        `Mostrando ${inicio}-${fim} de ${logsPaginacao.total} registros`;
+    
+    // Atualizar botões
+    document.getElementById('logs-btn-anterior').disabled = logsPaginacao.page <= 1;
+    document.getElementById('logs-btn-proximo').disabled = logsPaginacao.page >= logsPaginacao.total_pages;
+}
+
+function paginaAnteriorLogs() {
+    if (logsPaginacao.page > 1) {
+        logsPaginacao.page--;
+        carregarLogs();
+    }
+}
+
+function proximaPaginaLogs() {
+    if (logsPaginacao.page < logsPaginacao.total_pages) {
+        logsPaginacao.page++;
+        carregarLogs();
+    }
 }
 </script>
