@@ -50,10 +50,13 @@ $canDelete = hasPermission('controle_descartes', 'delete');
 $canImport = hasPermission('controle_descartes', 'import');
 $canExport = hasPermission('controle_descartes', 'export');
 
+// Verificar se é admin/super_admin para exibir Log de Ações
+$userRole = $_SESSION['user_role'] ?? '';
+$isAdmin = in_array($userRole, ['admin', 'super_admin']);
+
 // Verificar se pode alterar status (admin ou perfil qualidade)
 $canAlterarStatus = false;
-$userRole = $_SESSION['user_role'] ?? '';
-if ($userRole === 'admin' || $userRole === 'super_admin') {
+if ($isAdmin) {
     $canAlterarStatus = true;
 } else {
     // Verificar se tem perfil qualidade
@@ -83,12 +86,14 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
                 <p class="mt-2 text-gray-600">Gerenciamento de descartes de equipamentos</p>
             </div>
             <div class="flex space-x-2 flex-wrap gap-2">
+                <?php if ($isAdmin): ?>
                 <button onclick="abrirModalLogs()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 text-sm rounded-md flex items-center">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                     Log
                 </button>
+                <?php endif; ?>
                 <?php if ($canExport): ?>
                 <button onclick="exportarDescartes()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 text-sm rounded-md flex items-center">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1355,7 +1360,7 @@ function carregarLogs() {
     params.append('page', logsPaginacao.page);
     params.append('per_page', logsPaginacao.per_page);
     
-    fetch(`/controle-descartes/logs?${params.toString()}`)
+    fetch(`/controle-descartes/action-logs?${params.toString()}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {

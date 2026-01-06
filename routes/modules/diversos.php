@@ -35,7 +35,7 @@ $router->get('/controle-rc/evidencia/{id}', [ControleRcController::class, 'downl
 
 $router->get('/controle-descartes', [ControleDescartesController::class, 'index']);
 $router->get('/controle-descartes/list', [ControleDescartesController::class, 'listDescartes']);
-$router->get('/controle-descartes/logs', [ControleDescartesController::class, 'listLogs']);
+$router->get('/controle-descartes/action-logs', [ControleDescartesController::class, 'listLogs']);
 $router->get('/controle-descartes/first-date', [ControleDescartesController::class, 'getFirstRecordDate']);
 $router->get('/controle-descartes/template', [ControleDescartesController::class, 'downloadTemplate']);
 $router->get('/controle-descartes/relatorios', [ControleDescartesController::class, 'relatorios']);
