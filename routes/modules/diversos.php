@@ -37,17 +37,17 @@ $router->get('/controle-descartes', [ControleDescartesController::class, 'index'
 $router->get('/controle-descartes/list', [ControleDescartesController::class, 'listDescartes']);
 $router->get('/controle-descartes/logs', [ControleDescartesController::class, 'listLogs']);
 $router->get('/controle-descartes/first-date', [ControleDescartesController::class, 'getFirstRecordDate']);
+$router->get('/controle-descartes/template', [ControleDescartesController::class, 'downloadTemplate']);
+$router->get('/controle-descartes/relatorios', [ControleDescartesController::class, 'relatorios']);
+$router->get('/controle-descartes/anexo/{id}', [ControleDescartesController::class, 'downloadAnexo']);
+$router->get('/controle-descartes/{id}', [ControleDescartesController::class, 'getDescarte']);
 $router->post('/controle-descartes/verify-admin', [ControleDescartesController::class, 'verifyAdminPassword']);
 $router->post('/controle-descartes/create', [ControleDescartesController::class, 'create']);
 $router->post('/controle-descartes/update', [ControleDescartesController::class, 'update']);
 $router->post('/controle-descartes/delete', [ControleDescartesController::class, 'delete']);
 $router->post('/controle-descartes/alterar-status', [ControleDescartesController::class, 'alterarStatus']);
 $router->post('/controle-descartes/alterar-status-andamento', [ControleDescartesController::class, 'alterarStatusAndamento']);
-$router->get('/controle-descartes/{id}', [ControleDescartesController::class, 'getDescarte']);
-$router->get('/controle-descartes/anexo/{id}', [ControleDescartesController::class, 'downloadAnexo']);
-$router->get('/controle-descartes/template', [ControleDescartesController::class, 'downloadTemplate']);
 $router->post('/controle-descartes/importar', [ControleDescartesController::class, 'importar']);
-$router->get('/controle-descartes/relatorios', [ControleDescartesController::class, 'relatorios']);
 
 // ===== NÃO CONFORMIDADES =====
 

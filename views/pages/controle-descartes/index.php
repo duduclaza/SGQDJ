@@ -82,35 +82,35 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
                 <h1 class="text-3xl font-bold text-gray-900">Controle de Descartes</h1>
                 <p class="mt-2 text-gray-600">Gerenciamento de descartes de equipamentos</p>
             </div>
-            <div class="flex space-x-3">
-                <button onclick="abrirModalLogs()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex space-x-2 flex-wrap gap-2">
+                <button onclick="abrirModalLogs()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 text-sm rounded-md flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
-                    Log de Ações
+                    Log
                 </button>
                 <?php if ($canExport): ?>
-                <button onclick="exportarDescartes()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button onclick="exportarDescartes()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 text-sm rounded-md flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                     Exportar
                 </button>
                 <?php endif; ?>
                 <?php if ($canImport): ?>
-                <button onclick="abrirModalImportacao()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button onclick="abrirModalImportacao()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 text-sm rounded-md flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                     </svg>
-                    Importar Excel
+                    Importar
                 </button>
                 <?php endif; ?>
                 <?php if ($canEdit): ?>
-                <button onclick="abrirModalDescarte()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button onclick="abrirModalDescarte()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-sm rounded-md flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
-                    Novo Descarte
+                    Novo
                 </button>
                 <?php endif; ?>
             </div>
@@ -506,75 +506,100 @@ if ($userRole === 'admin' || $userRole === 'super_admin') {
 </div>
 
 <!-- Modal Log de Ações -->
-<div id="modal-logs" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-900">📋 Log de Ações</h3>
-                <button onclick="fecharModalLogs()" class="text-gray-400 hover:text-gray-600">
+<div id="modal-logs" class="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 backdrop-blur-sm">
+    <div class="relative top-5 mx-auto border-0 w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-2xl rounded-xl bg-white mb-10">
+        <!-- Header com gradiente -->
+        <div class="bg-gradient-to-r from-gray-700 to-gray-900 rounded-t-xl px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white bg-opacity-20 p-2 rounded-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white">Log de Ações</h3>
+                        <p class="text-gray-300 text-sm">Histórico de alterações no módulo</p>
+                    </div>
+                </div>
+                <button onclick="fecharModalLogs()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            
+        </div>
+        
+        <div class="p-6">
             <!-- Filtros do Log -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Ação</label>
-                    <select id="log-filtro-acao" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
-                        <option value="">Todas</option>
-                        <option value="INSERT">Inserção</option>
-                        <option value="UPDATE">Alteração</option>
-                        <option value="DELETE">Exclusão</option>
-                        <option value="DELETE_FAILED">Exclusão Falha</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
-                    <input type="date" id="log-filtro-data-inicio" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
-                    <input type="date" id="log-filtro-data-fim" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
-                </div>
-                <div class="flex items-end">
-                    <button onclick="carregarLogs()" class="w-full px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm">
-                        Filtrar
-                    </button>
+            <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Ação</label>
+                        <select id="log-filtro-acao" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400">
+                            <option value="">Todas</option>
+                            <option value="INSERT">➕ Inserção</option>
+                            <option value="UPDATE">✏️ Alteração</option>
+                            <option value="DELETE">🗑️ Exclusão</option>
+                            <option value="DELETE_FAILED">⚠️ Exclusão Falha</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
+                        <input type="date" id="log-filtro-data-inicio" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
+                        <input type="date" id="log-filtro-data-fim" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="carregarLogs()" class="w-full px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            Buscar
+                        </button>
+                    </div>
                 </div>
             </div>
             
             <!-- Tabela de Logs -->
-            <div class="overflow-x-auto max-h-96 overflow-y-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50 sticky top-0">
-                        <tr>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Data/Hora</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Ação</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Usuário</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Detalhes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-logs" class="bg-white divide-y divide-gray-200">
-                        <!-- Dados carregados via JavaScript -->
-                    </tbody>
-                </table>
+            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100 sticky top-0">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Data/Hora</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ação</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Usuário</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Descrição</th>
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Detalhes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-logs" class="bg-white divide-y divide-gray-100">
+                            <!-- Dados carregados via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div id="logs-no-data" class="text-center py-4 hidden">
-                <p class="text-gray-500">Nenhum log encontrado.</p>
+            
+            <div id="logs-no-data" class="text-center py-12 hidden">
+                <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p class="text-gray-500 text-lg">Nenhum log encontrado</p>
+                <p class="text-gray-400 text-sm mt-1">Crie, edite ou exclua registros para ver o histórico aqui</p>
             </div>
             
             <!-- Paginação Logs -->
             <div id="logs-paginacao" class="flex justify-between items-center mt-4 pt-4 border-t hidden">
                 <span id="logs-paginacao-info" class="text-sm text-gray-600"></span>
                 <div class="flex space-x-2">
-                    <button onclick="paginaAnteriorLogs()" id="logs-btn-anterior" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50" disabled>
-                        « Anterior
+                    <button onclick="paginaAnteriorLogs()" id="logs-btn-anterior" class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>
+                        ← Anterior
                     </button>
-                    <button onclick="proximaPaginaLogs()" id="logs-btn-proximo" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50" disabled>
-                        Próximo »
+                    <button onclick="proximaPaginaLogs()" id="logs-btn-proximo" class="px-4 py-2 bg-gray-700 text-white rounded-lg text-sm hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>
+                        Próximo →
                     </button>
                 </div>
             </div>
