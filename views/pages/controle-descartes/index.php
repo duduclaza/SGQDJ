@@ -183,9 +183,13 @@ if ($isAdmin) {
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Lista de Descartes</h3>
         </div>
-        <div class="overflow-x-auto">
+        <!-- Barra de rolagem superior -->
+        <div id="scroll-top-container" class="overflow-x-auto border-b border-gray-100" style="overflow-y: hidden; height: 18px;">
+            <div id="scroll-top-content" style="height: 1px;"></div>
+        </div>
+        <div id="tabela-scroll-container" class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="bg-gray-50 sticky top-0">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número de Série</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filial</th>
@@ -317,13 +321,13 @@ if ($isAdmin) {
                 </button>
             </div>
             
-            <form id="form-descarte" enctype="multipart/form-data">
+            <form id="form-descarte" enctype="multipart/form-data" autocomplete="off">
                 <input type="hidden" id="descarte-id" name="id">
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Número de Série *</label>
-                        <input type="text" id="numero-serie" name="numero_serie" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="numero-serie" name="numero_serie" required autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Filial *</label>
@@ -339,7 +343,7 @@ if ($isAdmin) {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Código do Produto *</label>
-                        <input type="text" id="codigo-produto" name="codigo_produto" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="codigo-produto" name="codigo_produto" required autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Data do Descarte</label>
@@ -350,17 +354,17 @@ if ($isAdmin) {
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Descrição do Produto *</label>
-                    <textarea id="descricao-produto" name="descricao_produto" required rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <textarea id="descricao-produto" name="descricao_produto" required rows="3" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Número da OS</label>
-                        <input type="text" id="numero-os" name="numero_os" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="numero-os" name="numero_os" autocomplete="new-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Responsável Técnico *</label>
-                        <input type="text" id="responsavel-tecnico" name="responsavel_tecnico" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="responsavel-tecnico" name="responsavel_tecnico" required autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
 
@@ -690,6 +694,37 @@ document.addEventListener('DOMContentLoaded', function() {
             aplicarFiltros();
         }
     });
+    
+    // Sincronizar scroll superior com a tabela
+    const scrollTop = document.getElementById('scroll-top-container');
+    const scrollTable = document.getElementById('tabela-scroll-container');
+    
+    if (scrollTop && scrollTable) {
+        // Sincronizar quando rolar a barra superior
+        scrollTop.addEventListener('scroll', function() {
+            scrollTable.scrollLeft = scrollTop.scrollLeft;
+        });
+        
+        // Sincronizar quando rolar a tabela
+        scrollTable.addEventListener('scroll', function() {
+            scrollTop.scrollLeft = scrollTable.scrollLeft;
+        });
+        
+        // Atualizar largura do conteúdo da barra superior quando a tabela carregar
+        const updateTopScrollWidth = () => {
+            const table = scrollTable.querySelector('table');
+            if (table) {
+                document.getElementById('scroll-top-content').style.width = table.scrollWidth + 'px';
+            }
+        };
+        
+        // Observar mudanças na tabela
+        const observer = new MutationObserver(updateTopScrollWidth);
+        observer.observe(document.getElementById('tabela-descartes'), { childList: true });
+        
+        // Atualizar ao redimensionar
+        window.addEventListener('resize', updateTopScrollWidth);
+    }
 });
 
 // Carregar data do primeiro registro para o filtro
