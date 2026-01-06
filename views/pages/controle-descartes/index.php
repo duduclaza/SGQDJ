@@ -184,7 +184,7 @@ if ($isAdmin) {
             <h3 class="text-lg font-medium text-gray-900">Lista de Descartes</h3>
         </div>
         <!-- Barra de rolagem superior -->
-        <div id="scroll-top-container" class="overflow-x-auto border-b border-gray-100" style="overflow-y: hidden; height: 18px;">
+        <div id="scroll-top-container" class="overflow-x-auto" style="overflow-y: hidden;">
             <div id="scroll-top-content" style="height: 1px;"></div>
         </div>
         <div id="tabela-scroll-container" class="overflow-x-auto">
