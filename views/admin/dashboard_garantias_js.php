@@ -476,7 +476,7 @@ function expandirGraficoGenerico(canvasId, titulo) {
   const modalTitle = document.getElementById('modalGarantiasChartTitle');
   const modalCanvas = document.getElementById('modalGarantiasChartCanvas');
   
-  if (!modal || !modal Content || !modalCanvas) {
+  if (!modal || !modalContent || !modalCanvas) {
     console.error('❌ Modal de garantias não encontrado');
     return;
   }
