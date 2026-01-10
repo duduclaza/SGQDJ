@@ -192,44 +192,4 @@
   </div>
 
 </div>
-
-<!-- Modal para Gráficos Expandidos de Garantias -->
-<div id="modalGarantiasChart" class="hidden fixed inset-0 bg-black bg-opacity-95 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 transition-all duration-500 ease-out" style="z-index: 99999;">
-  <div class="relative w-full max-w-6xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl shadow-2xl border border-gray-700 p-4 md:p-8 transition-all duration-500 ease-out transform scale-95 opacity-0" id="modalGarantiasChartContent">
-    <!-- Botão Fechar -->
-    <button onclick="fecharModalGarantiasChart()" class="absolute top-6 right-6 p-3 rounded-full bg-red-500/20 hover:bg-red-500/40 transition-all duration-300 group z-10">
-      <svg class="w-6 h-6 text-red-400 group-hover:text-red-300 group-hover:rotate-90 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-      </svg>
-    </button>
-    
-    <!-- Título -->
-    <div class="mb-6">
-      <div class="text-center mb-4">
-        <h2 id="modalGarantiasChartTitle" class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 flex items-center justify-center gap-3">
-          <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-          </svg>
-          Gráfico
-        </h2>
-        <p class="text-gray-400 mt-2">Visão Expandida</p>
-      </div>
-    </div>
-    
-    <!-- Canvas Container -->
-    <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-6 border border-gray-700/50" style="height: 60vh; min-height: 400px; max-height: 600px;">
-      <canvas id="modalGarantiasChartCanvas"></canvas>
-    </div>
-    
-    <!-- Dica -->
-    <div class="mt-6 text-center">
-      <p class="text-gray-500 text-sm flex items-center justify-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        Pressione <kbd class="px-2 py-1 bg-gray-700 rounded text-xs mx-1">ESC</kbd> ou clique no botão ✕ para fechar
-      </p>
-    </div>
-  </div>
-</div>
-<!-- Fim Modal Gráficos Expandidos -->
+<!-- FIM CONTEÚDO ABA GARANTIAS -->
