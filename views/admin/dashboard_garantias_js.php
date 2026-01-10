@@ -474,8 +474,9 @@ function expandirGraficoGenerico(canvasId, titulo) {
   const modal = document.getElementById('modalGarantiasChart');
   const modalContent = document.getElementById('modalGarantiasChartContent');
   const modalTitle = document.getElementById('modalGarantiasChartTitle');
+  const modalCanvas = document.getElementById('modalGarantiasChartCanvas');
   
-  if (!modal || !modalContent) {
+  if (!modal || !modal Content || !modalCanvas) {
     console.error('❌ Modal de garantias não encontrado');
     return;
   }
@@ -497,34 +498,31 @@ function expandirGraficoGenerico(canvasId, titulo) {
     return;
   }
   
-  // Limpar conteúdo anterior
-  modalContent.innerHTML = '';
-  
-  // Atualizar título
-  modalTitle.textContent = titulo;
-  
-  // Criar novo canvas
-  const canvasClone = document.createElement('canvas');
-  canvasClone.id = canvasId + '_expandido';
-  canvasClone.style.width = '100%';
-  canvasClone.style.maxHeight = '500px';
-  
-  // Adicionar canvas ao modal
-  modalContent.appendChild(canvasClone);
+  // Atualizar título do modal
+  const titulos = {
+    'garantiasFornecedorChart': '📊 Quantidade por Fornecedor',
+    'garantiasMesChart': '📅 Garantias por Mês',
+    'garantiasValorChart': '💰 Valor por Mês (R$)',
+    'garantiasOrigemChart': '🥧 Garantias por Origem'
+  };
+  modalTitle.textContent = titulos[canvasId] || titulo;
   
   // Mostrar modal com animação
   modal.classList.remove('hidden');
   setTimeout(() => {
-    const modalBg = modal.querySelector('.bg-gradient-to-br');
-    if (modalBg) {
-      modalBg.classList.remove('scale-95', 'opacity-0');
-      modalBg.classList.add('scale-100', 'opacity-100');
-    }
+    modalContent.classList.remove('scale-95', 'opacity-0');
+    modalContent.classList.add('scale-100', 'opacity-100');
   }, 10);
   
   // Recriar gráfico no modal (aguardar renderização do DOM)
   setTimeout(() => {
-    const ctx = canvasClone.getContext('2d');
+    const ctx = modalCanvas.getContext('2d');
+    
+    // Limpar canvas anterior
+    if (window.garantiasExpandedChart) {
+      window.garantiasExpandedChart.destroy();
+      window.garantiasExpandedChart = null;
+    }
     
     // Clonar configurações do gráfico original
     const expandedOptions = JSON.parse(JSON.stringify(chartOriginal.config.options));
@@ -561,13 +559,23 @@ function fecharModalGarantiasChart() {
   }
   
   // Animação de saída
-  const modalBg = modal.querySelector('.bg-gradient-to-br');
-  if (modalBg) {
-    modalBg.classList.remove('scale-100', 'opacity-100');
-    modalBg.classList.add('scale-95', 'opacity-0');
+  const modalContent = document.getElementById('modalGarantiasChartContent');
+  if (modalContent) {
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    modalContent.classList.add('scale-95', 'opacity-0');
   }
   
   setTimeout(() => {
     modal.classList.add('hidden');
-  }, 200);
+  }, 300);
 }
+
+// Fechar modal ao pressionar ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' || e.key === 'Esc') {
+    const modal = document.getElementById('modalGarantiasChart');
+    if (modal && !modal.classList.contains('hidden')) {
+      fecharModalGarantiasChart();
+    }
+  }
+});
