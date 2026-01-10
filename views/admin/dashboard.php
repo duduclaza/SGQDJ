@@ -4154,9 +4154,4 @@ document.addEventListener('DOMContentLoaded', function() {
 <?php include __DIR__ . '/dashboard_garantias_js.php'; ?>
 <?php include __DIR__ . '/dashboard_nao_conformidades_js.php'; ?>
 
-<!-- Include JavaScript da Tab de Garantias -->
-<?php if ($tabPermissions['garantias'] ?? false): ?>
-<?php include __DIR__ . '/dashboard_garantias_js.php'; ?>
-<?php endif; ?>
-
 </script>
