@@ -468,22 +468,19 @@ function expandirGraficoGarantiasOrigem() {
 
 // Função genérica para expandir gráfico
 function expandirGraficoGenerico(canvasId, titulo) {
-  console.log('🔍 Expandindo gráfico:', canvasId);
+  console.log('🔍 Expandindo gráfico:', canvasId, titulo);
   
-  const modal = document.getElementById('modalExpandidoRetornados');
-  const canvas = document.getElementById(canvasId);
+  // Usar modal específico de garantias
+  const modal = document.getElementById('modalGarantiasChart');
+  const modalContent = document.getElementById('modalGarantiasChartContent');
+  const modalTitle = document.getElementById('modalGarantiasChartTitle');
   
-  if (!modal) {
-    console.error('❌ Modal não encontrado');
+  if (!modal || !modalContent) {
+    console.error('❌ Modal de garantias não encontrado');
     return;
   }
   
-  if (!canvas) {
-    console.error('❌ Canvas não encontrado:', canvasId);
-    return;
-  }
-  
-  // Descobrir qual gráfico é (mapeamento)
+  // Mapeamento dos gráficos
   const chartKeyMap = {
     'garantiasFornecedorChart': 'fornecedor',
     'garantiasMesChart': 'mes',
@@ -492,73 +489,85 @@ function expandirGraficoGenerico(canvasId, titulo) {
   };
   
   const chartKey = chartKeyMap[canvasId];
-  console.log('📊 Chave do gráfico:', chartKey);
-  console.log('📊 Gráficos disponíveis:', Object.keys(garantiasCharts));
-  
   const chartOriginal = garantiasCharts[chartKey];
   
   if (!chartOriginal) {
-    console.error('❌ Gráfico original não encontrado para:', chartKey);
-    console.log('Disponíveis:', garantiasCharts);
+    console.error('❌ Gráfico original não encontrado:', chartKey);
+    console.log('Disponíveis:', Object.keys(garantiasCharts));
     return;
   }
   
   // Limpar conteúdo anterior
-  const modalBody = modal.querySelector('#modalContentRetornados');
-  const existingCanvas = modalBody.querySelector('canvas');
-  if (existingCanvas) {
-    existingCanvas.remove();
-  }
+  modalContent.innerHTML = '';
   
-  // Adicionar título
-  let tituloEl = modalBody.querySelector('h2');
-  if (!tituloEl) {
-    tituloEl = document.createElement('h2');
-    tituloEl.className = 'text-2xl font-bold text-white mb-6';
-    modalBody.insertBefore(tituloEl, modalBody.firstChild.nextSibling.nextSibling);
-  }
-  tituloEl.textContent = '🛡️ ' + titulo;
+  // Atualizar título
+  modalTitle.textContent = titulo;
   
   // Criar novo canvas
   const canvasClone = document.createElement('canvas');
   canvasClone.id = canvasId + '_expandido';
-  canvasClone.style.maxHeight = '400px';
   canvasClone.style.width = '100%';
+  canvasClone.style.maxHeight = '500px';
   
-  // Adicionar canvas
-  modalBody.appendChild(canvasClone);
+  // Adicionar canvas ao modal
+  modalContent.appendChild(canvasClone);
   
-  // Mostrar modal
+  // Mostrar modal com animação
   modal.classList.remove('hidden');
   setTimeout(() => {
-    modalBody.classList.remove('scale-95', 'opacity-0');
-    modalBody.classList.add('scale-100', 'opacity-100');
+    const modalBg = modal.querySelector('.bg-gradient-to-br');
+    if (modalBg) {
+      modalBg.classList.remove('scale-95', 'opacity-0');
+      modalBg.classList.add('scale-100', 'opacity-100');
+    }
   }, 10);
   
-  // Recriar o gráfico no canvas expandido
+  // Recriar gráfico no modal (aguardar renderização do DOM)
   setTimeout(() => {
     const ctx = canvasClone.getContext('2d');
     
-    // Clonar opções do gráfico original
+    // Clonar configurações do gráfico original
     const expandedOptions = JSON.parse(JSON.stringify(chartOriginal.config.options));
     expandedOptions.maintainAspectRatio = false;
     expandedOptions.responsive = true;
     
-    // Para gráficos de pizza/doughnut, ajustar tamanho
+    // Ajustar aspectRatio para gráficos tipo pizza/doughnut
     if (chartOriginal.config.type === 'pie' || chartOriginal.config.type === 'doughnut') {
-      expandedOptions.aspectRatio = 1.5; // Proporção mais adequada
+      expandedOptions.aspectRatio = 1.5;
     }
     
     const expandedChart = new Chart(ctx, {
       type: chartOriginal.config.type,
-      data: chartOriginal.config.data,
+      data: JSON.parse(JSON.stringify(chartOriginal.config.data)),
       options: expandedOptions
     });
     
-    console.log('✅ Gráfico expandido criado:', {
-      tipo: chartOriginal.config.type,
-      labels: chartOriginal.config.data.labels?.length || 0,
-      datasets: chartOriginal.config.data.datasets?.length || 0
-    });
-  }, 100);
+    // Guardar referência para poder destruir depois
+    window.garantiasExpandedChart = expandedChart;
+    
+    console.log('✅ Gráfico expandido criado com sucesso');
+  }, 150);
+}
+
+// Função para fechar o modal
+function fecharModalGarantiasChart() {
+  const modal = document.getElementById('modalGarantiasChart');
+  if (!modal) return;
+  
+  // Destruir gráfico expandido se existir
+  if (window.garantiasExpandedChart) {
+    window.garantiasExpandedChart.destroy();
+    window.garantiasExpandedChart = null;
+  }
+  
+  // Animação de saída
+  const modalBg = modal.querySelector('.bg-gradient-to-br');
+  if (modalBg) {
+    modalBg.classList.remove('scale-100', 'opacity-100');
+    modalBg.classList.add('scale-95', 'opacity-0');
+  }
+  
+  setTimeout(() => {
+    modal.classList.add('hidden');
+  }, 200);
 }

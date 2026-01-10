@@ -192,4 +192,33 @@
   </div>
 
 </div>
-<!-- FIM CONTEÚDO ABA GARANTIAS -->
+
+<!-- Modal para Gráficos Expandidos de Garantias -->
+<div id="modalGarantiasChart" class="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden transform transition-all duration-300 scale-95 opacity-0">
+    <div class="p-8">
+      <!-- Header com título e botão fechar -->
+      <div class="relative mb-6">
+        <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+          <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <span id="modalGarantiasChartTitle">Gráfico</span>
+        </h2>
+        <button onclick="fecharModalGarantiasChart()" class="absolute right-0 top-0 text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-all">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Canvas Container -->
+      <div id="modalGarantiasChartContent" class="flex items-center justify-center bg-white bg-opacity-5 rounded-xl p-6" style="min-height: 500px; max-height: 70vh;">
+        <!-- Canvas será inserido aqui -->
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Fim Modal Gráficos Expandidos -->
