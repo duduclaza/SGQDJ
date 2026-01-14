@@ -2921,13 +2921,14 @@ class AdminController
                 $sql = "
                     SELECT 
                         a.codigo_produto as codigo,
-                        a.observacoes as descricao,
+                        CONCAT(a.nome_produto, CASE WHEN a.observacoes IS NOT NULL AND a.observacoes != '' THEN CONCAT(' - Obs: ', a.observacoes) ELSE '' END) as descricao,
                         a.tipo_produto as tipo,
                         a.quantidade_reprovada as quantidade,
                         a.created_at as data_registro,
                         fil.nome as origem,
                         COALESCE(aprovador.name, u.name) as responsavel,
-                        'Reprovado' as status
+                        'Reprovado' as status,
+                        a.numero_nf as nf
                     FROM amostragens_2 a
                     INNER JOIN fornecedores f ON a.fornecedor_id = f.id
                     INNER JOIN filiais fil ON a.filial_id = fil.id
@@ -2935,7 +2936,7 @@ class AdminController
                     LEFT JOIN users aprovador ON a.aprovado_por = aprovador.id
                     WHERE f.id = ?
                     AND DATE(a.created_at) BETWEEN ? AND ?
-                    AND (a.status_final IN ('reprovado') OR a.quantidade_reprovada > 0)
+                    AND (a.status_final IN ('reprovado', 'Reprovado') OR a.quantidade_reprovada > 0)
                 ";
                 
                 $params = [$fornecedorId, $dataInicial, $dataFinal];
@@ -2956,13 +2957,14 @@ class AdminController
                 $sql = "
                     SELECT 
                         a.codigo_produto as codigo,
-                        a.observacoes as descricao,
+                        CONCAT(a.nome_produto, CASE WHEN a.observacoes IS NOT NULL AND a.observacoes != '' THEN CONCAT(' - Obs: ', a.observacoes) ELSE '' END) as descricao,
                         a.tipo_produto as tipo,
                         a.quantidade_aprovada as quantidade,
                         a.created_at as data_registro,
                         fil.nome as origem,
                         COALESCE(aprovador.name, u.name) as responsavel,
-                        'Aprovado' as status
+                        'Aprovado' as status,
+                        a.numero_nf as nf
                     FROM amostragens_2 a
                     INNER JOIN fornecedores f ON a.fornecedor_id = f.id
                     INNER JOIN filiais fil ON a.filial_id = fil.id
@@ -2970,7 +2972,7 @@ class AdminController
                     LEFT JOIN users aprovador ON a.aprovado_por = aprovador.id
                     WHERE f.id = ?
                     AND DATE(a.created_at) BETWEEN ? AND ?
-                    AND (a.status_final IN ('aprovado', 'aprovado_parcialmente') OR a.quantidade_aprovada > 0)
+                    AND (a.status_final IN ('aprovado', 'Aprovado', 'aprovado_parcialmente', 'Aprovado Parcialmente') OR a.quantidade_aprovada > 0)
                 ";
                 
                 $params = [$fornecedorId, $dataInicial, $dataFinal];
