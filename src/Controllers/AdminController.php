@@ -2315,7 +2315,8 @@ class AdminController
                 SELECT 
                     DATE_FORMAT(a.created_at, '%Y-%m') as mes,
                     SUM(COALESCE(quantidade_recebida, 0)) as recebidas,
-                    SUM(COALESCE(quantidade_testada, 0)) as testadas
+                    SUM(COALESCE(quantidade_testada, 0)) as testadas,
+                    SUM(COALESCE(quantidade_reprovada, 0)) as reprovadas
                 FROM amostragens_2 a
                 LEFT JOIN users u ON a.user_id = u.id
                 $whereClause
@@ -2327,9 +2328,21 @@ class AdminController
             $quantidadesData = $stmtQuantidades->fetchAll(\PDO::FETCH_ASSOC);
             $quantidadesData = array_reverse($quantidadesData); // Ordem cronológica
             
-            $quantidadesLabels = array_column($quantidadesData, 'mes');
+            // Arrays para os gráficos
+            $quantidadesLabels = [];
+            $quantidadesDatesYM = array_column($quantidadesData, 'mes'); // YYYY-MM para uso no click
             $quantidadesRecebidas = array_column($quantidadesData, 'recebidas');
             $quantidadesTestadas = array_column($quantidadesData, 'testadas');
+            $quantidadesReprovadas = array_column($quantidadesData, 'reprovadas');
+            
+            // Converter YYYY-MM para labels legíveis (Jan/2025, Fev/2025...)
+            foreach ($quantidadesDatesYM as $mesYM) {
+                $meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                $partes = explode('-', $mesYM);
+                $mesNum = (int)$partes[1] - 1;
+                $ano = substr($partes[0], 2);
+                $quantidadesLabels[] = $meses[$mesNum] . '/' . $ano;
+            }
             
             // 3. Gráfico de Pizza: Taxa de Aprovação/Reprovação por Fornecedor
             $stmtFornecedores = $this->db->prepare("
@@ -2386,8 +2399,10 @@ class AdminController
                     ],
                     'quantidades_mes' => [
                         'labels' => $quantidadesLabels,
+                        'dates_ym' => $quantidadesDatesYM,
                         'recebidas' => array_map('intval', $quantidadesRecebidas),
-                        'testadas' => array_map('intval', $quantidadesTestadas)
+                        'testadas' => array_map('intval', $quantidadesTestadas),
+                        'reprovadas' => array_map('intval', $quantidadesReprovadas)
                     ],
                     'fornecedores_taxa' => [
                         'labels' => $fornecedoresLabels,
@@ -3049,6 +3064,75 @@ class AdminController
             
         } catch (\Exception $e) {
             error_log("Erro em fornecedorItens: " . $e->getMessage());
+            echo "Erro ao carregar dados: " . $e->getMessage();
+        }
+    }
+
+    /**
+     * Página de amostragens reprovadas de um mês específico
+     */
+    public function amostragemReprovadasMes()
+    {
+        $mes = $_GET['mes'] ?? ''; // Formato YYYY-MM
+        
+        if (empty($mes)) {
+            echo "Mês não informado";
+            return;
+        }
+        
+        try {
+            // Converter mês para formato legível
+            $dataObj = \DateTime::createFromFormat('Y-m', $mes);
+            if (!$dataObj) {
+                echo "Formato de mês inválido. Use YYYY-MM";
+                return;
+            }
+            
+            // Meses em português
+            $meses = [
+                1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Março', 4 => 'Abril',
+                5 => 'Maio', 6 => 'Junho', 7 => 'Julho', 8 => 'Agosto',
+                9 => 'Setembro', 10 => 'Outubro', 11 => 'Novembro', 12 => 'Dezembro'
+            ];
+            $mesLabel = $meses[(int)$dataObj->format('m')] . '/' . $dataObj->format('Y');
+            
+            // Calcular primeiro e último dia do mês
+            $primeiroDia = $dataObj->format('Y-m-01');
+            $ultimoDia = $dataObj->format('Y-m-t');
+            
+            // Buscar amostragens reprovadas do mês
+            $sql = "
+                SELECT 
+                    a.id,
+                    a.codigo_produto as codigo,
+                    a.nome_produto,
+                    a.tipo_produto as tipo,
+                    a.quantidade_reprovada as quantidade,
+                    a.created_at as data_registro,
+                    f.nome as fornecedor,
+                    COALESCE(aprovador.name, u.name) as responsavel,
+                    a.observacoes
+                FROM amostragens_2 a
+                INNER JOIN fornecedores f ON a.fornecedor_id = f.id
+                LEFT JOIN users u ON a.user_id = u.id
+                LEFT JOIN users aprovador ON a.aprovado_por = aprovador.id
+                WHERE DATE(a.created_at) BETWEEN ? AND ?
+                AND (a.status_final IN ('reprovado', 'Reprovado') OR a.quantidade_reprovada > 0)
+                ORDER BY a.created_at DESC
+            ";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$primeiroDia, $ultimoDia]);
+            $itens = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            // Calcular total de itens reprovados
+            $totalReprovado = array_sum(array_column($itens, 'quantidade'));
+            
+            // Renderizar página
+            include __DIR__ . '/../../views/admin/amostragens_reprovadas_mes.php';
+            
+        } catch (\Exception $e) {
+            error_log("Erro em amostragemReprovadasMes: " . $e->getMessage());
             echo "Erro ao carregar dados: " . $e->getMessage();
         }
     }

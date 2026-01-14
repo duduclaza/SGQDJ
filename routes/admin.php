@@ -81,6 +81,7 @@ $router->get('/admin/dashboard/toners-por-cliente', [AdminController::class, 'ge
 $router->get('/admin/dashboard/amostragens-data', [AdminController::class, 'getAmostragemsDashboardData']);
 $router->get('/admin/dashboard/fornecedores-data', [AdminController::class, 'fornecedoresData']);
 $router->get('/admin/fornecedor-itens', [AdminController::class, 'fornecedorItens']);
+$router->get('/admin/amostragens-reprovadas-mes', [AdminController::class, 'amostragemReprovadasMes']);
 $router->get('/admin/dashboard/melhorias-data', [AdminController::class, 'getMelhoriasData']);
 $router->get('/admin/dashboard/nao-conformidades-data', [AdminController::class, 'getNaoConformidadesData']);
 $router->get('/admin/dashboard/departamentos', [AdminController::class, 'getDepartamentos']);
