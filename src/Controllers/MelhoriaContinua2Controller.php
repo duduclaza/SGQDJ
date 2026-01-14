@@ -97,6 +97,15 @@ class MelhoriaContinua2Controller
                 $params[':pontuacao_max'] = (int)$_GET['pontuacao_max'];
             }
 
+            // Filtro por ano (ano_atual, ano_passado)
+            if (!empty($_GET['ano'])) {
+                if ($_GET['ano'] === 'ano_atual') {
+                    $where[] = "YEAR(m.created_at) = YEAR(CURRENT_DATE())";
+                } elseif ($_GET['ano'] === 'ano_passado') {
+                    $where[] = "YEAR(m.created_at) = YEAR(CURRENT_DATE()) - 1";
+                }
+            }
+
         // Buscar melhorias baseado nas regras de visibilidade
         if ($isAdmin) {
             // Construir WHERE clause

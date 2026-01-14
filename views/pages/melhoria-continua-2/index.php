@@ -61,6 +61,14 @@ function construirUrlPaginacao($pagina) {
           </select>
         </div>
         <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
+          <select name="ano" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">Todos</option>
+            <option value="ano_atual" <?= ($_GET['ano'] ?? '') == 'ano_atual' ? 'selected' : '' ?>>📅 Ano Atual (<?= date('Y') ?>)</option>
+            <option value="ano_passado" <?= ($_GET['ano'] ?? '') == 'ano_passado' ? 'selected' : '' ?>>📅 Ano Passado (<?= date('Y') - 1 ?>)</option>
+          </select>
+        </div>
+        <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Idealizador</label>
           <input type="text" name="idealizador" value="<?= $_GET['idealizador'] ?? '' ?>" placeholder="Nome do idealizador..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         </div>
