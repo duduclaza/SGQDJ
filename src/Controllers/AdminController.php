@@ -2971,7 +2971,7 @@ class AdminController
                         gi.quantidade as quantidade,
                         g.created_at as data_registro,
                         COALESCE(g.origem_garantia, 'Garantia Direta') as origem,
-                        COALESCE(u.name, 'Sistema') as responsavel,
+                        'Garantia' as responsavel,
                         'Garantia' as fonte,
                         COALESCE(g.numero_nf_compras, '-') as nf
                     FROM garantias g
