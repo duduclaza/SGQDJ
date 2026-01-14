@@ -2958,9 +2958,12 @@ class AdminController
                         gi.codigo_produto as codigo,
                         CONCAT(
                             COALESCE(gi.nome_produto, gi.codigo_produto, 'Produto não identificado'),
-                            ' - Ticket: ', COALESCE(g.numero_ticket, 'N/A'),
-                            CASE WHEN g.defeito_reclamado IS NOT NULL AND g.defeito_reclamado != '' 
-                                THEN CONCAT(' - Defeito: ', LEFT(g.defeito_reclamado, 100)) 
+                            CASE WHEN g.numero_ticket_os IS NOT NULL AND g.numero_ticket_os != '' 
+                                THEN CONCAT(' - Ticket: ', g.numero_ticket_os) 
+                                ELSE '' 
+                            END,
+                            CASE WHEN g.descricao_defeito IS NOT NULL AND g.descricao_defeito != '' 
+                                THEN CONCAT(' - Defeito: ', LEFT(g.descricao_defeito, 100)) 
                                 ELSE '' 
                             END
                         ) as descricao,
@@ -2970,11 +2973,10 @@ class AdminController
                         COALESCE(g.origem_garantia, 'Garantia Direta') as origem,
                         COALESCE(u.name, 'Sistema') as responsavel,
                         'Garantia' as fonte,
-                        COALESCE(g.numero_nf, '-') as nf
+                        COALESCE(g.numero_nf_compras, '-') as nf
                     FROM garantias g
                     INNER JOIN garantias_itens gi ON g.id = gi.garantia_id
                     INNER JOIN fornecedores f ON g.fornecedor_id = f.id
-                    LEFT JOIN users u ON g.user_id = u.id
                     WHERE f.id = ?
                     AND DATE(g.created_at) BETWEEN ? AND ?
                 ";
