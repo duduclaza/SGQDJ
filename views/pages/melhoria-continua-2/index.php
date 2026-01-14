@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$isAdmin = $_SESSION['user_role'] === 'admin';
+$isAdmin = in_array($_SESSION['user_role'], ['admin', 'super_admin']);
 $userId = $_SESSION['user_id'];
 
 /**
