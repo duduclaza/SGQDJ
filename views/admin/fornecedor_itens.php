@@ -115,11 +115,12 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">#</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Código</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Descrição do Defeito/Obs.</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Descrição do Produto/Defeito</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Tipo</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Quantidade</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Qtd</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Data</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Origem</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Fonte</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-<?= $corTema ?>-700 uppercase tracking-wider">Responsável</th>
                         </tr>
                     </thead>
@@ -149,6 +150,15 @@
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
                                     <?= htmlspecialchars($item['origem'] ?? '-') ?>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <?php 
+                                $fonte = $item['fonte'] ?? 'Amostragem';
+                                $fonteClass = $fonte === 'Garantia' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700';
+                                ?>
+                                <span class="px-2 py-1 text-xs font-medium rounded-full <?= $fonteClass ?>">
+                                    <?= $fonte === 'Garantia' ? '🛡️ Garantia' : '🧪 Amostragem' ?>
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">

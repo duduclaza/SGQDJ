@@ -2917,7 +2917,7 @@ class AdminController
             $itens = [];
             
             if ($tipo === 'reprovados') {
-                // Buscar itens reprovados das amostragens
+                // 1. Buscar itens reprovados das amostragens
                 $sql = "
                     SELECT 
                         a.codigo_produto as codigo,
@@ -2927,7 +2927,7 @@ class AdminController
                         a.created_at as data_registro,
                         fil.nome as origem,
                         COALESCE(aprovador.name, u.name) as responsavel,
-                        'Reprovado' as status,
+                        'Amostragem' as fonte,
                         a.numero_nf as nf
                     FROM amostragens_2 a
                     INNER JOIN fornecedores f ON a.fornecedor_id = f.id
@@ -2950,7 +2950,57 @@ class AdminController
                 
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute($params);
-                $itens = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+                $itensAmostragens = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+                
+                // 2. Buscar itens das garantias (problemas que foram direto para garantia, sem amostragem)
+                $sqlGarantias = "
+                    SELECT 
+                        gi.codigo_produto as codigo,
+                        CONCAT(
+                            COALESCE(gi.nome_produto, gi.codigo_produto, 'Produto não identificado'),
+                            ' - Ticket: ', COALESCE(g.numero_ticket, 'N/A'),
+                            CASE WHEN g.defeito_reclamado IS NOT NULL AND g.defeito_reclamado != '' 
+                                THEN CONCAT(' - Defeito: ', LEFT(g.defeito_reclamado, 100)) 
+                                ELSE '' 
+                            END
+                        ) as descricao,
+                        gi.tipo_produto as tipo,
+                        gi.quantidade as quantidade,
+                        g.created_at as data_registro,
+                        COALESCE(g.origem_garantia, 'Garantia Direta') as origem,
+                        COALESCE(u.name, 'Sistema') as responsavel,
+                        'Garantia' as fonte,
+                        COALESCE(g.numero_nf, '-') as nf
+                    FROM garantias g
+                    INNER JOIN garantias_itens gi ON g.id = gi.garantia_id
+                    INNER JOIN fornecedores f ON g.fornecedor_id = f.id
+                    LEFT JOIN users u ON g.user_id = u.id
+                    WHERE f.id = ?
+                    AND DATE(g.created_at) BETWEEN ? AND ?
+                ";
+                
+                $paramsGarantias = [$fornecedorId, $dataInicial, $dataFinal];
+                
+                // Filtro de origens se selecionado
+                if (!empty($origens)) {
+                    $placeholders = str_repeat('?,', count($origens) - 1) . '?';
+                    $sqlGarantias .= " AND g.origem_garantia IN ($placeholders)";
+                    $paramsGarantias = array_merge($paramsGarantias, $origens);
+                }
+                
+                $sqlGarantias .= " ORDER BY g.created_at DESC";
+                
+                $stmt = $this->db->prepare($sqlGarantias);
+                $stmt->execute($paramsGarantias);
+                $itensGarantias = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+                
+                // 3. Unir os resultados (amostragens + garantias)
+                $itens = array_merge($itensAmostragens, $itensGarantias);
+                
+                // 4. Ordenar por data (mais recentes primeiro)
+                usort($itens, function($a, $b) {
+                    return strtotime($b['data_registro']) - strtotime($a['data_registro']);
+                });
                 
             } else {
                 // Buscar itens aprovados das amostragens
