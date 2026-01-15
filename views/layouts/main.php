@@ -1,9 +1,15 @@
 <?php
+// Forçar cabeçalhos de não-cache no PHP (mais forte que HTML meta tags)
+header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
+header("Pragma: no-cache"); // HTTP 1.0.
+header("Expires: 0"); // Proxies.
+
 $title = $title ?? 'SGQ OTI - DJ';
 $viewFile = $viewFile ?? __DIR__ . '/../pages/home.php';
 $sidebar = __DIR__ . '/../partials/sidebar.php';
-// Versão centralizada de assets para controle de cache
-$assetVersion = $_ENV['ASSET_VERSION'] ?? '2025.11.25';
+// Versão dinâmica para evitar cache (time() força atualização a cada reload)
+// Em produção, isso pode ser alterado para uma string fixa para performance
+$assetVersion = time();
 // Safe helper fallbacks in case global helpers are not loaded
 if (!function_exists('e')) {
   function e($value) { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'); }
@@ -17,6 +23,7 @@ if (!function_exists('flash')) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Meta tags de cache (reforço) -->
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
