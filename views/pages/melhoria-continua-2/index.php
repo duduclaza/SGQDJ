@@ -53,11 +53,12 @@ function construirUrlPaginacao($pagina) {
           <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
           <select name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             <option value="">Todos</option>
-            <option value="pendente" <?= ($_GET['status'] ?? '') == 'pendente' ? 'selected' : '' ?>>⏳ Pendente</option>
-            <option value="em_analise" <?= ($_GET['status'] ?? '') == 'em_analise' ? 'selected' : '' ?>>🔍 Em Análise</option>
-            <option value="aprovado" <?= ($_GET['status'] ?? '') == 'aprovado' ? 'selected' : '' ?>>✅ Aprovado</option>
-            <option value="reprovado" <?= ($_GET['status'] ?? '') == 'reprovado' ? 'selected' : '' ?>>❌ Reprovado</option>
-            <option value="implementado" <?= ($_GET['status'] ?? '') == 'implementado' ? 'selected' : '' ?>>🚀 Implementado</option>
+            <option value="Pendente análise" <?= ($_GET['status'] ?? '') == 'Pendente análise' ? 'selected' : '' ?>>⏳ Pendente Análise</option>
+            <option value="Enviado para Aprovação" <?= ($_GET['status'] ?? '') == 'Enviado para Aprovação' ? 'selected' : '' ?>>📤 Enviado para Aprovação</option>
+            <option value="Em andamento" <?= ($_GET['status'] ?? '') == 'Em andamento' ? 'selected' : '' ?>>🔄 Em Andamento</option>
+            <option value="Concluída" <?= ($_GET['status'] ?? '') == 'Concluída' ? 'selected' : '' ?>>✅ Concluída</option>
+            <option value="Recusada" <?= ($_GET['status'] ?? '') == 'Recusada' ? 'selected' : '' ?>>❌ Recusada</option>
+            <option value="Pendente Adaptação" <?= ($_GET['status'] ?? '') == 'Pendente Adaptação' ? 'selected' : '' ?>>📝 Pendente Adaptação</option>
           </select>
         </div>
         <div>
