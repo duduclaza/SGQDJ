@@ -15,6 +15,11 @@ use App\Controllers\FMEAController;
 use App\Controllers\CertificadosController;
 use App\Controllers\CadastroMaquinasController;
 use App\Controllers\CadastroPecasController;
+use App\Controllers\PageController;
+
+// ===== E-LEARNING ATLAS (EM BREVE) =====
+
+$router->get('/e-learning-atlas', [PageController::class, 'eLearningAtlas']);
 
 // ===== CONTROLE DE RC =====
 
