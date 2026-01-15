@@ -174,6 +174,7 @@ class PermissionMiddleware
         $comingSoonRoutes = [
             '/controle-de-rc', 
             '/homologacoes',
+            '/e-learning-atlas',
         ];
         
         // Rotas de API que têm verificação própria

@@ -127,6 +127,17 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
       </li>
       <?php endif; ?>
       
+      <!-- e-Learning Atlas - Disponível para todos -->
+      <li>
+        <a href="/e-learning-atlas" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-700 <?php echo $current==='/e-learning-atlas'?'bg-blue-600 text-white shadow-lg':'text-slate-300 hover:text-white'; ?>">
+          <span class="text-lg">🎓</span>
+          <span class="flex items-center gap-2">
+            e-Learning Atlas
+            <span class="px-1.5 py-0.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded animate-pulse">EM BREVE</span>
+          </span>
+        </a>
+      </li>
+      
       <!-- Suporte movido para o header (ícone ao lado do sininho) -->
       <!-- Removido do sidebar para ficar mais acessível no topo da página -->
       <?php /* if (isAdmin()): ?>
