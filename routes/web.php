@@ -153,6 +153,10 @@ $router->get('/logistica/estoque-tecnico', function() {
     include __DIR__ . '/../views/layouts/main.php';
 });
 
+// ===== E-LEARNING ATLAS (EM BREVE) =====
+
+$router->get('/e-learning-atlas', [PageController::class, 'eLearningAtlas']);
+
 // ===== PROFILE (Perfil do Usuário) =====
 
 $router->get('/profile', [ProfileController::class, 'index']);

@@ -21,6 +21,7 @@ class PageController
     public function homologacoes(): void { $this->render('coming-soon', ['title' => 'Homologações']); }
     public function fluxogramas(): void { $this->render('coming-soon', ['title' => 'Fluxogramas']); }
     public function controleDeRc(): void { $this->render('coming-soon', ['title' => 'Controle de RC']); }
+    public function eLearningAtlas(): void { $this->render('e-learning-atlas', ['title' => 'e-Learning Atlas']); }
     
     // Módulos já implementados - estes métodos não são mais usados
     // public function controleDeToners(): void { $this->render('blank', ['title' => 'Controle de Toners']); }
