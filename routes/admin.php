@@ -9,10 +9,14 @@ use App\Controllers\AdminController;
 use App\Controllers\ProfilesController;
 use App\Controllers\ConfigController;
 use App\Controllers\HomeController;
+use App\Controllers\PageController;
 
 // ===== PÁGINA INICIAL AUTENTICADA =====
 
 $router->get('/inicio', [HomeController::class, 'index']);
+
+// e-Learning Atlas - Disponível para todos
+$router->get('/e-learning-atlas', [PageController::class, 'eLearningAtlas']);
 
 // ===== DASHBOARD =====
 
