@@ -1097,6 +1097,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
       
       overlay.innerHTML = `
         <div class="relative max-w-2xl w-full mx-4" style="animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)">
+          <!-- Background icons -->
           <div class="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
             <div style="position: absolute; top: 10%; left: 10%; font-size: 2rem; animation: float 3s ease-in-out infinite;">🎓</div>
             <div style="position: absolute; top: 20%; right: 15%; font-size: 2rem; animation: float 3s ease-in-out infinite; animation-delay: 0.5s;">📚</div>
@@ -1104,55 +1105,56 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
             <div style="position: absolute; bottom: 15%; right: 10%; font-size: 2rem; animation: float 3s ease-in-out infinite; animation-delay: 1.5s;">🏆</div>
           </div>
           
-          <div class="relative bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 rounded-3xl p-8 shadow-2xl">
-            <button onclick="this.closest('.fixed').remove()" class="absolute top-4 right-4 text-white/80 hover:text-white hover:rotate-90 transition-all duration-300">
+          <!-- Modal content with scroll support -->
+          <div class="relative bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 rounded-3xl p-6 md:p-8 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="this.closest('.fixed').remove()" class="absolute top-4 right-4 text-white/80 hover:text-white hover:rotate-90 transition-all duration-300 z-10">
               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
             </button>
             
             <div class="text-center text-white">
-              <div class="mb-6" style="animation: bounceSlow 2s ease-in-out infinite">
-                <span class="text-8xl">🎓</span>
+              <div class="mb-4" style="animation: bounceSlow 2s ease-in-out infinite">
+                <span class="text-6xl md:text-8xl">🎓</span>
               </div>
               
-              <h2 class="text-4xl font-bold mb-4">e-Learning Atlas</h2>
+              <h2 class="text-3xl md:text-4xl font-bold mb-3">e-Learning Atlas</h2>
               
-              <div class="inline-flex items-center gap-2 px-6 py-3 bg-white/20 backdrop-blur-sm rounded-full mb-6" style="animation: pulseSlow 2s ease-in-out infinite">
+              <div class="inline-flex items-center gap-2 px-5 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-5" style="animation: pulseSlow 2s ease-in-out infinite">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <span class="font-bold">EM BREVE</span>
+                <span class="font-bold text-sm">EM BREVE</span>
               </div>
               
-              <p class="text-xl mb-8 text-white/90">
+              <p class="text-lg md:text-xl mb-6 text-white/90 leading-tight">
                 Plataforma completa de aprendizagem para sua equipe!
               </p>
               
-              <div class="grid grid-cols-2 gap-4 mb-8">
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                  <div class="text-3xl mb-2">📹</div>
-                  <div class="font-medium">Vídeo-aulas</div>
+              <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3">
+                  <div class="text-2xl mb-1">📹</div>
+                  <div class="font-medium text-sm">Vídeo-aulas</div>
                 </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                  <div class="text-3xl mb-2">📜</div>
-                  <div class="font-medium">Certificados</div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3">
+                  <div class="text-2xl mb-1">📜</div>
+                  <div class="font-medium text-sm">Certificados</div>
                 </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                  <div class="text-3xl mb-2">📊</div>
-                  <div class="font-medium">Relatórios</div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3">
+                  <div class="text-2xl mb-1">📊</div>
+                  <div class="font-medium text-sm">Relatórios</div>
                 </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                  <div class="text-3xl mb-2">🏆</div>
-                  <div class="font-medium">Gamificação</div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3">
+                  <div class="text-2xl mb-1">🏆</div>
+                  <div class="font-medium text-sm">Gamificação</div>
                 </div>
               </div>
               
-              <p class="text-sm text-white/80 mb-6">
+              <p class="text-xs md:text-sm text-white/80 mb-6 max-w-md mx-auto">
                 Gestores poderão inserir vídeo-aulas com certificados de aprendizagem e participação para a equipe
               </p>
               
-              <button onclick="this.closest('.fixed').remove()" class="px-8 py-3 bg-white text-purple-600 font-bold rounded-xl hover:bg-purple-50 transition-all transform hover:scale-105 shadow-lg">
+              <button onclick="this.closest('.fixed').remove()" class="px-8 py-3 bg-white text-purple-600 font-bold rounded-xl hover:bg-purple-50 transition-all transform hover:scale-105 shadow-lg w-full md:w-auto">
                 Entendi, aguardo ansioso! 🚀
               </button>
             </div>
