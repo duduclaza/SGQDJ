@@ -97,78 +97,6 @@ $menu = [
       ['label' => 'Parâmetros de Retornados', 'href' => '/registros/parametros', 'icon' => '📊', 'module' => 'registros_parametros'],
     ]
   ],
-  [
-    'label' => 'Módulos Especiais', 
-    'href' => '#', 
-    'icon' => '🚀', 
-    'category' => true,
-    // Usa sistema de permissões - não é mais admin_only
-    'submenu' => [
-      // Gestão de Implantação
-      [
-        'label' => 'Gestão de Implantação',
-        'href' => '#',
-        'icon' => '🚀',
-        'has_submenu' => true,
-        'modules' => ['implantacao_dpo', 'implantacao_ordem_servicos', 'implantacao_fluxo', 'implantacao_relatorios'],
-        'submenu' => [
-          ['label' => 'DPO', 'href' => '/implantacao/dpo', 'icon' => '📊', 'module' => 'implantacao_dpo'],
-          ['label' => 'Ordem de Serviços de Implantação', 'href' => '/implantacao/ordem-servicos', 'icon' => '📋', 'module' => 'implantacao_ordem_servicos'],
-          ['label' => 'Fluxo de Implantação', 'href' => '/implantacao/fluxo', 'icon' => '🔄', 'module' => 'implantacao_fluxo'],
-          ['label' => 'Relatórios', 'href' => '/implantacao/relatorios', 'icon' => '📈', 'module' => 'implantacao_relatorios'],
-        ]
-      ],
-      // CRM
-      [
-        'label' => 'CRM',
-        'href' => '#',
-        'icon' => '💼',
-        'has_submenu' => true,
-        'modules' => ['crm_prospeccao', 'crm_vendas', 'crm_relacionamento', 'crm_marketing', 'crm_relatorios', 'crm_dashboards'],
-        'submenu' => [
-          ['label' => 'Prospecção', 'href' => '/crm/prospeccao', 'icon' => '🎯', 'module' => 'crm_prospeccao'],
-          ['label' => 'Vendas', 'href' => '/crm/vendas', 'icon' => '💰', 'module' => 'crm_vendas'],
-          ['label' => 'Relacionamento', 'href' => '/crm/relacionamento', 'icon' => '🤝', 'module' => 'crm_relacionamento'],
-          ['label' => 'Marketing', 'href' => '/crm/marketing', 'icon' => '📢', 'module' => 'crm_marketing'],
-          ['label' => 'Relatórios', 'href' => '/crm/relatorios', 'icon' => '📈', 'module' => 'crm_relatorios'],
-          ['label' => 'Dashboards', 'href' => '/crm/dashboards', 'icon' => '📊', 'module' => 'crm_dashboards'],
-        ]
-      ],
-      // Logística
-      [
-        'label' => 'Logística',
-        'href' => '#',
-        'icon' => '📦',
-        'has_submenu' => true,
-        'badge' => 'R$ 600/mês',
-        'modules' => ['logistica_entrada_estoque', 'logistica_entrada_almoxarifados', 'logistica_inventarios', 'logistica_consulta_estoque', 'logistica_consulta_almoxarifado', 'logistica_transferencias_internas', 'logistica_transferencias_externas', 'logistica_estoque_tecnico'],
-        'submenu' => [
-          ['label' => 'Entrada de Estoque', 'href' => '/logistica/entrada-estoque', 'icon' => '📥', 'module' => 'logistica_entrada_estoque'],
-          ['label' => 'Entrada de Almoxarifados', 'href' => '/logistica/entrada-almoxarifados', 'icon' => '🏭', 'module' => 'logistica_entrada_almoxarifados'],
-          ['label' => 'Inventários', 'href' => '/logistica/inventarios', 'icon' => '📋', 'module' => 'logistica_inventarios'],
-          ['label' => 'Consulta de Estoque', 'href' => '/logistica/consulta-estoque', 'icon' => '🔍', 'module' => 'logistica_consulta_estoque'],
-          ['label' => 'Consulta de Almoxarifado', 'href' => '/logistica/consulta-almoxarifado', 'icon' => '🏢', 'module' => 'logistica_consulta_almoxarifado'],
-          ['label' => 'Transferências Internas', 'href' => '/logistica/transferencias-internas', 'icon' => '🔄', 'module' => 'logistica_transferencias_internas'],
-          ['label' => 'Transferências Externas', 'href' => '/logistica/transferencias-externas', 'icon' => '🚚', 'module' => 'logistica_transferencias_externas'],
-          ['label' => 'Estoque Técnico', 'href' => '/logistica/estoque-tecnico', 'icon' => '🔧', 'module' => 'logistica_estoque_tecnico'],
-        ]
-      ],
-      // Área Técnica
-      [
-        'label' => 'Área Técnica',
-        'href' => '#',
-        'icon' => '🔧',
-        'has_submenu' => true,
-        'badge' => 'R$ 200/mês',
-        'modules' => ['area_tecnica', 'area_tecnica_checklist', 'area_tecnica_consulta'],
-        'submenu' => [
-          ['label' => 'Visão Geral', 'href' => '/area-tecnica', 'icon' => '📊', 'module' => 'area_tecnica'],
-          ['label' => 'Checklist Virtual', 'href' => '/area-tecnica/checklist', 'icon' => '📋', 'module' => 'area_tecnica_checklist'],
-          ['label' => 'Consulta de Checklists', 'href' => '/area-tecnica/consulta', 'icon' => '🔍', 'module' => 'area_tecnica_consulta'],
-        ]
-      ],
-    ]
-  ],
 ];
 $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/') ?: '/';
 ?>
@@ -423,7 +351,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
         </li>
       <?php endforeach; ?>
       
-      <!-- 📊 Usabilidade - Exclusivo para Super Admin (após Módulos Especiais) -->
+      <!-- 📊 Usabilidade - Exclusivo para Super Admin -->
       <?php if (isSuperAdmin()): ?>
       <li class="mt-4 pt-4 border-t border-slate-700">
         <a href="/usabilidade" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-700 <?php echo $current==='/usabilidade'?'bg-amber-700 text-white shadow-lg':'text-amber-400 hover:text-white'; ?>">

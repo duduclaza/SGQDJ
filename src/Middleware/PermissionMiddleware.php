@@ -153,39 +153,6 @@ class PermissionMiddleware
         '/api/powerbi/garantias-simples' => 'api_powerbi',
         '/api/powerbi/garantias' => 'api_powerbi',
         
-        // =====================================================
-        // 🌟 MÓDULOS ESPECIAIS
-        // =====================================================
-        
-        // 🚀 Implantação
-        '/implantacao/dpo' => 'implantacao_dpo',
-        '/implantacao/ordem-servicos' => 'implantacao_ordem_servicos',
-        '/implantacao/fluxo' => 'implantacao_fluxo',
-        '/implantacao/relatorios' => 'implantacao_relatorios',
-        
-        // 💼 CRM
-        '/crm/prospeccao' => 'crm_prospeccao',
-        '/crm/vendas' => 'crm_vendas',
-        '/crm/relacionamento' => 'crm_relacionamento',
-        '/crm/marketing' => 'crm_marketing',
-        '/crm/relatorios' => 'crm_relatorios',
-        '/crm/dashboards' => 'crm_dashboards',
-        
-        // 📦 Logística
-        '/logistica/entrada-estoque' => 'logistica_entrada_estoque',
-        '/logistica/entrada-almoxarifados' => 'logistica_entrada_almoxarifados',
-        '/logistica/inventarios' => 'logistica_inventarios',
-        '/logistica/consulta-estoque' => 'logistica_consulta_estoque',
-        '/logistica/consulta-almoxarifado' => 'logistica_consulta_almoxarifado',
-        '/logistica/transferencias-internas' => 'logistica_transferencias_internas',
-        '/logistica/transferencias-externas' => 'logistica_transferencias_externas',
-        '/logistica/estoque-tecnico' => 'logistica_estoque_tecnico',
-        
-        // 🔧 Área Técnica
-        '/area-tecnica' => 'area_tecnica',
-        '/area-tecnica/checklist' => 'area_tecnica_checklist',
-        '/area-tecnica/consulta' => 'area_tecnica_consulta',
-        
         // Perfil - removido pois é rota pública para usuários logados
     ];
     
@@ -207,28 +174,6 @@ class PermissionMiddleware
         $comingSoonRoutes = [
             '/controle-de-rc', 
             '/homologacoes',
-            // Módulos Especiais - Em desenvolvimento
-            '/implantacao/dpo',
-            '/implantacao/ordem-servicos',
-            '/implantacao/fluxo',
-            '/implantacao/relatorios',
-            '/crm/prospeccao',
-            '/crm/vendas',
-            '/crm/relacionamento',
-            '/crm/marketing',
-            '/crm/relatorios',
-            '/crm/dashboards',
-            '/logistica/entrada-estoque',
-            '/logistica/entrada-almoxarifados',
-            '/logistica/inventarios',
-            '/logistica/consulta-estoque',
-            '/logistica/consulta-almoxarifado',
-            '/logistica/transferencias-internas',
-            '/logistica/transferencias-externas',
-            '/logistica/estoque-tecnico',
-            '/area-tecnica',
-            '/area-tecnica/checklist',
-            '/area-tecnica/consulta',
         ];
         
         // Rotas de API que têm verificação própria

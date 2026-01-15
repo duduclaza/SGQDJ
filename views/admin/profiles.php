@@ -300,40 +300,7 @@ const modules = [
   { key: 'admin_convites', name: 'Solicitações de Acesso' },
   { key: 'admin_painel', name: 'Painel Administrativo' },
   { key: 'profile', name: 'Perfil do Usuário' },
-  { key: 'email_config', name: 'Configurações de Email' },
-  
-  // ═══════════════════════════════════════════════════════════════
-  // 🌟 MÓDULOS ESPECIAIS
-  // ═══════════════════════════════════════════════════════════════
-  
-  // 🚀 Implantação
-  { key: 'implantacao_dpo', name: '🚀 Implantação → DPO' },
-  { key: 'implantacao_ordem_servicos', name: '🚀 Implantação → Ordem de Serviços' },
-  { key: 'implantacao_fluxo', name: '🚀 Implantação → Fluxo de Implantação' },
-  { key: 'implantacao_relatorios', name: '🚀 Implantação → Relatórios' },
-  
-  // 💼 CRM
-  { key: 'crm_prospeccao', name: '💼 CRM → Prospecção' },
-  { key: 'crm_vendas', name: '💼 CRM → Vendas' },
-  { key: 'crm_relacionamento', name: '💼 CRM → Relacionamento' },
-  { key: 'crm_marketing', name: '💼 CRM → Marketing' },
-  { key: 'crm_relatorios', name: '💼 CRM → Relatórios' },
-  { key: 'crm_dashboards', name: '💼 CRM → Dashboards' },
-  
-  // 📦 Logística (R$ 600/mês)
-  { key: 'logistica_entrada_estoque', name: '📦 Logística → Entrada de Estoque' },
-  { key: 'logistica_entrada_almoxarifados', name: '📦 Logística → Entrada de Almoxarifados' },
-  { key: 'logistica_inventarios', name: '📦 Logística → Inventários' },
-  { key: 'logistica_consulta_estoque', name: '📦 Logística → Consulta de Estoque' },
-  { key: 'logistica_consulta_almoxarifado', name: '📦 Logística → Consulta de Almoxarifado' },
-  { key: 'logistica_transferencias_internas', name: '📦 Logística → Transferências Internas' },
-  { key: 'logistica_transferencias_externas', name: '📦 Logística → Transferências Externas' },
-  { key: 'logistica_estoque_tecnico', name: '📦 Logística → Estoque Técnico' },
-  
-  // 🔧 Área Técnica (R$ 200/mês)
-  { key: 'area_tecnica', name: '🔧 Área Técnica → Visão Geral' },
-  { key: 'area_tecnica_checklist', name: '🔧 Área Técnica → Checklist Virtual' },
-  { key: 'area_tecnica_consulta', name: '🔧 Área Técnica → Consulta de Checklists' }
+  { key: 'email_config', name: 'Configurações de Email' }
 ];
 
 // Email do usuário logado (Master User pode editar tudo)
