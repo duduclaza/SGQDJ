@@ -14,6 +14,7 @@ use App\Controllers\AreaTecnicaController;
 use App\Controllers\CRMController;
 use App\Controllers\ImplantacaoController;
 use App\Controllers\ProfileController;
+use App\Controllers\PageController;
 
 // ===== REGISTROS GERAIS =====
 
@@ -154,7 +155,6 @@ $router->get('/logistica/estoque-tecnico', function() {
 });
 
 // ===== E-LEARNING ATLAS (EM BREVE) =====
-
 $router->get('/e-learning-atlas', [PageController::class, 'eLearningAtlas']);
 
 // ===== PROFILE (Perfil do Usuário) =====
