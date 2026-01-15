@@ -16,7 +16,11 @@ use App\Controllers\PageController;
 $router->get('/inicio', [HomeController::class, 'index']);
 
 // e-Learning Atlas - Disponível para todos
-$router->get('/e-learning-atlas', [PageController::class, 'eLearningAtlas']);
+$router->get('/e-learning-atlas', function() {
+    $title = 'e-Learning Atlas - SGQ OTI DJ';
+    $viewFile = __DIR__ . '/../views/pages/e-learning-atlas.php';
+    include __DIR__ . '/../views/layouts/main.php';
+});
 
 // ===== DASHBOARD =====
 
