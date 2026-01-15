@@ -1088,5 +1088,100 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
 
     // Carregar foto quando a página carregar
     document.addEventListener('DOMContentLoaded', loadSidebarUserPhoto);
+    
+    // ===== e-Learning Atlas Animation =====
+    function showELearningAnimation() {
+      const overlay = document.createElement('div');
+      overlay.className = 'fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center';
+      overlay.style.animation = 'fadeIn 0.3s ease-out';
+      
+      overlay.innerHTML = `
+        <div class="relative max-w-2xl w-full mx-4" style="animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)">
+          <div class="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
+            <div style="position: absolute; top: 10%; left: 10%; font-size: 2rem; animation: float 3s ease-in-out infinite;">🎓</div>
+            <div style="position: absolute; top: 20%; right: 15%; font-size: 2rem; animation: float 3s ease-in-out infinite; animation-delay: 0.5s;">📚</div>
+            <div style="position: absolute; bottom: 20%; left: 20%; font-size: 2rem; animation: float 3s ease-in-out infinite; animation-delay: 1s;">✨</div>
+            <div style="position: absolute; bottom: 15%; right: 10%; font-size: 2rem; animation: float 3s ease-in-out infinite; animation-delay: 1.5s;">🏆</div>
+          </div>
+          
+          <div class="relative bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 rounded-3xl p-8 shadow-2xl">
+            <button onclick="this.closest('.fixed').remove()" class="absolute top-4 right-4 text-white/80 hover:text-white hover:rotate-90 transition-all duration-300">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+            
+            <div class="text-center text-white">
+              <div class="mb-6" style="animation: bounceSlow 2s ease-in-out infinite">
+                <span class="text-8xl">🎓</span>
+              </div>
+              
+              <h2 class="text-4xl font-bold mb-4">e-Learning Atlas</h2>
+              
+              <div class="inline-flex items-center gap-2 px-6 py-3 bg-white/20 backdrop-blur-sm rounded-full mb-6" style="animation: pulseSlow 2s ease-in-out infinite">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="font-bold">EM BREVE</span>
+              </div>
+              
+              <p class="text-xl mb-8 text-white/90">
+                Plataforma completa de aprendizagem para sua equipe!
+              </p>
+              
+              <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                  <div class="text-3xl mb-2">📹</div>
+                  <div class="font-medium">Vídeo-aulas</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                  <div class="text-3xl mb-2">📜</div>
+                  <div class="font-medium">Certificados</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                  <div class="text-3xl mb-2">📊</div>
+                  <div class="font-medium">Relatórios</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                  <div class="text-3xl mb-2">🏆</div>
+                  <div class="font-medium">Gamificação</div>
+                </div>
+              </div>
+              
+              <p class="text-sm text-white/80 mb-6">
+                Gestores poderão inserir vídeo-aulas com certificados de aprendizagem e participação para a equipe
+              </p>
+              
+              <button onclick="this.closest('.fixed').remove()" class="px-8 py-3 bg-white text-purple-600 font-bold rounded-xl hover:bg-purple-50 transition-all transform hover:scale-105 shadow-lg">
+                Entendi, aguardo ansioso! 🚀
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', (e) => e.target === overlay && overlay.remove());
+      document.addEventListener('keydown', function closeOnEsc(e) {
+        if (e.key === 'Escape') {
+          overlay.remove();
+          document.removeEventListener('keydown', closeOnEsc);
+        }
+      });
+    }
+    
+    // Add animation styles
+    if (!document.getElementById('elearning-animations')) {
+      const style = document.createElement('style');
+      style.id = 'elearning-animations';
+      style.textContent = `
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.4; } 50% { transform: translateY(-20px) rotate(10deg); opacity: 0.8; } }
+        @keyframes bounceSlow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulseSlow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+      `;
+      document.head.appendChild(style);
+    }
   </script>
 </div>
