@@ -575,16 +575,29 @@ function renderFormularios(formularios) {
       </div>
       <h4 class="font-semibold text-gray-900 mb-1">${escapeHtml(f.titulo)}</h4>
       <p class="text-sm text-gray-600 mb-3 line-clamp-2">${escapeHtml(f.descricao || 'Sem descrição')}</p>
-      <div class="flex items-center gap-4 text-xs text-gray-500 mb-4">
+      <div class="flex items-center gap-4 text-xs text-gray-500 mb-3">
         <span>📊 ${f.total_perguntas} perguntas</span>
         <span>📋 ${f.total_avaliacoes} avaliações</span>
       </div>
-      <div class="flex items-center gap-2 pt-3 border-t border-gray-100">
-        <button onclick="editarFormularioRh(${f.id}, ${f.total_avaliacoes})" class="flex-1 text-center px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-          ✏️ Editar
+      ${f.url_publica ? `
+      <div class="flex items-center gap-2 mb-3">
+        <button onclick="copiarLink('${f.url_publica}')" class="flex-1 text-center px-2 py-1.5 text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded-lg transition-colors" title="Copiar Link">
+          🔗 Copiar Link
         </button>
-        <button onclick="excluirFormularioRh(${f.id}, ${f.total_avaliacoes})" class="flex-1 text-center px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-          🗑️ Excluir
+        <button onclick="mostrarQRCode('${f.url_publica}', '${escapeHtml(f.titulo).replace(/'/g, "\\'")}')" class="flex-1 text-center px-2 py-1.5 text-xs bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg transition-colors" title="QR Code">
+          📱 QR Code
+        </button>
+      </div>
+      ` : ''}
+      <div class="flex items-center gap-1 pt-3 border-t border-gray-100">
+        <button onclick="duplicarFormularioRh(${f.id})" class="flex-1 text-center px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors" title="Duplicar">
+          📋
+        </button>
+        <button onclick="editarFormularioRh(${f.id}, ${f.total_avaliacoes})" class="flex-1 text-center px-2 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar">
+          ✏️
+        </button>
+        <button onclick="excluirFormularioRh(${f.id}, ${f.total_avaliacoes})" class="flex-1 text-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir">
+          🗑️
         </button>
       </div>
     </div>
@@ -781,4 +794,74 @@ document.getElementById('formFormulario').addEventListener('submit', function(e)
       alert('Erro ao salvar formulário');
     });
 });
+
+// Copiar link do formulário
+function copiarLink(token) {
+  const url = window.location.origin + '/avaliacao/' + token;
+  navigator.clipboard.writeText(url).then(() => {
+    alert('Link copiado!\n\n' + url);
+  }).catch(() => {
+    prompt('Copie o link:', url);
+  });
+}
+
+// Mostrar QR Code
+function mostrarQRCode(token, titulo) {
+  const url = window.location.origin + '/avaliacao/' + token;
+  
+  // Criar modal de QR Code
+  const modal = document.createElement('div');
+  modal.id = 'modalQRCode';
+  modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+  modal.innerHTML = `
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 text-center">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-semibold text-gray-900">📱 QR Code</h3>
+        <button onclick="document.getElementById('modalQRCode').remove()" class="text-gray-400 hover:text-gray-600">✕</button>
+      </div>
+      <h4 class="text-lg font-medium text-gray-900 mb-4">${titulo}</h4>
+      <div id="qrcode" class="flex justify-center mb-4"></div>
+      <p class="text-sm text-gray-600 mb-4">Escaneie para acessar o formulário</p>
+      <div class="flex gap-2">
+        <button onclick="copiarLink('${token}')" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+          🔗 Copiar Link
+        </button>
+        <button onclick="document.getElementById('modalQRCode').remove()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+          Fechar
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  
+  // Gerar QR Code usando API
+  const qrImg = document.createElement('img');
+  qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url);
+  qrImg.alt = 'QR Code';
+  qrImg.className = 'mx-auto';
+  document.getElementById('qrcode').appendChild(qrImg);
+}
+
+// Duplicar formulário
+function duplicarFormularioRh(id) {
+  if (!confirm('Deseja duplicar este formulário?')) return;
+  
+  const formData = new FormData();
+  formData.append('id', id);
+  
+  fetch('/rh/formularios/duplicar', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        carregarFormularios();
+      } else {
+        alert('Erro: ' + data.message);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Erro ao duplicar');
+    });
+}
 </script>

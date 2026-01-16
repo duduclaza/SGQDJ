@@ -676,6 +676,10 @@ $router->get('/rh/formularios/{id}/detalhes', [App\Controllers\RhController::cla
 $router->post('/rh/formularios/criar', [App\Controllers\RhController::class, 'criarFormulario']);
 $router->post('/rh/formularios/editar', [App\Controllers\RhController::class, 'editarFormulario']);
 $router->post('/rh/formularios/excluir', [App\Controllers\RhController::class, 'excluirFormulario']);
+$router->post('/rh/formularios/duplicar', [App\Controllers\RhController::class, 'duplicarFormulario']);
+// Páginas públicas de avaliação RH
+$router->get('/avaliacao/{token}', [App\Controllers\RhController::class, 'formularioPublico']);
+$router->post('/avaliacao/responder', [App\Controllers\RhController::class, 'salvarRespostaPublica']);
 
 // ===== MÓDULO USABILIDADE DO SGQ (SUPER ADMIN ONLY) =====
 $router->get('/usabilidade', [App\Controllers\UsabilidadeController::class, 'index']);
