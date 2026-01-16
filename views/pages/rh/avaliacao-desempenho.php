@@ -263,11 +263,8 @@
     <form id="formNovaAvaliacao" class="p-6 space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Colaborador *</label>
-        <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" required>
-          <option value="">Selecione o colaborador</option>
-          <option value="1">João Silva - Analista de TI</option>
-          <option value="2">Ana Costa - Coordenadora de Qualidade</option>
-          <option value="3">Pedro Souza - Técnico de Suporte</option>
+        <select id="selectColaborador" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" required>
+          <option value="">Carregando colaboradores...</option>
         </select>
       </div>
       <div>
@@ -407,10 +404,35 @@ function getStatusLabel(status) {
 // Modal
 function abrirModalNovaAvaliacao() {
   document.getElementById('modalNovaAvaliacao').classList.remove('hidden');
+  carregarColaboradores();
 }
 
 function fecharModalNovaAvaliacao() {
   document.getElementById('modalNovaAvaliacao').classList.add('hidden');
+}
+
+// Carregar colaboradores do sistema
+function carregarColaboradores() {
+  const select = document.getElementById('selectColaborador');
+  select.innerHTML = '<option value="">Carregando...</option>';
+  
+  fetch('/rh/colaboradores/listar')
+    .then(r => r.json())
+    .then(data => {
+      if (data.success && data.colaboradores) {
+        select.innerHTML = '<option value="">Selecione o colaborador</option>';
+        data.colaboradores.forEach(c => {
+          const setor = c.setor || 'Sem setor';
+          select.innerHTML += `<option value="${c.id}">${escapeHtml(c.name)} - ${escapeHtml(setor)}</option>`;
+        });
+      } else {
+        select.innerHTML = '<option value="">Erro ao carregar</option>';
+      }
+    })
+    .catch(err => {
+      console.error('Erro ao carregar colaboradores:', err);
+      select.innerHTML = '<option value="">Erro ao carregar</option>';
+    });
 }
 
 // Form submit
