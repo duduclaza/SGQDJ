@@ -368,6 +368,7 @@ $router->post('/nps/criar', [App\Controllers\NpsController::class, 'criar']);
 $router->post('/nps/editar', [App\Controllers\NpsController::class, 'editar']);
 $router->post('/nps/toggle-status', [App\Controllers\NpsController::class, 'toggleStatus']);
 $router->post('/nps/excluir', [App\Controllers\NpsController::class, 'excluir']);
+$router->post('/nps/duplicar', [App\Controllers\NpsController::class, 'duplicar']);
 $router->get('/nps/{id}/detalhes', [App\Controllers\NpsController::class, 'detalhes']);
 $router->get('/nps/{id}/respostas', [App\Controllers\NpsController::class, 'verRespostas']);
 $router->post('/nps/excluir-resposta', [App\Controllers\NpsController::class, 'excluirResposta']);
