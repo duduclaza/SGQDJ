@@ -119,8 +119,8 @@ class RhController
                        f.titulo as formulario_titulo,
                        COALESCE(u_colab.name, a.colaborador_nome, 'Externo') as colaborador_nome,
                        COALESCE(u_aval.name, a.avaliador_nome, 'Externo') as avaliador_nome_final,
-                       u_colab.role as cargo,
-                       u_colab.setor as departamento
+                       COALESCE(u_colab.role, 'Não informado') as cargo,
+                       COALESCE(u_colab.setor, 'Não informado') as departamento
                 FROM rh_avaliacoes a
                 JOIN rh_formularios_avaliacao f ON a.formulario_id = f.id
                 LEFT JOIN users u_colab ON a.colaborador_id = u_colab.id
@@ -151,6 +151,37 @@ class RhController
         }
         exit;
     }
+    
+    /**
+     * API: Excluir avaliação
+     */
+    public function excluirAvaliacao()
+    {
+        $this->checkRhPermission();
+        header('Content-Type: application/json');
+        
+        try {
+            $id = $_POST['id'] ?? 0;
+            
+            if (!$id) {
+                echo json_encode(['success' => false, 'message' => 'ID inválido']);
+                exit;
+            }
+            
+            // Excluir respostas vinculada (se não tiver CASCADE no banco)
+            $stmt = $this->db->prepare("DELETE FROM rh_avaliacoes_respostas WHERE avaliacao_id = ?");
+            $stmt->execute([$id]);
+            
+            // Excluir avaliação
+            $stmt = $this->db->prepare("DELETE FROM rh_avaliacoes WHERE id = ?");
+            $stmt->execute([$id]);
+            
+            echo json_encode(['success' => true, 'message' => 'Avaliação excluída com sucesso!']);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Erro ao excluir: ' . $e->getMessage()]);
+        }
+        exit;
+    }
 
 
 
@@ -177,12 +208,20 @@ class RhController
                 exit;
             }
             
-            // Criar avaliação salvando os nomes
+            // Buscar ID do colaborador (se existir)
+            $colaboradorId = null;
+            if ($colaboradorNome && $colaboradorNome !== 'Não informado') {
+                $stmtUser = $this->db->prepare("SELECT id FROM users WHERE name = ? LIMIT 1");
+                $stmtUser->execute([$colaboradorNome]);
+                $colaboradorId = $stmtUser->fetchColumn() ?: null;
+            }
+
+            // Criar avaliação salvando os nomes e IDs
             $stmt = $this->db->prepare("
                 INSERT INTO rh_avaliacoes (formulario_id, colaborador_id, colaborador_nome, avaliador_id, avaliador_nome, data_inicio, status)
-                VALUES (?, NULL, ?, NULL, ?, NOW(), 'concluida')
+                VALUES (?, ?, ?, NULL, ?, NOW(), 'concluida')
             ");
-            $stmt->execute([$formulario['id'], $colaboradorNome, $avaliadorNome]);
+            $stmt->execute([$formulario['id'], $colaboradorId, $colaboradorNome, $avaliadorNome]);
             $avaliacaoId = $this->db->lastInsertId();
             
             // Salvar respostas
@@ -533,6 +572,10 @@ class RhController
             $stmt = $this->db->prepare("SELECT * FROM rh_formularios_perguntas WHERE formulario_id = ? ORDER BY ordem");
             $stmt->execute([$formulario['id']]);
             $formulario['perguntas'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Buscar colaboradores para o select
+            $stmt = $this->db->query("SELECT id, name, setor FROM users WHERE status = 'active' ORDER BY name ASC");
+            $colaboradores = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             
             $title = $formulario['titulo'] . ' - Avaliação RH';
             $viewFile = __DIR__ . '/../../views/pages/rh/formulario-publico.php';

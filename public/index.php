@@ -670,6 +670,7 @@ $router->get('/rh', [App\Controllers\RhController::class, 'index']);
 $router->get('/rh/avaliacao-desempenho', [App\Controllers\RhController::class, 'avaliacaoDesempenho']);
 $router->get('/rh/dashboard/stats', [App\Controllers\RhController::class, 'dashboardStats']);
 $router->get('/rh/avaliacoes/listar', [App\Controllers\RhController::class, 'listarAvaliacoes']);
+$router->post('/rh/avaliacoes/excluir', [App\Controllers\RhController::class, 'excluirAvaliacao']);
 $router->get('/rh/colaboradores/listar', [App\Controllers\RhController::class, 'listarColaboradores']);
 // Formulários de Avaliação
 $router->get('/rh/formularios/listar', [App\Controllers\RhController::class, 'listarFormularios']);

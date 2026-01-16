@@ -407,10 +407,41 @@ function renderAvaliacoes(avaliacoes) {
         </span>
       </td>
       <td class="px-6 py-4">
-        <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">Ver detalhes</button>
+        <button onclick="verDetalhesAvaliacao(${a.id})" class="text-blue-600 hover:text-blue-800 text-sm font-medium mr-2" title="Ver Detalhes">
+            👁️
+        </button>
+        <button onclick="excluirAvaliacaoRh(${a.id})" class="text-red-600 hover:text-red-800 text-sm font-medium" title="Excluir Avaliação">
+            🗑️
+        </button>
       </td>
     </tr>
   `).join('');
+}
+
+// ... helpers ...
+
+// Função para excluir avaliação
+function excluirAvaliacaoRh(id) {
+    if (!confirm('Tem certeza que deseja excluir esta avaliação? Essa ação não pode ser desfeita.')) return;
+
+    const formData = new FormData();
+    formData.append('id', id);
+
+    fetch('/rh/avaliacoes/excluir', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('Avaliação excluída com sucesso!');
+            carregarAvaliacoes(); // Recarregar tabela
+            carregarDashboardStats(); // Atualizar KPIs
+        } else {
+            alert('Erro: ' + data.message);
+        }
+    })
+    .catch(console.error);
 }
 
 // Helpers
