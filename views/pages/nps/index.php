@@ -236,6 +236,13 @@ function renderFormularios(formularios) {
               </svg>
             </button>
             
+            <!-- Botão Duplicar -->
+            <button onclick="duplicarFormulario('${f.id}')" class="p-2 text-purple-600 hover:text-purple-700" title="📋 Duplicar formulário">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+              </svg>
+            </button>
+            
             <!-- Ícone de Chave/Cadeado para Ativo/Inativo -->
             <button onclick="toggleStatus('${f.id}')" class="p-2 ${f.ativo ? 'text-green-600 hover:text-green-700' : 'text-gray-400 hover:text-gray-600'}" title="${f.ativo ? '🔓 Formulário Aberto (clique para fechar)' : '🔒 Formulário Fechado (clique para abrir)'}">
               ${f.ativo ? `
@@ -502,6 +509,32 @@ function excluirFormulario(id, totalRespostas) {
     } else {
       alert('Erro: ' + data.message);
     }
+  });
+}
+
+// Duplicar formulário
+function duplicarFormulario(id) {
+  if (!confirm('Deseja duplicar este formulário? Uma cópia será criada com todas as perguntas.')) return;
+  
+  const formData = new FormData();
+  formData.append('formulario_id', id);
+  
+  fetch('/nps/duplicar', {
+    method: 'POST',
+    body: formData
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      alert(data.message);
+      carregarFormularios();
+    } else {
+      alert('Erro: ' + data.message);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert('Erro ao duplicar formulário');
   });
 }
 

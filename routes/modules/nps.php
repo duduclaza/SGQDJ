@@ -20,6 +20,7 @@ $router->post('/nps/criar', [NpsController::class, 'criar']);
 $router->post('/nps/editar', [NpsController::class, 'editar']);
 $router->post('/nps/toggle-status', [NpsController::class, 'toggleStatus']);
 $router->post('/nps/excluir', [NpsController::class, 'excluir']);
+$router->post('/nps/duplicar', [NpsController::class, 'duplicar']);
 
 // ===== DETALHES E RESPOSTAS =====
 

@@ -378,6 +378,104 @@ class NpsController
     }
     
     /**
+     * Duplicar formulário existente
+     */
+    public function duplicar()
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            $userId = $_SESSION['user_id'] ?? null;
+            $userName = $_SESSION['user_name'] ?? 'Usuário';
+            
+            if (!$userId) {
+                echo json_encode(['success' => false, 'message' => 'Não autenticado']);
+                exit;
+            }
+            
+            $formularioId = $_POST['formulario_id'] ?? '';
+            
+            if (empty($formularioId)) {
+                echo json_encode(['success' => false, 'message' => 'ID do formulário não informado']);
+                exit;
+            }
+            
+            // Carregar formulário original
+            $filename = $this->storageDir . '/formulario_' . $formularioId . '.json';
+            if (!file_exists($filename)) {
+                echo json_encode(['success' => false, 'message' => 'Formulário não encontrado']);
+                exit;
+            }
+            
+            $formularioOriginal = json_decode(file_get_contents($filename), true);
+            
+            // Verificar permissão para duplicar
+            $userRole = $_SESSION['user_role'] ?? '';
+            $isOwner = $formularioOriginal['criado_por'] == $userId;
+            $isAdminOrSuper = in_array($userRole, ['admin', 'super_admin']);
+            $hasViewPermission = PermissionService::hasPermission($userId, 'nps', 'view');
+            
+            if (!$isOwner && !$isAdminOrSuper && !$hasViewPermission) {
+                echo json_encode(['success' => false, 'message' => 'Sem permissão para duplicar este formulário']);
+                exit;
+            }
+            
+            // Gerar novo ID único
+            $novoFormularioId = 'form_' . time() . '_' . uniqid();
+            
+            // Copiar logo se existir
+            $novoLogoPath = null;
+            if (!empty($formularioOriginal['logo'])) {
+                $logoOriginalPath = __DIR__ . '/../../' . $formularioOriginal['logo'];
+                if (file_exists($logoOriginalPath)) {
+                    $logosDir = $this->storageDir . '/logos';
+                    if (!is_dir($logosDir)) {
+                        mkdir($logosDir, 0755, true);
+                    }
+                    
+                    $fileExtension = pathinfo($formularioOriginal['logo'], PATHINFO_EXTENSION);
+                    $novoLogoFilename = $novoFormularioId . '.' . $fileExtension;
+                    $novoLogoFullPath = $logosDir . '/' . $novoLogoFilename;
+                    
+                    if (copy($logoOriginalPath, $novoLogoFullPath)) {
+                        $novoLogoPath = 'storage/formularios/logos/' . $novoLogoFilename;
+                    }
+                }
+            }
+            
+            // Criar novo formulário com dados do original
+            $novoFormulario = [
+                'id' => $novoFormularioId,
+                'titulo' => $formularioOriginal['titulo'] . ' (Cópia)',
+                'descricao' => $formularioOriginal['descricao'],
+                'perguntas' => $formularioOriginal['perguntas'],
+                'logo' => $novoLogoPath,
+                'ativo' => false, // Iniciar como inativo para o usuário revisar antes de ativar
+                'criado_por' => $userId,
+                'criado_por_nome' => $userName,
+                'criado_em' => date('Y-m-d H:i:s'),
+                'atualizado_em' => date('Y-m-d H:i:s')
+            ];
+            
+            // Salvar novo formulário
+            $novoFilename = $this->storageDir . '/formulario_' . $novoFormularioId . '.json';
+            file_put_contents($novoFilename, json_encode($novoFormulario, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Formulário duplicado com sucesso! O novo formulário está inativo para você revisar antes de ativar.',
+                'formulario_id' => $novoFormularioId,
+                'link_publico' => $_ENV['APP_URL'] . '/nps/responder/' . $novoFormularioId
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log('Erro ao duplicar formulário: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Erro ao duplicar formulário']);
+        }
+        exit;
+    }
+    
+    /**
      * Página pública de resposta (SEM LOGIN)
      */
     public function responder($formularioId)
