@@ -138,6 +138,25 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
         </button>
       </li>
       
+      <!-- RH - Recursos Humanos (Admin e Setor RH) -->
+      <?php 
+        $userRole = $_SESSION['user_role'] ?? '';
+        $userSetor = $_SESSION['user_setor'] ?? '';
+        $isAdminRh = in_array($userRole, ['admin', 'super_admin']);
+        $isRhSetor = strtoupper($userSetor) === 'RH' || stripos($userSetor, 'recursos humanos') !== false;
+        if ($isAdminRh || $isRhSetor): 
+      ?>
+      <li>
+        <a href="/rh" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-700 <?php echo $current==='/rh'?'bg-emerald-600 text-white shadow-lg':'text-slate-300 hover:text-white'; ?>">
+          <span class="text-lg">👥</span>
+          <span class="flex items-center gap-2">
+            RH
+            <span class="px-1.5 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-bold rounded animate-pulse">EM BREVE</span>
+          </span>
+        </a>
+      </li>
+      <?php endif; ?>
+      
       <!-- Suporte movido para o header (ícone ao lado do sininho) -->
       <!-- Removido do sidebar para ficar mais acessível no topo da página -->
       <?php /* if (isAdmin()): ?>

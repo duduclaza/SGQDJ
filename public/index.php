@@ -665,6 +665,9 @@ $router->get('/area-tecnica/checklists/{id}', [App\Controllers\AreaTecnicaContro
 $router->get('/teste-smtp-debug', [App\Controllers\TesteEmailController::class, 'index']);
 $router->post('/teste-smtp-debug', [App\Controllers\TesteEmailController::class, 'index']);
 
+// ===== MÓDULO RH - RECURSOS HUMANOS =====
+$router->get('/rh', [App\Controllers\RhController::class, 'index']);
+
 // ===== MÓDULO USABILIDADE DO SGQ (SUPER ADMIN ONLY) =====
 $router->get('/usabilidade', [App\Controllers\UsabilidadeController::class, 'index']);
 $router->get('/usabilidade/api/logins-por-dia', [App\Controllers\UsabilidadeController::class, 'getLoginsPorDia']);
