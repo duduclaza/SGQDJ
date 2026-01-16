@@ -670,6 +670,12 @@ $router->get('/rh', [App\Controllers\RhController::class, 'index']);
 $router->get('/rh/avaliacao-desempenho', [App\Controllers\RhController::class, 'avaliacaoDesempenho']);
 $router->get('/rh/avaliacoes/listar', [App\Controllers\RhController::class, 'listarAvaliacoes']);
 $router->get('/rh/colaboradores/listar', [App\Controllers\RhController::class, 'listarColaboradores']);
+// Formulários de Avaliação
+$router->get('/rh/formularios/listar', [App\Controllers\RhController::class, 'listarFormularios']);
+$router->get('/rh/formularios/{id}/detalhes', [App\Controllers\RhController::class, 'detalhesFormulario']);
+$router->post('/rh/formularios/criar', [App\Controllers\RhController::class, 'criarFormulario']);
+$router->post('/rh/formularios/editar', [App\Controllers\RhController::class, 'editarFormulario']);
+$router->post('/rh/formularios/excluir', [App\Controllers\RhController::class, 'excluirFormulario']);
 
 // ===== MÓDULO USABILIDADE DO SGQ (SUPER ADMIN ONLY) =====
 $router->get('/usabilidade', [App\Controllers\UsabilidadeController::class, 'index']);

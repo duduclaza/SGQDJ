@@ -220,15 +220,25 @@
 
   <!-- Aba Formulários -->
   <div id="content-formularios" class="tab-content hidden">
-    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-8 text-center">
-      <div class="text-blue-600 mb-4">
-        <span class="text-5xl">📝</span>
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900">Modelos de Formulários</h3>
+        <p class="text-sm text-gray-600">Crie formulários personalizados para diferentes tipos de avaliação</p>
       </div>
-      <h3 class="text-xl font-semibold text-blue-800 mb-2">Formulários de Avaliação</h3>
-      <p class="text-blue-700 mb-4">Crie e gerencie modelos de formulários para diferentes tipos de avaliação.</p>
-      <span class="inline-flex items-center px-3 py-1 bg-amber-100 text-amber-800 text-sm font-medium rounded-full">
-        ⚙️ Em desenvolvimento
-      </span>
+      <button onclick="abrirModalFormulario()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-lg">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Novo Formulário
+      </button>
+    </div>
+    
+    <div id="formulariosGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Formulários carregados via JavaScript -->
+      <div class="col-span-full text-center py-12 text-gray-500">
+        <span class="text-4xl mb-2 block">📝</span>
+        Carregando formulários...
+      </div>
     </div>
   </div>
 
@@ -293,6 +303,74 @@
   </div>
 </div>
 
+<!-- Modal Criar/Editar Formulário -->
+<div id="modalFormulario" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+  <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full my-8">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex justify-between items-center">
+        <h3 id="modalFormTitulo" class="text-xl font-semibold text-gray-900">📝 Novo Formulário de Avaliação</h3>
+        <button onclick="fecharModalFormulario()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <form id="formFormulario" class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+      <input type="hidden" id="form_id" value="">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Título do Formulário *</label>
+          <input type="text" id="form_titulo" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" placeholder="Ex: Avaliação de Desempenho Trimestral">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+          <select id="form_tipo" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+            <option value="desempenho">Avaliação de Desempenho</option>
+            <option value="experiencia">Avaliação de Experiência</option>
+            <option value="trimestral">Trimestral</option>
+            <option value="semestral">Semestral</option>
+            <option value="anual">Anual</option>
+            <option value="bonificacao">Bonificação</option>
+            <option value="disc">DISC</option>
+          </select>
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+        <textarea id="form_descricao" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" placeholder="Breve descrição do formulário..."></textarea>
+      </div>
+      
+      <div>
+        <div class="flex justify-between items-center mb-3">
+          <label class="block text-sm font-medium text-gray-700">Perguntas do Formulário *</label>
+          <button type="button" onclick="adicionarPerguntaForm()" class="text-sm text-blue-600 hover:text-blue-700 flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Adicionar Pergunta
+          </button>
+        </div>
+        
+        <div id="perguntasFormContainer" class="space-y-3">
+          <!-- Perguntas serão adicionadas aqui -->
+        </div>
+      </div>
+      
+      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+        <button type="button" onclick="fecharModalFormulario()" class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+          Cancelar
+        </button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          Salvar Formulário
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 // Funções de Abas
 function trocarAba(aba) {
@@ -314,6 +392,8 @@ function trocarAba(aba) {
   // Carregar dados se necessário
   if (aba === 'avaliacoes') {
     carregarAvaliacoes();
+  } else if (aba === 'formularios') {
+    carregarFormularios();
   }
 }
 
@@ -440,5 +520,265 @@ document.getElementById('formNovaAvaliacao').addEventListener('submit', function
   e.preventDefault();
   alert('Funcionalidade em desenvolvimento!');
   fecharModalNovaAvaliacao();
+});
+
+// ========== FORMULÁRIOS DE AVALIAÇÃO ==========
+
+let perguntasForm = [];
+
+// Carregar formulários ao trocar para aba
+function carregarFormularios() {
+  const grid = document.getElementById('formulariosGrid');
+  grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500"><span class="text-4xl mb-2 block">⏳</span>Carregando...</div>';
+  
+  fetch('/rh/formularios/listar')
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        renderFormularios(data.formularios);
+      } else {
+        grid.innerHTML = '<div class="col-span-full text-center py-12 text-red-500">Erro ao carregar formulários</div>';
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      grid.innerHTML = '<div class="col-span-full text-center py-12 text-red-500">Erro ao carregar</div>';
+    });
+}
+
+// Renderizar grid de formulários
+function renderFormularios(formularios) {
+  const grid = document.getElementById('formulariosGrid');
+  
+  if (formularios.length === 0) {
+    grid.innerHTML = `
+      <div class="col-span-full text-center py-12">
+        <span class="text-5xl mb-4 block">📝</span>
+        <p class="text-gray-600 mb-4">Nenhum formulário criado ainda</p>
+        <button onclick="abrirModalFormulario()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+          Criar Primeiro Formulário
+        </button>
+      </div>
+    `;
+    return;
+  }
+  
+  grid.innerHTML = formularios.map(f => `
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-5 hover:shadow-xl transition-all duration-300">
+      <div class="flex items-start justify-between mb-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+          <span class="text-xl">📝</span>
+        </div>
+        <span class="px-2 py-1 text-xs font-medium rounded-full ${f.ativo == 1 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+          ${f.ativo == 1 ? 'Ativo' : 'Inativo'}
+        </span>
+      </div>
+      <h4 class="font-semibold text-gray-900 mb-1">${escapeHtml(f.titulo)}</h4>
+      <p class="text-sm text-gray-600 mb-3 line-clamp-2">${escapeHtml(f.descricao || 'Sem descrição')}</p>
+      <div class="flex items-center gap-4 text-xs text-gray-500 mb-4">
+        <span>📊 ${f.total_perguntas} perguntas</span>
+        <span>📋 ${f.total_avaliacoes} avaliações</span>
+      </div>
+      <div class="flex items-center gap-2 pt-3 border-t border-gray-100">
+        <button onclick="editarFormularioRh(${f.id}, ${f.total_avaliacoes})" class="flex-1 text-center px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+          ✏️ Editar
+        </button>
+        <button onclick="excluirFormularioRh(${f.id}, ${f.total_avaliacoes})" class="flex-1 text-center px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+          🗑️ Excluir
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Modal de formulário
+function abrirModalFormulario() {
+  document.getElementById('modalFormTitulo').textContent = '📝 Novo Formulário de Avaliação';
+  document.getElementById('form_id').value = '';
+  document.getElementById('form_titulo').value = '';
+  document.getElementById('form_descricao').value = '';
+  document.getElementById('form_tipo').value = 'desempenho';
+  
+  perguntasForm = [];
+  document.getElementById('perguntasFormContainer').innerHTML = '';
+  adicionarPerguntaForm(); // Adicionar primeira pergunta
+  
+  document.getElementById('modalFormulario').classList.remove('hidden');
+}
+
+function fecharModalFormulario() {
+  document.getElementById('modalFormulario').classList.add('hidden');
+}
+
+// Adicionar pergunta ao formulário
+function adicionarPerguntaForm() {
+  const index = perguntasForm.length;
+  perguntasForm.push({ texto: '', tipo: 'texto' });
+  
+  const container = document.getElementById('perguntasFormContainer');
+  const div = document.createElement('div');
+  div.className = 'border border-gray-300 rounded-lg p-4 bg-gray-50';
+  div.id = `pergunta_form_${index}`;
+  div.innerHTML = `
+    <div class="flex justify-between items-center mb-3">
+      <span class="text-sm font-medium text-gray-700">Pergunta ${index + 1}</span>
+      <button type="button" onclick="removerPerguntaForm(${index})" class="text-red-600 hover:text-red-700 text-sm">
+        Remover
+      </button>
+    </div>
+    <input type="text" id="pf_texto_${index}" placeholder="Digite a pergunta" class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-2 focus:ring-2 focus:ring-blue-500" required>
+    <div class="grid grid-cols-2 gap-2">
+      <select id="pf_tipo_${index}" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+        <option value="texto">Resposta de Texto</option>
+        <option value="numero">Número (0-10)</option>
+        <option value="escala_1_5">Escala 1-5</option>
+        <option value="escala_1_10">Escala 1-10</option>
+        <option value="sim_nao">Sim/Não</option>
+        <option value="multipla">Múltipla Escolha</option>
+      </select>
+      <input type="number" id="pf_peso_${index}" placeholder="Peso (default: 1)" step="0.1" min="0" max="10" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+    </div>
+  `;
+  container.appendChild(div);
+}
+
+// Remover pergunta
+function removerPerguntaForm(index) {
+  const el = document.getElementById(`pergunta_form_${index}`);
+  if (el) el.remove();
+  // Renumerar
+  let count = 1;
+  document.querySelectorAll('#perguntasFormContainer > div').forEach(div => {
+    const label = div.querySelector('.text-sm.font-medium');
+    if (label) label.textContent = `Pergunta ${count++}`;
+  });
+}
+
+// Editar formulário
+function editarFormularioRh(id, totalAvaliacoes) {
+  if (parseInt(totalAvaliacoes) > 0) {
+    alert('Não é possível editar! Este formulário possui ' + totalAvaliacoes + ' avaliação(ões) vinculada(s).');
+    return;
+  }
+  
+  fetch(`/rh/formularios/${id}/detalhes`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        const f = data.formulario;
+        
+        document.getElementById('modalFormTitulo').textContent = '✏️ Editar Formulário';
+        document.getElementById('form_id').value = f.id;
+        document.getElementById('form_titulo').value = f.titulo;
+        document.getElementById('form_descricao').value = f.descricao || '';
+        document.getElementById('form_tipo').value = f.tipo;
+        
+        perguntasForm = [];
+        document.getElementById('perguntasFormContainer').innerHTML = '';
+        
+        if (f.perguntas && f.perguntas.length > 0) {
+          f.perguntas.forEach((p, i) => {
+            adicionarPerguntaForm();
+            document.getElementById(`pf_texto_${i}`).value = p.texto;
+            document.getElementById(`pf_tipo_${i}`).value = p.tipo;
+            document.getElementById(`pf_peso_${i}`).value = p.peso || 1;
+          });
+        } else {
+          adicionarPerguntaForm();
+        }
+        
+        document.getElementById('modalFormulario').classList.remove('hidden');
+      } else {
+        alert('Erro: ' + data.message);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Erro ao carregar formulário');
+    });
+}
+
+// Excluir formulário
+function excluirFormularioRh(id, totalAvaliacoes) {
+  if (parseInt(totalAvaliacoes) > 0) {
+    alert('Não é possível excluir! Este formulário possui ' + totalAvaliacoes + ' avaliação(ões) vinculada(s).');
+    return;
+  }
+  
+  if (!confirm('Tem certeza que deseja excluir este formulário?')) return;
+  
+  const formData = new FormData();
+  formData.append('id', id);
+  
+  fetch('/rh/formularios/excluir', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        alert('Formulário excluído!');
+        carregarFormularios();
+      } else {
+        alert('Erro: ' + data.message);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Erro ao excluir');
+    });
+}
+
+// Submit do formulário
+document.getElementById('formFormulario').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const id = document.getElementById('form_id').value;
+  const titulo = document.getElementById('form_titulo').value.trim();
+  const descricao = document.getElementById('form_descricao').value.trim();
+  const tipo = document.getElementById('form_tipo').value;
+  
+  // Coletar perguntas
+  const perguntas = [];
+  document.querySelectorAll('#perguntasFormContainer > div').forEach((div, i) => {
+    const textoEl = div.querySelector('input[id^="pf_texto_"]');
+    const tipoEl = div.querySelector('select[id^="pf_tipo_"]');
+    const pesoEl = div.querySelector('input[id^="pf_peso_"]');
+    
+    if (textoEl && textoEl.value.trim()) {
+      perguntas.push({
+        texto: textoEl.value.trim(),
+        tipo: tipoEl ? tipoEl.value : 'texto',
+        peso: pesoEl && pesoEl.value ? parseFloat(pesoEl.value) : 1.00
+      });
+    }
+  });
+  
+  if (perguntas.length === 0) {
+    alert('Adicione pelo menos uma pergunta!');
+    return;
+  }
+  
+  const formData = new FormData();
+  if (id) formData.append('id', id);
+  formData.append('titulo', titulo);
+  formData.append('descricao', descricao);
+  formData.append('tipo', tipo);
+  formData.append('perguntas', JSON.stringify(perguntas));
+  
+  const url = id ? '/rh/formularios/editar' : '/rh/formularios/criar';
+  
+  fetch(url, { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        fecharModalFormulario();
+        carregarFormularios();
+      } else {
+        alert('Erro: ' + data.message);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Erro ao salvar formulário');
+    });
 });
 </script>
