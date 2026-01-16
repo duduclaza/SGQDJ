@@ -18,19 +18,22 @@
   <!-- Grid de Submódulos -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
     
-    <!-- Avaliação de Desempenho -->
-    <div class="group bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 opacity-75">
+    <!-- Avaliação de Desempenho (ATIVO) -->
+    <a href="/rh/avaliacao-desempenho" class="group bg-white rounded-xl shadow-lg border border-blue-300 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer block">
       <div class="flex items-center gap-4 mb-4">
         <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
           <span class="text-2xl">🎯</span>
         </div>
         <div>
-          <h3 class="font-semibold text-gray-900">Avaliação de Desempenho</h3>
-          <span class="text-xs text-amber-600 font-medium">Em desenvolvimento</span>
+          <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">Avaliação de Desempenho</h3>
+          <span class="text-xs text-green-600 font-medium">✓ Disponível</span>
         </div>
       </div>
       <p class="text-sm text-gray-600">Avalie a performance dos colaboradores com métricas e feedbacks estruturados.</p>
-    </div>
+      <div class="mt-3 text-blue-600 text-sm font-medium group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+        Acessar →
+      </div>
+    </a>
 
     <!-- Formulário de Bonificação -->
     <div class="group bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 opacity-75">

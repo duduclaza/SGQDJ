@@ -667,6 +667,8 @@ $router->post('/teste-smtp-debug', [App\Controllers\TesteEmailController::class,
 
 // ===== MÓDULO RH - RECURSOS HUMANOS =====
 $router->get('/rh', [App\Controllers\RhController::class, 'index']);
+$router->get('/rh/avaliacao-desempenho', [App\Controllers\RhController::class, 'avaliacaoDesempenho']);
+$router->get('/rh/avaliacoes/listar', [App\Controllers\RhController::class, 'listarAvaliacoes']);
 
 // ===== MÓDULO USABILIDADE DO SGQ (SUPER ADMIN ONLY) =====
 $router->get('/usabilidade', [App\Controllers\UsabilidadeController::class, 'index']);
