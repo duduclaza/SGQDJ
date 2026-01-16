@@ -668,6 +668,7 @@ $router->post('/teste-smtp-debug', [App\Controllers\TesteEmailController::class,
 // ===== MÓDULO RH - RECURSOS HUMANOS =====
 $router->get('/rh', [App\Controllers\RhController::class, 'index']);
 $router->get('/rh/avaliacao-desempenho', [App\Controllers\RhController::class, 'avaliacaoDesempenho']);
+$router->get('/rh/dashboard/stats', [App\Controllers\RhController::class, 'dashboardStats']);
 $router->get('/rh/avaliacoes/listar', [App\Controllers\RhController::class, 'listarAvaliacoes']);
 $router->get('/rh/colaboradores/listar', [App\Controllers\RhController::class, 'listarColaboradores']);
 // Formulários de Avaliação

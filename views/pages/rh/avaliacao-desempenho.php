@@ -42,39 +42,53 @@
   
   <!-- Aba Dashboard -->
   <div id="content-dashboard" class="tab-content">
-    <!-- Cards de Estatísticas -->
+    <div class="mb-6 flex justify-between items-center">
+      <h2 class="text-xl font-bold text-gray-800">Visão Geral</h2>
+      <div class="flex gap-4">
+         <select id="filtroColaboradorDashboard" onchange="carregarDashboardStats()" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white shadow-sm">
+            <option value="">Todos os Colaboradores</option>
+            <!-- Preenchido via JS -->
+         </select>
+         <button onclick="carregarDashboardStats()" class="p-2 text-gray-500 hover:text-blue-600 transition-colors" title="Atualizar">
+           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+         </button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
-        <div class="flex items-center justify-between">
+      <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
+        <div class="absolute right-0 top-0 h-full w-1/2 bg-white/5 skew-x-12 transform origin-bottom-right"></div>
+        <div class="flex items-center justify-between relative z-10">
           <div>
             <p class="text-blue-100 text-sm">Total de Avaliações</p>
-            <p class="text-3xl font-bold">156</p>
+            <p class="text-3xl font-bold" id="kpiTotal">-</p>
           </div>
           <div class="bg-white/20 p-3 rounded-lg">
             <span class="text-2xl">📊</span>
           </div>
         </div>
-        <p class="text-blue-100 text-xs mt-2">+12% este mês</p>
+        <p class="text-blue-100 text-xs mt-2 relative z-10" id="kpiTotalDesc">Carregando...</p>
       </div>
       
       <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-green-100 text-sm">Concluídas</p>
-            <p class="text-3xl font-bold">142</p>
+            <p class="text-3xl font-bold" id="kpiConcluidas">-</p>
           </div>
           <div class="bg-white/20 p-3 rounded-lg">
             <span class="text-2xl">✅</span>
           </div>
         </div>
-        <p class="text-green-100 text-xs mt-2">91% de conclusão</p>
+        <p class="text-green-100 text-xs mt-2" id="kpiConcluidasDesc">Carregando...</p>
       </div>
       
       <div class="bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl p-6 text-white shadow-lg">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-amber-100 text-sm">Pendentes</p>
-            <p class="text-3xl font-bold">14</p>
+            <p class="text-3xl font-bold" id="kpiPendentes">-</p>
           </div>
           <div class="bg-white/20 p-3 rounded-lg">
             <span class="text-2xl">⏳</span>
@@ -87,7 +101,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-purple-100 text-sm">Média Geral</p>
-            <p class="text-3xl font-bold">8.4</p>
+            <p class="text-3xl font-bold" id="kpiMedia">-</p>
           </div>
           <div class="bg-white/20 p-3 rounded-lg">
             <span class="text-2xl">⭐</span>
@@ -101,41 +115,13 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 Avaliações por Departamento</h3>
-        <div class="space-y-4">
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span class="text-gray-600">Tecnologia</span>
-              <span class="font-medium">45 avaliações</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-blue-600 h-2 rounded-full" style="width: 75%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span class="text-gray-600">Qualidade</span>
-              <span class="font-medium">38 avaliações</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-green-600 h-2 rounded-full" style="width: 63%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span class="text-gray-600">Administrativo</span>
-              <span class="font-medium">32 avaliações</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-purple-600 h-2 rounded-full" style="width: 53%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span class="text-gray-600">Operacional</span>
-              <span class="font-medium">28 avaliações</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-amber-600 h-2 rounded-full" style="width: 47%"></div>
+        <div class="space-y-4" id="chartDepartamentos">
+          <div class="animate-pulse flex space-x-4">
+            <div class="flex-1 space-y-4 py-1">
+              <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div class="space-y-2">
+                <div class="h-4 bg-gray-200 rounded"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -143,45 +129,26 @@
       
       <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">⭐ Distribuição de Notas</h3>
-        <div class="space-y-4">
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span class="text-gray-600">Excelente (9-10)</span>
-              <span class="font-medium text-green-600">35%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-green-500 h-2 rounded-full" style="width: 35%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span class="text-gray-600">Bom (7-8.9)</span>
-              <span class="font-medium text-blue-600">45%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-blue-500 h-2 rounded-full" style="width: 45%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span class="text-gray-600">Regular (5-6.9)</span>
-              <span class="font-medium text-amber-600">15%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-amber-500 h-2 rounded-full" style="width: 15%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span class="text-gray-600">Insatisfatório (0-4.9)</span>
-              <span class="font-medium text-red-600">5%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-red-500 h-2 rounded-full" style="width: 5%"></div>
+        <div class="space-y-4" id="chartNotas">
+          <div class="animate-pulse flex space-x-4">
+             <div class="flex-1 space-y-4 py-1">
+              <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div class="space-y-2">
+                <div class="h-4 bg-gray-200 rounded"></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+    
+    <!-- Gráfico de Evolução -->
+    <div class="mt-6 bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">📈 Evolução da Média Geral (Últimos 12 Meses)</h3>
+      <div class="relative h-80 w-full">
+        <canvas id="chartEvolucao"></canvas>
+      </div>
+    </div>
     </div>
   </div>
 
@@ -667,13 +634,40 @@ function removerPerguntaForm(index) {
   });
 }
 
-// Editar formulário
+// Carregar colaboradores
+// Carregar colaboradores
+function carregarColaboradores() {
+  fetch('/rh/colaboradores/listar')
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        // Preencher select do modal de nova avaliação (já existente)
+        const selectModal = document.getElementById('selectColaborador');
+        if (selectModal) {
+          selectModal.innerHTML = '<option value="">Selecione o colaborador...</option>' + 
+            data.colaboradores.map(c => `<option value="${c.id}">${c.nome} (${c.setor || 'N/A'})</option>`).join('');
+        }
+
+        // Preencher select de filtro do dashboard (NOVO)
+        const selectFiltro = document.getElementById('filtroColaboradorDashboard');
+        if (selectFiltro) {
+          // Manter opção "Todos"
+          const valorAtual = selectFiltro.value;
+          selectFiltro.innerHTML = '<option value="">Todos os Colaboradores</option>' + 
+            data.colaboradores.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+          selectFiltro.value = valorAtual;
+        }
+      }
+    })
+    .catch(console.error);
+}
+
+// Carregar formulário para edição
 function editarFormularioRh(id, totalAvaliacoes) {
   if (parseInt(totalAvaliacoes) > 0) {
     alert('Não é possível editar! Este formulário possui ' + totalAvaliacoes + ' avaliação(ões) vinculada(s).');
     return;
   }
-  
   fetch(`/rh/formularios/${id}/detalhes`)
     .then(r => r.json())
     .then(data => {
@@ -692,9 +686,14 @@ function editarFormularioRh(id, totalAvaliacoes) {
         if (f.perguntas && f.perguntas.length > 0) {
           f.perguntas.forEach((p, i) => {
             adicionarPerguntaForm();
-            document.getElementById(`pf_texto_${i}`).value = p.texto;
-            document.getElementById(`pf_tipo_${i}`).value = p.tipo;
-            document.getElementById(`pf_peso_${i}`).value = p.peso || 1;
+            setTimeout(() => { // Pequeno delay para garantir que o DOM foi criado
+                const elTexto = document.getElementById(`pf_texto_${i}`);
+                const elTipo = document.getElementById(`pf_tipo_${i}`);
+                const elPeso = document.getElementById(`pf_peso_${i}`);
+                if(elTexto) elTexto.value = p.texto;
+                if(elTipo) elTipo.value = p.tipo;
+                if(elPeso) elPeso.value = p.peso || 1;
+            }, 10);
           });
         } else {
           adicionarPerguntaForm();
@@ -864,4 +863,120 @@ function duplicarFormularioRh(id) {
       alert('Erro ao duplicar');
     });
 }
+// Carregar estatísticas do dashboard
+function carregarDashboardStats() {
+    const colaboradorId = document.getElementById('filtroColaboradorDashboard').value;
+    const url = '/rh/dashboard/stats' + (colaboradorId ? '?colaborador_id=' + colaboradorId : '');
+
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const s = data.stats;
+                
+                // KPIs
+                document.getElementById('kpiTotal').textContent = s.total;
+                document.getElementById('kpiConcluidas').textContent = s.concluidas;
+                document.getElementById('kpiPendentes').textContent = s.pendentes;
+                document.getElementById('kpiMedia').textContent = s.media;
+                
+                document.getElementById('kpiTotalDesc').textContent = 'Atualizado agora';
+                document.getElementById('kpiConcluidasDesc').textContent = 
+                    s.total > 0 ? Math.round((s.concluidas / s.total) * 100) + '% de conclusão' : 'Sem dados';
+
+                // Chart Departamentos (Barras)
+                const chartDep = document.getElementById('chartDepartamentos');
+                chartDep.innerHTML = '';
+                
+                if (s.departamentos.length === 0) {
+                    chartDep.innerHTML = '<p class="text-gray-500 text-center py-4">Sem dados disponíveis</p>';
+                } else {
+                    const maxQtd = Math.max(...s.departamentos.map(d => d.qtd));
+                    const colors = ['bg-blue-600', 'bg-green-600', 'bg-purple-600', 'bg-amber-600', 'bg-red-600'];
+                    
+                    s.departamentos.forEach((d, i) => {
+                        const width = maxQtd > 0 ? (d.qtd / maxQtd) * 100 : 0;
+                        const color = colors[i % colors.length];
+                        
+                        chartDep.innerHTML += `
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">${d.departamento}</span>
+                                    <span class="font-medium">${d.qtd} avaliações</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="${color} h-2 rounded-full transition-all duration-1000" style="width: ${width}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Chart Notas (Barras)
+                const chartNotas = document.getElementById('chartNotas');
+                chartNotas.innerHTML = '';
+                
+                if (s.notas.length === 0) {
+                    chartNotas.innerHTML = '<p class="text-gray-500 text-center py-4">Sem dados disponíveis</p>';
+                } else {
+                    const maxQtd = Math.max(...s.notas.map(n => n.qtd));
+                    
+                    s.notas.forEach(n => {
+                        const width = maxQtd > 0 ? (n.qtd / maxQtd) * 100 : 0;
+                        let color = 'bg-gray-500';
+                        if (n.faixa.includes('Excelente')) color = 'bg-green-500';
+                        else if (n.faixa.includes('Bom')) color = 'bg-blue-500';
+                        else if (n.faixa.includes('Regular')) color = 'bg-amber-500';
+                        else if (n.faixa.includes('Ruim')) color = 'bg-red-500';
+                        
+                        chartNotas.innerHTML += `
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">${n.faixa}</span>
+                                    <span class="font-medium">${n.qtd}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="${color} h-2 rounded-full transition-all duration-1000" style="width: ${width}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            }
+        })
+        .catch(console.error);
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+  carregarDashboardStats();
+  carregarColaboradores();
+  carregarAvaliacoes();
+  
+  // Tabs
+  window.trocarAba = function(aba) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    document.getElementById('content-' + aba).classList.remove('hidden');
+    
+    document.querySelectorAll('.tab-btn').forEach(el => {
+      el.classList.remove('border-blue-600', 'text-blue-600', 'bg-blue-50');
+      el.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+    });
+    
+    const activeBtn = document.querySelector(`button[onclick="trocarAba('${aba}')"]`);
+    if(activeBtn) {
+      activeBtn.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+      activeBtn.classList.add('border-blue-600', 'text-blue-600', 'bg-blue-50');
+    }
+    
+    // Carregar dados específicos da aba
+    if (aba === 'formularios') {
+        carregarFormularios();
+    } else if (aba === 'dashboard') {
+        carregarDashboardStats();
+    } else if (aba === 'avaliacoes') {
+        carregarAvaliacoes();
+    }
+  };
+});
 </script>

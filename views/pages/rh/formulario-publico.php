@@ -9,25 +9,32 @@
     body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
   </style>
 </head>
-<body class="py-8 px-4">
+<body class="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800 min-h-screen py-8 px-4 font-sans">
   <div class="max-w-2xl mx-auto">
     <!-- Card do Formulário -->
-    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-      <!-- Header -->
-      <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
-        <div class="flex items-center gap-4 mb-4">
-          <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
-            <span class="text-3xl">📋</span>
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold"><?php echo htmlspecialchars($formulario['titulo']); ?></h1>
-            <p class="text-blue-100 text-sm">Formulário de Avaliação - RH</p>
-          </div>
-        </div>
-        <?php if (!empty($formulario['descricao'])): ?>
-        <p class="text-blue-100"><?php echo htmlspecialchars($formulario['descricao']); ?></p>
-        <?php endif; ?>
+    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden relative">
+      <!-- Decorativo de fundo do card -->
+      <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+
+      <!-- Logo Centralizado (Igual Login) -->
+      <div class="text-center pt-8 pb-4">
+        <img src="/assets/logodj.png" alt="DJ Logo" class="mx-auto h-16 object-contain">
       </div>
+
+      <!-- Header com Título -->
+      <div class="px-6 pb-2 text-center">
+        <h1 class="text-2xl font-bold text-gray-800 mb-1"><?php echo htmlspecialchars($formulario['titulo']); ?></h1>
+        <p class="text-gray-500 text-sm">Formulário de Avaliação - RH</p>
+      </div>
+
+      <!-- Descrição -->
+      <?php if (!empty($formulario['descricao'])): ?>
+      <div class="px-6 py-2">
+        <div class="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm text-center">
+          <?php echo htmlspecialchars($formulario['descricao']); ?>
+        </div>
+      </div>
+      <?php endif; ?>
 
       <!-- Formulário -->
       <form id="formAvaliacao" class="p-6 space-y-6">

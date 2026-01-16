@@ -89,7 +89,7 @@ class RhController
         
         try {
             $stmt = $this->db->prepare("
-                SELECT id, name, email, setor, filial, role, status, created_at
+                SELECT id, name, name as nome, email, setor, filial, role, status, created_at
                 FROM users 
                 WHERE status = 'active'
                 ORDER BY name ASC
@@ -113,36 +113,105 @@ class RhController
         header('Content-Type: application/json');
         
         try {
-            // Buscar usuários reais do banco como colaboradores
+            // Buscar avaliações reais do banco
             $stmt = $this->db->prepare("
-                SELECT id, name, email, setor, filial, role
-                FROM users 
-                WHERE status = 'active'
-                ORDER BY name ASC
+                SELECT a.*, 
+                       f.titulo as formulario_titulo,
+                       COALESCE(u_colab.name, a.colaborador_nome, 'Externo') as colaborador_nome,
+                       COALESCE(u_aval.name, a.avaliador_nome, 'Externo') as avaliador_nome_final,
+                       u_colab.role as cargo,
+                       u_colab.setor as departamento
+                FROM rh_avaliacoes a
+                JOIN rh_formularios_avaliacao f ON a.formulario_id = f.id
+                LEFT JOIN users u_colab ON a.colaborador_id = u_colab.id
+                LEFT JOIN users u_aval ON a.avaliador_id = u_aval.id
+                ORDER BY a.data_inicio DESC
             ");
             $stmt->execute();
-            $users = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $avaliacoesDb = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             
-            // Por enquanto, gerar avaliações de exemplo baseadas nos usuários reais
             $avaliacoes = [];
-            foreach ($users as $index => $user) {
-                // Apenas alguns usuários terão avaliações de exemplo
-                if ($index < 5) {
-                    $avaliacoes[] = [
-                        'id' => $index + 1,
-                        'user_id' => $user['id'],
-                        'colaborador' => $user['name'],
-                        'cargo' => $user['role'] ?? 'Colaborador',
-                        'departamento' => $user['setor'] ?? 'Não informado',
-                        'avaliador' => $_SESSION['user_name'] ?? 'Administrador',
-                        'data_avaliacao' => $index < 3 ? date('Y-m-d', strtotime("-{$index} days")) : null,
-                        'nota_geral' => $index < 3 ? round(7 + (mt_rand(0, 30) / 10), 1) : null,
-                        'status' => $index < 3 ? 'concluída' : 'pendente'
-                    ];
-                }
+            foreach ($avaliacoesDb as $a) {
+                $avaliacoes[] = [
+                    'id' => $a['id'],
+                    'formulario' => $a['formulario_titulo'],
+                    'colaborador' => $a['colaborador_nome'],
+                    'cargo' => $a['cargo'] ?? 'Não informado',
+                    'departamento' => $a['departamento'] ?? 'Não informado',
+                    'avaliador' => $a['avaliador_nome_final'],
+                    'data_avaliacao' => date('Y-m-d', strtotime($a['data_inicio'])),
+                    'nota_geral' => $a['nota_geral'] ? round($a['nota_geral'], 1) : null,
+                    'status' => $a['status']
+                ];
             }
             
             echo json_encode(['success' => true, 'avaliacoes' => $avaliacoes]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        exit;
+    }
+
+
+
+    /**
+     * Salvar resposta do formulário público
+     */
+    public function salvarRespostaPublica()
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            $token = $_POST['token'] ?? '';
+            $colaboradorNome = trim($_POST['colaborador_nome'] ?? 'Não informado');
+            $avaliadorNome = trim($_POST['avaliador_nome'] ?? 'Não informado');
+            $respostas = json_decode($_POST['respostas'] ?? '[]', true);
+            
+            // Buscar formulário
+            $stmt = $this->db->prepare("SELECT * FROM rh_formularios_avaliacao WHERE url_publica = ? AND ativo = 1");
+            $stmt->execute([$token]);
+            $formulario = $stmt->fetch(\PDO::FETCH_ASSOC);
+            
+            if (!$formulario) {
+                echo json_encode(['success' => false, 'message' => 'Formulário inválido']);
+                exit;
+            }
+            
+            // Criar avaliação salvando os nomes
+            $stmt = $this->db->prepare("
+                INSERT INTO rh_avaliacoes (formulario_id, colaborador_id, colaborador_nome, avaliador_id, avaliador_nome, data_inicio, status)
+                VALUES (?, NULL, ?, NULL, ?, NOW(), 'concluida')
+            ");
+            $stmt->execute([$formulario['id'], $colaboradorNome, $avaliadorNome]);
+            $avaliacaoId = $this->db->lastInsertId();
+            
+            // Salvar respostas
+            $totalNota = 0;
+            $countNotas = 0;
+            
+            $stmtResp = $this->db->prepare("
+                INSERT INTO rh_avaliacoes_respostas (avaliacao_id, pergunta_id, resposta, nota, respondido_em)
+                VALUES (?, ?, ?, ?, NOW())
+            ");
+            
+            foreach ($respostas as $r) {
+                $nota = isset($r['nota']) && is_numeric($r['nota']) ? floatval($r['nota']) : null;
+                $stmtResp->execute([$avaliacaoId, $r['pergunta_id'], $r['resposta'], $nota]);
+                
+                if ($nota !== null) {
+                    $totalNota += $nota;
+                    $countNotas++;
+                }
+            }
+            
+            // Atualizar nota geral
+            if ($countNotas > 0) {
+                $notaGeral = $totalNota / $countNotas;
+                $stmt = $this->db->prepare("UPDATE rh_avaliacoes SET nota_geral = ?, data_conclusao = NOW() WHERE id = ?");
+                $stmt->execute([$notaGeral, $avaliacaoId]);
+            }
+            
+            echo json_encode(['success' => true, 'message' => 'Avaliação enviada com sucesso!']);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
@@ -473,68 +542,94 @@ class RhController
             echo '<h1>Erro ao carregar formulário</h1>';
         }
     }
-    
+
     /**
-     * Salvar resposta do formulário público
+     * API: Estatísticas para o Dashboard
      */
-    public function salvarRespostaPublica()
+    public function dashboardStats()
     {
+        $this->checkRhPermission();
         header('Content-Type: application/json');
-        
+
         try {
-            $token = $_POST['token'] ?? '';
-            $colaboradorNome = trim($_POST['colaborador_nome'] ?? '');
-            $avaliadorNome = trim($_POST['avaliador_nome'] ?? '');
-            $respostas = json_decode($_POST['respostas'] ?? '[]', true);
-            
-            // Buscar formulário
-            $stmt = $this->db->prepare("SELECT * FROM rh_formularios_avaliacao WHERE url_publica = ? AND ativo = 1");
-            $stmt->execute([$token]);
-            $formulario = $stmt->fetch(\PDO::FETCH_ASSOC);
-            
-            if (!$formulario) {
-                echo json_encode(['success' => false, 'message' => 'Formulário inválido']);
-                exit;
+            $colaboradorId = isset($_GET['colaborador_id']) && is_numeric($_GET['colaborador_id']) ? $_GET['colaborador_id'] : null;
+            $whereClause = "";
+            $params = [];
+
+            if ($colaboradorId) {
+                $whereClause = " AND colaborador_id = ? ";
+                $params[] = $colaboradorId;
             }
+
+            $stats = [];
             
-            // Criar avaliação
+            // KPIs
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM rh_avaliacoes WHERE 1=1 $whereClause");
+            $stmt->execute($params);
+            $stats['total'] = $stmt->fetchColumn();
+
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM rh_avaliacoes WHERE status = 'concluida' $whereClause");
+            $stmt->execute($params);
+            $stats['concluidas'] = $stmt->fetchColumn();
+            
+            $stats['pendentes'] = $stats['total'] - $stats['concluidas'];
+            
+            $stmt = $this->db->prepare("SELECT AVG(nota_geral) FROM rh_avaliacoes WHERE status = 'concluida' $whereClause");
+            $stmt->execute($params);
+            $media = $stmt->fetchColumn();
+            $stats['media'] = $media ? number_format($media, 1) : '0.0';
+
+            // Chart Departamentos
             $stmt = $this->db->prepare("
-                INSERT INTO rh_avaliacoes (formulario_id, colaborador_id, avaliador_id, data_inicio, status)
-                VALUES (?, 0, 0, NOW(), 'concluida')
+                SELECT COALESCE(NULLIF(u.setor, ''), 'Externo/Outros') as departamento, COUNT(*) as qtd 
+                FROM rh_avaliacoes a 
+                LEFT JOIN users u ON a.colaborador_id = u.id 
+                WHERE 1=1 $whereClause
+                GROUP BY departamento 
+                ORDER BY qtd DESC 
+                LIMIT 5
             ");
-            $stmt->execute([$formulario['id']]);
-            $avaliacaoId = $this->db->lastInsertId();
-            
-            // Salvar respostas
-            $totalNota = 0;
-            $countNotas = 0;
-            
-            $stmtResp = $this->db->prepare("
-                INSERT INTO rh_avaliacoes_respostas (avaliacao_id, pergunta_id, resposta, nota, respondido_em)
-                VALUES (?, ?, ?, ?, NOW())
+            $stmt->execute($params);
+            $stats['departamentos'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Chart Notas
+            $stmt = $this->db->prepare("
+                SELECT 
+                    CASE 
+                        WHEN nota_geral >= 9 THEN 'Excelente (9-10)'
+                        WHEN nota_geral >= 7 THEN 'Bom (7-8.9)'
+                        WHEN nota_geral >= 5 THEN 'Regular (5-6.9)'
+                        ELSE 'Ruim (0-4.9)'
+                    END as faixa,
+                    COUNT(*) as qtd
+                FROM rh_avaliacoes 
+                WHERE status = 'concluida' $whereClause
+                GROUP BY faixa
+                ORDER BY faixa DESC
             ");
+            $stmt->execute($params);
+            $stats['notas'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Chart Evolução Mensal
+            $stmt = $this->db->prepare("
+                SELECT 
+                    DATE_FORMAT(data_conclusao, '%Y-%m') as mes, 
+                    AVG(nota_geral) as media 
+                FROM rh_avaliacoes 
+                WHERE status = 'concluida' 
+                  AND data_conclusao >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+                  $whereClause
+                GROUP BY mes 
+                ORDER BY mes ASC
+            ");
+            $stmt->execute($params);
+            $stats['evolucao'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             
-            foreach ($respostas as $r) {
-                $nota = isset($r['nota']) && is_numeric($r['nota']) ? floatval($r['nota']) : null;
-                $stmtResp->execute([$avaliacaoId, $r['pergunta_id'], $r['resposta'], $nota]);
-                
-                if ($nota !== null) {
-                    $totalNota += $nota;
-                    $countNotas++;
-                }
-            }
-            
-            // Atualizar nota geral
-            if ($countNotas > 0) {
-                $notaGeral = $totalNota / $countNotas;
-                $stmt = $this->db->prepare("UPDATE rh_avaliacoes SET nota_geral = ?, data_conclusao = NOW() WHERE id = ?");
-                $stmt->execute([$notaGeral, $avaliacaoId]);
-            }
-            
-            echo json_encode(['success' => true, 'message' => 'Avaliação enviada com sucesso!']);
+            echo json_encode(['success' => true, 'stats' => $stats]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
         exit;
     }
+
 }
