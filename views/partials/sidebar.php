@@ -149,10 +149,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
       <li>
         <a href="https://darkturquoise-whale-293770.hostingersite.com/login" target="_blank" rel="noopener noreferrer" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-700 text-slate-300 hover:text-white">
           <span class="text-lg">👥</span>
-          <span class="flex items-center gap-2">
-            RH
-            <span class="px-1.5 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-bold rounded animate-pulse">EM BREVE</span>
-          </span>
+          <span>RH</span>
         </a>
       </li>
       <?php endif; ?>
