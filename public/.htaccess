@@ -12,9 +12,24 @@
   RewriteRule ^ index.php [L]
 </IfModule>
 
-# No cache headers for static as well
+# Forçar no-cache para arquivos PHP e HTML (evitar cache do navegador)
 <IfModule mod_headers.c>
-  Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+  # Headers gerais anti-cache
+  Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0"
   Header set Pragma "no-cache"
-  Header set Expires "0"
+  Header set Expires "Sat, 01 Jan 2000 00:00:00 GMT"
+  
+  # ETag desabilitado para evitar cache baseado em hash
+  Header unset ETag
+  FileETag None
+  
+  # Forçar revalidação
+  Header set Vary "Accept-Encoding"
 </IfModule>
+
+# Desabilitar cache para arquivos PHP
+<FilesMatch "\.php$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+  </IfModule>
+</FilesMatch>
