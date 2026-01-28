@@ -1605,9 +1605,9 @@ function editarRetornado(id) {
 
   <!-- Data Grid -->
   <div class="bg-white border rounded-lg overflow-hidden">
-    <!-- Top Scrollbar -->
-    <div id="topScrollbar" class="overflow-x-auto" style="overflow-y: hidden; height: 16px;">
-      <div id="topScrollbarContent" style="height: 1px;"></div>
+    <!-- Top Scrollbar - Barra de rolagem superior -->
+    <div id="topScrollbar" class="overflow-x-scroll bg-gray-100 border-b border-gray-200" style="overflow-y: hidden;">
+      <div id="topScrollbarContent" style="height: 8px; min-width: 2000px;"></div>
     </div>
     <div id="tableContainer" class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
