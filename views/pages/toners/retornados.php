@@ -29,6 +29,8 @@
     </div>
 
     <form id="retornadoForm" class="space-y-6">
+      <!-- Campo hidden para edição -->
+      <input type="hidden" id="retornadoId" name="id" value="">
       <!-- Usuário e Filial -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -550,6 +552,18 @@ function cancelRetornadoForm() {
 
 function resetForm() {
   document.getElementById('retornadoForm').reset();
+  
+  // Limpar ID de edição
+  document.getElementById('retornadoId').value = '';
+  
+  // Restaurar título e botão para modo criação
+  document.getElementById('retornadoFormTitle').textContent = 'Registrar Novo Retornado';
+  const submitBtn = document.getElementById('submitRetornadoBtn');
+  if (submitBtn) {
+    submitBtn.textContent = 'Registrar Retornado';
+    submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+    submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+  }
   
   // Restaurar valores padrão dos campos de usuário e filial
   document.getElementById('nomeUsuario').value = '<?= $_SESSION['user_name'] ?? 'Usuário' ?>';
@@ -1326,6 +1340,8 @@ function submitRetornado(e) {
   e.preventDefault();
   
   const formData = new FormData(e.target);
+  const retornadoId = document.getElementById('retornadoId').value;
+  const isEditing = retornadoId && retornadoId !== '';
   
   // Adicionar campo modo baseado no tipo de medição selecionado
   const tipoMedicao = document.querySelector('input[name="tipoMedicao"]:checked');
@@ -1339,24 +1355,29 @@ function submitRetornado(e) {
   }
   
   // Debug: mostrar todos os dados que serão enviados
-  console.log('Dados do formulário:');
+  console.log('Dados do formulário (modo ' + (isEditing ? 'EDIÇÃO' : 'CRIAÇÃO') + '):');
   for (let [key, value] of formData.entries()) {
     console.log(key + ': ' + value);
   }
   
-  // Validações
-  if (!selectedDestino) {
+  // Validações (relaxadas para edição)
+  if (!selectedDestino && !isEditing) {
     alert('Selecione um destino para o toner');
     return;
   }
   
-  if (!tipoMedicao) {
+  // Na edição, tipo medição é opcional
+  if (!tipoMedicao && !isEditing) {
     alert('Selecione o tipo de medição (Peso Físico ou % do Chip)');
     return;
   }
   
+  // Determinar URL e mensagem baseado no modo
+  const url = isEditing ? '/toners/retornados/update' : '/toners/retornados';
+  const successMessage = isEditing ? 'Registro atualizado com sucesso!' : 'Retornado registrado com sucesso!';
+  
   // Enviar dados
-  fetch('/toners/retornados', {
+  fetch(url, {
     method: 'POST',
     body: formData
   })
@@ -1370,9 +1391,9 @@ function submitRetornado(e) {
     try {
       const result = JSON.parse(text);
       if (result.success) {
-        alert('Retornado registrado com sucesso!');
+        alert(successMessage);
         cancelRetornadoForm();
-        // Recarregar a página para mostrar o novo registro
+        // Recarregar a página para mostrar as alterações
         window.location.reload();
       } else {
         alert('Erro: ' + result.message);
@@ -1387,6 +1408,92 @@ function submitRetornado(e) {
     console.error('Fetch error:', error);
     alert('Erro de conexão: ' + error.message);
   });
+}
+
+// Função para editar um retornado existente
+function editarRetornado(id) {
+  console.log('✏️ Editando retornado ID:', id);
+  
+  // Buscar dados do registro
+  fetch('/toners/retornados/' + id)
+    .then(response => response.json())
+    .then(result => {
+      if (result.success && result.data) {
+        const data = result.data;
+        console.log('📋 Dados carregados:', data);
+        
+        // Mostrar formulário
+        document.getElementById('retornadoFormContainer').classList.remove('hidden');
+        
+        // Alterar título e botão para modo edição
+        document.getElementById('retornadoFormTitle').textContent = 'Editar Retornado';
+        const submitBtn = document.getElementById('submitRetornadoBtn');
+        if (submitBtn) {
+          submitBtn.textContent = 'Atualizar';
+          submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+          submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+        }
+        
+        // Preencher campos
+        document.getElementById('retornadoId').value = data.id;
+        
+        // Cliente
+        const codigoClienteInput = document.getElementById('codigoCliente');
+        if (codigoClienteInput) codigoClienteInput.value = data.codigo_cliente || '';
+        
+        // Data
+        const dataRegistroInput = document.getElementById('dataRegistro');
+        if (dataRegistroInput) dataRegistroInput.value = data.data_registro || '';
+        
+        // Quantidade
+        const quantidadeInput = document.getElementById('quantidade');
+        if (quantidadeInput) quantidadeInput.value = data.quantidade || 1;
+        
+        // Observação
+        const observacaoInput = document.getElementById('observacao');
+        if (observacaoInput) observacaoInput.value = data.observacao || '';
+        
+        // Modelo - precisa acionar o dropdown
+        const modeloInput = document.getElementById('modeloToner');
+        if (modeloInput) {
+          // Tentar encontrar por nome do modelo nos options
+          const options = modeloInput.querySelectorAll('option');
+          for (let opt of options) {
+            if (opt.value === data.modelo || opt.textContent === data.modelo) {
+              modeloInput.value = opt.value;
+              break;
+            }
+          }
+          // Disparar evento change para carregar dados do modelo
+          modeloInput.dispatchEvent(new Event('change'));
+        }
+        
+        // Destino
+        if (data.destino) {
+          selectedDestino = data.destino;
+          document.getElementById('destinoSelecionado').value = data.destino;
+          updateDestinoButtons();
+          
+          // Mostrar seção de destino
+          document.getElementById('selecaoDestino').classList.remove('hidden');
+          
+          // Mostrar campo observação se for descarte
+          if (data.destino === 'descarte') {
+            document.getElementById('campoObservacao').classList.remove('hidden');
+          }
+        }
+        
+        // Scroll para o formulário
+        document.getElementById('retornadoFormContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+      } else {
+        alert('Erro ao carregar dados: ' + (result.message || 'Registro não encontrado'));
+      }
+    })
+    .catch(error => {
+      console.error('Fetch error:', error);
+      alert('Erro ao buscar registro: ' + error.message);
+    });
 }
 
 
@@ -1548,10 +1655,16 @@ function submitRetornado(e) {
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= date('d/m/Y', strtotime($retornado['data_registro'])) ?></td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <button onclick="excluirRetornado(<?= $retornado['id'] ?>, '<?= e($retornado['modelo']) ?>')" 
-                          class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-md font-medium transition-colors duration-200 shadow-sm hover:shadow-md">
-                    Excluir
-                  </button>
+                  <div class="flex space-x-2">
+                    <button onclick="editarRetornado(<?= $retornado['id'] ?>)" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded-md font-medium transition-colors duration-200 shadow-sm hover:shadow-md">
+                      Editar
+                    </button>
+                    <button onclick="excluirRetornado(<?= $retornado['id'] ?>, '<?= e($retornado['modelo']) ?>')" 
+                            class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-md font-medium transition-colors duration-200 shadow-sm hover:shadow-md">
+                      Excluir
+                    </button>
+                  </div>
                 </td>
               </tr>
             <?php endforeach; ?>

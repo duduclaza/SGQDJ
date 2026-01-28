@@ -1440,4 +1440,120 @@ class TonersController
             ]);
         }
     }
+    
+    /**
+     * Busca dados de um retornado específico para edição
+     */
+    public function getRetornado($id): void
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            $stmt = $this->db->prepare('
+                SELECT id, modelo, codigo_cliente, usuario, filial, destino, 
+                       data_registro, modelo_cadastrado, valor_calculado, observacao, 
+                       quantidade, modo, peso_retornado, percentual_chip,
+                       gramatura_existente, percentual_restante
+                FROM retornados 
+                WHERE id = ?
+            ');
+            $stmt->execute([$id]);
+            $retornado = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($retornado) {
+                echo json_encode(['success' => true, 'data' => $retornado]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Registro não encontrado']);
+            }
+        } catch (\PDOException $e) {
+            echo json_encode(['success' => false, 'message' => 'Erro ao buscar registro: ' . $e->getMessage()]);
+        }
+    }
+    
+    /**
+     * Atualiza um registro de retornado existente
+     */
+    public function updateRetornado(): void
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            $id = (int)($_POST['id'] ?? 0);
+            
+            if ($id <= 0) {
+                echo json_encode(['success' => false, 'message' => 'ID inválido']);
+                return;
+            }
+            
+            // Validar campos obrigatórios
+            $modelo = trim($_POST['modelo'] ?? '');
+            $codigo_cliente = trim($_POST['codigo_cliente'] ?? '');
+            $destino = trim($_POST['destino'] ?? '');
+            $quantidade = max(1, (int)($_POST['quantidade'] ?? 1));
+            $observacao = trim($_POST['observacao'] ?? '');
+            $data_registro = $_POST['data_registro'] ?? date('Y-m-d');
+            
+            if (empty($modelo) || empty($codigo_cliente) || empty($destino)) {
+                echo json_encode(['success' => false, 'message' => 'Campos obrigatórios: modelo, código cliente e destino']);
+                return;
+            }
+            
+            // Verificar se modelo existe
+            $modelo_id = $_POST['modelo_id'] ?? null;
+            if ($modelo_id) {
+                $stmt = $this->db->prepare('SELECT capacidade_folhas, custo_por_folha FROM toners WHERE id = ?');
+                $stmt->execute([$modelo_id]);
+            } else {
+                $stmt = $this->db->prepare('SELECT capacidade_folhas, custo_por_folha FROM toners WHERE modelo = ?');
+                $stmt->execute([$modelo]);
+            }
+            $tonerData = $stmt->fetch(PDO::FETCH_ASSOC);
+            $modelo_cadastrado = $tonerData ? 1 : 0;
+            
+            // Recalcular valor se destino é estoque
+            $valor_calculado = 0.00;
+            $percentual_restante = (float)($_POST['percentual_restante'] ?? 0);
+            
+            if ($destino === 'estoque' && $percentual_restante > 0 && $tonerData) {
+                $capacidade_folhas = $tonerData['capacidade_folhas'] ?? 0;
+                $custo_por_folha = $tonerData['custo_por_folha'] ?? 0;
+                
+                if ($capacidade_folhas > 0 && $custo_por_folha > 0) {
+                    $folhas_restantes = ($percentual_restante / 100) * $capacidade_folhas;
+                    $valor_calculado = $folhas_restantes * $custo_por_folha * $quantidade;
+                }
+            }
+            
+            // Atualizar registro
+            $stmt = $this->db->prepare('
+                UPDATE retornados SET 
+                    modelo = :modelo,
+                    modelo_cadastrado = :modelo_cadastrado,
+                    codigo_cliente = :codigo_cliente,
+                    destino = :destino,
+                    quantidade = :quantidade,
+                    observacao = :observacao,
+                    data_registro = :data_registro,
+                    valor_calculado = :valor_calculado
+                WHERE id = :id
+            ');
+            
+            $stmt->execute([
+                ':modelo' => $modelo,
+                ':modelo_cadastrado' => $modelo_cadastrado,
+                ':codigo_cliente' => $codigo_cliente,
+                ':destino' => $destino,
+                ':quantidade' => $quantidade,
+                ':observacao' => $observacao,
+                ':data_registro' => $data_registro,
+                ':valor_calculado' => $valor_calculado,
+                ':id' => $id
+            ]);
+            
+            echo json_encode(['success' => true, 'message' => 'Registro atualizado com sucesso!']);
+            
+        } catch (\PDOException $e) {
+            echo json_encode(['success' => false, 'message' => 'Erro ao atualizar: ' . $e->getMessage()]);
+        }
+    }
 }
