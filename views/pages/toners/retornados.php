@@ -230,12 +230,12 @@ window.filterData = function filterData() {
   const dateFrom = document.getElementById('dateFrom')?.value || '';
   const dateTo = document.getElementById('dateTo')?.value || '';
   
-  console.log('🔍 Buscando:', { search, dateFrom, dateTo });
+  // console.log('🔍 Buscando:', { search, dateFrom, dateTo });
   
   // Get all table rows from tbody
   const tbody = document.getElementById('retornadosTable');
   if (!tbody) {
-    console.error('❌ Tabela retornadosTable não encontrada!');
+    // console.error('❌ Tabela retornadosTable não encontrada!');
     return;
   }
   
@@ -243,7 +243,7 @@ window.filterData = function filterData() {
   let visibleCount = 0;
   let totalCount = rows.length;
   
-  console.log(`📊 Total de linhas: ${totalCount}`);
+  // console.log(`📊 Total de linhas: ${totalCount}`);
   
   rows.forEach((row, index) => {
     let show = true;
@@ -290,7 +290,7 @@ window.filterData = function filterData() {
     if (show) visibleCount++;
   });
   
-  console.log(`✅ Resultado: ${visibleCount} de ${totalCount} registros`);
+  // console.log(`✅ Resultado: ${visibleCount} de ${totalCount} registros`);
   
   // Show feedback only if there was a search term
   if (search || dateFrom || dateTo) {
@@ -300,7 +300,7 @@ window.filterData = function filterData() {
 
 // Clear filters function
 window.clearFilters = function clearFilters() {
-  console.log('🧹 Limpando filtros...');
+  // console.log('🧹 Limpando filtros...');
   
   // Limpar campos de filtro
   document.getElementById('searchInput').value = '';
@@ -318,7 +318,7 @@ window.clearFilters = function clearFilters() {
   
   // Show feedback
   showNotification(`Filtros limpos: ${totalCount} registro(s) visível(is)`, 'success');
-  console.log('✅ Filtros limpos - todas as linhas visíveis');
+  // console.log('✅ Filtros limpos - todas as linhas visíveis');
 }
 
 window.exportToExcel = function exportToExcel() {
@@ -359,14 +359,14 @@ window.exportToExcel = function exportToExcel() {
 
 // Nova função de exclusão simples e direta
 window.excluirRetornado = function excluirRetornado(id, modelo) {
-  console.log('🗑️ Excluir retornado:', { id, modelo });
+  // console.log('🗑️ Excluir retornado:', { id, modelo });
   
   // Confirmação simples com alert nativo
   if (!confirm(`Tem certeza que deseja excluir o registro do modelo "${modelo}"?\n\nEsta ação não pode ser desfeita.`)) {
     return;
   }
   
-  console.log('✅ Usuário confirmou exclusão, enviando requisição...');
+  // console.log('✅ Usuário confirmou exclusão, enviando requisição...');
   
   // Fazer requisição DELETE diretamente
   fetch(`/toners/retornados/delete/${id}`, {
@@ -376,11 +376,11 @@ window.excluirRetornado = function excluirRetornado(id, modelo) {
     }
   })
   .then(response => {
-    console.log('📡 Resposta recebida:', response.status);
+    // console.log('📡 Resposta recebida:', response.status);
     return response.json();
   })
   .then(result => {
-    console.log('📋 Resultado:', result);
+    // console.log('📋 Resultado:', result);
     
     if (result.success) {
       alert('✅ Registro excluído com sucesso!');
@@ -390,7 +390,7 @@ window.excluirRetornado = function excluirRetornado(id, modelo) {
     }
   })
   .catch(error => {
-    console.error('❌ Erro na requisição:', error);
+    // console.error('❌ Erro na requisição:', error);
     alert('❌ Erro de conexão: ' + error.message);
   });
 }
@@ -430,10 +430,10 @@ window.showNotification = function showNotification(message, type = 'info') {
 
 // Carregar dados iniciais
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('DOM loaded, iniciando carregamento...');
+  // console.log('DOM loaded, iniciando carregamento...');
   
   // Verificar se as funções estão disponíveis
-  console.log('Funções disponíveis:', {
+  // console.log('Funções disponíveis:', {
     excluirRetornado: typeof window.excluirRetornado,
     showNotification: typeof window.showNotification,
     filterData: typeof window.filterData,
@@ -442,20 +442,20 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Teste rápido das funções
   if (typeof window.excluirRetornado !== 'function') {
-    console.error('❌ excluirRetornado não está definida!');
+    // console.error('❌ excluirRetornado não está definida!');
   } else {
-    console.log('✅ excluirRetornado está OK');
+    // console.log('✅ excluirRetornado está OK');
   }
   
   // Teste simples das funções críticas
   setTimeout(() => {
-    console.log('🧪 TESTE DAS FUNÇÕES:');
-    console.log('excluirRetornado disponível:', typeof window.excluirRetornado === 'function');
-    console.log('filterData disponível:', typeof window.filterData === 'function');
-    console.log('exportToExcel disponível:', typeof window.exportToExcel === 'function');
-    console.log('calcularPercentual disponível:', typeof calcularPercentual === 'function');
-    console.log('mostrarResultados disponível:', typeof mostrarResultados === 'function');
-    console.log('forcarExibicaoDestinos disponível:', typeof forcarExibicaoDestinos === 'function');
+    // console.log('🧪 TESTE DAS FUNÇÕES:');
+    // console.log('excluirRetornado disponível:', typeof window.excluirRetornado === 'function');
+    // console.log('filterData disponível:', typeof window.filterData === 'function');
+    // console.log('exportToExcel disponível:', typeof window.exportToExcel === 'function');
+    // console.log('calcularPercentual disponível:', typeof calcularPercentual === 'function');
+    // console.log('mostrarResultados disponível:', typeof mostrarResultados === 'function');
+    // console.log('forcarExibicaoDestinos disponível:', typeof forcarExibicaoDestinos === 'function');
   }, 1000);
   
   carregarModelos();
@@ -493,22 +493,22 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
     
-    console.log('✅ Busca em tempo real configurada');
+    // console.log('✅ Busca em tempo real configurada');
   }
   
   // Teste direto da API
   setTimeout(() => {
-    console.log('Testando API diretamente...');
+    // console.log('Testando API diretamente...');
     fetch('/api/toner')
       .then(response => {
-        console.log('Teste direto - Status:', response.status);
+        // console.log('Teste direto - Status:', response.status);
         return response.text();
       })
       .then(text => {
-        console.log('Teste direto - Response:', text);
+        // console.log('Teste direto - Response:', text);
       })
       .catch(error => {
-        console.error('Teste direto - Erro:', error);
+        // console.error('Teste direto - Erro:', error);
       });
   }, 1000);
 });
@@ -581,7 +581,7 @@ function resetForm() {
 
 // Carregar modelos de toner
 function carregarModelos() {
-  console.log('Carregando modelos de toner...');
+  // console.log('Carregando modelos de toner...');
   fetch('/api/toner', {
     method: 'GET',
     headers: {
@@ -590,32 +590,32 @@ function carregarModelos() {
     }
   })
     .then(response => {
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers.get('content-type'));
+      // console.log('Response status:', response.status);
+      // console.log('Response headers:', response.headers.get('content-type'));
       return response.text();
     })
     .then(text => {
-      console.log('Raw response:', text);
+      // console.log('Raw response:', text);
       try {
         const data = JSON.parse(text);
-        console.log('Parsed data:', data);
+        // console.log('Parsed data:', data);
         
         if (Array.isArray(data)) {
           modelosData = data;
-          console.log(`${data.length} modelos carregados para busca`);
+          // console.log(`${data.length} modelos carregados para busca`);
           
           // Configurar funcionalidade de busca
           setupModeloSearch();
         } else {
-          console.error('Resposta não é um array:', data);
+          // console.error('Resposta não é um array:', data);
         }
       } catch (e) {
-        console.error('JSON parse error:', e);
-        console.error('Response text:', text);
+        // console.error('JSON parse error:', e);
+        // console.error('Response text:', text);
       }
     })
     .catch(error => {
-      console.error('Erro ao carregar modelos:', error);
+      // console.error('Erro ao carregar modelos:', error);
     });
 }
 
@@ -661,7 +661,7 @@ function setupModeloSearch() {
           
           dropdown.classList.add('hidden');
           
-          console.log('✅ Modelo selecionado:', {
+          // console.log('✅ Modelo selecionado:', {
             nome: modelo.modelo,
             id: modelo.id
           });
@@ -748,7 +748,7 @@ function setupModeloSearch() {
 
 // Carregar parâmetros gerais com retry automático - SEMPRE usar os parâmetros configurados
 function carregarParametrosGerais(tentativa = 1, maxTentativas = 3) {
-  console.log(`📡 Carregando parâmetros de retornados configurados... (tentativa ${tentativa}/${maxTentativas})`);
+  // console.log(`📡 Carregando parâmetros de retornados configurados... (tentativa ${tentativa}/${maxTentativas})`);
   
   return fetch('/api/parametros', {
     method: 'GET',
@@ -758,21 +758,21 @@ function carregarParametrosGerais(tentativa = 1, maxTentativas = 3) {
     }
   })
     .then(response => {
-      console.log('Response status (parâmetros):', response.status);
+      // console.log('Response status (parâmetros):', response.status);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       return response.text();
     })
     .then(text => {
-      console.log('Raw response (parâmetros):', text);
+      // console.log('Raw response (parâmetros):', text);
       try {
         const data = JSON.parse(text);
-        console.log('Parsed data (parâmetros):', data);
+        // console.log('Parsed data (parâmetros):', data);
         
         if (data.success && Array.isArray(data.data)) {
           parametrosGerais = data.data;
-          console.log(`✅ ${data.data.length} parâmetros carregados com sucesso!`);
+          // console.log(`✅ ${data.data.length} parâmetros carregados com sucesso!`);
           
           // Mostrar notificação de sucesso se houve tentativas anteriores
           if (tentativa > 1) {
@@ -788,12 +788,12 @@ function carregarParametrosGerais(tentativa = 1, maxTentativas = 3) {
       }
     })
     .catch(error => {
-      console.error(`❌ Erro ao carregar parâmetros (tentativa ${tentativa}):`, error);
+      // console.error(`❌ Erro ao carregar parâmetros (tentativa ${tentativa}):`, error);
       
       // Se ainda há tentativas restantes, tentar novamente
       if (tentativa < maxTentativas) {
         const delay = tentativa * 1000; // Delay progressivo: 1s, 2s, 3s
-        console.log(`🔄 Tentando novamente em ${delay}ms...`);
+        // console.log(`🔄 Tentando novamente em ${delay}ms...`);
         
         mostrarNotificacaoParametros(`Erro ao carregar parâmetros. Tentando novamente... (${tentativa}/${maxTentativas})`, 'warning');
         
@@ -804,7 +804,7 @@ function carregarParametrosGerais(tentativa = 1, maxTentativas = 3) {
         });
       } else {
         // Esgotaram as tentativas
-        console.error('❌ Falha ao carregar parâmetros após todas as tentativas');
+        // console.error('❌ Falha ao carregar parâmetros após todas as tentativas');
         parametrosGerais = [];
         mostrarNotificacaoParametros('Falha ao carregar parâmetros. Usando valores padrão.', 'error');
         return [];
@@ -851,7 +851,7 @@ function mostrarNotificacaoParametros(mensagem, tipo = 'info') {
 document.addEventListener('change', function(e) {
   if (e.target.id === 'modeloToner') {
     const modeloValue = e.target.value;
-    console.log('🔍 Modelo selecionado:', modeloValue);
+    // console.log('🔍 Modelo selecionado:', modeloValue);
     
     if (modeloValue) {
       // Buscar modelo por ID ou por nome
@@ -860,12 +860,12 @@ document.addEventListener('change', function(e) {
         modelo = modelosData.find(m => m.modelo === modeloValue);
       }
       
-      console.log('📋 Modelo encontrado:', modelo);
+      // console.log('📋 Modelo encontrado:', modelo);
       
       if (modelo) {
         exibirDadosModelo(modelo);
       } else {
-        console.log('⚠️ Modelo não encontrado nos dados carregados');
+        // console.log('⚠️ Modelo não encontrado nos dados carregados');
         document.getElementById('dadosModelo').classList.add('hidden');
       }
     } else {
@@ -899,7 +899,7 @@ function toggleMedicaoType() {
     document.getElementById('camposPercentual').classList.remove('hidden');
   }
   
-  console.log('🔄 Tipo de medição alterado para:', tipo);
+  // console.log('🔄 Tipo de medição alterado para:', tipo);
 }
 
 function validarModeloParaPeso() {
@@ -920,13 +920,13 @@ function validarModeloParaPeso() {
 
 // Calcular gramatura a partir do peso
 function calcularGramatura() {
-  console.log('⚖️ Calculando por peso físico...');
+  // console.log('⚖️ Calculando por peso físico...');
   
   const modeloId = document.getElementById('modeloToner').value;
   const pesoInput = document.getElementById('pesoRetornado').value;
   const pesoRetornado = parseFloat(pesoInput);
   
-  console.log('📊 Dados do cálculo por peso:', {
+  // console.log('📊 Dados do cálculo por peso:', {
     modeloId,
     pesoInput,
     pesoRetornado,
@@ -934,7 +934,7 @@ function calcularGramatura() {
   });
   
   if (!modeloId) {
-    console.log('⚠️ Modelo não selecionado');
+    // console.log('⚠️ Modelo não selecionado');
     // Ocultar seções se não há modelo
     document.getElementById('resultadoCalculo').classList.add('hidden');
     document.getElementById('selecaoDestino').classList.add('hidden');
@@ -943,7 +943,7 @@ function calcularGramatura() {
   }
   
   if (isNaN(pesoRetornado) || pesoRetornado < 0) {
-    console.log('⚠️ Peso inválido:', pesoRetornado);
+    // console.log('⚠️ Peso inválido:', pesoRetornado);
     // Ocultar seções se peso inválido
     document.getElementById('resultadoCalculo').classList.add('hidden');
     document.getElementById('selecaoDestino').classList.add('hidden');
@@ -958,8 +958,8 @@ function calcularGramatura() {
   }
   
   if (!modelo) {
-    console.log('⚠️ Modelo não encontrado nos dados:', modeloId);
-    console.log('📋 Modelos disponíveis:', modelosData.map(m => ({id: m.id, modelo: m.modelo})));
+    // console.log('⚠️ Modelo não encontrado nos dados:', modeloId);
+    // console.log('📋 Modelos disponíveis:', modelosData.map(m => ({id: m.id, modelo: m.modelo})));
     // Ainda assim, tentar mostrar os botões de destino
     forcarExibicaoDestinos();
     document.getElementById('gramaturaRestante').textContent = 'Modelo não encontrado';
@@ -974,11 +974,11 @@ function calcularGramatura() {
     ...modelo
   };
   
-  console.log('📋 Modelo encontrado:', modeloSeguro);
+  // console.log('📋 Modelo encontrado:', modeloSeguro);
   
   // Verificar se temos dados suficientes para cálculo
   if (!modeloSeguro.peso_vazio && !modeloSeguro.gramatura) {
-    console.log('⚠️ Modelo sem dados de peso/gramatura - usando fallback');
+    // console.log('⚠️ Modelo sem dados de peso/gramatura - usando fallback');
     // Mostrar botões mesmo sem dados completos
     forcarExibicaoDestinos();
     document.getElementById('gramaturaRestante').textContent = 'Dados incompletos';
@@ -1001,7 +1001,7 @@ function calcularGramatura() {
   // Atualizar display da gramatura restante
   document.getElementById('gramaturaRestante').textContent = gramaturaRestante.toFixed(1) + 'g (' + percentualRestante.toFixed(1) + '%)';
   
-  console.log('📊 Cálculo por peso completo:', {
+  // console.log('📊 Cálculo por peso completo:', {
     pesoRetornado,
     pesoVazio: modeloSeguro.peso_vazio,
     pesoCheio: modeloSeguro.peso_cheio,
@@ -1012,26 +1012,26 @@ function calcularGramatura() {
   
   // Detectar casos especiais
   if (pesoRetornado <= modeloSeguro.peso_vazio) {
-    console.log('🚨 PESO IGUAL OU MENOR QUE PESO VAZIO - TONER VAZIO!');
+    // console.log('🚨 PESO IGUAL OU MENOR QUE PESO VAZIO - TONER VAZIO!');
     percentualRestante = 0;
   } else if (modeloSeguro.peso_cheio > 0 && pesoRetornado >= modeloSeguro.peso_cheio) {
-    console.log('✅ PESO IGUAL OU MAIOR QUE PESO CHEIO - TONER CHEIO!');
+    // console.log('✅ PESO IGUAL OU MAIOR QUE PESO CHEIO - TONER CHEIO!');
     percentualRestante = 100;
   }
   
-  console.log('✅ Chamando mostrarResultados com percentual:', percentualRestante);
+  // console.log('✅ Chamando mostrarResultados com percentual:', percentualRestante);
   mostrarResultados(percentualRestante, modeloSeguro);
 }
 
 // Calcular a partir do percentual
 function calcularPercentual() {
-  console.log('🔢 Calculando por percentual do chip...');
+  // console.log('🔢 Calculando por percentual do chip...');
   
   const modeloId = document.getElementById('modeloToner').value;
   const percentualInput = document.getElementById('percentualChip').value;
   const percentual = parseFloat(percentualInput);
   
-  console.log('📊 Dados do cálculo por percentual:', {
+  // console.log('📊 Dados do cálculo por percentual:', {
     modeloId,
     percentualInput,
     percentual,
@@ -1039,7 +1039,7 @@ function calcularPercentual() {
   });
   
   if (!modeloId) {
-    console.log('⚠️ Modelo não selecionado');
+    // console.log('⚠️ Modelo não selecionado');
     // Ocultar seções se não há modelo
     document.getElementById('resultadoCalculo').classList.add('hidden');
     document.getElementById('selecaoDestino').classList.add('hidden');
@@ -1047,7 +1047,7 @@ function calcularPercentual() {
   }
   
   if (isNaN(percentual) || percentual < 0 || percentual > 100) {
-    console.log('⚠️ Percentual inválido:', percentual);
+    // console.log('⚠️ Percentual inválido:', percentual);
     // Ocultar seções se percentual inválido
     document.getElementById('resultadoCalculo').classList.add('hidden');
     document.getElementById('selecaoDestino').classList.add('hidden');
@@ -1056,7 +1056,7 @@ function calcularPercentual() {
   
   // Permitir percentual 0 (toner vazio)
   if (percentual === 0) {
-    console.log('📊 Percentual é 0% - toner vazio');
+    // console.log('📊 Percentual é 0% - toner vazio');
   }
   
   // Buscar modelo por ID ou por nome
@@ -1066,57 +1066,57 @@ function calcularPercentual() {
   }
   
   if (!modelo) {
-    console.log('⚠️ Modelo não encontrado nos dados:', modeloId);
-    console.log('📋 Modelos disponíveis:', modelosData.map(m => ({id: m.id, modelo: m.modelo})));
+    // console.log('⚠️ Modelo não encontrado nos dados:', modeloId);
+    // console.log('📋 Modelos disponíveis:', modelosData.map(m => ({id: m.id, modelo: m.modelo})));
     // Ainda assim, tentar mostrar os botões de destino
     forcarExibicaoDestinos();
     return;
   }
   
-  console.log('✅ Chamando mostrarResultados com percentual:', percentual);
+  // console.log('✅ Chamando mostrarResultados com percentual:', percentual);
   mostrarResultados(percentual, modelo);
 }
 
 // Função de teste para modo percentual
 window.testarModoPercentual = function(percentualTeste = 50) {
-  console.log('🧪 TESTE DO MODO PERCENTUAL');
-  console.log('Simulando entrada de', percentualTeste + '%');
+  // console.log('🧪 TESTE DO MODO PERCENTUAL');
+  // console.log('Simulando entrada de', percentualTeste + '%');
   
   // Simular seleção de modelo
   const modeloInput = document.getElementById('modeloToner');
   if (modeloInput && modelosData.length > 0) {
     modeloInput.value = modelosData[0].id || modelosData[0].modelo;
-    console.log('✅ Modelo selecionado:', modeloInput.value);
+    // console.log('✅ Modelo selecionado:', modeloInput.value);
   }
   
   // Simular entrada de percentual
   const percentualInput = document.getElementById('percentualChip');
   if (percentualInput) {
     percentualInput.value = percentualTeste;
-    console.log('✅ Percentual definido:', percentualInput.value);
+    // console.log('✅ Percentual definido:', percentualInput.value);
     
     // Chamar função de cálculo
     calcularPercentual();
-    console.log('✅ Função calcularPercentual() chamada');
+    // console.log('✅ Função calcularPercentual() chamada');
   } else {
-    console.error('❌ Campo percentualChip não encontrado');
+    // console.error('❌ Campo percentualChip não encontrado');
   }
 }
 
 // Função de teste para modo peso
 window.testarModoPeso = function(pesoTeste = 1122) {
-  console.log('🧪 TESTE DO MODO PESO');
-  console.log('Simulando entrada de', pesoTeste + 'g');
+  // console.log('🧪 TESTE DO MODO PESO');
+  // console.log('Simulando entrada de', pesoTeste + 'g');
   
   // Simular seleção de modelo
   const modeloInput = document.getElementById('modeloToner');
   if (modeloInput && modelosData.length > 0) {
     modeloInput.value = modelosData[0].id || modelosData[0].modelo;
-    console.log('✅ Modelo selecionado:', modeloInput.value);
+    // console.log('✅ Modelo selecionado:', modeloInput.value);
     
     // Simular dados do modelo se necessário
     if (modelosData[0]) {
-      console.log('📋 Dados do modelo:', {
+      // console.log('📋 Dados do modelo:', {
         peso_vazio: modelosData[0].peso_vazio,
         peso_cheio: modelosData[0].peso_cheio,
         gramatura: modelosData[0].gramatura
@@ -1128,19 +1128,19 @@ window.testarModoPeso = function(pesoTeste = 1122) {
   const pesoInput = document.getElementById('pesoRetornado');
   if (pesoInput) {
     pesoInput.value = pesoTeste;
-    console.log('✅ Peso definido:', pesoInput.value);
+    // console.log('✅ Peso definido:', pesoInput.value);
     
     // Chamar função de cálculo
     calcularGramatura();
-    console.log('✅ Função calcularGramatura() chamada');
+    // console.log('✅ Função calcularGramatura() chamada');
   } else {
-    console.error('❌ Campo pesoRetornado não encontrado');
+    // console.error('❌ Campo pesoRetornado não encontrado');
   }
 }
 
 function mostrarResultados(percentualRestante, modelo) {
-  console.log('🎯 Mostrando resultados para:', percentualRestante + '%');
-  console.log('📋 Modelo recebido:', modelo);
+  // console.log('🎯 Mostrando resultados para:', percentualRestante + '%');
+  // console.log('📋 Modelo recebido:', modelo);
   
   // Garantir que o modelo tenha valores padrão se necessário
   const modeloSeguro = {
@@ -1163,25 +1163,25 @@ function mostrarResultados(percentualRestante, modelo) {
   // SEMPRE mostrar resultados e seleção de destino primeiro
   document.getElementById('resultadoCalculo').classList.remove('hidden');
   document.getElementById('selecaoDestino').classList.remove('hidden');
-  console.log('✅ Seções de resultado e destino exibidas');
+  // console.log('✅ Seções de resultado e destino exibidas');
   
   // Verificar se parâmetros estão carregados, senão recarregar
   if (!Array.isArray(parametrosGerais) || parametrosGerais.length === 0) {
-    console.log('⚠️ Parâmetros não carregados, recarregando...');
+    // console.log('⚠️ Parâmetros não carregados, recarregando...');
     document.getElementById('textoOrientacao').textContent = 'Carregando orientação do sistema...';
     
     // Carregar parâmetros e depois gerar orientação
     carregarParametrosGerais().then(() => {
-      console.log('✅ Parâmetros recarregados, gerando orientação...');
+      // console.log('✅ Parâmetros recarregados, gerando orientação...');
       const orientacao = gerarOrientacao(percentualRestante);
       atualizarOrientacaoVisual(orientacao, percentualRestante);
     }).catch(error => {
-      console.error('❌ Erro ao recarregar parâmetros:', error);
+      // console.error('❌ Erro ao recarregar parâmetros:', error);
       document.getElementById('textoOrientacao').textContent = 'Erro ao carregar orientação. Verifique os parâmetros do sistema.';
     });
   } else {
     // Gerar orientação normalmente
-    console.log('✅ Parâmetros já carregados, gerando orientação...');
+    // console.log('✅ Parâmetros já carregados, gerando orientação...');
     const orientacao = gerarOrientacao(percentualRestante);
     atualizarOrientacaoVisual(orientacao, percentualRestante);
   }
@@ -1222,58 +1222,58 @@ function atualizarOrientacaoVisual(orientacao, percentual) {
   }
   
   // Log para debug
-  console.log(`💡 Orientação atualizada para ${percentual.toFixed(1)}%: "${orientacao}"`);
+  // console.log(`💡 Orientação atualizada para ${percentual.toFixed(1)}%: "${orientacao}"`);
 }
 
 function gerarOrientacao(percentual) {
-  console.log('🎯 Gerando orientação para percentual:', percentual);
-  console.log('📋 Parâmetros disponíveis:', parametrosGerais);
+  // console.log('🎯 Gerando orientação para percentual:', percentual);
+  // console.log('📋 Parâmetros disponíveis:', parametrosGerais);
   
   // SEMPRE tentar usar os parâmetros configurados primeiro
   if (Array.isArray(parametrosGerais) && parametrosGerais.length > 0) {
-    console.log('✅ Usando parâmetros configurados do sistema');
+    // console.log('✅ Usando parâmetros configurados do sistema');
     
     // Ordenar parâmetros por faixa_min para garantir ordem correta
     const parametrosOrdenados = [...parametrosGerais].sort((a, b) => a.faixa_min - b.faixa_min);
-    console.log('📊 Parâmetros ordenados:', parametrosOrdenados);
+    // console.log('📊 Parâmetros ordenados:', parametrosOrdenados);
     
     // Encontrar o parâmetro correspondente ao percentual
     for (const parametro of parametrosOrdenados) {
       const faixaMin = parseFloat(parametro.faixa_min);
       const faixaMax = parametro.faixa_max ? parseFloat(parametro.faixa_max) : null;
       
-      console.log(`🔍 Verificando faixa: ${faixaMin}% - ${faixaMax ? faixaMax + '%' : '∞'}`);
+      // console.log(`🔍 Verificando faixa: ${faixaMin}% - ${faixaMax ? faixaMax + '%' : '∞'}`);
       
       // Se tem faixa máxima, verificar se está dentro do intervalo
       if (faixaMax !== null) {
         if (percentual >= faixaMin && percentual <= faixaMax) {
-          console.log(`✅ Percentual ${percentual}% está na faixa ${faixaMin}% - ${faixaMax}%`);
+          // console.log(`✅ Percentual ${percentual}% está na faixa ${faixaMin}% - ${faixaMax}%`);
           return parametro.orientacao;
         }
       } else {
         // Se não tem faixa máxima, verificar se é maior ou igual ao mínimo
         if (percentual >= faixaMin) {
-          console.log(`✅ Percentual ${percentual}% está na faixa ${faixaMin}% - ∞`);
+          // console.log(`✅ Percentual ${percentual}% está na faixa ${faixaMin}% - ∞`);
           return parametro.orientacao;
         }
       }
     }
     
     // Se não encontrou parâmetro correspondente, mas tem parâmetros carregados
-    console.log('⚠️ Percentual fora das faixas configuradas nos parâmetros');
+    // console.log('⚠️ Percentual fora das faixas configuradas nos parâmetros');
     return 'Percentual (' + percentual.toFixed(1) + '%) fora das faixas configuradas. Verifique os parâmetros de retornados.';
   }
   
   // APENAS se não conseguir carregar os parâmetros, usar fallback mínimo
-  console.log('❌ Parâmetros não carregados - tentando recarregar...');
+  // console.log('❌ Parâmetros não carregados - tentando recarregar...');
   
   // Tentar recarregar parâmetros uma vez
   carregarParametrosGerais().then(() => {
-    console.log('🔄 Parâmetros recarregados, gerando orientação novamente...');
+    // console.log('🔄 Parâmetros recarregados, gerando orientação novamente...');
     const novaOrientacao = gerarOrientacao(percentual);
     atualizarOrientacaoVisual(novaOrientacao, percentual);
   }).catch(() => {
-    console.log('❌ Falha ao recarregar parâmetros');
+    // console.log('❌ Falha ao recarregar parâmetros');
   });
   
   return 'Carregando orientações dos parâmetros configurados...';
@@ -1317,13 +1317,13 @@ function updateDestinoButtons() {
 
 // Função para forçar exibição dos destinos quando há problemas
 function forcarExibicaoDestinos() {
-  console.log('🔧 Forçando exibição dos botões de destino...');
+  // console.log('🔧 Forçando exibição dos botões de destino...');
   
   // Mostrar seção de destino
   const selecaoDestino = document.getElementById('selecaoDestino');
   if (selecaoDestino) {
     selecaoDestino.classList.remove('hidden');
-    console.log('✅ Seção de destino exibida');
+    // console.log('✅ Seção de destino exibida');
   }
   
   // Mostrar orientação padrão
@@ -1332,7 +1332,7 @@ function forcarExibicaoDestinos() {
   if (orientacaoSistema && textoOrientacao) {
     textoOrientacao.textContent = 'Selecione o destino apropriado para este toner. Verifique os parâmetros do sistema se necessário.';
     orientacaoSistema.parentElement.classList.remove('hidden');
-    console.log('✅ Orientação padrão exibida');
+    // console.log('✅ Orientação padrão exibida');
   }
 }
 
@@ -1355,9 +1355,9 @@ function submitRetornado(e) {
   }
   
   // Debug: mostrar todos os dados que serão enviados
-  console.log('Dados do formulário (modo ' + (isEditing ? 'EDIÇÃO' : 'CRIAÇÃO') + '):');
+  // console.log('Dados do formulário (modo ' + (isEditing ? 'EDIÇÃO' : 'CRIAÇÃO') + '):');
   for (let [key, value] of formData.entries()) {
-    console.log(key + ': ' + value);
+    // console.log(key + ': ' + value);
   }
   
   // Validações (relaxadas para edição)
@@ -1382,12 +1382,12 @@ function submitRetornado(e) {
     body: formData
   })
   .then(response => {
-    console.log('Response status:', response.status);
-    console.log('Response headers:', response.headers.get('content-type'));
+    // console.log('Response status:', response.status);
+    // console.log('Response headers:', response.headers.get('content-type'));
     return response.text();
   })
   .then(text => {
-    console.log('Raw response:', text);
+    // console.log('Raw response:', text);
     try {
       const result = JSON.parse(text);
       if (result.success) {
@@ -1399,20 +1399,20 @@ function submitRetornado(e) {
         alert('Erro: ' + result.message);
       }
     } catch (e) {
-      console.error('JSON parse error:', e);
-      console.error('Response text:', text);
+      // console.error('JSON parse error:', e);
+      // console.error('Response text:', text);
       alert('Erro no servidor: Resposta inválida recebida');
     }
   })
   .catch(error => {
-    console.error('Fetch error:', error);
+    // console.error('Fetch error:', error);
     alert('Erro de conexão: ' + error.message);
   });
 }
 
 // Função para editar um retornado existente
 function editarRetornado(id) {
-  console.log('✏️ Editando retornado ID:', id);
+  // console.log('✏️ Editando retornado ID:', id);
   
   // Buscar dados do registro
   fetch('/toners/retornados/' + id)
@@ -1420,7 +1420,7 @@ function editarRetornado(id) {
     .then(result => {
       if (result.success && result.data) {
         const data = result.data;
-        console.log('📋 Dados carregados:', data);
+        // console.log('📋 Dados carregados:', data);
         
         // Mostrar formulário
         document.getElementById('retornadoFormContainer').classList.remove('hidden');
@@ -1480,9 +1480,9 @@ function editarRetornado(id) {
             document.getElementById('gramatura').textContent = modeloEncontrado.gramatura ? modeloEncontrado.gramatura + 'g' : '-';
             document.getElementById('rendimento').textContent = modeloEncontrado.rendimento ? modeloEncontrado.rendimento + ' folhas' : '-';
             
-            console.log('✅ Modelo preenchido:', modeloEncontrado);
+            // console.log('✅ Modelo preenchido:', modeloEncontrado);
           } else {
-            console.log('⚠️ Modelo não encontrado nos dados carregados:', data.modelo);
+            // console.log('⚠️ Modelo não encontrado nos dados carregados:', data.modelo);
           }
         }
         
@@ -1509,7 +1509,7 @@ function editarRetornado(id) {
       }
     })
     .catch(error => {
-      console.error('Fetch error:', error);
+      // console.error('Fetch error:', error);
       alert('Erro ao buscar registro: ' + error.message);
     });
 }
@@ -1552,7 +1552,7 @@ function editarRetornado(id) {
                 });
               }
             } catch (err) {
-              console.error('Falha ao abrir o modal via fallback:', err);
+              // console.error('Falha ao abrir o modal via fallback:', err);
               alert('Erro ao abrir o formulário. Recarregue a página.');
             }
           });
@@ -1958,14 +1958,14 @@ function editarRetornado(id) {
 
 <script>
 let tonerData = {};
-let selectedDestino = '';
+// let selectedDestino = ''; // Removido declaração duplicada
 
 // Debug: Check if modal exists when page loads
 document.addEventListener('DOMContentLoaded', function() {
   const modal = document.getElementById('retornadoModal');
-  console.log('Modal found:', modal ? 'Yes' : 'No');
+  // console.log('Modal found:', modal ? 'Yes' : 'No');
   if (!modal) {
-    console.error('retornadoModal element not found in DOM');
+    // console.error('retornadoModal element not found in DOM');
   }
   // Ensure the open button triggers the modal even if inline handler is blocked
   const openBtn = document.getElementById('openRetornadoBtn');
@@ -1977,7 +1977,7 @@ document.addEventListener('DOMContentLoaded', function() {
       } else if (typeof openRetornadoModal === 'function') {
         openRetornadoModal();
       } else {
-        console.error('openRetornadoModal is not defined');
+        // console.error('openRetornadoModal is not defined');
         alert('Erro ao abrir o formulário. Recarregue a página.');
       }
     });
@@ -2002,7 +2002,7 @@ function logActivity(type, action, details = {}) {
   };
   
   activityLog.push(logEntry);
-  console.log(`[${type.toUpperCase()}] ${action}:`, details);
+  // console.log(`[${type.toUpperCase()}] ${action}:`, details);
   
   // Keep only last 1000 entries to prevent memory issues
   if (activityLog.length > 1000) {
@@ -2158,12 +2158,12 @@ function downloadImportCSV(report) {
 // Modal functions
 function openRetornadoModal() {
   logActivity('modal', 'Open Retornado Modal', { modalId: 'retornadoModal' });
-  console.log('openRetornadoModal called');
+  // console.log('openRetornadoModal called');
   const modal = document.getElementById('retornadoModal');
-  console.log('Modal element:', modal);
+  // console.log('Modal element:', modal);
   
   if (modal) {
-    console.log('Removing hidden class from modal');
+    // console.log('Removing hidden class from modal');
     modal.classList.remove('hidden');
     
     // Load parameters when modal opens to ensure fresh data
@@ -2200,9 +2200,9 @@ function openRetornadoModal() {
       observacaoContainer.classList.add('hidden');
     }
     
-    console.log('Modal should be visible now');
+    // console.log('Modal should be visible now');
   } else {
-    console.error('Modal retornadoModal não encontrado no DOM');
+    // console.error('Modal retornadoModal não encontrado no DOM');
     alert('Erro: Modal não encontrado. Recarregue a página.');
   }
 }
@@ -2762,7 +2762,7 @@ if (typeof submitRetornado === 'function') window.submitRetornado = submitRetorn
 
 // Simplified activity logging
 function logActivity(type, message, data = {}) {
-  console.log(`[${type.toUpperCase()}] ${message}`, data);
+  // console.log(`[${type.toUpperCase()}] ${message}`, data);
 }
 
 // Initialize session start time
@@ -2770,19 +2770,19 @@ window.sessionStartTime = Date.now();
 logActivity('system', 'Page Loaded', { timestamp: new Date().toISOString() });
 
 // Final check - log all available functions
-console.log('🔧 FUNÇÕES DISPONÍVEIS NO WINDOW:');
-console.log('excluirRetornado:', typeof window.excluirRetornado);
-console.log('filterData:', typeof window.filterData);
-console.log('exportToExcel:', typeof window.exportToExcel);
+// console.log('🔧 FUNÇÕES DISPONÍVEIS NO WINDOW:');
+// console.log('excluirRetornado:', typeof window.excluirRetornado);
+// console.log('filterData:', typeof window.filterData);
+// console.log('exportToExcel:', typeof window.exportToExcel);
 
 // Test if functions are callable
 try {
   if (typeof window.excluirRetornado === 'function') {
-    console.log('✅ excluirRetornado está OK');
+    // console.log('✅ excluirRetornado está OK');
   } else {
-    console.error('❌ excluirRetornado não é uma função');
+    // console.error('❌ excluirRetornado não é uma função');
   }
 } catch (e) {
-  console.error('❌ Erro ao testar excluirRetornado:', e);
+  // console.error('❌ Erro ao testar excluirRetornado:', e);
 }
 </script>

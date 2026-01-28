@@ -641,17 +641,17 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
   <script>
     // ===== DEFINIR FUNÇÃO GLOBAL PRIMEIRO - ANTES DE TUDO =====
     window.toggleSubmenu = function(button) {
-      console.log('toggleSubmenu chamada!', button);
+      // console.log('toggleSubmenu chamada!', button);
       const submenu = button.parentElement.querySelector('.submenu');
       const arrow = button.querySelector('.submenu-arrow');
       if (submenu && arrow) {
         submenu.classList.toggle('hidden');
         arrow.style.transform = submenu.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
       } else {
-        console.error('Submenu ou arrow não encontrado', {submenu, arrow});
+        // console.error('Submenu ou arrow não encontrado', {submenu, arrow});
       }
     }
-    console.log('toggleSubmenu definida:', typeof window.toggleSubmenu);
+    // console.log('toggleSubmenu definida:', typeof window.toggleSubmenu);
     
     // Mobile menu
     const btn = document.getElementById('menuBtn');
@@ -712,7 +712,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
       // Verificar se o sino de notificações está presente (usuário tem notificações ativadas)
       const notificationBtn = document.getElementById('notificationBtn');
       if (!notificationBtn) {
-        console.log('Sistema de notificações desativado para este usuário');
+        // console.log('Sistema de notificações desativado para este usuário');
         return; // Não inicializar se notificações estiverem desativadas
       }
       
@@ -753,7 +753,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
           updateNotificationsList(data.notifications);
         }
       } catch (error) {
-        console.error('Erro ao carregar notificações:', error);
+        // console.error('Erro ao carregar notificações:', error);
       }
     }
 
