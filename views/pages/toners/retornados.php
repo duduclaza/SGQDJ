@@ -1605,13 +1605,9 @@ function editarRetornado(id) {
 
   <!-- Data Grid -->
   <div class="bg-white border rounded-lg overflow-hidden">
-    <!-- Top Scrollbar - Barra de rolagem superior sincronizada -->
-    <div id="topScrollWrapper" class="border-b border-gray-300 bg-gray-50" style="overflow-x: scroll; overflow-y: hidden; height: 17px;">
-      <div id="topScrollContent" style="height: 1px; width: 2000px;"></div>
-    </div>
-    <div id="tableContainer" style="overflow-x: auto;">
+    <div id="tableContainer" class="overflow-x-auto" style="max-height: 70vh; overflow-y: auto;">
       <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+        <thead class="bg-gray-50 sticky top-0 z-10">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modelo</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código Cliente</th>
@@ -2791,58 +2787,5 @@ try {
   }
 } catch (e) {
   console.error('❌ Erro ao testar excluirRetornado:', e);
-}
-
-// Sincronizar barra de rolagem superior com a tabela
-function initTopScrollbar() {
-  const topScroll = document.getElementById('topScrollWrapper');
-  const topScrollContent = document.getElementById('topScrollContent');
-  const tableContainer = document.getElementById('tableContainer');
-  
-  if (!topScroll || !topScrollContent || !tableContainer) {
-    console.error('❌ Elementos da barra de rolagem não encontrados');
-    return;
-  }
-  
-  const table = tableContainer.querySelector('table');
-  if (!table) {
-    console.error('❌ Tabela não encontrada');
-    return;
-  }
-  
-  // Definir a largura do conteúdo da barra superior igual à largura da tabela
-  function updateTopScrollWidth() {
-    const tableWidth = table.scrollWidth;
-    topScrollContent.style.width = tableWidth + 'px';
-  }
-  
-  // Sincronizar scroll: quando rolar em cima, rola embaixo
-  topScroll.onscroll = function() {
-    tableContainer.scrollLeft = topScroll.scrollLeft;
-  };
-  
-  // Sincronizar scroll: quando rolar embaixo, rola em cima
-  tableContainer.onscroll = function() {
-    topScroll.scrollLeft = tableContainer.scrollLeft;
-  };
-  
-  // Inicializar largura
-  updateTopScrollWidth();
-  
-  // Atualizar quando a janela é redimensionada
-  window.addEventListener('resize', updateTopScrollWidth);
-  
-  // Atualizar a cada 500ms por segurança
-  setTimeout(updateTopScrollWidth, 500);
-  setTimeout(updateTopScrollWidth, 1000);
-  
-  console.log('✅ Barra de rolagem superior configurada!');
-}
-
-// Executar após página carregar
-if (document.readyState === 'complete') {
-  initTopScrollbar();
-} else {
-  window.addEventListener('load', initTopScrollbar);
 }
 </script>
