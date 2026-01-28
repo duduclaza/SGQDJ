@@ -35,6 +35,7 @@ function e($string) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SGQ OTI DJ - Sistema de Gestão da Qualidade</title>
+    <script>if(window.console){const o=console.warn;console.warn=(...a)=>{if(a[0]&&String(a[0]).includes('cdn.tail'))return;o.apply(console,a)}}</script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/src/Support/modal-styles.css">
     <style>
