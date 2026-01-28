@@ -2418,9 +2418,6 @@ function selectDestino(destino) {
   updateDestinoButtons();
   calculateValue();
   
-  // Hide auto discard notification when user manually selects destination
-  }
-
   // Show/hide value calculation for estoque
   const valorDiv = document.getElementById('valorCalculado');
   if (destino === 'estoque') {
