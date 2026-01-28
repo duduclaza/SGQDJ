@@ -29,6 +29,7 @@ if (!function_exists('flash')) {
   <meta http-equiv="Expires" content="0">
   <link rel="icon" href="data:,">
   <title><?= e($title) ?></title>
+  <script>if(window.console){const o=console.warn;console.warn=(...a)=>{if(a[0]&&String(a[0]).includes('cdn.tail'))return;o.apply(console,a)}}</script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link rel="stylesheet" href="/src/Support/modal-styles.css?v=<?= urlencode($assetVersion) ?>">
@@ -37,18 +38,18 @@ if (!function_exists('flash')) {
     // ===== TOGGLE SUBMENU - GLOBAL FUNCTION =====
     // Definir PRIMEIRO, antes de qualquer outra coisa
     window.toggleSubmenu = function(button) {
-      console.log('toggleSubmenu global chamada!', button);
+      // console.log('toggleSubmenu global chamada!', button);
       const submenu = button.parentElement.querySelector('.submenu');
       const arrow = button.querySelector('.submenu-arrow');
       if (submenu && arrow) {
         submenu.classList.toggle('hidden');
         arrow.style.transform = submenu.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
-        console.log('Submenu toggled - hidden:', submenu.classList.contains('hidden'));
+        // console.log('Submenu toggled - hidden:', submenu.classList.contains('hidden'));
       } else {
-        console.error('ERRO: Submenu ou arrow não encontrado!', {submenu, arrow, parent: button.parentElement});
+        // console.error('ERRO: Submenu ou arrow não encontrado!', {submenu, arrow, parent: button.parentElement});
       }
     }
-    console.log('[LAYOUT] toggleSubmenu definida:', typeof window.toggleSubmenu);
+    // console.log('[LAYOUT] toggleSubmenu definida:', typeof window.toggleSubmenu);
     
     // User permissions for frontend
     window.userPermissions = <?= json_encode($_SESSION['user_permissions'] ?? []) ?>;
