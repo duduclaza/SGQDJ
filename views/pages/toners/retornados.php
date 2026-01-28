@@ -2794,7 +2794,7 @@ try {
 }
 
 // Sincronizar barra de rolagem superior com a tabela
-(function initTopScrollbar() {
+function initTopScrollbar() {
   const topScroll = document.getElementById('topScrollWrapper');
   const topScrollContent = document.getElementById('topScrollContent');
   const tableContainer = document.getElementById('tableContainer');
@@ -2814,18 +2814,17 @@ try {
   function updateTopScrollWidth() {
     const tableWidth = table.scrollWidth;
     topScrollContent.style.width = tableWidth + 'px';
-    console.log('📏 Largura da tabela:', tableWidth);
   }
   
   // Sincronizar scroll: quando rolar em cima, rola embaixo
-  topScroll.addEventListener('scroll', function() {
+  topScroll.onscroll = function() {
     tableContainer.scrollLeft = topScroll.scrollLeft;
-  });
+  };
   
   // Sincronizar scroll: quando rolar embaixo, rola em cima
-  tableContainer.addEventListener('scroll', function() {
+  tableContainer.onscroll = function() {
     topScroll.scrollLeft = tableContainer.scrollLeft;
-  });
+  };
   
   // Inicializar largura
   updateTopScrollWidth();
@@ -2833,12 +2832,17 @@ try {
   // Atualizar quando a janela é redimensionada
   window.addEventListener('resize', updateTopScrollWidth);
   
-  // Observar mudanças no tamanho da tabela
-  if (typeof ResizeObserver !== 'undefined') {
-    const observer = new ResizeObserver(updateTopScrollWidth);
-    observer.observe(table);
-  }
+  // Atualizar a cada 500ms por segurança
+  setTimeout(updateTopScrollWidth, 500);
+  setTimeout(updateTopScrollWidth, 1000);
   
-  console.log('✅ Barra de rolagem superior configurada com sucesso!');
-})();
+  console.log('✅ Barra de rolagem superior configurada!');
+}
+
+// Executar após página carregar
+if (document.readyState === 'complete') {
+  initTopScrollbar();
+} else {
+  window.addEventListener('load', initTopScrollbar);
+}
 </script>
