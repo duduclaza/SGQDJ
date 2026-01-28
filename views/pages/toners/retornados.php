@@ -1605,11 +1605,11 @@ function editarRetornado(id) {
 
   <!-- Data Grid -->
   <div class="bg-white border rounded-lg overflow-hidden">
-    <!-- Top Scrollbar - Barra de rolagem superior -->
-    <div id="topScrollbar" class="overflow-x-scroll bg-gray-100 border-b border-gray-200" style="overflow-y: hidden;">
-      <div id="topScrollbarContent" style="height: 8px; min-width: 2000px;"></div>
+    <!-- Top Scrollbar - Barra de rolagem superior sincronizada -->
+    <div id="topScrollWrapper" style="overflow-x: auto; overflow-y: hidden;">
+      <div id="topScrollContent" style="height: 1px;"></div>
     </div>
-    <div id="tableContainer" class="overflow-x-auto">
+    <div id="tableContainer" style="overflow-x: auto;">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
@@ -2794,52 +2794,51 @@ try {
 }
 
 // Sincronizar barra de rolagem superior com a tabela
-(function() {
-  const topScrollbar = document.getElementById('topScrollbar');
-  const topScrollbarContent = document.getElementById('topScrollbarContent');
+(function initTopScrollbar() {
+  const topScroll = document.getElementById('topScrollWrapper');
+  const topScrollContent = document.getElementById('topScrollContent');
   const tableContainer = document.getElementById('tableContainer');
   
-  if (topScrollbar && topScrollbarContent && tableContainer) {
-    // Função para sincronizar largura do scroller superior
-    function syncScrollbarWidth() {
-      const table = tableContainer.querySelector('table');
-      if (table) {
-        topScrollbarContent.style.width = table.scrollWidth + 'px';
-      }
-    }
-    
-    // Sincronizar rolagem entre os dois containers
-    let isSyncing = false;
-    
-    topScrollbar.addEventListener('scroll', function() {
-      if (!isSyncing) {
-        isSyncing = true;
-        tableContainer.scrollLeft = topScrollbar.scrollLeft;
-        isSyncing = false;
-      }
-    });
-    
-    tableContainer.addEventListener('scroll', function() {
-      if (!isSyncing) {
-        isSyncing = true;
-        topScrollbar.scrollLeft = tableContainer.scrollLeft;
-        isSyncing = false;
-      }
-    });
-    
-    // Inicializar largura após tabela carregar
-    syncScrollbarWidth();
-    
-    // Observar mudanças no container da tabela
-    const resizeObserver = new ResizeObserver(() => {
-      syncScrollbarWidth();
-    });
-    resizeObserver.observe(tableContainer);
-    
-    // Atualizar quando a janela for redimensionada
-    window.addEventListener('resize', syncScrollbarWidth);
-    
-    console.log('✅ Barra de rolagem superior sincronizada');
+  if (!topScroll || !topScrollContent || !tableContainer) {
+    console.error('❌ Elementos da barra de rolagem não encontrados');
+    return;
   }
+  
+  const table = tableContainer.querySelector('table');
+  if (!table) {
+    console.error('❌ Tabela não encontrada');
+    return;
+  }
+  
+  // Definir a largura do conteúdo da barra superior igual à largura da tabela
+  function updateTopScrollWidth() {
+    const tableWidth = table.scrollWidth;
+    topScrollContent.style.width = tableWidth + 'px';
+    console.log('📏 Largura da tabela:', tableWidth);
+  }
+  
+  // Sincronizar scroll: quando rolar em cima, rola embaixo
+  topScroll.addEventListener('scroll', function() {
+    tableContainer.scrollLeft = topScroll.scrollLeft;
+  });
+  
+  // Sincronizar scroll: quando rolar embaixo, rola em cima
+  tableContainer.addEventListener('scroll', function() {
+    topScroll.scrollLeft = tableContainer.scrollLeft;
+  });
+  
+  // Inicializar largura
+  updateTopScrollWidth();
+  
+  // Atualizar quando a janela é redimensionada
+  window.addEventListener('resize', updateTopScrollWidth);
+  
+  // Observar mudanças no tamanho da tabela
+  if (typeof ResizeObserver !== 'undefined') {
+    const observer = new ResizeObserver(updateTopScrollWidth);
+    observer.observe(table);
+  }
+  
+  console.log('✅ Barra de rolagem superior configurada com sucesso!');
 })();
 </script>
