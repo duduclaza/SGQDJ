@@ -1453,19 +1453,37 @@ function editarRetornado(id) {
         const observacaoInput = document.getElementById('observacao');
         if (observacaoInput) observacaoInput.value = data.observacao || '';
         
-        // Modelo - precisa acionar o dropdown
+        // Modelo - preencher campo de texto e campo hidden
         const modeloInput = document.getElementById('modeloToner');
+        const modeloIdInput = document.getElementById('modeloId');
         if (modeloInput) {
-          // Tentar encontrar por nome do modelo nos options
-          const options = modeloInput.querySelectorAll('option');
-          for (let opt of options) {
-            if (opt.value === data.modelo || opt.textContent === data.modelo) {
-              modeloInput.value = opt.value;
-              break;
-            }
+          // Preencher o campo de texto com o nome do modelo
+          modeloInput.value = data.modelo || '';
+          
+          // Se tiver o ID do modelo, preencher o campo hidden
+          if (modeloIdInput && data.modelo_id) {
+            modeloIdInput.value = data.modelo_id;
           }
-          // Disparar evento change para carregar dados do modelo
-          modeloInput.dispatchEvent(new Event('change'));
+          
+          // Buscar o modelo nos dados carregados para exibir informações
+          const modeloEncontrado = modelosData.find(m => m.modelo === data.modelo || m.id == data.modelo_id);
+          if (modeloEncontrado) {
+            // Preencher campo hidden com ID
+            if (modeloIdInput) {
+              modeloIdInput.value = modeloEncontrado.id;
+            }
+            
+            // Exibir dados do modelo selecionado
+            document.getElementById('dadosModelo').classList.remove('hidden');
+            document.getElementById('pesoCheio').textContent = modeloEncontrado.peso_cheio ? modeloEncontrado.peso_cheio + 'g' : '-';
+            document.getElementById('pesoVazio').textContent = modeloEncontrado.peso_vazio ? modeloEncontrado.peso_vazio + 'g' : '-';
+            document.getElementById('gramatura').textContent = modeloEncontrado.gramatura ? modeloEncontrado.gramatura + 'g' : '-';
+            document.getElementById('rendimento').textContent = modeloEncontrado.rendimento ? modeloEncontrado.rendimento + ' folhas' : '-';
+            
+            console.log('✅ Modelo preenchido:', modeloEncontrado);
+          } else {
+            console.log('⚠️ Modelo não encontrado nos dados carregados:', data.modelo);
+          }
         }
         
         // Destino

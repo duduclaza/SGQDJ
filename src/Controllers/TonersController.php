@@ -1450,12 +1450,14 @@ class TonersController
         
         try {
             $stmt = $this->db->prepare('
-                SELECT id, modelo, codigo_cliente, usuario, filial, destino, 
-                       data_registro, modelo_cadastrado, valor_calculado, observacao, 
-                       quantidade, modo, peso_retornado, percentual_chip,
-                       gramatura_existente, percentual_restante
-                FROM retornados 
-                WHERE id = ?
+                SELECT r.id, r.modelo, r.codigo_cliente, r.usuario, r.filial, r.destino, 
+                       r.data_registro, r.modelo_cadastrado, r.valor_calculado, r.observacao, 
+                       r.quantidade, r.modo, r.peso_retornado, r.percentual_chip,
+                       r.gramatura_existente, r.percentual_restante,
+                       t.id as modelo_id
+                FROM retornados r
+                LEFT JOIN toners t ON t.modelo = r.modelo
+                WHERE r.id = ?
             ');
             $stmt->execute([$id]);
             $retornado = $stmt->fetch(PDO::FETCH_ASSOC);
