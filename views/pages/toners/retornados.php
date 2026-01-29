@@ -434,11 +434,11 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Verificar se as funções estão disponíveis
   // console.log('Funções disponíveis:', {
-    excluirRetornado: typeof window.excluirRetornado,
-    showNotification: typeof window.showNotification,
-    filterData: typeof window.filterData,
-    exportToExcel: typeof window.exportToExcel
-  });
+//    excluirRetornado: typeof window.excluirRetornado,
+//    showNotification: typeof window.showNotification,
+//    filterData: typeof window.filterData,
+//    exportToExcel: typeof window.exportToExcel
+//  });
   
   // Teste rápido das funções
   if (typeof window.excluirRetornado !== 'function') {
@@ -662,9 +662,9 @@ function setupModeloSearch() {
           dropdown.classList.add('hidden');
           
           // console.log('✅ Modelo selecionado:', {
-            nome: modelo.modelo,
-            id: modelo.id
-          });
+//            nome: modelo.modelo,
+//            id: modelo.id
+//          });
           
           // Disparar evento change para carregar dados do modelo
           const changeEvent = new Event('change', { bubbles: true });
@@ -927,11 +927,11 @@ function calcularGramatura() {
   const pesoRetornado = parseFloat(pesoInput);
   
   // console.log('📊 Dados do cálculo por peso:', {
-    modeloId,
-    pesoInput,
-    pesoRetornado,
-    isNaN: isNaN(pesoRetornado)
-  });
+//    modeloId,
+//    pesoInput,
+//    pesoRetornado,
+//    isNaN: isNaN(pesoRetornado)
+//  });
   
   if (!modeloId) {
     // console.log('⚠️ Modelo não selecionado');
@@ -1002,13 +1002,13 @@ function calcularGramatura() {
   document.getElementById('gramaturaRestante').textContent = gramaturaRestante.toFixed(1) + 'g (' + percentualRestante.toFixed(1) + '%)';
   
   // console.log('📊 Cálculo por peso completo:', {
-    pesoRetornado,
-    pesoVazio: modeloSeguro.peso_vazio,
-    pesoCheio: modeloSeguro.peso_cheio,
-    gramatura: modeloSeguro.gramatura,
-    gramaturaRestante,
-    percentualRestante
-  });
+//    pesoRetornado,
+//    pesoVazio: modeloSeguro.peso_vazio,
+//    pesoCheio: modeloSeguro.peso_cheio,
+//    gramatura: modeloSeguro.gramatura,
+//    gramaturaRestante,
+//    percentualRestante
+//  });
   
   // Detectar casos especiais
   if (pesoRetornado <= modeloSeguro.peso_vazio) {
@@ -1032,11 +1032,11 @@ function calcularPercentual() {
   const percentual = parseFloat(percentualInput);
   
   // console.log('📊 Dados do cálculo por percentual:', {
-    modeloId,
-    percentualInput,
-    percentual,
-    isNaN: isNaN(percentual)
-  });
+//    modeloId,
+//    percentualInput,
+//    percentual,
+//    isNaN: isNaN(percentual)
+//  });
   
   if (!modeloId) {
     // console.log('⚠️ Modelo não selecionado');
@@ -1117,10 +1117,10 @@ window.testarModoPeso = function(pesoTeste = 1122) {
     // Simular dados do modelo se necessário
     if (modelosData[0]) {
       // console.log('📋 Dados do modelo:', {
-        peso_vazio: modelosData[0].peso_vazio,
-        peso_cheio: modelosData[0].peso_cheio,
-        gramatura: modelosData[0].gramatura
-      });
+//        peso_vazio: modelosData[0].peso_vazio,
+//        peso_cheio: modelosData[0].peso_cheio,
+//        gramatura: modelosData[0].gramatura
+//      });
     }
   }
   
