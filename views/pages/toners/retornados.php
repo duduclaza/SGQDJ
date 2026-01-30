@@ -424,9 +424,89 @@ window.showNotification = function showNotification(message, type = 'info') {
       if (notification.parentNode) {
         notification.parentNode.removeChild(notification);
       }
-    }, 300);
   }, 4000);
 }
+
+// ===== FUNÇÕES DE FILTRO DE COLUNAS =====
+
+// Toggle do dropdown de colunas
+window.toggleColumnFilter = function toggleColumnFilter() {
+  const dropdown = document.getElementById('columnFilterDropdown');
+  if (dropdown) {
+    dropdown.classList.toggle('hidden');
+  }
+}
+
+// Fechar dropdown ao clicar fora
+document.addEventListener('click', function(e) {
+  const dropdown = document.getElementById('columnFilterDropdown');
+  const btn = document.getElementById('columnFilterBtn');
+  if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+    dropdown.classList.add('hidden');
+  }
+});
+
+// Selecionar todas as colunas
+window.selectAllColumns = function selectAllColumns() {
+  document.querySelectorAll('.column-checkbox').forEach(cb => {
+    cb.checked = true;
+  });
+  applyColumnFilter();
+}
+
+// Desselecionar todas as colunas (exceto Ações)
+window.deselectAllColumns = function deselectAllColumns() {
+  document.querySelectorAll('.column-checkbox').forEach(cb => {
+    // Manter Ações sempre visível
+    if (cb.dataset.column !== '9') {
+      cb.checked = false;
+    }
+  });
+  applyColumnFilter();
+}
+
+// Aplicar filtro de colunas
+window.applyColumnFilter = function applyColumnFilter() {
+  const checkboxes = document.querySelectorAll('.column-checkbox');
+  const table = document.querySelector('#tableContainer table');
+  
+  if (!table) return;
+  
+  checkboxes.forEach(cb => {
+    const colIndex = parseInt(cb.dataset.column);
+    const isVisible = cb.checked;
+    
+    // Aplicar em cabeçalhos
+    const headers = table.querySelectorAll('thead tr th');
+    if (headers[colIndex]) {
+      headers[colIndex].style.display = isVisible ? '' : 'none';
+    }
+    
+    // Aplicar em todas as linhas do corpo
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells[colIndex]) {
+        cells[colIndex].style.display = isVisible ? '' : 'none';
+      }
+    });
+  });
+  
+  // Atualizar largura da barra de rolagem superior
+  setTimeout(() => {
+    const topScrollContent = document.getElementById('topScrollContent');
+    if (topScrollContent && table) {
+      topScrollContent.style.width = table.offsetWidth + 'px';
+    }
+  }, 100);
+}
+
+// Event listeners para os checkboxes de colunas
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.column-checkbox').forEach(cb => {
+    cb.addEventListener('change', applyColumnFilter);
+  });
+});
 
 // Carregar dados iniciais
 document.addEventListener('DOMContentLoaded', function() {
@@ -1605,7 +1685,7 @@ function editarRetornado(id) {
 
   <!-- Filters and Search -->
   <div class="bg-white border rounded-lg p-4">
-    <div class="grid grid-cols-1 lg:grid-cols-6 gap-3">
+    <div class="grid grid-cols-1 lg:grid-cols-7 gap-3">
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
         <input type="text" id="searchInput" placeholder="Modelo, cód. cliente, usuário..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -1641,6 +1721,75 @@ function editarRetornado(id) {
           </svg>
           <span>Exportar</span>
         </button>
+      </div>
+      <!-- Filtro de Colunas -->
+      <div class="flex items-end relative">
+        <button id="columnFilterBtn" onclick="toggleColumnFilter()" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center space-x-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path>
+          </svg>
+          <span>Colunas</span>
+        </button>
+        <!-- Dropdown de Colunas -->
+        <div id="columnFilterDropdown" class="hidden absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+          <div class="p-3 border-b border-gray-200">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm font-medium text-gray-700">Exibir Colunas</span>
+              <button onclick="toggleColumnFilter()" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            <div class="flex space-x-2">
+              <button onclick="selectAllColumns()" class="text-xs text-blue-600 hover:text-blue-800 font-medium">Todas</button>
+              <span class="text-gray-300">|</span>
+              <button onclick="deselectAllColumns()" class="text-xs text-gray-600 hover:text-gray-800 font-medium">Nenhuma</button>
+            </div>
+          </div>
+          <div class="p-2 max-h-64 overflow-y-auto">
+            <label class="flex items-center px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+              <input type="checkbox" data-column="0" checked class="column-checkbox mr-2 rounded text-purple-600 focus:ring-purple-500">
+              <span class="text-sm text-gray-700">Modelo</span>
+            </label>
+            <label class="flex items-center px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+              <input type="checkbox" data-column="1" checked class="column-checkbox mr-2 rounded text-purple-600 focus:ring-purple-500">
+              <span class="text-sm text-gray-700">Código Cliente</span>
+            </label>
+            <label class="flex items-center px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+              <input type="checkbox" data-column="2" checked class="column-checkbox mr-2 rounded text-purple-600 focus:ring-purple-500">
+              <span class="text-sm text-gray-700">Quantidade</span>
+            </label>
+            <label class="flex items-center px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+              <input type="checkbox" data-column="3" checked class="column-checkbox mr-2 rounded text-purple-600 focus:ring-purple-500">
+              <span class="text-sm text-gray-700">Usuário</span>
+            </label>
+            <label class="flex items-center px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+              <input type="checkbox" data-column="4" checked class="column-checkbox mr-2 rounded text-purple-600 focus:ring-purple-500">
+              <span class="text-sm text-gray-700">Filial</span>
+            </label>
+            <label class="flex items-center px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+              <input type="checkbox" data-column="5" checked class="column-checkbox mr-2 rounded text-purple-600 focus:ring-purple-500">
+              <span class="text-sm text-gray-700">Destino</span>
+            </label>
+            <label class="flex items-center px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+              <input type="checkbox" data-column="6" checked class="column-checkbox mr-2 rounded text-purple-600 focus:ring-purple-500">
+              <span class="text-sm text-gray-700">Valor</span>
+            </label>
+            <label class="flex items-center px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+              <input type="checkbox" data-column="7" checked class="column-checkbox mr-2 rounded text-purple-600 focus:ring-purple-500">
+              <span class="text-sm text-gray-700">Observação</span>
+            </label>
+            <label class="flex items-center px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+              <input type="checkbox" data-column="8" checked class="column-checkbox mr-2 rounded text-purple-600 focus:ring-purple-500">
+              <span class="text-sm text-gray-700">Data</span>
+            </label>
+            <label class="flex items-center px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+              <input type="checkbox" data-column="9" checked class="column-checkbox mr-2 rounded text-purple-600 focus:ring-purple-500">
+              <span class="text-sm text-gray-700">Ações</span>
+            </label>
+          </div>
+        </div>
       </div>
     </div>
   </div>
