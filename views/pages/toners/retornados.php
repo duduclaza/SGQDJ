@@ -424,6 +424,7 @@ window.showNotification = function showNotification(message, type = 'info') {
       if (notification.parentNode) {
         notification.parentNode.removeChild(notification);
       }
+    }, 300);
   }, 4000);
 }
 
