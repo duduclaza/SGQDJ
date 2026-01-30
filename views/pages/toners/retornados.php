@@ -1605,6 +1605,10 @@ function editarRetornado(id) {
 
   <!-- Data Grid -->
   <div class="bg-white border rounded-lg overflow-hidden">
+    <!-- Barra de rolagem superior sincronizada -->
+    <div id="topScrollWrapper" class="overflow-x-auto" style="overflow-y: hidden; height: 20px;">
+      <div id="topScrollContent" style="height: 1px;"></div>
+    </div>
     <div id="tableContainer" class="overflow-x-auto" style="max-height: 70vh; overflow-y: auto;">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50 sticky top-0 z-10">
