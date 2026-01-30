@@ -885,7 +885,7 @@ function exibirDadosModelo(modelo) {
 
 // Toggle tipo de medição
 function toggleMedicaoType() {
-  const tipo = document.querySelector('input[name="tipoMedicao"]:checked')?.value;
+  const tipo = document.querySelector('input[name="modo"]:checked')?.value;
   
   document.getElementById('camposPeso').classList.add('hidden');
   document.getElementById('camposPercentual').classList.add('hidden');
