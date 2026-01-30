@@ -119,11 +119,11 @@
         <label class="block text-sm font-medium text-gray-700 mb-3">Tipo de Medição *</label>
         <div class="flex space-x-4">
           <label class="flex items-center">
-            <input type="radio" name="tipoMedicao" value="peso" class="mr-2" onchange="toggleMedicaoType()">
+            <input type="radio" name="modo" value="peso" class="mr-2" onchange="toggleMedicaoType()">
             <span>Peso Físico</span>
           </label>
           <label class="flex items-center">
-            <input type="radio" name="tipoMedicao" value="chip" class="mr-2" onchange="toggleMedicaoType()">
+            <input type="radio" name="modo" value="chip" class="mr-2" onchange="toggleMedicaoType()">
             <span>% do Chip</span>
           </label>
         </div>
