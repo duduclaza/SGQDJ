@@ -214,6 +214,43 @@
       </div>
     </form>
   </div>
+
+  <!-- Estilos para redimensionamento de colunas -->
+  <style>
+    .resizable-th {
+      position: relative;
+      overflow: hidden;
+    }
+    .resizable-th .resizer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 5px;
+      height: 100%;
+      cursor: col-resize;
+      background: transparent;
+      user-select: none;
+      z-index: 1;
+    }
+    .resizable-th .resizer:hover,
+    .resizable-th .resizer.resizing {
+      background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+    }
+    .resizing-active {
+      cursor: col-resize !important;
+      user-select: none !important;
+    }
+    .resizing-active * {
+      cursor: col-resize !important;
+      user-select: none !important;
+    }
+    #resizableTable td {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  </style>
+
     <script>
 // Variáveis globais
 let modelosData = [];
@@ -505,6 +542,67 @@ window.applyColumnFilter = function applyColumnFilter() {
     }
   }, 100);
 }
+
+// ===== FUNÇÕES DE REDIMENSIONAMENTO DE COLUNAS =====
+
+function initColumnResizing() {
+  const table = document.getElementById('resizableTable');
+  if (!table) return;
+  
+  const resizers = table.querySelectorAll('.resizer');
+  let currentResizer = null;
+  let startX = 0;
+  let startWidth = 0;
+  let th = null;
+  
+  resizers.forEach(resizer => {
+    resizer.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      currentResizer = this;
+      th = this.parentElement;
+      startX = e.pageX;
+      startWidth = th.offsetWidth;
+      
+      currentResizer.classList.add('resizing');
+      document.body.classList.add('resizing-active');
+      
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    });
+  });
+  
+  function handleMouseMove(e) {
+    if (!currentResizer || !th) return;
+    
+    const diff = e.pageX - startX;
+    const newWidth = Math.max(50, startWidth + diff);
+    th.style.width = newWidth + 'px';
+    
+    // Atualizar barra de rolagem superior
+    const topScrollContent = document.getElementById('topScrollContent');
+    if (topScrollContent && table) {
+      topScrollContent.style.width = table.offsetWidth + 'px';
+    }
+  }
+  
+  function handleMouseUp() {
+    if (currentResizer) {
+      currentResizer.classList.remove('resizing');
+    }
+    document.body.classList.remove('resizing-active');
+    
+    currentResizer = null;
+    th = null;
+    
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  }
+}
+
+// Inicializar redimensionamento quando DOM estiver pronto
+document.addEventListener('DOMContentLoaded', initColumnResizing);
 
 // Event listeners para os checkboxes de colunas
 document.addEventListener('DOMContentLoaded', function() {
@@ -1806,19 +1904,19 @@ function editarRetornado(id) {
       <div id="topScrollContent" style="height: 1px;"></div>
     </div>
     <div id="tableContainer" class="overflow-x-auto" style="max-height: 70vh; overflow-y: auto;">
-      <table class="min-w-full divide-y divide-gray-200">
+      <table id="resizableTable" class="min-w-full divide-y divide-gray-200" style="table-layout: fixed;">
         <thead class="bg-gray-50 sticky top-0 z-10">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modelo</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código Cliente</th>
-            <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Qtd</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filial</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destino</th>
-            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Observação</th>
-            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 120px; width: 150px;"><span>Modelo</span><div class="resizer"></div></th>
+            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 100px; width: 120px;"><span>Código Cliente</span><div class="resizer"></div></th>
+            <th class="resizable-th px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 50px; width: 60px;"><span>Qtd</span><div class="resizer"></div></th>
+            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 100px; width: 120px;"><span>Usuário</span><div class="resizer"></div></th>
+            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 80px; width: 100px;"><span>Filial</span><div class="resizer"></div></th>
+            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 80px; width: 100px;"><span>Destino</span><div class="resizer"></div></th>
+            <th class="resizable-th px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 80px; width: 100px;"><span>Valor</span><div class="resizer"></div></th>
+            <th class="resizable-th px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 100px; width: 150px;"><span>Observação</span><div class="resizer"></div></th>
+            <th class="resizable-th px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 80px; width: 100px;"><span>Data</span><div class="resizer"></div></th>
+            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 120px; width: 140px;">Ações</th>
           </tr>
         </thead>
         <tbody id="retornadosTable" class="bg-white divide-y divide-gray-200">
