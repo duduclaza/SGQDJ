@@ -430,7 +430,11 @@ window.showNotification = function showNotification(message, type = 'info') {
 // ===== FUNÇÕES DE FILTRO DE COLUNAS =====
 
 // Toggle do dropdown de colunas
-window.toggleColumnFilter = function toggleColumnFilter() {
+window.toggleColumnFilter = function toggleColumnFilter(event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
   const dropdown = document.getElementById('columnFilterDropdown');
   if (dropdown) {
     dropdown.classList.toggle('hidden');
@@ -1724,7 +1728,7 @@ function editarRetornado(id) {
       </div>
       <!-- Filtro de Colunas -->
       <div class="flex items-end relative">
-        <button id="columnFilterBtn" onclick="toggleColumnFilter()" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center space-x-1">
+        <button id="columnFilterBtn" onclick="toggleColumnFilter(event)" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center space-x-1">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path>
           </svg>
@@ -1735,7 +1739,7 @@ function editarRetornado(id) {
           <div class="p-3 border-b border-gray-200">
             <div class="flex justify-between items-center mb-2">
               <span class="text-sm font-medium text-gray-700">Exibir Colunas</span>
-              <button onclick="toggleColumnFilter()" class="text-gray-400 hover:text-gray-600">
+              <button onclick="toggleColumnFilter(event)" class="text-gray-400 hover:text-gray-600">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
