@@ -511,6 +511,48 @@ document.addEventListener('DOMContentLoaded', function() {
         // console.error('Teste direto - Erro:', error);
       });
   }, 1000);
+  
+  // Sincronização da barra de rolagem superior com a inferior
+  const topScroll = document.getElementById('topScrollWrapper');
+  const tableContainer = document.getElementById('tableContainer');
+  const topScrollContent = document.getElementById('topScrollContent');
+  
+  if (topScroll && tableContainer && topScrollContent) {
+    // Função para ajustar a largura do conteúdo da barra superior
+    function syncScrollWidth() {
+      const table = tableContainer.querySelector('table');
+      if (table) {
+        topScrollContent.style.width = table.offsetWidth + 'px';
+      }
+    }
+    
+    // Sincronizar scroll da barra superior para a tabela
+    let isSyncingTop = false;
+    topScroll.addEventListener('scroll', function() {
+      if (!isSyncingTop) {
+        isSyncingTop = true;
+        tableContainer.scrollLeft = topScroll.scrollLeft;
+        setTimeout(() => { isSyncingTop = false; }, 10);
+      }
+    });
+    
+    // Sincronizar scroll da tabela para a barra superior  
+    let isSyncingBottom = false;
+    tableContainer.addEventListener('scroll', function() {
+      if (!isSyncingBottom) {
+        isSyncingBottom = true;
+        topScroll.scrollLeft = tableContainer.scrollLeft;
+        setTimeout(() => { isSyncingBottom = false; }, 10);
+      }
+    });
+    
+    // Ajustar largura inicial e em resize
+    syncScrollWidth();
+    window.addEventListener('resize', syncScrollWidth);
+    
+    // Ajustar quando a tabela for carregada/modificada
+    setTimeout(syncScrollWidth, 500);
+  }
 });
 
 // Toggle do formulário inline
