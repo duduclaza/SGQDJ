@@ -27,13 +27,25 @@ class CadastroPecasController
             }
 
             // Buscar peças
-            $stmt = $this->db->prepare('
+            $search = trim($_GET['search'] ?? '');
+            
+            $query = '
                 SELECT p.*, u.name as criador_nome
                 FROM cadastro_pecas p
                 LEFT JOIN users u ON p.created_by = u.id
-                ORDER BY p.created_at DESC
-            ');
-            $stmt->execute();
+            ';
+            
+            $params = [];
+            
+            if (!empty($search)) {
+                $query .= ' WHERE p.codigo_referencia LIKE :search OR p.descricao LIKE :search';
+                $params[':search'] = "%$search%";
+            }
+            
+            $query .= ' ORDER BY p.created_at DESC';
+            
+            $stmt = $this->db->prepare($query);
+            $stmt->execute($params);
             $pecas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $title = 'Cadastro de Peças - SGQ OTI DJ';
