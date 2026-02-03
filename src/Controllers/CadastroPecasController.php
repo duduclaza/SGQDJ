@@ -61,6 +61,15 @@ class CadastroPecasController
                 return;
             }
 
+            // Verificar se o código já existe
+            $stmtCheck = $this->db->prepare('SELECT id FROM cadastro_pecas WHERE codigo_referencia = :codigo');
+            $stmtCheck->execute([':codigo' => $codigoReferencia]);
+            
+            if ($stmtCheck->fetch()) {
+                echo json_encode(['success' => false, 'message' => 'Este código de referência já está cadastrado.']);
+                return;
+            }
+
             $stmt = $this->db->prepare('
                 INSERT INTO cadastro_pecas (codigo_referencia, descricao, created_by, created_at, updated_at)
                 VALUES (:codigo_referencia, :descricao, :created_by, NOW(), NOW())
@@ -95,6 +104,15 @@ class CadastroPecasController
 
             if ($id <= 0 || empty($codigoReferencia) || empty($descricao)) {
                 echo json_encode(['success' => false, 'message' => 'Dados inválidos']);
+                return;
+            }
+
+            // Verificar se o código já existe em outra peça
+            $stmtCheck = $this->db->prepare('SELECT id FROM cadastro_pecas WHERE codigo_referencia = :codigo AND id != :id');
+            $stmtCheck->execute([':codigo' => $codigoReferencia, ':id' => $id]);
+            
+            if ($stmtCheck->fetch()) {
+                echo json_encode(['success' => false, 'message' => 'Este código de referência já está em uso por outra peça.']);
                 return;
             }
 
