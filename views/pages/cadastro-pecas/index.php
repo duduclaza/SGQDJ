@@ -95,7 +95,7 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
 </section>
 
 <!-- Modal de Importação -->
-<div id="importModal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4" style="z-index: 999999; display: none;" onclick="closeImportModal()">
+<div id="importModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-80 items-center justify-center p-4" style="z-index: 999999; display: none; visibility: hidden;" onclick="closeImportModal()">
   <div class="bg-white rounded-lg shadow-xl w-full max-w-md" onclick="event.stopPropagation()">
     <!-- Header -->
     <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white rounded-t-lg">
@@ -262,35 +262,23 @@ document.getElementById('pecaForm').addEventListener('submit', async function(e)
 // ===== FUNÇÕES DE IMPORTAÇÃO =====
 
 function openImportModal() {
-  console.log('🔍 Tentando abrir modal de importação...');
   const modal = document.getElementById('importModal');
-  console.log('Modal encontrado:', modal);
   
   if (!modal) {
-    console.error('❌ Modal não encontrado no DOM!');
     alert('Erro: Modal de importação não foi encontrado. Por favor, recarregue a página.');
     return;
   }
   
-  // Remover classe hidden
-  modal.classList.remove('hidden');
-  
-  // Forçar display (sobrescrever CSS do layout)
+  // Mostrar modal
   modal.style.display = 'flex';
   modal.style.visibility = 'visible';
   modal.style.opacity = '1';
-  
-  console.log('✅ Modal aberto com sucesso!');
-  console.log('Display:', modal.style.display);
 }
 
 function closeImportModal() {
   const modal = document.getElementById('importModal');
   
-  // Adicionar classe hidden
-  modal.classList.add('hidden');
-  
-  // Forçar ocultação
+  // Ocultar modal
   modal.style.display = 'none';
   modal.style.visibility = 'hidden';
   modal.style.opacity = '0';
@@ -298,12 +286,9 @@ function closeImportModal() {
   // Limpar inputs
   document.getElementById('excelFileInput').value = '';
   document.getElementById('progressContainer').classList.add('hidden');
-  
-  console.log('🚪 Modal fechado!');
 }
 
 function downloadTemplatePecas() {
-  console.log('📥 Gerando template Excel de Peças...');
   
   // Criar dados da planilha
   const data = [
@@ -425,8 +410,6 @@ function downloadTemplatePecas() {
   const fileName = `template_pecas_${new Date().toISOString().split('T')[0]}.xlsx`;
   XLSX.writeFile(wb, fileName);
   
-  console.log('✅ Template gerado:', fileName);
-  
   // Feedback
   const btn = event.target;
   const originalText = btn.innerHTML;
@@ -529,27 +512,4 @@ function showImportError(message) {
   alert('Erro na importação: ' + message);
 }
 
-// ===== DIAGNÓSTICO DE CARREGAMENTO =====
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('🔧 [PEÇAS] Página carregada!');
-  
-  const modal = document.getElementById('importModal');
-  console.log('🔧 [PEÇAS] Modal presente:', !!modal);
-  console.log('🔧 [PEÇAS] Função openImportModal disponível:', typeof openImportModal);
-  console.log('🔧 [PEÇAS] Biblioteca XLSX disponível:', typeof XLSX !== 'undefined');
-  
-  if (modal) {
-    const computedStyle = window.getComputedStyle(modal);
-    console.log('🔧 [PEÇAS] Display inicial:', computedStyle.display);
-    console.log('🔧 [PEÇAS] Visibility inicial:', computedStyle.visibility);
-    console.log('🔧 [PEÇAS] Z-index:', computedStyle.zIndex);
-    console.log('🔧 [PEÇAS] Classes:', modal.className);
-    
-    // Garantir que o modal esteja oculto inicialmente
-    if (computedStyle.display !== 'none') {
-      console.warn('⚠️ [PEÇAS] Modal não está oculto inicialmente! Corrigindo...');
-      modal.style.display = 'none';
-    }
-  }
-});
 </script>
