@@ -23,7 +23,7 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
 
   <!-- Barra de Busca -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-    <form action="" method="GET" class="flex gap-4">
+    <div class="flex gap-4">
       <div class="flex-1 relative">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,20 +31,12 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
           </svg>
         </div>
         <input type="text" 
-               name="search" 
-               value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" 
-               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" 
+               id="searchPecaInput"
+               onkeyup="filterPecas()"
+               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-shadow duration-200" 
                placeholder="Pesquisar por código de referência ou descrição...">
       </div>
-      <button type="submit" class="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium">
-        Buscar
-      </button>
-      <?php if (!empty($_GET['search'])): ?>
-      <a href="/cadastro-pecas" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center">
-        Limpar
-      </a>
-      <?php endif; ?>
-    </form>
+    </div>
   </div>
   <div id="formContainer" class="hidden bg-gray-800 border border-gray-600 rounded-lg p-6 mb-6">
     <div class="flex justify-between items-center mb-6">
@@ -530,10 +522,34 @@ function updateProgressPecas(percentage, status) {
   document.getElementById('importStatus').textContent = status;
 }
 
+
 function showImportError(message) {
   document.getElementById('progressContainer').classList.add('hidden');
   document.getElementById('importBtn').disabled = false;
   alert('Erro na importação: ' + message);
+}
+
+function filterPecas() {
+  const input = document.getElementById('searchPecaInput');
+  const filter = input.value.toLowerCase();
+  const table = document.querySelector('table tbody');
+  const rows = table.getElementsByTagName('tr');
+
+  for (let i = 0; i < rows.length; i++) {
+    const codigoCell = rows[i].getElementsByTagName('td')[1];
+    const descCell = rows[i].getElementsByTagName('td')[2];
+    
+    if (codigoCell && descCell) {
+      const codigoText = codigoCell.textContent || codigoCell.innerText;
+      const descText = descCell.textContent || descCell.innerText;
+      
+      if (codigoText.toLowerCase().indexOf(filter) > -1 || descText.toLowerCase().indexOf(filter) > -1) {
+        rows[i].style.display = "";
+      } else {
+        rows[i].style.display = "none";
+      }
+    }
+  }
 }
 
 </script>
