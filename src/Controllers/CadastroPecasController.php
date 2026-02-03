@@ -89,7 +89,7 @@ class CadastroPecasController
 
         } catch (\Exception $e) {
             error_log('Erro ao salvar peça: ' . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => 'Erro interno do servidor']);
+            echo json_encode(['success' => false, 'message' => 'Erro: ' . $e->getMessage()]);
         }
     }
 
