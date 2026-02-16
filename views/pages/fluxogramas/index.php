@@ -181,16 +181,52 @@ const departamentos = <?= json_encode($departamentos ?? []) ?>;
             <div id="content-registros" class="tab-content hidden">
                 <!-- Formulário de Registro -->
                 <div class="bg-gray-50 rounded-lg p-6 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📄 Criar Novo Registro</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">📄 Criar Novo Registro</h3>
+                    </div>
+
                     
                     <form id="formCriarRegistro" class="space-y-4" enctype="multipart/form-data">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Título -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Título *</label>
-                                <select name="titulo_id" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Selecione um título...</option>
-                                </select>
+                                <input type="hidden" name="titulo_id" id="tituloIdHidden" required>
+                                <div class="relative" id="searchableDropdown">
+                                    <div class="relative">
+                                        <input 
+                                            type="text" 
+                                            id="tituloSearchInput"
+                                            placeholder="Selecione um título..."
+                                            class="w-full border border-gray-300 rounded-md pl-10 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                            autocomplete="off"
+                                            onclick="toggleTituloDropdown()"
+                                            oninput="filtrarTituloDropdown()"
+                                            readonly
+                                        >
+                                        <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                        </svg>
+                                        <svg class="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none transition-transform" id="dropdownArrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </div>
+                                    <div id="tituloDropdownList" class="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 hidden" style="max-height: 280px;">
+                                        <div class="sticky top-0 bg-white p-2 border-b border-gray-100">
+                                            <input 
+                                                type="text" 
+                                                id="tituloDropdownSearch"
+                                                placeholder="🔍 Pesquisar título..."
+                                                class="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                oninput="filtrarTituloDropdown()"
+                                                autocomplete="off"
+                                            >
+                                        </div>
+                                        <div id="tituloDropdownOptions" class="overflow-y-auto" style="max-height: 220px;">
+                                            <!-- Options loaded via JS -->
+                                        </div>
+                                    </div>
+                                </div>
                                 <p class="text-xs text-gray-500 mt-1">O sistema definirá automaticamente a próxima versão</p>
                             </div>
 
@@ -249,7 +285,22 @@ const departamentos = <?= json_encode($departamentos ?? []) ?>;
                 <!-- Lista de Meus Registros -->
                 <div class="bg-white rounded-lg shadow-sm border">
                     <div class="px-6 py-4 border-b border-gray-200">
-                        <h4 class="text-lg font-semibold text-gray-900">📋 Meus Registros</h4>
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-lg font-semibold text-gray-900">📋 Meus Registros</h4>
+                            <!-- Busca Inteligente -->
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    id="buscaMeusRegistros"
+                                    placeholder="🔍 Buscar registro..."
+                                    class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-64"
+                                    onkeyup="filtrarMeusRegistros()"
+                                >
+                                <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full">
@@ -830,28 +881,103 @@ function limparFormularioRegistro() {
 }
 
 // Carregar títulos para dropdown
+let titulosDropdownData = [];
+let tituloDropdownOpen = false;
+
 async function loadTitulosDropdown() {
     try {
         const response = await fetch('/fluxogramas/titulos/list');
         const result = await response.json();
         
-        const select = document.querySelector('#formCriarRegistro select[name="titulo_id"]');
-        if (!select) return;
-        
-        select.innerHTML = '<option value="">Selecione um título...</option>';
-        
         if (result.success && result.data.length > 0) {
-            result.data.forEach(titulo => {
-                const option = document.createElement('option');
-                option.value = titulo.id;
-                option.textContent = `${titulo.titulo} (${titulo.departamento_nome || 'N/A'})`;
-                select.appendChild(option);
-            });
+            titulosDropdownData = result.data;
+        } else {
+            titulosDropdownData = [];
         }
+        renderTituloDropdownOptions('');
     } catch (error) {
         console.error('Erro ao carregar títulos para dropdown:', error);
     }
 }
+
+function renderTituloDropdownOptions(searchText) {
+    const container = document.getElementById('tituloDropdownOptions');
+    if (!container) return;
+    
+    const filtrado = titulosDropdownData.filter(t => {
+        if (!searchText) return true;
+        const text = `${t.titulo} ${t.departamento_nome || ''}`.toLowerCase();
+        return text.includes(searchText.toLowerCase());
+    });
+    
+    if (filtrado.length === 0) {
+        container.innerHTML = `
+            <div class="px-4 py-6 text-center text-gray-400 text-sm">
+                <svg class="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Nenhum título encontrado
+            </div>`;
+        return;
+    }
+    
+    container.innerHTML = filtrado.map(titulo => `
+        <div class="px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors text-sm border-b border-gray-50 last:border-b-0 flex items-center justify-between"
+             onclick="selecionarTituloDropdown(${titulo.id}, '${titulo.titulo.replace(/'/g, "\\'")}', '${(titulo.departamento_nome || 'N/A').replace(/'/g, "\\'")}')">
+            <div>
+                <span class="font-medium text-gray-900">${titulo.titulo}</span>
+            </div>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 ml-2 whitespace-nowrap">${titulo.departamento_nome || 'N/A'}</span>
+        </div>
+    `).join('');
+}
+
+function toggleTituloDropdown() {
+    const list = document.getElementById('tituloDropdownList');
+    const arrow = document.getElementById('dropdownArrow');
+    const searchField = document.getElementById('tituloDropdownSearch');
+    
+    if (list.classList.contains('hidden')) {
+        list.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+        tituloDropdownOpen = true;
+        renderTituloDropdownOptions('');
+        if (searchField) {
+            searchField.value = '';
+            setTimeout(() => searchField.focus(), 50);
+        }
+    } else {
+        list.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+        tituloDropdownOpen = false;
+    }
+}
+
+function filtrarTituloDropdown() {
+    const searchField = document.getElementById('tituloDropdownSearch');
+    if (!searchField) return;
+    renderTituloDropdownOptions(searchField.value);
+}
+
+function selecionarTituloDropdown(id, titulo, depto) {
+    document.getElementById('tituloIdHidden').value = id;
+    document.getElementById('tituloSearchInput').value = `${titulo} (${depto})`;
+    document.getElementById('tituloDropdownList').classList.add('hidden');
+    document.getElementById('dropdownArrow').style.transform = 'rotate(0deg)';
+    tituloDropdownOpen = false;
+}
+
+// Fechar dropdown ao clicar fora
+document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('searchableDropdown');
+    const list = document.getElementById('tituloDropdownList');
+    if (dropdown && list && !dropdown.contains(e.target)) {
+        list.classList.add('hidden');
+        const arrow = document.getElementById('dropdownArrow');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        tituloDropdownOpen = false;
+    }
+})
 
 // Carregar meus registros
 async function loadMeusRegistros() {
@@ -2510,6 +2636,104 @@ function filtrarTitulosCadastro() {
             }
         }
     }
+}
+
+// Filtrar Meus Registros por texto
+
+
+// Buscar registros existentes na seção "Criar Novo Registro"
+let buscaRegistroTimeout = null;
+function buscarRegistroExistente(query) {
+    const btnLimpar = document.getElementById("btnLimparBuscaRegistro");
+    const resultados = document.getElementById("resultadosBuscaRegistro");
+    const lista = document.getElementById("resultadosBuscaRegistroList");
+    
+    if (query.trim().length === 0) {
+        resultados.classList.add("hidden");
+        btnLimpar.classList.add("hidden");
+        return;
+    }
+    
+    btnLimpar.classList.remove("hidden");
+    
+    clearTimeout(buscaRegistroTimeout);
+    buscaRegistroTimeout = setTimeout(async () => {
+        try {
+            // Buscar nos registros já carregados na tabela "Meus Registros"
+            const tbody = document.getElementById("listaMeusRegistros");
+            const rows = tbody ? tbody.querySelectorAll("tr") : [];
+            const searchLower = query.toLowerCase().trim();
+            let found = [];
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                if (cells.length >= 3) {
+                    const titulo = cells[0]?.textContent?.trim() || "";
+                    const versao = cells[1]?.textContent?.trim() || "";
+                    const status = cells[2]?.textContent?.trim() || "";
+                    const arquivo = cells[3]?.textContent?.trim() || "";
+                    const rowText = (titulo + " " + versao + " " + status + " " + arquivo).toLowerCase();
+                    
+                    if (rowText.includes(searchLower)) {
+                        found.push({ titulo, versao, status, arquivo });
+                    }
+                }
+            });
+            
+            if (found.length > 0) {
+                lista.innerHTML = found.map(item => `
+                    <div class="px-4 py-3 hover:bg-blue-50 transition-colors cursor-default">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-sm font-medium text-gray-900">${item.titulo}</span>
+                                <span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700">v${item.versao}</span>
+                            </div>
+                            <span class="text-xs px-2 py-1 rounded-full ${
+                                item.status.toLowerCase().includes("aprovado") ? "bg-green-100 text-green-700" :
+                                item.status.toLowerCase().includes("pendente") ? "bg-yellow-100 text-yellow-700" :
+                                item.status.toLowerCase().includes("rejeitado") ? "bg-red-100 text-red-700" :
+                                "bg-gray-100 text-gray-600"
+                            }">${item.status}</span>
+                        </div>
+                    </div>
+                `).join("");
+                resultados.classList.remove("hidden");
+            } else {
+                lista.innerHTML = `
+                    <div class="px-4 py-6 text-center text-gray-500">
+                        <svg class="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-sm">Nenhum registro encontrado para "<strong>${query}</strong>"</p>
+                    </div>
+                `;
+                resultados.classList.remove("hidden");
+            }
+        } catch (error) {
+            console.error("Erro na busca:", error);
+        }
+    }, 250);
+}
+
+function limparBuscaRegistro() {
+    document.getElementById("buscaRegistroExistente").value = "";
+    document.getElementById("resultadosBuscaRegistro").classList.add("hidden");
+    document.getElementById("btnLimparBuscaRegistro").classList.add("hidden");
+}
+
+function filtrarMeusRegistros() {
+    const searchText = document.getElementById("buscaMeusRegistros").value.toLowerCase().trim();
+    const tbody = document.getElementById("listaMeusRegistros");
+    const rows = tbody.querySelectorAll("tr");
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (searchText === "" || text.includes(searchText)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
 }
 
 // Filtrar Visualização (Registros Aprovados)

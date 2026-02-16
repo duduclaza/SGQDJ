@@ -1569,9 +1569,238 @@ class AdminController
         exit;
     }
 
+    
     /**
+     * Get retornados por clientes (sem limite)
+     */
+    public function getRetornadosPorClientes()
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            $filial = $_GET['filial'] ?? '';
+            $destino = $_GET['destino'] ?? '';
+            $dataInicial = $_GET['data_inicial'] ?? '';
+            $dataFinal = $_GET['data_final'] ?? '';
+            
+            $dateColumn = $this->getDateColumn();
+            $filialColumn = $this->getFilialColumn();
+            $destinoColumn = $this->getDestinoColumn();
+            
+            $sql = "
+                SELECT 
+                    TRIM(LEADING '0' FROM r.codigo_cliente) as codigo_cliente,
+                    MAX(c.nome) as nome_cliente,
+                    SUM(r.quantidade) as total_retornados
+                FROM retornados r
+                LEFT JOIN clientes c ON TRIM(LEADING '0' FROM r.codigo_cliente) COLLATE utf8mb4_unicode_ci = TRIM(LEADING '0' FROM c.codigo) COLLATE utf8mb4_unicode_ci
+                WHERE r.codigo_cliente IS NOT NULL 
+                AND r.codigo_cliente != ''
+                AND r.codigo_cliente REGEXP '[0-9]'
+                AND TRIM(LEADING '0' FROM r.codigo_cliente) NOT IN ('', '1', '2852')
+            ";
+            
+            $params = [];
+            
+            if (!empty($filial)) {
+                $sql .= " AND r.{$filialColumn} = ?";
+                $params[] = $filial;
+            }
+            
+            if (!empty($destino)) {
+                $sql .= " AND r.{$destinoColumn} = ?";
+                $params[] = $destino;
+            }
+            
+            if (!empty($dataInicial)) {
+                $sql .= " AND r.{$dateColumn} >= ?";
+                $params[] = $dataInicial;
+            }
+            
+            if (!empty($dataFinal)) {
+                $sql .= " AND r.{$dateColumn} <= ?";
+                $params[] = $dataFinal;
+            }
+            
+            $sql .= " GROUP BY TRIM(LEADING '0' FROM r.codigo_cliente) ORDER BY total_retornados DESC";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            $labels = [];
+            $data = [];
+            $codigos = [];
+            
+            foreach ($results as $row) {
+                $label = $row['nome_cliente'] ?? null;
+                if (empty($label)) {
+                    $label = $row['codigo_cliente'] ?: 'Sem Código';
+                }
+                $labels[] = $label;
+                $data[] = (int)$row['total_retornados'];
+                $codigos[] = $row['codigo_cliente'];
+            }
+            
+            echo json_encode([
+                'success' => true,
+                'data' => [
+                    'labels' => $labels,
+                    'data' => $data,
+                    'codigos' => $codigos
+                ]
+            ]);
+        } catch (\Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erro ao carregar retornados por clientes: ' . $e->getMessage()
+            ]);
+        }
+        exit;
+    }
+
+/**
      * Get toners detalhados por cliente (para popup do ranking)
      */
+    
+    /**
+     * Exportar Retornados por Clientes para Excel (.xlsx)
+     * Usa os mesmos filtros locais do gráfico
+     */
+    public function exportRetornadosPorClientes()
+    {
+        try {
+            $filial = $_GET['filial'] ?? '';
+            $destino = $_GET['destino'] ?? '';
+            $dataInicial = $_GET['data_inicial'] ?? '';
+            $dataFinal = $_GET['data_final'] ?? '';
+            
+            $dateColumn = $this->getDateColumn();
+            $filialColumn = $this->getFilialColumn();
+            $destinoColumn = $this->getDestinoColumn();
+            
+            // Query detalhada com modelo de toner
+            $sql = "
+                SELECT 
+                    TRIM(LEADING '0' FROM r.codigo_cliente) as codigo_cliente,
+                    MAX(c.nome) as nome_cliente,
+                    r.modelo,
+                    r.{$destinoColumn} as destino,
+                    SUM(r.quantidade) as total_retornados
+                FROM retornados r
+                LEFT JOIN clientes c ON TRIM(LEADING '0' FROM r.codigo_cliente) COLLATE utf8mb4_unicode_ci = TRIM(LEADING '0' FROM c.codigo) COLLATE utf8mb4_unicode_ci
+                WHERE r.codigo_cliente IS NOT NULL 
+                AND r.codigo_cliente != ''
+                AND r.codigo_cliente REGEXP '[0-9]'
+                AND TRIM(LEADING '0' FROM r.codigo_cliente) NOT IN ('', '1', '2852')
+            ";
+            
+            $params = [];
+            
+            if (!empty($filial)) {
+                $sql .= " AND r.{$filialColumn} = ?";
+                $params[] = $filial;
+            }
+            
+            if (!empty($destino)) {
+                $sql .= " AND r.{$destinoColumn} = ?";
+                $params[] = $destino;
+            }
+            
+            if (!empty($dataInicial)) {
+                $sql .= " AND r.{$dateColumn} >= ?";
+                $params[] = $dataInicial;
+            }
+            
+            if (!empty($dataFinal)) {
+                $sql .= " AND r.{$dateColumn} <= ?";
+                $params[] = $dataFinal;
+            }
+            
+            $sql .= " GROUP BY TRIM(LEADING '0' FROM r.codigo_cliente), r.modelo, r.{$destinoColumn} ORDER BY nome_cliente ASC, total_retornados DESC";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            // Criar planilha com PhpSpreadsheet
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('Retornados por Clientes');
+            
+            // Cabeçalho com estilo
+            $headers = ['Código Cliente', 'Nome Cliente', 'Modelo Toner', 'Destino', 'Quantidade'];
+            foreach ($headers as $col => $header) {
+                $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1) . '1';
+                $sheet->setCellValue($cell, $header);
+            }
+            
+            // Estilo do cabeçalho
+            $headerStyle = [
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
+                'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '0D9488']],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]
+            ];
+            $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
+            
+            // Dados
+            $row = 2;
+            foreach ($results as $item) {
+                $sheet->setCellValue("A{$row}", $item['codigo_cliente']);
+                $sheet->setCellValue("B{$row}", $item['nome_cliente'] ?? 'Sem Nome');
+                $sheet->setCellValue("C{$row}", $item['modelo'] ?? '');
+                $sheet->setCellValue("D{$row}", ucfirst(strtolower($item['destino'] ?? 'N/A')));
+                $sheet->setCellValue("E{$row}", (int)$item['total_retornados']);
+                $row++;
+            }
+            
+            // Bordas nos dados
+            if ($row > 2) {
+                $dataRange = "A2:E" . ($row - 1);
+                $sheet->getStyle($dataRange)->applyFromArray([
+                    'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'D1D5DB']]]
+                ]);
+            }
+            
+            // Auto-dimensionar colunas
+            foreach (range('A', 'E') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+            
+            // Filtros aplicados (info na parte inferior)
+            $infoRow = $row + 2;
+            $sheet->setCellValue("A{$infoRow}", 'Filtros aplicados:');
+            $sheet->getStyle("A{$infoRow}")->getFont()->setBold(true);
+            $infoRow++;
+            if (!empty($filial)) { $sheet->setCellValue("A{$infoRow}", "Filial: {$filial}"); $infoRow++; }
+            if (!empty($destino)) { $sheet->setCellValue("A{$infoRow}", "Destino: {$destino}"); $infoRow++; }
+            if (!empty($dataInicial)) { $sheet->setCellValue("A{$infoRow}", "Data Inicial: {$dataInicial}"); $infoRow++; }
+            if (!empty($dataFinal)) { $sheet->setCellValue("A{$infoRow}", "Data Final: {$dataFinal}"); $infoRow++; }
+            $sheet->setCellValue("A{$infoRow}", "Gerado em: " . date('d/m/Y H:i:s'));
+            
+            // Gerar nome do arquivo
+            $nomeArquivo = 'retornados_clientes_' . date('Y-m-d_His') . '.xlsx';
+            
+            // Headers para download
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header("Content-Disposition: attachment; filename=\"{$nomeArquivo}\"");
+            header('Cache-Control: max-age=0');
+            
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->save('php://output');
+            
+            $spreadsheet->disconnectWorksheets();
+            unset($spreadsheet);
+            
+        } catch (\Exception $e) {
+            header('Content-Type: application/json');
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Erro ao exportar: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
     public function getTonersPorCliente()
     {
         header('Content-Type: application/json');

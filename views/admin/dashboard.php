@@ -339,6 +339,66 @@
     </div>
   </div>
 
+  <!-- Gráfico Retornados por Clientes (sem limite) -->
+  <div class="bg-white rounded-lg shadow-lg border-l-4 border-teal-500 mt-6">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          📊 Retornados por Clientes
+        </h3>
+      </div>
+      <!-- Filtros específicos para este gráfico -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mt-2">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">🏢 Filial</label>
+          <select id="filtroFilialRetClientes" onchange="updateRetornadosClientesChart()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+            <option value="">Todas as Filiais</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">📅 Data Inicial</label>
+          <input type="date" id="dataInicialRetClientes" onchange="updateRetornadosClientesChart()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">📅 Data Final</label>
+          <input type="date" id="dataFinalRetClientes" onchange="updateRetornadosClientesChart()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">🎯 Destino</label>
+          <select id="filtroDestinoRetClientes" onchange="updateRetornadosClientesChart()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+            <option value="">Todos os Destinos</option>
+            <option value="ESTOQUE">Estoque</option>
+            <option value="DESCARTE">Descarte</option>
+            <option value="USO_INTERNO">Uso Interno</option>
+            <option value="GARANTIA">Garantia</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button onclick="limparFiltrosRetClientes()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            Limpar
+          </button>
+        </div>
+      </div>
+        <div class="flex items-end">
+          <button onclick="exportarRetornadosClientesExcel()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1.5 shadow-sm hover:shadow-md" title="Exportar dados filtrados para Excel">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            📊 Excel
+          </button>
+        </div>
+    </div>
+    <div class="p-6">
+      <canvas id="retornadosClientesChart" width="400" height="400"></canvas>
+    </div>
+  </div>
+
   </div>
   <?php endif; ?>
   <!-- FIM CONTEÚDO ABA RETORNADOS -->
@@ -1195,6 +1255,7 @@
                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Modelo do Toner</th>
                 <th class="px-6 py-4 text-center text-xs font-semibold text-gray-300 uppercase tracking-wider">Destino</th>
                 <th class="px-6 py-4 text-right text-xs font-semibold text-gray-300 uppercase tracking-wider">Quantidade</th>
+                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-300 uppercase tracking-wider">%</th>
               </tr>
             </thead>
             <tbody id="modalClienteToners" class="divide-y divide-gray-700/50">
@@ -1501,7 +1562,7 @@
 
 <script>
 // Variáveis globais para os gráficos
-let retornadosMesChart, retornadosDestinoChart, tonersRecuperadosChart, rankingClientesChart, retornadosMesChartExpandido, retornadosDestinoChartExpandido, tonersRecuperadosChartExpandido, rankingClientesChartExpandido;
+let retornadosMesChart, retornadosDestinoChart, tonersRecuperadosChart, rankingClientesChart, retornadosClientesChart, retornadosMesChartExpandido, retornadosDestinoChartExpandido, tonersRecuperadosChartExpandido, rankingClientesChartExpandido;
 let dashboardData = null;
 
 // Dados iniciais vazios (serão carregados da API)
@@ -1628,6 +1689,7 @@ function updateChartsWithData() {
   
   // Carregar ranking de clientes
   loadRankingClientes();
+      loadRetornadosPorClientes();
 }
 
 // Atualizar cards de totais acumulados
@@ -1671,6 +1733,7 @@ function populateFilialOptions(filiais) {
   
   // Popular também o dropdown específico do ranking
   populateFilialOptionsRanking(filiais);
+  populateFilialOptionsRetClientes(filiais);
 }
 
 // Popular opções de filiais do Ranking
@@ -1961,7 +2024,10 @@ function updateRankingClientesChart(data) {
           const index = elements[0].index;
           const codigoCliente = dadosRankingClientes[index];
           if (codigoCliente) {
-            abrirModalDetalhesCliente(codigoCliente);
+            const destino = document.getElementById('filtroDestinoRetClientes')?.value || '';
+            const dataInicial = document.getElementById('dataInicialRetClientes')?.value || '';
+            const dataFinal = document.getElementById('dataFinalRetClientes')?.value || '';
+            abrirModalDetalhesCliente(codigoCliente, { destino, dataInicial, dataFinal });
           }
         }
       },
@@ -2069,6 +2135,200 @@ function updateRankingClientesChart(data) {
   });
 }
 
+// ======= Retornados por Clientes (sem limite) =======
+let dadosRetornadosClientes = [];
+
+async function loadRetornadosPorClientes() {
+  try {
+    const filial = document.getElementById('filtroFilialRetClientes')?.value || '';
+    const destino = document.getElementById('filtroDestinoRetClientes')?.value || '';
+    const dataInicial = document.getElementById('dataInicialRetClientes')?.value || '';
+    const dataFinal = document.getElementById('dataFinalRetClientes')?.value || '';
+
+    const params = new URLSearchParams();
+    if (filial) params.append('filial', filial);
+    if (destino) params.append('destino', destino);
+    if (dataInicial) params.append('data_inicial', dataInicial);
+    if (dataFinal) params.append('data_final', dataFinal);
+
+    const response = await fetch(`/admin/dashboard/retornados-por-clientes?${params.toString()}`);
+    const result = await response.json();
+
+    if (result.success) {
+      updateRetornadosClientesChartData(result.data);
+    } else {
+      console.error('Erro ao carregar retornados por clientes:', result.message);
+    }
+  } catch (error) {
+    console.error('Erro na requisição de retornados por clientes:', error);
+  }
+}
+
+function limparFiltrosRetClientes() {
+  const filial = document.getElementById('filtroFilialRetClientes');
+  const dataInicial = document.getElementById('dataInicialRetClientes');
+  const dataFinal = document.getElementById('dataFinalRetClientes');
+  const destino = document.getElementById('filtroDestinoRetClientes');
+
+  if (filial) filial.value = '';
+  if (dataInicial) dataInicial.value = '';
+  if (dataFinal) dataFinal.value = '';
+  if (destino) destino.value = '';
+
+  updateRetornadosClientesChart();
+}
+
+// Exportar Retornados por Clientes para Excel (usa filtros LOCAIS do gráfico)
+function exportarRetornadosClientesExcel() {
+  const filial = document.getElementById('filtroFilialRetClientes')?.value || '';
+  const destino = document.getElementById('filtroDestinoRetClientes')?.value || '';
+  const dataInicial = document.getElementById('dataInicialRetClientes')?.value || '';
+  const dataFinal = document.getElementById('dataFinalRetClientes')?.value || '';
+  
+  const params = new URLSearchParams();
+  if (filial) params.append('filial', filial);
+  if (destino) params.append('destino', destino);
+  if (dataInicial) params.append('data_inicial', dataInicial);
+  if (dataFinal) params.append('data_final', dataFinal);
+  
+  const url = '/admin/dashboard/exportar-retornados-clientes' + (params.toString() ? '?' + params.toString() : '');
+  window.open(url, '_blank');
+}
+
+function updateRetornadosClientesChart() {
+  loadRetornadosPorClientes();
+}
+
+function updateRetornadosClientesChartData(data) {
+  const ctx = document.getElementById('retornadosClientesChart');
+  if (!ctx) return;
+
+  dadosRetornadosClientes = data.codigos || [];
+
+  if (retornadosClientesChart) {
+    retornadosClientesChart.destroy();
+  }
+
+  const minHeight = 400;
+  const heightPerItem = 30;
+  const calculatedHeight = Math.max(minHeight, data.labels.length * heightPerItem);
+  ctx.parentElement.style.height = calculatedHeight + 'px';
+
+  retornadosClientesChart = new Chart(ctx.getContext('2d'), {
+    type: 'bar',
+    plugins: [ChartDataLabels],
+    data: {
+      labels: data.labels,
+      datasets: [{
+        label: 'Quantidade de Retornados',
+        data: data.data,
+        backgroundColor: 'rgba(20, 184, 166, 0.8)',
+        borderColor: 'rgba(20, 184, 166, 1)',
+        borderWidth: 2,
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      onClick: function(evt, elements) {
+        if (elements.length > 0) {
+          const index = elements[0].index;
+          const codigoCliente = dadosRetornadosClientes[index];
+          if (codigoCliente) {
+            const destino = document.getElementById('filtroDestinoRetClientes')?.value || '';
+            const dataInicial = document.getElementById('dataInicialRetClientes')?.value || '';
+            const dataFinal = document.getElementById('dataFinalRetClientes')?.value || '';
+            abrirModalDetalhesCliente(codigoCliente, { destino, dataInicial, dataFinal });
+          }
+        }
+      },
+      onHover: function(evt, elements) {
+        evt.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            color: '#374151',
+            font: { size: 13, weight: 'bold' }
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          titleColor: '#fff',
+          bodyColor: '#d1d5db',
+          borderColor: 'rgba(20, 184, 166, 0.5)',
+          borderWidth: 2,
+          cornerRadius: 8,
+          padding: 12,
+          titleFont: { size: 14, weight: 'bold' },
+          bodyFont: { size: 13 },
+          callbacks: {
+            label: function(context) {
+              return `${context.label}: ${context.parsed.x} retornados`;
+            },
+            afterLabel: function(context) {
+              return '🖱️ Clique para ver detalhes';
+            }
+          }
+        },
+        datalabels: {
+          display: true,
+          anchor: 'end',
+          align: 'end',
+          color: '#0d9488',
+          font: { size: 11, weight: 'bold' },
+          formatter: function(value) { return value; },
+          padding: { left: 4 }
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0, 0, 0, 0.1)' },
+          ticks: { color: '#6B7280', font: { size: 12 } },
+          title: {
+            display: true,
+            text: 'Quantidade de Retornados',
+            color: '#374151',
+            font: { size: 13, weight: 'bold' }
+          }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: '#374151', font: { size: 12, weight: '600' } },
+          title: {
+            display: true,
+            text: 'Cliente',
+            color: '#374151',
+            font: { size: 13, weight: 'bold' }
+          }
+        }
+      }
+    }
+  });
+}
+
+function populateFilialOptionsRetClientes(filiais) {
+  const select = document.getElementById('filtroFilialRetClientes');
+  if (!select) return;
+  const currentValue = select.value;
+  while (select.children.length > 1) {
+    select.removeChild(select.lastChild);
+  }
+  filiais.forEach(filial => {
+    const option = document.createElement('option');
+    option.value = filial;
+    option.textContent = filial;
+    select.appendChild(option);
+  });
+  select.value = currentValue;
+}
+
 // Atualizar apenas o ranking quando filtro de destino mudar
 function updateRankingChart() {
   loadRankingClientes();
@@ -2152,7 +2412,10 @@ function criarGraficoRankingExpandido() {
           const index = elements[0].index;
           const codigoCliente = dadosRankingClientes[index];
           if (codigoCliente) {
-            abrirModalDetalhesCliente(codigoCliente);
+            const destino = document.getElementById('filtroDestinoRetClientes')?.value || '';
+            const dataInicial = document.getElementById('dataInicialRetClientes')?.value || '';
+            const dataFinal = document.getElementById('dataFinalRetClientes')?.value || '';
+            abrirModalDetalhesCliente(codigoCliente, { destino, dataInicial, dataFinal });
           }
         }
       },
@@ -3699,7 +3962,7 @@ document.addEventListener('keydown', function(e) {
 // Armazenar dados do ranking para uso no click
 let dadosRankingClientes = [];
 
-async function abrirModalDetalhesCliente(codigoCliente) {
+async function abrirModalDetalhesCliente(codigoCliente, filtros = {}) {
   const modal = document.getElementById('modalDetalhesCliente');
   const content = document.getElementById('modalDetalhesClienteContent');
   
@@ -3718,15 +3981,20 @@ async function abrirModalDetalhesCliente(codigoCliente) {
   }, 10);
   
   try {
-    // Pegar filtros de data atuais
-    const dataInicial = document.getElementById('dataInicial')?.value || '';
-    const dataFinal = document.getElementById('dataFinal')?.value || '';
+    // Priorizar filtros passados, senão usar filtros globais
+    const dataInicial = filtros.dataInicial || document.getElementById('dataInicial')?.value || '';
+    const dataFinal = filtros.dataFinal || document.getElementById('dataFinal')?.value || '';
+    const destino = filtros.destino || '';
     
     const params = new URLSearchParams({
       codigo: codigoCliente,
       data_inicial: dataInicial,
       data_final: dataFinal
     });
+    
+    if (destino) {
+      params.append('destino', destino);
+    }
     
     const response = await fetch(`/admin/dashboard/toners-por-cliente?${params}`);
     const result = await response.json();
@@ -3742,7 +4010,7 @@ async function abrirModalDetalhesCliente(codigoCliente) {
       tbody.innerHTML = '';
       
       if (result.data.toners.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-12 text-center text-gray-500">Nenhum toner encontrado</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-gray-500">Nenhum toner encontrado</td></tr>';
       } else {
         result.data.toners.forEach((toner, index) => {
           const tr = document.createElement('tr');
@@ -3760,6 +4028,8 @@ async function abrirModalDetalhesCliente(codigoCliente) {
             destinoBadgeClass = 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
           }
           
+          const totalGeral = result.data.total || 1;
+          const percentual = ((parseInt(toner.total) / totalGeral) * 100).toFixed(1);
           tr.innerHTML = `
             <td class="px-6 py-4 text-sm font-medium text-gray-200">${toner.modelo || 'N/A'}</td>
             <td class="px-6 py-4 text-center">
@@ -3770,6 +4040,11 @@ async function abrirModalDetalhesCliente(codigoCliente) {
             <td class="px-6 py-4 text-right">
               <span class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
                 ${parseInt(toner.total).toLocaleString('pt-BR')}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                ${percentual}%
               </span>
             </td>
           `;
@@ -4307,3 +4582,4 @@ document.addEventListener('DOMContentLoaded', function() {
 <?php include __DIR__ . '/dashboard_nao_conformidades_js.php'; ?>
 
 </script>
+
