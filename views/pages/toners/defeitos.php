@@ -574,67 +574,91 @@ function showToast(type, titulo, msg) {
 </script>
 
 <!-- Modal Devolutiva -->
-<div id="modalDevolutiva" class="fixed inset-0 z-[9999] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="z-index: 9999;">
-  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeDevolutiva()"></div>
-    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-    
-    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-      <form id="formDevolutiva" class="p-6">
-        <input type="hidden" name="defeito_id" id="devolutivaDefeitoId">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Devolutiva (Qualidade)</h3>
-          <button type="button" onclick="closeDevolutiva()" class="text-gray-400 hover:text-gray-500">
-            <span class="sr-only">Fechar</span>
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-          </button>
-        </div>
+<!-- Overlay + Container fixo -->
+<div id="modalDevolutiva" class="fixed inset-0 z-[99999] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="z-index: 99999;">
+  
+  <!-- Overlay Backdrop -->
+  <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm pointer-events-auto" aria-hidden="true" onclick="closeDevolutiva()"></div>
+
+  <!-- Centralização -->
+  <div class="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 pointer-events-none">
+      
+      <!-- Modal Card -->
+      <div class="pointer-events-auto relative w-full max-w-lg bg-white rounded-xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden transform transition-all ring-1 ring-black ring-opacity-5">
         
-        <div class="mt-2 text-sm text-gray-500 mb-4" id="devolutivaModeText">
-             Insira a análise técnica e evidências.
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0">
+            <h3 class="text-lg font-semibold text-gray-900" id="modal-title">Devolutiva (Qualidade)</h3>
+            <button type="button" onclick="closeDevolutiva()" class="text-gray-400 hover:text-gray-500 transition-colors bg-white hover:bg-gray-100 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 border border-transparent hover:border-gray-200">
+                <span class="sr-only">Fechar</span>
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
         </div>
 
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Descrição da Devolutiva</label>
-                <textarea name="devolutiva_descricao" id="devolutivaDesc" rows="4" 
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-                    required></textarea>
-            </div>
-            
-            <div id="devolutivaUploads">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Evidências (Fotos)</label>
-                <div class="grid grid-cols-3 gap-2">
-                    <?php for ($i = 1; $i <= 3; $i++): ?>
-                    <div class="relative">
-                        <label class="block w-full aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-red-500 transition-colors bg-gray-50">
-                            <input type="file" name="devolutiva_foto<?php echo $i; ?>" id="devFoto<?php echo $i; ?>" accept="image/*" class="hidden" onchange="previewDevFoto(this, <?php echo $i; ?>)">
-                            <div id="devPlaceholder<?php echo $i; ?>" class="text-center p-1">
-                                <svg class="mx-auto h-8 w-8 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                            </div>
-                            <img id="devPreview<?php echo $i; ?>" class="hidden w-full h-full object-cover rounded-lg">
-                        </label>
-                    </div>
-                    <?php
-endfor; ?>
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-gray-200">
+            <form id="formDevolutiva">
+                <input type="hidden" name="defeito_id" id="devolutivaDefeitoId">
+                
+                <div class="mb-5 p-3.5 bg-blue-50 border border-blue-100 rounded-lg flex gap-3 text-sm text-blue-700" id="devolutivaModeText">
+                    <svg class="w-5 h-5 shrink-0 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>Insira a análise técnica e evidências.</span>
                 </div>
-            </div>
-            
-            <div id="devolutivaLinks" class="hidden grid grid-cols-3 gap-2">
-               <!-- Links injetados via JS -->
-            </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Descrição Técnica</label>
+                        <textarea name="devolutiva_descricao" id="devolutivaDesc" rows="5" 
+                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm placeholder-gray-400 resize-none transition-shadow"
+                            placeholder="Descreva detalhadamente a análise realizada..."
+                            required></textarea>
+                    </div>
+                    
+                    <div id="devolutivaUploads">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Evidências (Até 3 fotos)</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <?php for ($i = 1; $i <= 3; $i++): ?>
+                            <div class="relative group aspect-square">
+                                <label class="block w-full h-full border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-red-500 hover:bg-red-50/30 transition-all overflow-hidden bg-gray-50/50">
+                                    <input type="file" name="devolutiva_foto<?php echo $i; ?>" id="devFoto<?php echo $i; ?>" accept="image/*" class="hidden" onchange="previewDevFoto(this, <?php echo $i; ?>)">
+                                    
+                                    <div id="devPlaceholder<?php echo $i; ?>" class="text-center p-2 transition-transform group-hover:scale-105">
+                                        <div class="w-8 h-8 mx-auto mb-1.5 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-white group-hover:shadow-sm transition-all">
+                                            <svg class="h-4 w-4 text-gray-400 group-hover:text-red-500" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                        </div>
+                                        <span class="block text-xs font-medium text-gray-500 group-hover:text-gray-700">Foto <?php echo $i; ?></span>
+                                    </div>
+                                    
+                                    <img id="devPreview<?php echo $i; ?>" class="hidden w-full h-full object-cover">
+                                    
+                                    <button type="button" onclick="event.preventDefault(); removerPreview(<?php echo $i; ?>)" id="btnRemoveDev<?php echo $i; ?>" class="hidden absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors z-10">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </label>
+                            </div>
+                            <?php
+endfor; ?>
+                        </div>
+                    </div>
+                    
+                    <div id="devolutivaLinks" class="hidden grid grid-cols-3 gap-3">
+                       <!-- Links injetados via JS -->
+                    </div>
+                </div>
+            </form>
         </div>
 
-        <div class="mt-5 sm:mt-6 flex justify-end gap-2">
-          <button type="button" onclick="closeDevolutiva()" class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none sm:text-sm">
-            Cancelar
-          </button>
-          <button type="submit" id="btnSaveDevolutiva" class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:text-sm">
-            Salvar Devolutiva
-          </button>
+        <!-- Footer -->
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 shrink-0 rounded-b-xl">
+              <button type="button" onclick="closeDevolutiva()" class="px-5 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 shadow-sm transition-all">
+                Cancelar
+              </button>
+              <button type="submit" form="formDevolutiva" id="btnSaveDevolutiva" class="px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg text-sm font-semibold hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 shadow-lg shadow-red-500/20 transition-all transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed">
+                Salvar Devolutiva
+              </button>
         </div>
-      </form>
-    </div>
+
+      </div>
   </div>
 </div>
 
@@ -708,12 +732,31 @@ function previewDevFoto(input, i) {
         const reader = new FileReader();
         reader.onload = function(e) {
             const img = document.getElementById('devPreview'+i);
+            const placeholder = document.getElementById('devPlaceholder'+i);
+            const btn = document.getElementById('btnRemoveDev'+i);
+            
             img.src = e.target.result;
             img.classList.remove('hidden');
-            document.getElementById('devPlaceholder'+i).classList.add('hidden');
+            placeholder.classList.add('hidden');
+            
+            if(btn) btn.classList.remove('hidden');
         }
         reader.readAsDataURL(input.files[0]);
     }
+}
+
+function removerPreview(i) {
+    const input = document.getElementById('devFoto'+i);
+    const img = document.getElementById('devPreview'+i);
+    const placeholder = document.getElementById('devPlaceholder'+i);
+    const btn = document.getElementById('btnRemoveDev'+i);
+    
+    input.value = ''; // Reset file input
+    img.src = '';
+    img.classList.add('hidden');
+    placeholder.classList.remove('hidden');
+    
+    if(btn) btn.classList.add('hidden');
 }
 
 document.getElementById('formDevolutiva').addEventListener('submit', async (e) => {
