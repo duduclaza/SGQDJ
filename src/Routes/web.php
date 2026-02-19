@@ -103,3 +103,4 @@ use App\Controllers\TonersController;
 $router->get('/toners/defeitos', [TonersController::class , 'defeitos']);
 $router->post('/toners/defeitos/store', [TonersController::class , 'storeDefeito']);
 $router->get('/toners/defeitos/{id}/foto/{n}', [TonersController::class , 'downloadFotoDefeito']);
+$router->post('/toners/defeitos/delete', [TonersController::class , 'deleteDefeito']);

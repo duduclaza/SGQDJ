@@ -206,6 +206,7 @@ $router->get('/toners/export', [App\Controllers\TonersController::class , 'expor
 $router->get('/toners/defeitos', [App\Controllers\TonersController::class , 'defeitos']);
 $router->post('/toners/defeitos/store', [App\Controllers\TonersController::class , 'storeDefeito']);
 $router->get('/toners/defeitos/{id}/foto/{n}', [App\Controllers\TonersController::class , 'downloadFotoDefeito']);
+$router->post('/toners/defeitos/delete', [App\Controllers\TonersController::class , 'deleteDefeito']);
 
 
 // Melhoria Contínua 2.0 routes
