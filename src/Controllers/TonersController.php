@@ -1593,13 +1593,19 @@ class TonersController
                     td.numero_pedido,
                     td.cliente_nome,
                     td.descricao,
+                    td.quantidade,
                     td.foto1_nome,
                     td.foto2_nome,
                     td.foto3_nome,
+                    td.devolutiva_descricao,
+                    td.devolutiva_at,
+                    td.devolutiva_uid,
                     td.created_at,
-                    u.name AS registrado_por_nome
+                    u.name AS registrado_por_nome,
+                    ud.name AS devolutiva_por_nome
                 FROM toners_defeitos td
                 LEFT JOIN users u ON u.id = td.registrado_por
+                LEFT JOIN users ud ON ud.id = td.devolutiva_uid
                 ORDER BY td.created_at DESC
                 LIMIT 200
             ");

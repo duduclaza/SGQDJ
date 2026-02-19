@@ -285,43 +285,32 @@ else: ?>
     $isAdmin = in_array($userRole, ['admin', 'super_admin']);
     $canInsert = ($isQualidade || $isAdmin);
 ?>
-
-                  <?php if ($hasDevolutiva): ?>
-                    <!-- Ver Devolutiva (visível para TODOS) -->
+                    <!-- Ver Devolutiva - SEMPRE VISÍVEL para todos -->
                     <button type="button" onclick="openDevolutiva(<?php echo $d['id']; ?>, 'view', this)"
                             data-desc="<?php echo htmlspecialchars($d['devolutiva_descricao'] ?? ''); ?>"
                             data-devolutiva-por="<?php echo htmlspecialchars($d['devolutiva_por_nome'] ?? ''); ?>"
                             data-devolutiva-at="<?php echo !empty($d['devolutiva_at']) ? date('d/m/Y H:i', strtotime($d['devolutiva_at'])) : ''; ?>"
-                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-800 transition-colors border border-blue-200" title="Ver Devolutiva">
+                            data-has-devolutiva="<?php echo $hasDevolutiva ? '1' : '0'; ?>"
+                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg <?php echo $hasDevolutiva ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-800 border-blue-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600 border-gray-200'; ?> transition-colors border" title="Ver Devolutiva">
                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                        <span class="text-xs font-medium">Ver</span>
                     </button>
+
+                  <?php if ($hasDevolutiva && $canInsert): ?>
                     <!-- Editar Devolutiva (só Qualidade/Admin) -->
-                    <?php if ($canInsert): ?>
-                        <button type="button" onclick="openDevolutiva(<?php echo $d['id']; ?>, 'edit', this)"
-                                data-desc="<?php echo htmlspecialchars($d['devolutiva_descricao'] ?? ''); ?>"
-                                class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-50 text-yellow-600 hover:bg-yellow-100 hover:text-yellow-800 transition-colors border border-yellow-200" title="Editar Devolutiva">
-                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                        </button>
-                    <?php
-      endif; ?>
+                    <button type="button" onclick="openDevolutiva(<?php echo $d['id']; ?>, 'edit', this)"
+                            data-desc="<?php echo htmlspecialchars($d['devolutiva_descricao'] ?? ''); ?>"
+                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-50 text-yellow-600 hover:bg-yellow-100 hover:text-yellow-800 transition-colors border border-yellow-200" title="Editar Devolutiva">
+                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    </button>
                   <?php
-    else: ?>
-                    <?php if ($canInsert): ?>
+    elseif (!$hasDevolutiva && $canInsert): ?>
                     <!-- Inserir Devolutiva (só Qualidade/Admin) -->
                     <button type="button" onclick="openDevolutiva(<?php echo $d['id']; ?>, 'create', this)"
                             class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-800 transition-colors border border-green-200" title="Inserir Devolutiva">
                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                        <span class="text-xs font-medium">Devolutiva</span>
                     </button>
-                    <?php
-      else: ?>
-                    <!-- Sem devolutiva (usuário comum) -->
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-50 text-gray-400 border border-gray-200 cursor-default" title="Sem devolutiva registrada">
-                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
-                    </span>
-                    <?php
-      endif; ?>
                   <?php
     endif; ?>
 
@@ -738,31 +727,35 @@ function openDevolutiva(id, mode, btn) {
     if (mode === 'view') {
         descInput.disabled = true;
         uploadDiv.classList.add('hidden');
-        linksDiv.classList.remove('hidden');
         btnSave.classList.add('hidden');
         
-        // Show metadata (who and when)
+        const hasDev = btn.getAttribute('data-has-devolutiva') === '1';
         const devPor = btn.getAttribute('data-devolutiva-por') || '';
         const devAt = btn.getAttribute('data-devolutiva-at') || '';
-        let metaInfo = 'Visualizando devolutiva registrada.';
-        if (devPor) {
-            metaInfo += ' Registrada por ' + devPor;
-            if (devAt) metaInfo += ' em ' + devAt;
-            metaInfo += '.';
-        }
-        modeText.innerText = metaInfo;
         
-        let linksHtml = '';
-        for(let i=1; i<=3; i++) {
-            // Check existence via simple image load error? No, too complex.
-            // Just show links. If 404, user sees 404.
-            // Or assume if description exists, maybe photos exist.
-            linksHtml += `<a href="/toners/defeitos/${id}/devolutiva-foto/${i}" target="_blank" class="block w-full aspect-square bg-gray-50 rounded flex flex-col items-center justify-center text-xs text-blue-500 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 transition-colors">
-                            <svg class="w-6 h-6 mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            Ver Foto ${i}
-                          </a>`;
+        if (hasDev && desc) {
+            linksDiv.classList.remove('hidden');
+            let metaInfo = 'Visualizando devolutiva registrada.';
+            if (devPor) {
+                metaInfo += ' Registrada por ' + devPor;
+                if (devAt) metaInfo += ' em ' + devAt;
+                metaInfo += '.';
+            }
+            modeText.querySelector('span').innerText = metaInfo;
+        
+            let linksHtml = '';
+            for(let i=1; i<=3; i++) {
+                linksHtml += `<a href="/toners/defeitos/${id}/devolutiva-foto/${i}" target="_blank" class="block w-full aspect-square bg-gray-50 rounded flex flex-col items-center justify-center text-xs text-blue-500 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 transition-colors">
+                                <svg class="w-6 h-6 mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                Ver Foto ${i}
+                              </a>`;
+            }
+            linksDiv.innerHTML = linksHtml;
+        } else {
+            linksDiv.classList.add('hidden');
+            descInput.value = 'Nenhuma devolutiva registrada para este defeito.';
+            modeText.querySelector('span').innerText = 'Este defeito ainda não possui devolutiva registrada.';
         }
-        linksDiv.innerHTML = linksHtml;
         
     } else {
         descInput.disabled = false;
@@ -771,9 +764,9 @@ function openDevolutiva(id, mode, btn) {
         btnSave.classList.remove('hidden');
         
         if (mode === 'edit') {
-             modeText.innerText = 'Editando devolutiva existente. Faça upload de novas fotos para substituir as antigas.';
+             modeText.querySelector('span').innerText = 'Editando devolutiva existente. Faça upload de novas fotos para substituir as antigas.';
         } else {
-             modeText.innerText = 'Insira a análise técnica e evidências.';
+             modeText.querySelector('span').innerText = 'Insira a análise técnica e evidências.';
         }
     }
 }
