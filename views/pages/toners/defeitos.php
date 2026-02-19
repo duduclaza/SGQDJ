@@ -247,7 +247,7 @@ else: ?>
             <td class="px-4 py-3 text-center whitespace-nowrap">
               <div class="flex items-center justify-center gap-2">
                   <?php
-    $hasDevolutiva = !empty($d['devolutiva_at']);
+    $hasDevolutiva = !empty($d['devolutiva_at']) || !empty($d['devolutiva_descricao']);
     $userSetor = $_SESSION['user_setor'] ?? '';
     $userRole = $_SESSION['user_role'] ?? '';
     $isQualidade = stripos($userSetor, 'Qualidade') !== false;
