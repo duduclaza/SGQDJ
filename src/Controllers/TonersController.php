@@ -1568,6 +1568,11 @@ class TonersController
      */
     public function defeitos(): void
     {
+        // Verificar permissoes do modulo
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $canEdit = \App\Services\PermissionService::hasPermission($userId, 'toners_defeitos', 'edit');
+        $canDelete = \App\Services\PermissionService::hasPermission($userId, 'toners_defeitos', 'delete');
+
         try {
             // Todos os toners para o listbox (id + modelo)
             $stmt = $this->db->query('SELECT id, modelo FROM toners ORDER BY modelo ASC');
@@ -1628,6 +1633,8 @@ class TonersController
             'clientes_lista'     => $clientes_lista,
             'defeitos_historico' => $defeitos_historico,
             'departamentos_lista' => $departamentos_lista,
+            'canEdit' => $canEdit,
+            'canDelete' => $canDelete,
         ]);
     }
 
@@ -1636,6 +1643,9 @@ class TonersController
      */
     public function storeDefeito(): void
     {
+        // Verificar permissao de edicao
+        \App\Services\PermissionService::requirePermission((int)($_SESSION['user_id'] ?? 0), 'toners_defeitos', 'edit');
+
         header('Content-Type: application/json');
 
         try {
@@ -1902,6 +1912,9 @@ class TonersController
      */
     public function deleteDefeito(): void
     {
+        // Verificar permissao de exclusao
+        \App\Services\PermissionService::requirePermission((int)($_SESSION['user_id'] ?? 0), 'toners_defeitos', 'delete');
+
         header('Content-Type: application/json');
 
         try {

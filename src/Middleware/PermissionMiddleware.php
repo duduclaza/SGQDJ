@@ -22,6 +22,12 @@ class PermissionMiddleware
         '/toners/retornados/import' => 'toners_retornados',
         '/toners/retornados/delete' => 'toners_retornados',
         
+        // Toners com Defeito
+        '/toners/defeitos' => 'toners_defeitos',
+        '/toners/defeitos/store' => 'toners_defeitos',
+        '/toners/defeitos/delete' => 'toners_defeitos',
+        '/toners/defeitos/{id}/foto/{n}' => 'toners_defeitos',
+        
         // Módulos principais
         '/homologacoes' => 'homologacoes',
         '/homologacoes/store' => 'homologacoes',

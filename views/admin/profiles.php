@@ -271,6 +271,7 @@ const modules = [
   { key: 'cadastro_maquinas', name: 'Cadastro de Máquinas 🖨️' },
   { key: 'cadastro_pecas', name: 'Cadastro de Peças 🔧' },
   { key: 'toners_retornados', name: 'Registro de Retornados' },
+  { key: 'toners_defeitos', name: 'Toners com Defeito \u{1F534}' },
   { key: 'homologacoes', name: 'Homologações' },
   { key: 'amostragens_2', name: 'Amostragens 2.0 🔬' },
   { key: 'garantias', name: 'Garantias' },
