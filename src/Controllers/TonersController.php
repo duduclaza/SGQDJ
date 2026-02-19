@@ -16,7 +16,7 @@ class TonersController
     public function cadastro(): void
     {
         try {
-            // Get ALL toners (sem paginação)
+            // Get ALL toners (sem paginaÃ§Ã£o)
             $stmt = $this->db->query('
                 SELECT * FROM toners 
                 ORDER BY modelo
@@ -107,14 +107,14 @@ class TonersController
         header('Access-Control-Allow-Methods: GET');
         header('Access-Control-Allow-Headers: Content-Type');
         
-        // Se não há parâmetro modelo, retorna todos os toners para dropdown
+        // Se nÃ£o hÃ¡ parÃ¢metro modelo, retorna todos os toners para dropdown
         $modelo = $_GET['modelo'] ?? '';
         
         if (empty($modelo)) {
             try {
                 // Tentar conectar ao banco
                 if (!$this->db) {
-                    echo json_encode(['error' => 'Conexão com banco não disponível']);
+                    echo json_encode(['error' => 'ConexÃ£o com banco nÃ£o disponÃ­vel']);
                     return;
                 }
                 
@@ -142,7 +142,7 @@ class TonersController
             }
         }
 
-        // Se há parâmetro modelo, retorna dados específicos do toner
+        // Se hÃ¡ parÃ¢metro modelo, retorna dados especÃ­ficos do toner
         try {
             $stmt = $this->db->prepare('SELECT gramatura, peso_vazio, preco_toner as preco FROM toners WHERE modelo = ?');
             $stmt->execute([$modelo]);
@@ -158,7 +158,7 @@ class TonersController
                     ]
                 ]);
             } else {
-                echo json_encode(['success' => false, 'error' => 'Toner não encontrado']);
+                echo json_encode(['success' => false, 'error' => 'Toner nÃ£o encontrado']);
             }
         } catch (\PDOException $e) {
             echo json_encode(['success' => false, 'error' => 'Erro ao buscar dados do toner']);
@@ -178,7 +178,7 @@ class TonersController
                 'parameters' => $parameters
             ]);
         } catch (\PDOException $e) {
-            echo json_encode(['success' => false, 'error' => 'Erro ao buscar parâmetros']);
+            echo json_encode(['success' => false, 'error' => 'Erro ao buscar parÃ¢metros']);
         }
     }
 
@@ -202,7 +202,7 @@ class TonersController
             $data_registro = $_POST['data_registro'] ?? date('Y-m-d');
 
             // Debug dos campos
-            error_log("Validação - modelo: '$modelo', usuario: '$usuario', filial: '$filial', codigo_cliente: '$codigo_cliente', modo: '$modo', destino: '$destino'");
+            error_log("ValidaÃ§Ã£o - modelo: '$modelo', usuario: '$usuario', filial: '$filial', codigo_cliente: '$codigo_cliente', modo: '$modo', destino: '$destino'");
 
             // Validate required fields
             if (empty($modelo) || empty($usuario) || empty($filial) || empty($codigo_cliente) || empty($modo) || empty($destino)) {
@@ -215,7 +215,7 @@ class TonersController
                 if (empty($destino)) $missing[] = 'destino';
                 
                 error_log('Campos faltando: ' . implode(', ', $missing));
-                echo json_encode(['success' => false, 'message' => 'Campos obrigatórios faltando: ' . implode(', ', $missing)]);
+                echo json_encode(['success' => false, 'message' => 'Campos obrigatÃ³rios faltando: ' . implode(', ', $missing)]);
                 return;
             }
 
@@ -238,7 +238,7 @@ class TonersController
             $modelo_cadastrado = $tonerData ? 1 : 0;
             
             // Log para debug
-            error_log('Verificando modelo cadastrado: ' . $modelo . ' (ID: ' . ($modelo_id ?: 'N/A') . ') - Encontrado: ' . ($modelo_cadastrado ? 'SIM' : 'NÃO'));
+            error_log('Verificando modelo cadastrado: ' . $modelo . ' (ID: ' . ($modelo_id ?: 'N/A') . ') - Encontrado: ' . ($modelo_cadastrado ? 'SIM' : 'NÃƒO'));
             $gramatura_existente = null;
             $percentual_restante = null;
             $valor_calculado = 0.00;
@@ -249,14 +249,14 @@ class TonersController
                 $percentual_restante = $tonerData['gramatura'] > 0 ? 
                     min(100, max(0, ($gramatura_existente / $tonerData['gramatura']) * 100)) : 0;
                     
-                error_log('Cálculo por peso: Peso=' . $peso_retornado . 'g, Vazio=' . $tonerData['peso_vazio'] . 'g, Gramatura=' . $gramatura_existente . 'g, Percentual=' . $percentual_restante . '%');
+                error_log('CÃ¡lculo por peso: Peso=' . $peso_retornado . 'g, Vazio=' . $tonerData['peso_vazio'] . 'g, Gramatura=' . $gramatura_existente . 'g, Percentual=' . $percentual_restante . '%');
             } elseif ($modo === 'chip' && $percentual_chip >= 0) {
                 $percentual_restante = max(0, min(100, $percentual_chip));
                 if ($tonerData && $tonerData['gramatura'] > 0) {
                     $gramatura_existente = ($percentual_restante / 100) * $tonerData['gramatura'];
                 }
                 
-                error_log('Cálculo por chip: Percentual=' . $percentual_restante . '%, Gramatura=' . ($gramatura_existente ?? 'N/A') . 'g');
+                error_log('CÃ¡lculo por chip: Percentual=' . $percentual_restante . '%, Gramatura=' . ($gramatura_existente ?? 'N/A') . 'g');
             }
 
             // Calculate value if destino is estoque
@@ -268,7 +268,7 @@ class TonersController
                     $folhas_restantes = ($percentual_restante / 100) * $capacidade_folhas;
                     $valor_calculado = $folhas_restantes * $custo_por_folha;
                     
-                    error_log('Cálculo de valor para estoque: ' . 
+                    error_log('CÃ¡lculo de valor para estoque: ' . 
                         'Percentual: ' . $percentual_restante . '% | ' .
                         'Capacidade: ' . $capacidade_folhas . ' folhas | ' .
                         'Custo por folha: R$ ' . $custo_por_folha . ' | ' .
@@ -276,13 +276,13 @@ class TonersController
                         'Valor calculado: R$ ' . $valor_calculado
                     );
                 } else {
-                    error_log('Não foi possível calcular valor - dados faltando: ' .
+                    error_log('NÃ£o foi possÃ­vel calcular valor - dados faltando: ' .
                         'Capacidade: ' . $capacidade_folhas . ' | ' .
                         'Custo: ' . $custo_por_folha
                     );
                 }
             } else {
-                error_log('Cálculo de valor não executado - Condições: ' .
+                error_log('CÃ¡lculo de valor nÃ£o executado - CondiÃ§Ãµes: ' .
                     'Destino: ' . $destino . ' | ' .
                     'Percentual: ' . $percentual_restante . ' | ' .
                     'TonerData: ' . ($tonerData ? 'OK' : 'NULL')
@@ -295,7 +295,7 @@ class TonersController
             // Multiplicar valor calculado pela quantidade
             $valor_total = $valor_calculado * $quantidade;
 
-            error_log('Valor final: Unitário R$ ' . number_format($valor_calculado, 2, ',', '.') . 
+            error_log('Valor final: UnitÃ¡rio R$ ' . number_format($valor_calculado, 2, ',', '.') . 
                       ' x ' . $quantidade . ' = R$ ' . number_format($valor_total, 2, ',', '.'));
 
             // Insert into database
@@ -353,9 +353,9 @@ class TonersController
         $cor = $_POST['cor'] ?? '';
         $tipo = $_POST['tipo'] ?? '';
 
-        // Validar campos obrigatórios (pesos são opcionais)
+        // Validar campos obrigatÃ³rios (pesos sÃ£o opcionais)
         if ($modelo === '' || $capacidade_folhas <= 0 || $preco_toner <= 0 || $cor === '' || $tipo === '') {
-            flash('error', 'Campos obrigatórios: Modelo, Capacidade de Folhas, Preço, Cor e Tipo.');
+            flash('error', 'Campos obrigatÃ³rios: Modelo, Capacidade de Folhas, PreÃ§o, Cor e Tipo.');
             redirect('/toners/cadastro');
             return;
         }
@@ -392,7 +392,7 @@ class TonersController
         }
 
         try {
-            // Colunas gramatura, gramatura_por_folha e custo_por_folha são GENERATED no banco
+            // Colunas gramatura, gramatura_por_folha e custo_por_folha sÃ£o GENERATED no banco
             $stmt = $this->db->prepare('INSERT INTO toners (modelo, peso_cheio, peso_vazio, capacidade_folhas, preco_toner, cor, tipo) VALUES (:modelo, :peso_cheio, :peso_vazio, :capacidade_folhas, :preco_toner, :cor, :tipo)');
             $stmt->execute([
                 ':modelo' => $modelo,
@@ -404,7 +404,7 @@ class TonersController
                 ':tipo' => $tipo
             ]);
             
-            // Fallback: se as colunas NÃO forem generated, atualizar computados aqui
+            // Fallback: se as colunas NÃƒO forem generated, atualizar computados aqui
             try {
                 $newId = (int)$this->db->lastInsertId();
                 if ($newId > 0) {
@@ -423,10 +423,10 @@ class TonersController
                     ]);
                 }
             } catch (\PDOException $ie) {
-                // Ignorar: provavelmente as colunas são generated
+                // Ignorar: provavelmente as colunas sÃ£o generated
             }
             
-            // Update existing retornados records that have this model as "não cadastrado"
+            // Update existing retornados records that have this model as "nÃ£o cadastrado"
             $updateStmt = $this->db->prepare('UPDATE retornados SET modelo_cadastrado = 1 WHERE modelo = :modelo AND modelo_cadastrado = 0');
             $updateStmt->execute([':modelo' => $modelo]);
             
@@ -456,13 +456,13 @@ class TonersController
             header('Content-Type: application/json');
         }
 
-        // Validar campos obrigatórios (pesos são opcionais)
+        // Validar campos obrigatÃ³rios (pesos sÃ£o opcionais)
         if ($id <= 0 || $modelo === '' || $capacidade_folhas <= 0 || $preco_toner <= 0 || $cor === '' || $tipo === '') {
             if ($isAjax) {
-                echo json_encode(['success' => false, 'message' => 'Dados inválidos. Campos obrigatórios: Modelo, Capacidade de Folhas, Preço, Cor e Tipo.']);
+                echo json_encode(['success' => false, 'message' => 'Dados invÃ¡lidos. Campos obrigatÃ³rios: Modelo, Capacidade de Folhas, PreÃ§o, Cor e Tipo.']);
                 return;
             }
-            flash('error', 'Dados inválidos. Campos obrigatórios: Modelo, Capacidade de Folhas, Preço, Cor e Tipo.');
+            flash('error', 'Dados invÃ¡lidos. Campos obrigatÃ³rios: Modelo, Capacidade de Folhas, PreÃ§o, Cor e Tipo.');
             redirect('/toners/cadastro');
             return;
         }
@@ -507,7 +507,7 @@ class TonersController
         }
 
         try {
-            // Colunas gramatura, gramatura_por_folha e custo_por_folha são GENERATED no banco
+            // Colunas gramatura, gramatura_por_folha e custo_por_folha sÃ£o GENERATED no banco
             $stmt = $this->db->prepare('UPDATE toners SET modelo = :modelo, peso_cheio = :peso_cheio, peso_vazio = :peso_vazio, capacidade_folhas = :capacidade_folhas, preco_toner = :preco_toner, cor = :cor, tipo = :tipo WHERE id = :id');
             $stmt->execute([
                 ':modelo' => $modelo,
@@ -520,7 +520,7 @@ class TonersController
                 ':id' => $id
             ]);
 
-            // Fallback: atualizar campos computados caso não sejam generated
+            // Fallback: atualizar campos computados caso nÃ£o sejam generated
             try {
                 $upd = $this->db->prepare('UPDATE toners 
                     SET gramatura = (CASE WHEN :peso_cheio_up IS NOT NULL AND :peso_vazio_up IS NOT NULL THEN :peso_cheio_up - :peso_vazio_up ELSE gramatura END),
@@ -536,7 +536,7 @@ class TonersController
                     ':id_up' => $id
                 ]);
             } catch (\PDOException $ie) {
-                // Ignorar: provavelmente as colunas são generated
+                // Ignorar: provavelmente as colunas sÃ£o generated
             }
 
             if ($isAjax) {
@@ -559,7 +559,7 @@ class TonersController
     {
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
-            flash('error', 'ID inválido.');
+            flash('error', 'ID invÃ¡lido.');
             redirect('/toners/cadastro');
             return;
         }
@@ -567,7 +567,7 @@ class TonersController
         try {
             $stmt = $this->db->prepare('DELETE FROM toners WHERE id = :id');
             $stmt->execute([':id' => $id]);
-            flash('success', 'Toner excluído com sucesso.');
+            flash('success', 'Toner excluÃ­do com sucesso.');
         } catch (\PDOException $e) {
             flash('error', 'Erro ao excluir toner: ' . $e->getMessage());
         }
@@ -575,7 +575,7 @@ class TonersController
         redirect('/toners/cadastro');
     }
 
-    // Exclusão via AJAX (DELETE /toners/{id}) com retorno JSON
+    // ExclusÃ£o via AJAX (DELETE /toners/{id}) com retorno JSON
     public function deleteAjax(): void
     {
         header('Content-Type: application/json');
@@ -586,16 +586,16 @@ class TonersController
         $id = end($parts);
 
         if (!$id || !is_numeric($id)) {
-            echo json_encode(['success' => false, 'message' => 'ID inválido']);
+            echo json_encode(['success' => false, 'message' => 'ID invÃ¡lido']);
             return;
         }
 
         try {
-            // Verificar existência
+            // Verificar existÃªncia
             $check = $this->db->prepare('SELECT id FROM toners WHERE id = :id');
             $check->execute([':id' => $id]);
             if (!$check->fetch()) {
-                echo json_encode(['success' => false, 'message' => 'Toner não encontrado']);
+                echo json_encode(['success' => false, 'message' => 'Toner nÃ£o encontrado']);
                 return;
             }
 
@@ -603,13 +603,13 @@ class TonersController
             $stmt = $this->db->prepare('DELETE FROM toners WHERE id = :id');
             $stmt->execute([':id' => $id]);
 
-            echo json_encode(['success' => true, 'message' => 'Toner excluído com sucesso']);
+            echo json_encode(['success' => true, 'message' => 'Toner excluÃ­do com sucesso']);
         } catch (\PDOException $e) {
             echo json_encode(['success' => false, 'message' => 'Erro ao excluir toner: ' . $e->getMessage()]);
         }
     }
 
-    // Baixar template CSV/Excel para importação
+    // Baixar template CSV/Excel para importaÃ§Ã£o
     public function downloadTemplate(): void
     {
         try {
@@ -627,13 +627,13 @@ class TonersController
             // BOM para UTF-8 (para Excel reconhecer acentos)
             fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            // Cabeçalhos (campos do formulário)
+            // CabeÃ§alhos (campos do formulÃ¡rio)
             $headers = [
                 'Modelo',
                 'Peso Cheio (g)',
                 'Peso Vazio (g)',
                 'Capacidade de Folhas',
-                'Preço do Toner (R$)',
+                'PreÃ§o do Toner (R$)',
                 'Cor',
                 'Tipo'
             ];
@@ -670,8 +670,8 @@ class TonersController
             error_log('POST data: ' . print_r($_POST, true));
             
             if (!isset($_FILES['excel_file']) || $_FILES['excel_file']['error'] !== UPLOAD_ERR_OK) {
-                $error = $_FILES['excel_file']['error'] ?? 'Arquivo não enviado';
-                echo json_encode(['success' => false, 'message' => 'Erro no upload do arquivo. Código: ' . $error]);
+                $error = $_FILES['excel_file']['error'] ?? 'Arquivo nÃ£o enviado';
+                echo json_encode(['success' => false, 'message' => 'Erro no upload do arquivo. CÃ³digo: ' . $error]);
                 return;
             }
 
@@ -698,7 +698,7 @@ class TonersController
             if (!in_array($fileExtension, $validExtensions) && !in_array($mimeType, $validMimeTypes)) {
                 echo json_encode([
                     'success' => false, 
-                    'message' => "Formato de arquivo inválido. Extensão: $fileExtension, MIME: $mimeType. Use .xlsx, .xls ou .csv"
+                    'message' => "Formato de arquivo invÃ¡lido. ExtensÃ£o: $fileExtension, MIME: $mimeType. Use .xlsx, .xls ou .csv"
                 ]);
                 return;
             }
@@ -707,7 +707,7 @@ class TonersController
             $excelData = $this->readExcelFile($uploadedFile);
             
             if (empty($excelData)) {
-                echo json_encode(['success' => false, 'message' => 'Arquivo vazio ou formato inválido. Verifique se o arquivo contém dados.']);
+                echo json_encode(['success' => false, 'message' => 'Arquivo vazio ou formato invÃ¡lido. Verifique se o arquivo contÃ©m dados.']);
                 return;
             }
             
@@ -752,7 +752,7 @@ class TonersController
 
                     // Validate required fields
                     if (empty($modelo) || $peso_cheio <= 0 || $peso_vazio <= 0 || $capacidade_folhas <= 0 || $preco_toner <= 0 || empty($cor) || empty($tipo)) {
-                        $errors[] = "Linha " . ($index + 1) . ": Dados incompletos ou inválidos - Modelo: '$modelo', Peso Cheio: $peso_cheio, Peso Vazio: $peso_vazio, Cap: $capacidade_folhas, Preço: $preco_toner, Cor: '$cor', Tipo: '$tipo'";
+                        $errors[] = "Linha " . ($index + 1) . ": Dados incompletos ou invÃ¡lidos - Modelo: '$modelo', Peso Cheio: $peso_cheio, Peso Vazio: $peso_vazio, Cap: $capacidade_folhas, PreÃ§o: $preco_toner, Cor: '$cor', Tipo: '$tipo'";
                         continue;
                     }
 
@@ -763,16 +763,16 @@ class TonersController
 
                     // Validate enum values
                     if (!in_array($cor, ['Yellow', 'Magenta', 'Cyan', 'Black'])) {
-                        $errors[] = "Linha " . ($index + 1) . ": Cor inválida (use: Yellow, Magenta, Cyan, Black)";
+                        $errors[] = "Linha " . ($index + 1) . ": Cor invÃ¡lida (use: Yellow, Magenta, Cyan, Black)";
                         continue;
                     }
 
                     if (!in_array($tipo, ['Original', 'Compativel', 'Remanufaturado'])) {
-                        $errors[] = "Linha " . ($index + 1) . ": Tipo inválido (use: Original, Compativel, Remanufaturado)";
+                        $errors[] = "Linha " . ($index + 1) . ": Tipo invÃ¡lido (use: Original, Compativel, Remanufaturado)";
                         continue;
                     }
 
-                    // Colunas gramatura, gramatura_por_folha e custo_por_folha são GENERATED no banco
+                    // Colunas gramatura, gramatura_por_folha e custo_por_folha sÃ£o GENERATED no banco
                     $stmt = $this->db->prepare('INSERT INTO toners (modelo, peso_cheio, peso_vazio, capacidade_folhas, preco_toner, cor, tipo) VALUES (:modelo, :peso_cheio, :peso_vazio, :capacidade_folhas, :preco_toner, :cor, :tipo)');
                     $stmt->execute([
                         ':modelo' => $modelo,
@@ -791,7 +791,7 @@ class TonersController
                 }
             }
 
-            $message = "Importação concluída! $imported registros importados";
+            $message = "ImportaÃ§Ã£o concluÃ­da! $imported registros importados";
             if (!empty($errors)) {
                 $message .= ". Erros encontrados: " . implode('; ', array_slice($errors, 0, 3));
                 if (count($errors) > 3) {
@@ -871,7 +871,7 @@ class TonersController
         $id = end($pathParts);
         
         if (!$id || !is_numeric($id)) {
-            echo json_encode(['success' => false, 'message' => 'ID inválido']);
+            echo json_encode(['success' => false, 'message' => 'ID invÃ¡lido']);
             return;
         }
         
@@ -881,7 +881,7 @@ class TonersController
             $stmt->execute([':id' => $id]);
             
             if (!$stmt->fetch()) {
-                echo json_encode(['success' => false, 'message' => 'Registro não encontrado']);
+                echo json_encode(['success' => false, 'message' => 'Registro nÃ£o encontrado']);
                 return;
             }
             
@@ -889,7 +889,7 @@ class TonersController
             $stmt = $this->db->prepare('DELETE FROM retornados WHERE id = :id');
             $stmt->execute([':id' => $id]);
             
-            echo json_encode(['success' => true, 'message' => 'Registro excluído com sucesso']);
+            echo json_encode(['success' => true, 'message' => 'Registro excluÃ­do com sucesso']);
             
         } catch (\PDOException $e) {
             echo json_encode(['success' => false, 'message' => 'Erro ao excluir registro: ' . $e->getMessage()]);
@@ -953,8 +953,8 @@ class TonersController
             // CSV Headers (in Portuguese)
             $headers = [
                 'Modelo',
-                'Código Cliente',
-                'Usuário',
+                'CÃ³digo Cliente',
+                'UsuÃ¡rio',
                 'Filial',
                 'Modo',
                 'Peso Retornado (g)',
@@ -962,7 +962,7 @@ class TonersController
                 'Quantidade',
                 'Destino',
                 'Valor Calculado (R$)',
-                'Observação',
+                'ObservaÃ§Ã£o',
                 'Data Registro'
             ];
 
@@ -1011,7 +1011,7 @@ class TonersController
             $data = $this->readCSVFile($uploadedFile);
             
             if (empty($data)) {
-                echo json_encode(['success' => false, 'message' => 'Arquivo vazio ou formato inválido']);
+                echo json_encode(['success' => false, 'message' => 'Arquivo vazio ou formato invÃ¡lido']);
                 return;
             }
 
@@ -1030,7 +1030,7 @@ class TonersController
                     
                     $stmt->execute([
                         ':usuario' => $row[2] ?? 'Importado',
-                        ':filial' => $row[3] ?? 'Jundiaí',
+                        ':filial' => $row[3] ?? 'JundiaÃ­',
                         ':codigo_cliente' => $row[1] ?? '',
                         ':modelo' => $row[0] ?? '',
                         ':modo' => 'peso', // Default
@@ -1048,7 +1048,7 @@ class TonersController
 
             echo json_encode([
                 'success' => true,
-                'message' => "Importação concluída! $imported registros importados",
+                'message' => "ImportaÃ§Ã£o concluÃ­da! $imported registros importados",
                 'imported' => $imported,
                 'errors' => $errors
             ]);
@@ -1078,7 +1078,7 @@ class TonersController
         $input = json_decode(file_get_contents('php://input'), true);
         
         if (!$input) {
-            echo json_encode(['success' => false, 'message' => 'Dados inválidos']);
+            echo json_encode(['success' => false, 'message' => 'Dados invÃ¡lidos']);
             return;
         }
         
@@ -1104,14 +1104,14 @@ class TonersController
             
             // Validate only essential fields - allow empty values for historical records
             if (empty(trim($input['modelo'] ?? ''))) {
-                echo json_encode(['success' => false, 'message' => "Campo modelo é obrigatório. Dados recebidos: " . json_encode($input)]);
+                echo json_encode(['success' => false, 'message' => "Campo modelo Ã© obrigatÃ³rio. Dados recebidos: " . json_encode($input)]);
                 return;
             }
             
             // Validate and normalize destino field
             $destino = trim($input['destino'] ?? '');
             if (empty($destino)) {
-                echo json_encode(['success' => false, 'message' => "Campo destino é obrigatório. Valor recebido: '" . ($input['destino'] ?? 'null') . "'"]);
+                echo json_encode(['success' => false, 'message' => "Campo destino Ã© obrigatÃ³rio. Valor recebido: '" . ($input['destino'] ?? 'null') . "'"]);
                 return;
             }
             
@@ -1126,7 +1126,7 @@ class TonersController
             ];
             
             if (!isset($destinoMap[$destinoNormalized])) {
-                echo json_encode(['success' => false, 'message' => "Destino inválido: '$destino'. Use: descarte, estoque, uso interno ou garantia"]);
+                echo json_encode(['success' => false, 'message' => "Destino invÃ¡lido: '$destino'. Use: descarte, estoque, uso interno ou garantia"]);
                 return;
             }
             
@@ -1185,7 +1185,7 @@ class TonersController
             
             $message = 'Registro importado com sucesso';
             if (!$modeloCadastrado) {
-                $message .= ' (modelo não cadastrado)';
+                $message .= ' (modelo nÃ£o cadastrado)';
             }
             
             echo json_encode(['success' => true, 'message' => $message]);
@@ -1246,13 +1246,13 @@ class TonersController
                 'Peso Vazio (g)', 
                 'Gramatura (g)',
                 'Capacidade Folhas',
-                'Preço Toner (R$)',
+                'PreÃ§o Toner (R$)',
                 'Gramatura por Folha (g)',
                 'Custo por Folha (R$)',
                 'Cor',
                 'Tipo',
                 'Data Cadastro',
-                'Última Atualização'
+                'Ãšltima AtualizaÃ§Ã£o'
             ];
 
             fputcsv($output, $headers, ';'); // Using semicolon for better Excel compatibility
@@ -1337,7 +1337,7 @@ class TonersController
                 'Peso Vazio (g)', 
                 'Gramatura (g)',
                 'Capacidade Folhas',
-                'Preço Toner (R$)',
+                'PreÃ§o Toner (R$)',
                 'Gramatura por Folha (g)',
                 'Custo por Folha (R$)',
                 'Cor',
@@ -1345,7 +1345,7 @@ class TonersController
                 'Total Retornados',
                 'Valor Total Recuperado (R$)',
                 'Data Cadastro',
-                'Última Atualização'
+                'Ãšltima AtualizaÃ§Ã£o'
             ];
 
             fputcsv($output, $headers, ';');
@@ -1405,7 +1405,7 @@ class TonersController
     }
     
     /**
-     * API: Lista todos os toners para seleção em dropdowns
+     * API: Lista todos os toners para seleÃ§Ã£o em dropdowns
      * Usado em: Amostragens 2.0, Garantias
      */
     public function apiListToners(): void
@@ -1425,7 +1425,7 @@ class TonersController
             $stmt->execute();
             $toners = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Adicionar campo 'modelo' também para compatibilidade
+            // Adicionar campo 'modelo' tambÃ©m para compatibilidade
             foreach ($toners as &$toner) {
                 $toner['modelo'] = $toner['codigo'];
             }
@@ -1442,7 +1442,7 @@ class TonersController
     }
     
     /**
-     * Busca dados de um retornado específico para edição
+     * Busca dados de um retornado especÃ­fico para ediÃ§Ã£o
      */
     public function getRetornado($id): void
     {
@@ -1465,7 +1465,7 @@ class TonersController
             if ($retornado) {
                 echo json_encode(['success' => true, 'data' => $retornado]);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Registro não encontrado']);
+                echo json_encode(['success' => false, 'message' => 'Registro nÃ£o encontrado']);
             }
         } catch (\PDOException $e) {
             echo json_encode(['success' => false, 'message' => 'Erro ao buscar registro: ' . $e->getMessage()]);
@@ -1483,11 +1483,11 @@ class TonersController
             $id = (int)($_POST['id'] ?? 0);
             
             if ($id <= 0) {
-                echo json_encode(['success' => false, 'message' => 'ID inválido']);
+                echo json_encode(['success' => false, 'message' => 'ID invÃ¡lido']);
                 return;
             }
             
-            // Validar campos obrigatórios
+            // Validar campos obrigatÃ³rios
             $modelo = trim($_POST['modelo'] ?? '');
             $codigo_cliente = trim($_POST['codigo_cliente'] ?? '');
             $destino = trim($_POST['destino'] ?? '');
@@ -1496,7 +1496,7 @@ class TonersController
             $data_registro = $_POST['data_registro'] ?? date('Y-m-d');
             
             if (empty($modelo) || empty($codigo_cliente) || empty($destino)) {
-                echo json_encode(['success' => false, 'message' => 'Campos obrigatórios: modelo, código cliente e destino']);
+                echo json_encode(['success' => false, 'message' => 'Campos obrigatÃ³rios: modelo, cÃ³digo cliente e destino']);
                 return;
             }
             
@@ -1512,7 +1512,7 @@ class TonersController
             $tonerData = $stmt->fetch(PDO::FETCH_ASSOC);
             $modelo_cadastrado = $tonerData ? 1 : 0;
             
-            // Recalcular valor se destino é estoque
+            // Recalcular valor se destino Ã© estoque
             $valor_calculado = 0.00;
             $percentual_restante = (float)($_POST['percentual_restante'] ?? 0);
             
@@ -1560,11 +1560,11 @@ class TonersController
     }
 
     // =========================================================
-    // MÓDULO: TONERS COM DEFEITO
+    // MÃ“DULO: TONERS COM DEFEITO
     // =========================================================
 
     /**
-     * Página principal do módulo Toners com Defeito
+     * PÃ¡gina principal do mÃ³dulo Toners com Defeito
      */
     public function defeitos(): void
     {
@@ -1585,7 +1585,7 @@ class TonersController
         }
 
         try {
-            // Histórico de defeitos registrados
+            // HistÃ³rico de defeitos registrados
             $stmt = $this->db->query("
                 SELECT
                     td.id,
@@ -1633,23 +1633,24 @@ class TonersController
             $cliente_id    = !empty($_POST['cliente_id']) ? (int)$_POST['cliente_id'] : null;
             $cliente_nome  = trim($_POST['cliente_nome']  ?? '');
             $descricao     = trim($_POST['descricao']     ?? '');
+            $quantidade    = max(1, (int)($_POST['quantidade'] ?? 1));
 
-            // ---- Validação ----
+            // ---- ValidaÃ§Ã£o ----
             $erros = [];
             if (empty($modelo_toner))  $erros[] = 'Modelo do Toner';
-            if (empty($numero_pedido)) $erros[] = 'Número do Pedido';
+            if (empty($numero_pedido)) $erros[] = 'NÃºmero do Pedido';
             if (empty($cliente_nome))  $erros[] = 'Cliente';
-            if (empty($descricao))     $erros[] = 'Descrição do Defeito';
+            if (empty($descricao))     $erros[] = 'DescriÃ§Ã£o do Defeito';
 
             if (!empty($erros)) {
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Campos obrigatórios não preenchidos: ' . implode(', ', $erros),
+                    'message' => 'Campos obrigatÃ³rios nÃ£o preenchidos: ' . implode(', ', $erros),
                 ]);
                 return;
             }
 
-            // ---- Processar fotos (até 3 arquivos MEDIUMBLOB ~16MB cada) ----
+            // ---- Processar fotos (atÃ© 3 arquivos MEDIUMBLOB ~16MB cada) ----
             $fotos = [];
             for ($i = 1; $i <= 3; $i++) {
                 $key = 'foto' . $i;
@@ -1662,7 +1663,7 @@ class TonersController
                     if (!str_starts_with($mime, 'image/')) {
                         echo json_encode([
                             'success' => false,
-                            'message' => "Foto {$i}: apenas imagens são permitidas (recebido: {$mime})",
+                            'message' => "Foto {$i}: apenas imagens sÃ£o permitidas (recebido: {$mime})",
                         ]);
                         return;
                     }
@@ -1724,8 +1725,8 @@ class TonersController
                 ");
                 $admins = $admStmt->fetchAll(PDO::FETCH_COLUMN);
 
-                $titulo = '⚠️ Toner com Defeito Registrado';
-                $mensagem = "O toner \"{$modelo_toner}\" (Pedido #{$numero_pedido} – Cliente: {$cliente_nome}) foi registrado com defeito.";
+                $titulo = 'âš ï¸ Toner com Defeito Registrado';
+                $mensagem = "O toner \"{$modelo_toner}\" (Pedido #{$numero_pedido} â€“ Cliente: {$cliente_nome}) foi registrado com defeito.";
 
                 foreach ($admins as $adminId) {
                     NotificationsController::create(
@@ -1738,7 +1739,7 @@ class TonersController
                     );
                 }
             } catch (\Exception $notifEx) {
-                error_log('Erro ao enviar notificações de defeito: ' . $notifEx->getMessage());
+                error_log('Erro ao enviar notificaÃ§Ãµes de defeito: ' . $notifEx->getMessage());
             }
 
             echo json_encode([
@@ -1757,12 +1758,12 @@ class TonersController
     }
 
     /**
-     * Serve foto de evidência armazenada como BLOB
+     * Serve foto de evidÃªncia armazenada como BLOB
      * GET /toners/defeitos/{id}/foto/{n}  (n = 1, 2 ou 3)
      */
     public function downloadFotoDefeito(): void
     {
-        // Extrair parâmetros da URL /toners/defeitos/{id}/foto/{n}
+        // Extrair parÃ¢metros da URL /toners/defeitos/{id}/foto/{n}
         $path   = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
         $parts  = explode('/', trim($path, '/'));
         // Esperado: ['toners', 'defeitos', '{id}', 'foto', '{n}']
@@ -1771,7 +1772,7 @@ class TonersController
 
         if ($id <= 0 || !in_array($n, [1, 2, 3])) {
             http_response_code(400);
-            echo 'Parâmetros inválidos';
+            echo 'ParÃ¢metros invÃ¡lidos';
             return;
         }
 
@@ -1785,7 +1786,7 @@ class TonersController
 
             if (!$row || empty($row[$col])) {
                 http_response_code(404);
-                echo 'Foto não encontrada';
+                echo 'Foto nÃ£o encontrada';
                 return;
             }
 
@@ -1800,6 +1801,37 @@ class TonersController
         } catch (\PDOException $e) {
             http_response_code(500);
             echo 'Erro ao recuperar imagem';
+        }
+    }
+
+    /**
+     * Excluir registro de defeito
+     * POST /toners/defeitos/delete
+     */
+    public function deleteDefeito(): void
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $input = json_decode(file_get_contents('php://input'), true);
+            $id = (int)($input['id'] ?? $_POST['id'] ?? 0);
+            
+            if ($id <= 0) {
+                echo json_encode(['success' => false, 'message' => 'ID inválido.']);
+                return;
+            }
+            
+            $stmt = $this->db->prepare('DELETE FROM toners_defeitos WHERE id = ?');
+            $stmt->execute([$id]);
+            
+            if ($stmt->rowCount() > 0) {
+                echo json_encode(['success' => true, 'message' => 'Registro excluído com sucesso.']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Registro não encontrado ou já excluído.']);
+            }
+            
+        } catch (\PDOException $e) {
+            echo json_encode(['success' => false, 'message' => 'Erro ao excluir: ' . $e->getMessage()]);
         }
     }
 }
