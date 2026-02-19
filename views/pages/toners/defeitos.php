@@ -245,10 +245,46 @@ else: ?>
               <?php echo htmlspecialchars($d['registrado_por_nome'] ?? '—'); ?>
             </td>
             <td class="px-4 py-3 text-center whitespace-nowrap">
-              <button type="button" onclick="excluirDefeito(<?php echo $d['id']; ?>)"
-                 class="text-red-500 hover:text-red-700 transition-colors" title="Excluir Registro">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-              </button>
+              <div class="flex items-center justify-center gap-2">
+                  <?php
+    $hasDevolutiva = !empty($d['devolutiva_at']);
+    $userSetor = $_SESSION['user_setor'] ?? '';
+    $userRole = $_SESSION['user_role'] ?? '';
+    $isQualidade = stripos($userSetor, 'Qualidade') !== false;
+    $isAdmin = in_array($userRole, ['admin', 'super_admin']);
+    $canInsert = ($isQualidade || $isAdmin);
+?>
+
+                  <?php if ($hasDevolutiva): ?>
+                    <!-- Ver -->
+                    <button type="button" onclick="openDevolutiva(<?php echo $d['id']; ?>, 'view', this)"
+                            data-desc="<?php echo htmlspecialchars($d['devolutiva_descricao'] ?? ''); ?>"
+                            class="text-blue-500 hover:text-blue-700" title="Ver Devolutiva">
+                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    </button>
+                    <!-- Editar -->
+                    <?php if ($canInsert): ?>
+                        <button type="button" onclick="openDevolutiva(<?php echo $d['id']; ?>, 'edit', this)"
+                                data-desc="<?php echo htmlspecialchars($d['devolutiva_descricao'] ?? ''); ?>"
+                                class="text-yellow-500 hover:text-yellow-700" title="Editar Devolutiva">
+                           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </button>
+                    <?php
+      endif; ?>
+                  <?php
+    elseif ($canInsert): ?>
+                    <!-- Inserir -->
+                    <button type="button" onclick="openDevolutiva(<?php echo $d['id']; ?>, 'create', this)" class="text-green-500 hover:text-green-700" title="Inserir Devolutiva">
+                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </button>
+                  <?php
+    endif; ?>
+
+                  <button type="button" onclick="excluirDefeito(<?php echo $d['id']; ?>)"
+                     class="text-red-500 hover:text-red-700 transition-colors" title="Excluir Registro">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+              </div>
             </td>
           </tr>
           <?php
@@ -273,30 +309,6 @@ endif; ?>
 </div>
 
 <script>
-// =====================================================
-// Listbox com busca — Toner
-// =====================================================
-const buscaToner   = document.getElementById('buscaToner');
-const selectToner  = document.getElementById('selectToner');
-const modeloHidden = document.getElementById('modeloTonerHidden');
-
-// Pré-selecionar primeiro item
-if (selectToner.options.length > 0) {
-  selectToner.selectedIndex = 0;
-  modeloHidden.value = selectToner.options[0]?.dataset.label ?? '';
-}
-
-buscaToner.addEventListener('input', () => {
-  const q = buscaToner.value.toLowerCase();
-  Array.from(selectToner.options).forEach(opt => {
-    opt.style.display = opt.dataset.label?.toLowerCase().includes(q) ? '' : 'none';
-  });
-});
-
-selectToner.addEventListener('change', () => {
-  const opt = selectToner.options[selectToner.selectedIndex];
-  modeloHidden.value = opt?.dataset.label ?? '';
-});
 
 // =====================================================
 // Autocomplete / Dropdown Logic (Toner & Cliente)
@@ -559,4 +571,176 @@ function showToast(type, titulo, msg) {
   toast.classList.remove('hidden');
   setTimeout(() => toast.classList.add('hidden'), 5000);
 }
+</script>
+
+<!-- Modal Devolutiva -->
+<div id="modalDevolutiva" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeDevolutiva()"></div>
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+    
+    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+      <form id="formDevolutiva" class="p-6">
+        <input type="hidden" name="defeito_id" id="devolutivaDefeitoId">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Devolutiva (Qualidade)</h3>
+          <button type="button" onclick="closeDevolutiva()" class="text-gray-400 hover:text-gray-500">
+            <span class="sr-only">Fechar</span>
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        
+        <div class="mt-2 text-sm text-gray-500 mb-4" id="devolutivaModeText">
+             Insira a análise técnica e evidências.
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Descrição da Devolutiva</label>
+                <textarea name="devolutiva_descricao" id="devolutivaDesc" rows="4" 
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
+                    required></textarea>
+            </div>
+            
+            <div id="devolutivaUploads">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Evidências (Fotos)</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <?php for ($i = 1; $i <= 3; $i++): ?>
+                    <div class="relative">
+                        <label class="block w-full aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-red-500 transition-colors bg-gray-50">
+                            <input type="file" name="devolutiva_foto<?php echo $i; ?>" id="devFoto<?php echo $i; ?>" accept="image/*" class="hidden" onchange="previewDevFoto(this, <?php echo $i; ?>)">
+                            <div id="devPlaceholder<?php echo $i; ?>" class="text-center p-1">
+                                <svg class="mx-auto h-8 w-8 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                            </div>
+                            <img id="devPreview<?php echo $i; ?>" class="hidden w-full h-full object-cover rounded-lg">
+                        </label>
+                    </div>
+                    <?php
+endfor; ?>
+                </div>
+            </div>
+            
+            <div id="devolutivaLinks" class="hidden grid grid-cols-3 gap-2">
+               <!-- Links injetados via JS -->
+            </div>
+        </div>
+
+        <div class="mt-5 sm:mt-6 flex justify-end gap-2">
+          <button type="button" onclick="closeDevolutiva()" class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none sm:text-sm">
+            Cancelar
+          </button>
+          <button type="submit" id="btnSaveDevolutiva" class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:text-sm">
+            Salvar Devolutiva
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function openDevolutiva(id, mode, btn) {
+    const modal = document.getElementById('modalDevolutiva');
+    const descInput = document.getElementById('devolutivaDesc');
+    const idInput = document.getElementById('devolutivaDefeitoId');
+    const uploadDiv = document.getElementById('devolutivaUploads');
+    const linksDiv = document.getElementById('devolutivaLinks');
+    const btnSave = document.getElementById('btnSaveDevolutiva');
+    const modeText = document.getElementById('devolutivaModeText');
+    
+    idInput.value = id;
+    modal.classList.remove('hidden');
+    
+    // Get Data
+    const desc = btn.getAttribute('data-desc') || '';
+    descInput.value = desc;
+    
+    // Reset Photos
+    for(let i=1; i<=3; i++) {
+        const img = document.getElementById('devPreview'+i);
+        const holder = document.getElementById('devPlaceholder'+i);
+        const input = document.getElementById('devFoto'+i);
+        img.classList.add('hidden');
+        img.src = '';
+        holder.classList.remove('hidden');
+        input.value = '';
+    }
+    
+    if (mode === 'view') {
+        descInput.disabled = true;
+        uploadDiv.classList.add('hidden');
+        linksDiv.classList.remove('hidden');
+        btnSave.classList.add('hidden');
+        modeText.innerText = 'Visualizando devolutiva registrada.';
+        
+        let linksHtml = '';
+        for(let i=1; i<=3; i++) {
+            // Check existence via simple image load error? No, too complex.
+            // Just show links. If 404, user sees 404.
+            // Or assume if description exists, maybe photos exist.
+            linksHtml += `<a href="/toners/defeitos/${id}/devolutiva-foto/${i}" target="_blank" class="block w-full aspect-square bg-gray-50 rounded flex flex-col items-center justify-center text-xs text-blue-500 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 transition-colors">
+                            <svg class="w-6 h-6 mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            Ver Foto ${i}
+                          </a>`;
+        }
+        linksDiv.innerHTML = linksHtml;
+        
+    } else {
+        descInput.disabled = false;
+        uploadDiv.classList.remove('hidden');
+        linksDiv.classList.add('hidden');
+        btnSave.classList.remove('hidden');
+        
+        if (mode === 'edit') {
+             modeText.innerText = 'Editando devolutiva existente. Faça upload de novas fotos para substituir as antigas.';
+        } else {
+             modeText.innerText = 'Insira a análise técnica e evidências.';
+        }
+    }
+}
+
+function closeDevolutiva() {
+    document.getElementById('modalDevolutiva').classList.add('hidden');
+}
+
+function previewDevFoto(input, i) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById('devPreview'+i);
+            img.src = e.target.result;
+            img.classList.remove('hidden');
+            document.getElementById('devPlaceholder'+i).classList.add('hidden');
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+document.getElementById('formDevolutiva').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnSaveDevolutiva');
+    const originalText = btn.innerText;
+    
+    btn.disabled = true;
+    btn.innerText = 'Salvando...';
+    
+    try {
+        const fd = new FormData(e.target);
+        const resp = await fetch('/toners/defeitos/devolutiva/store', { method: 'POST', body: fd });
+        const data = await resp.json();
+        
+        if (data.success) {
+            showToast('success', 'Sucesso', data.message);
+            closeDevolutiva();
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast('error', 'Erro', data.message);
+        }
+    } catch (err) {
+        showToast('error', 'Erro', 'Falha na conexão.');
+    } finally {
+        btn.disabled = false;
+        btn.innerText = originalText;
+    }
+});
 </script>
