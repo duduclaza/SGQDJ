@@ -299,28 +299,102 @@ selectToner.addEventListener('change', () => {
 });
 
 // =====================================================
-// Listbox com busca — Cliente
+// Autocomplete / Dropdown Logic (Toner & Cliente)
 // =====================================================
-const buscaCliente  = document.getElementById('buscaCliente');
-const selectCliente = document.getElementById('selectCliente');
-const clienteNomeH  = document.getElementById('clienteNomeHidden');
 
-if (selectCliente.options.length > 0) {
-  selectCliente.selectedIndex = 0;
-  clienteNomeH.value = selectCliente.options[0]?.dataset.nome ?? '';
+function setupAutocomplete(inputId, dropdownId, selectId, hiddenInputId, onSelectCallback) {
+  const input    = document.getElementById(inputId);
+  const dropdown = document.getElementById(dropdownId);
+  const select   = document.getElementById(selectId);
+  const hidden   = document.getElementById(hiddenInputId);
+  
+  if (!input || !dropdown || !select) return;
+
+  function filterOptions() {
+    const q = input.value.toLowerCase();
+    let visibleCount = 0;
+    
+    Array.from(select.options).forEach(opt => {
+      const text  = (opt.dataset.label || opt.text).toLowerCase();
+      // Ocultar se não der match E não for a opção padrão disabled
+      const match = text.includes(q);
+      
+      if (opt.disabled) {
+          opt.style.display = match ? '' : 'none'; // Mostrar disabled message se for relevante? Geralmente não.
+      } else {
+          opt.style.display = match ? '' : 'none';
+          if (match) visibleCount++;
+      }
+    });
+    
+    // Se digitou algo e tem resultados, mostrar
+    if (visibleCount > 0) {
+        dropdown.classList.remove('hidden');
+    } else {
+        dropdown.classList.add('hidden');
+    }
+  }
+
+  // Mostrar ao focar
+  input.addEventListener('focus', () => {
+      filterOptions();
+      dropdown.classList.remove('hidden');
+  });
+
+  // Filtrar ao digitar
+  input.addEventListener('input', () => {
+      filterOptions();
+  });
+
+  // Selecionar ao clicar na option (ou change no select)
+  // O evento 'change' dispara quando clica numa option em size > 1
+  select.addEventListener('change', () => {
+      selectOption();
+  });
+  
+  // Garantir clique direto (desktop)
+  select.addEventListener('click', (e) => {
+      if (e.target.tagName === 'OPTION' && !e.target.disabled) {
+          selectOption();
+      }
+  });
+
+  function selectOption() {
+      const opt = select.options[select.selectedIndex];
+      if (opt && !opt.disabled) {
+          input.value = opt.dataset.label || opt.text;
+          // Se for select de ID (value=int), salvar no hidden se necessário ou confiar no submit do select
+          // Mas cuidado: se o user digitar algo que não existe, o select não muda.
+          // O input visual é só busca. O que vale é o select.
+          
+          if (hidden) hidden.value = opt.dataset.label || opt.dataset.nome || '';
+          
+          if (onSelectCallback) onSelectCallback(opt);
+          
+          dropdown.classList.add('hidden');
+      }
+  }
+
+  // Ocultar ao sair (com delay para permitir clique)
+  input.addEventListener('blur', () => {
+      setTimeout(() => {
+          dropdown.classList.add('hidden');
+      }, 200);
+  });
 }
 
-buscaCliente.addEventListener('input', () => {
-  const q = buscaCliente.value.toLowerCase();
-  Array.from(selectCliente.options).forEach(opt => {
-    opt.style.display = opt.dataset.label?.toLowerCase().includes(q) ? '' : 'none';
-  });
+// Configurar Toner
+setupAutocomplete('buscaToner', 'dropdownToner', 'selectToner', 'modeloTonerHidden', (opt) => {
+    // Ao selecionar toner, atualizar o campo hidden com o NOME do modelo (redundância)
+    document.getElementById('modeloTonerHidden').value = opt.dataset.label;
 });
 
-selectCliente.addEventListener('change', () => {
-  const opt = selectCliente.options[selectCliente.selectedIndex];
-  clienteNomeH.value = opt?.dataset.nome ?? '';
+// Configurar Cliente
+setupAutocomplete('buscaCliente', 'dropdownCliente', 'selectCliente', 'clienteNomeHidden', (opt) => {
+    // Ao selecionar cliente, atualizar nome hidden
+    document.getElementById('clienteNomeHidden').value = opt.dataset.nome;
 });
+
 
 // =====================================================
 // Preview de fotos
@@ -351,6 +425,7 @@ selectCliente.addEventListener('change', () => {
       preview.classList.remove('hidden');
       holder.classList.add('hidden');
       btnRem.classList.remove('hidden');
+      // Remover borda tracejada ao ter foto? Opcional
     };
     reader.readAsDataURL(file);
   });
@@ -376,18 +451,22 @@ document.getElementById('formDefeito').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const btn = document.getElementById('btnRegistrar');
+  const selectToner = document.getElementById('selectToner');
+  const selectCliente = document.getElementById('selectCliente');
+  
+  // Validação: Verificar se um item foi realmente selecionado no SELECT
+  // Se o usuário só digitou e não selecionou, o selectValue pode estar vazio ou errado.
+  // Entretanto, se o usuário não selecionou nada, o select.value será '' (se tiver option disabled selected) ou o primeiro.
+  // Vamos forçar a validação: o texto do input busca deve bater com o selecionado? Não necessariamente.
+  // Vamos confiar no select.value.
 
-  // Validação cliente e toner selecionados
-  modeloHidden.value = selectToner.options[selectToner.selectedIndex]?.dataset.label ?? modeloHidden.value;
-  clienteNomeH.value = selectCliente.options[selectCliente.selectedIndex]?.dataset.nome ?? clienteNomeH.value;
-
-  if (!modeloHidden.value) {
+  if (!selectToner.value) {
     showToast('error', 'Campo obrigatório', 'Selecione um modelo de toner na lista.'); return;
   }
   if (!document.getElementById('numeroPedido').value.trim()) {
     showToast('error', 'Campo obrigatório', 'Informe o número do pedido.'); return;
   }
-  if (!clienteNomeH.value) {
+  if (!selectCliente.value) {
     showToast('error', 'Campo obrigatório', 'Selecione um cliente na lista.'); return;
   }
   if (!document.getElementById('descricaoDefeito').value.trim()) {
@@ -399,9 +478,9 @@ document.getElementById('formDefeito').addEventListener('submit', async (e) => {
 
   try {
     const fd = new FormData(e.target);
-    // Garantir que os campos hidden estejam no FormData
-    fd.set('modelo_toner', modeloHidden.value);
-    fd.set('cliente_nome', clienteNomeH.value);
+    // Garantir valores hidden corretos
+    fd.set('modelo_toner', document.getElementById('modeloTonerHidden').value);
+    fd.set('cliente_nome', document.getElementById('clienteNomeHidden').value);
 
     const resp = await fetch('/toners/defeitos/store', { method: 'POST', body: fd });
     const data = await resp.json();
@@ -411,18 +490,19 @@ document.getElementById('formDefeito').addEventListener('submit', async (e) => {
       e.target.reset();
       // Resetar previews
       [1, 2, 3].forEach(i => removerFoto(i));
-      // Resetar listboxes
-      selectToner.selectedIndex  = 0;
-      selectCliente.selectedIndex = 0;
-      modeloHidden.value  = selectToner.options[0]?.dataset.label ?? '';
-      clienteNomeH.value  = selectCliente.options[0]?.dataset.nome ?? '';
+      // Resetar selects e inputs visuais
+      selectToner.selectedIndex  = -1; // Desmarcar
+      selectCliente.selectedIndex = -1;
+      document.getElementById('buscaToner').value = '';
+      document.getElementById('buscaCliente').value = '';
+      
       // Recarregar histórico após 1s
       setTimeout(() => location.reload(), 2000);
     } else {
       showToast('error', 'Erro ao registrar', data.message ?? 'Tente novamente.');
     }
   } catch (err) {
-    showToast('error', 'Erro de conexão', 'Não foi possível enviar o formulário.');
+    showToast('error', 'Erro de conexão', 'Não foi possível enviar o formulário.' + err);
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Registrar Toner com Defeito';
