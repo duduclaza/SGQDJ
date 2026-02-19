@@ -1,10 +1,11 @@
 <?php
 // Simula ambiente
-$_SESSION['user_setor'] = 'Qualidade'; // Permissão OK
-$_SESSION['user_role'] = 'admin'; // Permissão OK
+$_SESSION['user_setor'] = 'Qualidade';
+
+$_SESSION['user_role'] = 'admin';
+
 $_SESSION['user_id'] = 1;
 
-$_POST['defeito_id'] = 1; // ID existente (espero)
 $_POST['devolutiva_descricao'] = 'Teste via Script Debug';
 
 // Mock File
@@ -29,16 +30,18 @@ try {
     echo "Controller Instanciado.\n";
 
     // Check Methods
-    $ref = new ReflectionClass($controller);
-    $methods = [];
-    foreach ($ref->getMethods() as $m) {
-        $methods[] = $m->name;
-    }
-    echo "Métodos Encontrados: " . implode(', ', $methods) . "\n";
-
     if (!method_exists($controller, 'storeDevolutiva')) {
         die("ERRO: O método storeDevolutiva NÃO existe na classe!\n");
     }
+
+    // 1. Create Dummy Record
+    $db = \App\Config\Database::getInstance();
+    $sql = "INSERT INTO toners_defeitos (descricao, modelo_toner, cliente_nome, quantidade, registrado_por, numero_pedido, cliente_id, created_at) VALUES ('TESTE DEBUG', 'TESTE', 'TESTE', 1, 1, '12345', 1, NOW())";
+    $db->exec($sql);
+    $fakeId = $db->lastInsertId();
+    echo "Registro Fake Criado ID: $fakeId\n";
+
+    $_POST['defeito_id'] = $fakeId;
 
     // Call Method
     ob_start();
@@ -46,6 +49,10 @@ try {
     $output = ob_get_clean();
 
     echo "Output JSON:\n" . $output . "\n";
+
+    // Cleanup
+    $db->exec("DELETE FROM toners_defeitos WHERE id = $fakeId");
+    echo "Registro Fake Excluído.\n";
 
 
 }
