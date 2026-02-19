@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // Function to check if user has permission
 function hasPermission($module, $action = 'view') {
     if (!isset($_SESSION['user_id'])) {
@@ -48,9 +48,10 @@ $menu = [
     'href' => '#', 
     'icon' => '📋', 
     'category' => true,
-    'modules' => ['toners_retornados', 'amostragens_2', 'garantias', 'controle_descartes', 'homologacoes', 'certificados', 'fmea', 'pops_its_visualizacao', 'pops_its_cadastro_titulos', 'pops_its_meus_registros', 'pops_its_pendente_aprovacao', 'fluxogramas', 'auditorias', 'nao_conformidades', 'melhoria_continua', 'melhoria_continua_2', 'controle_rc', 'nps'],
+    'modules' => ['toners_retornados', 'toners_defeitos', 'amostragens_2', 'garantias', 'controle_descartes', 'homologacoes', 'certificados', 'fmea', 'pops_its_visualizacao', 'pops_its_cadastro_titulos', 'pops_its_meus_registros', 'pops_its_pendente_aprovacao', 'fluxogramas', 'auditorias', 'nao_conformidades', 'melhoria_continua', 'melhoria_continua_2', 'controle_rc', 'nps'],
     'submenu' => [
       ['label' => 'Registro de Retornados', 'href' => '/toners/retornados', 'icon' => '📋', 'module' => 'toners_retornados'],
+      ['label' => 'Toners com Defeito', 'href' => '/toners/defeitos', 'icon' => '(!)', 'module' => 'toners_defeitos'],
       ['label' => 'Amostragens 2.0', 'href' => '/amostragens-2', 'icon' => '🔬', 'module' => 'amostragens_2'],
       ['label' => 'Controle de Descartes', 'href' => '/controle-descartes', 'icon' => '♻️', 'module' => 'controle_descartes'],
       // Itens originais de Gestão da Qualidade
