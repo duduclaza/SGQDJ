@@ -706,8 +706,14 @@ function openDevolutiva(id, mode, btn) {
     const btnSave = document.getElementById('btnSaveDevolutiva');
     const modeText = document.getElementById('devolutivaModeText');
     
+    // Move modal to body to escape sidebar stacking context
+    if (modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+    
     idInput.value = id;
     modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
     
     // Get Data
     const desc = btn.getAttribute('data-desc') || '';
@@ -773,6 +779,7 @@ function openDevolutiva(id, mode, btn) {
 
 function closeDevolutiva() {
     document.getElementById('modalDevolutiva').classList.add('hidden');
+    document.body.style.overflow = '';
 }
 
 function previewDevFoto(input, i) {
