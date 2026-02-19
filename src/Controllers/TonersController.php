@@ -1558,7 +1558,6 @@ class TonersController
             echo json_encode(['success' => false, 'message' => 'Erro ao atualizar: ' . $e->getMessage()]);
         }
     }
-    }
 
     // =========================================================
     // MÓDULO: TONERS COM DEFEITO
