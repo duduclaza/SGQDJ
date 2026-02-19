@@ -156,6 +156,27 @@ endfor; ?>
         </div>
       </div>
 
+      <!-- Linha 5: Notificar Setores (12) -->
+      <div class="md:col-span-12">
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">
+          Notificar Setores
+          <span class="text-gray-400 font-normal lowercase ml-1">(opcional â€” usuÃ¡rios dos setores selecionados receberÃ£o email)</span>
+        </label>
+        <div class="flex flex-wrap gap-2">
+          <?php if (!empty($departamentos_lista)): ?>
+            <?php foreach ($departamentos_lista as $dep): ?>
+              <label class="inline-flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-red-50 hover:border-red-300 transition-all has-[:checked]:bg-red-50 has-[:checked]:border-red-400 has-[:checked]:text-red-700 select-none">
+                <input type="checkbox" name="notificar_setores[]" value="<?php echo htmlspecialchars($dep['nome']); ?>"
+                  class="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2">
+                <span class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($dep['nome']); ?></span>
+              </label>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <span class="text-sm text-gray-400 italic">Nenhum departamento cadastrado.</span>
+          <?php endif; ?>
+        </div>
+      </div>
+
       <!-- Botão -->
       <div class="md:col-span-12 flex justify-end pt-4 border-t border-gray-100 mt-2">
         <button type="submit" id="btnRegistrar"

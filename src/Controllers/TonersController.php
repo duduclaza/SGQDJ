@@ -1614,11 +1614,20 @@ class TonersController
             $defeitos_historico = [];
         }
 
+        // Departamentos para o campo de notificacoes
+        try {
+            $stmt = $this->db->query('SELECT id, nome FROM departamentos ORDER BY nome');
+            $departamentos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            $departamentos_lista = [];
+        }
+
         $this->render('toners/defeitos', [
             'title'              => 'Toners com Defeito',
             'toners_lista'       => $toners_lista,
             'clientes_lista'     => $clientes_lista,
             'defeitos_historico' => $defeitos_historico,
+            'departamentos_lista' => $departamentos_lista,
         ]);
     }
 
@@ -1745,7 +1754,84 @@ class TonersController
                     );
                 }
             } catch (\Exception $notifEx) {
-                error_log('Erro ao enviar notificaÃ§Ãµes de defeito: ' . $notifEx->getMessage());
+                error_log('Erro ao enviar notificacoes de defeito (admins): ' . $notifEx->getMessage());
+            }
+
+            // ---- Notificar usuarios dos setores selecionados (in-app + email) ----
+            $setoresSelecionados = $_POST['notificar_setores'] ?? [];
+            if (!empty($setoresSelecionados) && is_array($setoresSelecionados)) {
+                try {
+                    $placeholders = implode(',', array_fill(0, count($setoresSelecionados), '?'));
+                    $params = $setoresSelecionados;
+                    $params[] = (int)$userId;
+
+                    $usersStmt = $this->db->prepare("
+                        SELECT id, email FROM users
+                        WHERE setor IN ($placeholders)
+                          AND id != ?
+                          AND status = 'active'
+                    ");
+                    $usersStmt->execute($params);
+                    $usersDoSetor = $usersStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    $tituloNotif = 'Toner com Defeito Registrado';
+                    $msgNotif = "O toner \"{$modelo_toner}\" (Pedido #{$numero_pedido} - Cliente: {$cliente_nome}) foi registrado com defeito.";
+                    $emailsParaNotificar = [];
+
+                    foreach ($usersDoSetor as $u) {
+                        NotificationsController::create(
+                            $u['id'],
+                            $tituloNotif,
+                            $msgNotif,
+                            'warning',
+                            'toner_defeito',
+                            $novoId
+                        );
+
+                        if (!empty($u['email']) && filter_var($u['email'], FILTER_VALIDATE_EMAIL)) {
+                            $emailsParaNotificar[] = $u['email'];
+                        }
+                    }
+
+                    if (!empty($emailsParaNotificar)) {
+                        try {
+                            $emailService = new \App\Services\EmailService();
+                            $appUrl = $_ENV['APP_URL'] ?? 'https://djbr.sgqoti.com.br';
+                            $registradoPor = $_SESSION['user_name'] ?? 'Usuario';
+                            $setoresTexto = implode(', ', $setoresSelecionados);
+
+                            $htmlBody = "
+<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Toner com Defeito</title></head>
+<body style='font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px;'>
+<div style='background:linear-gradient(135deg,#DC2626,#991B1B);padding:30px;text-align:center;border-radius:10px 10px 0 0;'>
+<h1 style='color:white;margin:0;font-size:28px;'>Toner com Defeito</h1>
+<p style='color:#f0f0f0;margin:5px 0 0 0;'>SGQ OTI DJ</p></div>
+<div style='background:white;padding:30px;border:1px solid #e0e0e0;border-top:none;'>
+<p style='color:#374151;font-size:15px;margin:0 0 20px 0;'>Um novo toner com defeito foi registrado e o seu setor foi notificado.</p>
+<table style='width:100%;border-collapse:collapse;margin:0 0 20px 0;'>
+<tr><td style='padding:10px 12px;border:1px solid #E5E7EB;background:#F9FAFB;font-weight:600;width:140px;'>Modelo</td><td style='padding:10px 12px;border:1px solid #E5E7EB;'>" . htmlspecialchars($modelo_toner) . "</td></tr>
+<tr><td style='padding:10px 12px;border:1px solid #E5E7EB;background:#F9FAFB;font-weight:600;'>Pedido</td><td style='padding:10px 12px;border:1px solid #E5E7EB;'>" . htmlspecialchars($numero_pedido) . "</td></tr>
+<tr><td style='padding:10px 12px;border:1px solid #E5E7EB;background:#F9FAFB;font-weight:600;'>Cliente</td><td style='padding:10px 12px;border:1px solid #E5E7EB;'>" . htmlspecialchars($cliente_nome) . "</td></tr>
+<tr><td style='padding:10px 12px;border:1px solid #E5E7EB;background:#F9FAFB;font-weight:600;'>Qtd</td><td style='padding:10px 12px;border:1px solid #E5E7EB;'>$quantidade</td></tr>
+<tr><td style='padding:10px 12px;border:1px solid #E5E7EB;background:#F9FAFB;font-weight:600;'>Descricao</td><td style='padding:10px 12px;border:1px solid #E5E7EB;'>" . nl2br(htmlspecialchars($descricao)) . "</td></tr>
+<tr><td style='padding:10px 12px;border:1px solid #E5E7EB;background:#F9FAFB;font-weight:600;'>Por</td><td style='padding:10px 12px;border:1px solid #E5E7EB;'>" . htmlspecialchars($registradoPor) . "</td></tr>
+<tr><td style='padding:10px 12px;border:1px solid #E5E7EB;background:#F9FAFB;font-weight:600;'>Setores</td><td style='padding:10px 12px;border:1px solid #E5E7EB;'>" . htmlspecialchars($setoresTexto) . "</td></tr>
+</table>
+<div style='text-align:center;margin:30px 0;'><a href='$appUrl/toners/defeitos' style='background:#DC2626;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:500;'>Ver no Sistema</a></div>
+</div>
+<div style='background:#f8f9fa;padding:20px;text-align:center;border-radius:0 0 10px 10px;border:1px solid #e0e0e0;border-top:none;'>
+<p style='margin:0;color:#666;font-size:12px;'>SGQ OTI DJ - Email automatico.</p></div></body></html>";
+
+                            $altBody = "SGQ - Toner com Defeito\nModelo: {$modelo_toner}\nPedido: #{$numero_pedido}\nCliente: {$cliente_nome}\nDescricao: {$descricao}\nPor: {$registradoPor}\nAcesse: {$appUrl}/toners/defeitos";
+
+                            $emailService->send($emailsParaNotificar, 'SGQ - Toner com Defeito Registrado', $htmlBody, $altBody);
+                        } catch (\Exception $emailEx) {
+                            error_log('Erro ao enviar emails de defeito para setores: ' . $emailEx->getMessage());
+                        }
+                    }
+                } catch (\Exception $setorEx) {
+                    error_log('Erro ao notificar setores: ' . $setorEx->getMessage());
+                }
             }
 
             echo json_encode([
