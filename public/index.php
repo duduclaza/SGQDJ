@@ -202,6 +202,11 @@ $router->get('/toners/retornados/{id}', [App\Controllers\TonersController::class
 $router->post('/toners/retornados/update', [App\Controllers\TonersController::class , 'updateRetornado']);
 $router->post('/toners/import', [App\Controllers\TonersController::class , 'import']);
 $router->get('/toners/export', [App\Controllers\TonersController::class , 'exportExcelAdvanced']);
+// Toners com Defeito
+$router->get('/toners/defeitos', [App\Controllers\TonersController::class , 'defeitos']);
+$router->post('/toners/defeitos/store', [App\Controllers\TonersController::class , 'storeDefeito']);
+$router->get('/toners/defeitos/{id}/foto/{n}', [App\Controllers\TonersController::class , 'downloadFotoDefeito']);
+
 
 // Melhoria Contínua 2.0 routes
 $router->get('/melhoria-continua-2', [App\Controllers\MelhoriaContinua2Controller::class , 'index']);
@@ -583,54 +588,6 @@ $router->get('/registros/filiais', [App\Controllers\RegistrosController::class ,
 $router->get('/registros/departamentos', [App\Controllers\RegistrosController::class , 'departamentos']);
 $router->get('/registros/fornecedores', [App\Controllers\RegistrosController::class , 'fornecedores']);
 $router->get('/registros/parametros', [App\Controllers\RegistrosController::class , 'parametros']);
-
-// Gestão de Implantação routes (Admin Only)
-$router->get('/implantacao/dpo', [App\Controllers\ImplantacaoController::class , 'dpo']);
-$router->get('/implantacao/ordem-servicos', [App\Controllers\ImplantacaoController::class , 'ordemServicos']);
-$router->get('/implantacao/fluxo', [App\Controllers\ImplantacaoController::class , 'fluxo']);
-$router->get('/implantacao/relatorios', [App\Controllers\ImplantacaoController::class , 'relatorios']);
-
-// CRM routes (Admin Only)
-$router->get('/crm/prospeccao', [App\Controllers\CRMController::class , 'prospeccao']);
-$router->get('/crm/vendas', [App\Controllers\CRMController::class , 'vendas']);
-$router->get('/crm/relacionamento', [App\Controllers\CRMController::class , 'relacionamento']);
-$router->get('/crm/marketing', [App\Controllers\CRMController::class , 'marketing']);
-$router->get('/crm/relatorios', [App\Controllers\CRMController::class , 'relatorios']);
-$router->get('/crm/dashboards', [App\Controllers\CRMController::class , 'dashboards']);
-
-// Logística routes (Admin Only - Premium R$ 600/mês)
-$router->get('/logistica/entrada-estoque', function () {
-    $viewFile = __DIR__ . '/../views/pages/logistica/entrada-estoque.php';
-    include __DIR__ . '/../views/layouts/main.php';
-});
-$router->get('/logistica/entrada-almoxarifados', function () {
-    $viewFile = __DIR__ . '/../views/pages/logistica/entrada-almoxarifados.php';
-    include __DIR__ . '/../views/layouts/main.php';
-});
-$router->get('/logistica/inventarios', function () {
-    $viewFile = __DIR__ . '/../views/pages/logistica/inventarios.php';
-    include __DIR__ . '/../views/layouts/main.php';
-});
-$router->get('/logistica/consulta-estoque', function () {
-    $viewFile = __DIR__ . '/../views/pages/logistica/consulta-estoque.php';
-    include __DIR__ . '/../views/layouts/main.php';
-});
-$router->get('/logistica/consulta-almoxarifado', function () {
-    $viewFile = __DIR__ . '/../views/pages/logistica/consulta-almoxarifado.php';
-    include __DIR__ . '/../views/layouts/main.php';
-});
-$router->get('/logistica/transferencias-internas', function () {
-    $viewFile = __DIR__ . '/../views/pages/logistica/transferencias-internas.php';
-    include __DIR__ . '/../views/layouts/main.php';
-});
-$router->get('/logistica/transferencias-externas', function () {
-    $viewFile = __DIR__ . '/../views/pages/logistica/transferencias-externas.php';
-    include __DIR__ . '/../views/layouts/main.php';
-});
-$router->get('/logistica/estoque-tecnico', function () {
-    $viewFile = __DIR__ . '/../views/pages/logistica/estoque-tecnico.php';
-    include __DIR__ . '/../views/layouts/main.php';
-});
 
 // Power BI API routes
 $router->get('/api/powerbi', [App\Controllers\PowerBIController::class , 'index']);

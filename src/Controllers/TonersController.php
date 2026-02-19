@@ -1558,4 +1558,249 @@ class TonersController
             echo json_encode(['success' => false, 'message' => 'Erro ao atualizar: ' . $e->getMessage()]);
         }
     }
+    }
+
+    // =========================================================
+    // MÓDULO: TONERS COM DEFEITO
+    // =========================================================
+
+    /**
+     * Página principal do módulo Toners com Defeito
+     */
+    public function defeitos(): void
+    {
+        try {
+            // Todos os toners para o listbox (id + modelo)
+            $stmt = $this->db->query('SELECT id, modelo FROM toners ORDER BY modelo ASC');
+            $toners_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            $toners_lista = [];
+        }
+
+        try {
+            // Todos os clientes para o listbox (id + codigo + nome)
+            $stmt = $this->db->query('SELECT id, codigo, nome FROM clientes ORDER BY nome ASC');
+            $clientes_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            $clientes_lista = [];
+        }
+
+        try {
+            // Histórico de defeitos registrados
+            $stmt = $this->db->query("
+                SELECT
+                    td.id,
+                    td.modelo_toner,
+                    td.numero_pedido,
+                    td.cliente_nome,
+                    td.descricao,
+                    td.foto1_nome,
+                    td.foto2_nome,
+                    td.foto3_nome,
+                    td.created_at,
+                    u.name AS registrado_por_nome
+                FROM toners_defeitos td
+                LEFT JOIN users u ON u.id = td.registrado_por
+                ORDER BY td.created_at DESC
+                LIMIT 200
+            ");
+            $defeitos_historico = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            $defeitos_historico = [];
+        }
+
+        $this->render('toners/defeitos', [
+            'title'              => 'Toners com Defeito',
+            'toners_lista'       => $toners_lista,
+            'clientes_lista'     => $clientes_lista,
+            'defeitos_historico' => $defeitos_historico,
+        ]);
+    }
+
+    /**
+     * Registrar um novo Toner com Defeito (POST JSON)
+     */
+    public function storeDefeito(): void
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $userId = $_SESSION['user_id'] ?? null;
+
+            // ---- Campos de texto ----
+            $toner_id      = !empty($_POST['toner_id'])   ? (int)$_POST['toner_id']   : null;
+            $modelo_toner  = trim($_POST['modelo_toner']  ?? '');
+            $numero_pedido = trim($_POST['numero_pedido'] ?? '');
+            $cliente_id    = !empty($_POST['cliente_id']) ? (int)$_POST['cliente_id'] : null;
+            $cliente_nome  = trim($_POST['cliente_nome']  ?? '');
+            $descricao     = trim($_POST['descricao']     ?? '');
+
+            // ---- Validação ----
+            $erros = [];
+            if (empty($modelo_toner))  $erros[] = 'Modelo do Toner';
+            if (empty($numero_pedido)) $erros[] = 'Número do Pedido';
+            if (empty($cliente_nome))  $erros[] = 'Cliente';
+            if (empty($descricao))     $erros[] = 'Descrição do Defeito';
+
+            if (!empty($erros)) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Campos obrigatórios não preenchidos: ' . implode(', ', $erros),
+                ]);
+                return;
+            }
+
+            // ---- Processar fotos (até 3 arquivos MEDIUMBLOB ~16MB cada) ----
+            $fotos = [];
+            for ($i = 1; $i <= 3; $i++) {
+                $key = 'foto' . $i;
+                if (
+                    isset($_FILES[$key]) &&
+                    $_FILES[$key]['error'] === UPLOAD_ERR_OK &&
+                    $_FILES[$key]['size'] > 0
+                ) {
+                    $mime = mime_content_type($_FILES[$key]['tmp_name']);
+                    if (!str_starts_with($mime, 'image/')) {
+                        echo json_encode([
+                            'success' => false,
+                            'message' => "Foto {$i}: apenas imagens são permitidas (recebido: {$mime})",
+                        ]);
+                        return;
+                    }
+                    $fotos[$i] = [
+                        'dados' => file_get_contents($_FILES[$key]['tmp_name']),
+                        'nome'  => basename($_FILES[$key]['name']),
+                        'tipo'  => $mime,
+                    ];
+                } else {
+                    $fotos[$i] = null;
+                }
+            }
+
+            // ---- Inserir no banco ----
+            $stmt = $this->db->prepare("
+                INSERT INTO toners_defeitos
+                    (toner_id, modelo_toner, numero_pedido, cliente_id, cliente_nome, descricao,
+                     foto1, foto1_nome, foto1_tipo,
+                     foto2, foto2_nome, foto2_tipo,
+                     foto3, foto3_nome, foto3_tipo,
+                     registrado_por, created_at)
+                VALUES
+                    (:toner_id, :modelo_toner, :numero_pedido, :cliente_id, :cliente_nome, :descricao,
+                     :foto1, :foto1_nome, :foto1_tipo,
+                     :foto2, :foto2_nome, :foto2_tipo,
+                     :foto3, :foto3_nome, :foto3_tipo,
+                     :registrado_por, NOW())
+            ");
+
+            $stmt->bindValue(':toner_id',     $toner_id,                     PDO::PARAM_INT);
+            $stmt->bindValue(':modelo_toner', $modelo_toner);
+            $stmt->bindValue(':numero_pedido',$numero_pedido);
+            $stmt->bindValue(':cliente_id',   $cliente_id,                    PDO::PARAM_INT);
+            $stmt->bindValue(':cliente_nome', $cliente_nome);
+            $stmt->bindValue(':descricao',    $descricao);
+            // Foto 1
+            $stmt->bindValue(':foto1',        $fotos[1] ? $fotos[1]['dados'] : null, $fotos[1] ? PDO::PARAM_LOB : PDO::PARAM_NULL);
+            $stmt->bindValue(':foto1_nome',   $fotos[1] ? $fotos[1]['nome']  : null);
+            $stmt->bindValue(':foto1_tipo',   $fotos[1] ? $fotos[1]['tipo']  : null);
+            // Foto 2
+            $stmt->bindValue(':foto2',        $fotos[2] ? $fotos[2]['dados'] : null, $fotos[2] ? PDO::PARAM_LOB : PDO::PARAM_NULL);
+            $stmt->bindValue(':foto2_nome',   $fotos[2] ? $fotos[2]['nome']  : null);
+            $stmt->bindValue(':foto2_tipo',   $fotos[2] ? $fotos[2]['tipo']  : null);
+            // Foto 3
+            $stmt->bindValue(':foto3',        $fotos[3] ? $fotos[3]['dados'] : null, $fotos[3] ? PDO::PARAM_LOB : PDO::PARAM_NULL);
+            $stmt->bindValue(':foto3_nome',   $fotos[3] ? $fotos[3]['nome']  : null);
+            $stmt->bindValue(':foto3_tipo',   $fotos[3] ? $fotos[3]['tipo']  : null);
+            $stmt->bindValue(':registrado_por', $userId, PDO::PARAM_INT);
+
+            $stmt->execute();
+            $novoId = (int)$this->db->lastInsertId();
+
+            // ---- Notificar todos os admins e super_admins ----
+            try {
+                $admStmt = $this->db->query("
+                    SELECT id FROM users
+                    WHERE role IN ('admin', 'super_admin', 'superadmin')
+                      AND id != " . (int)$userId . "
+                ");
+                $admins = $admStmt->fetchAll(PDO::FETCH_COLUMN);
+
+                $titulo = '⚠️ Toner com Defeito Registrado';
+                $mensagem = "O toner \"{$modelo_toner}\" (Pedido #{$numero_pedido} – Cliente: {$cliente_nome}) foi registrado com defeito.";
+
+                foreach ($admins as $adminId) {
+                    NotificationsController::create(
+                        $adminId,
+                        $titulo,
+                        $mensagem,
+                        'warning',
+                        'toner_defeito',
+                        $novoId
+                    );
+                }
+            } catch (\Exception $notifEx) {
+                error_log('Erro ao enviar notificações de defeito: ' . $notifEx->getMessage());
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Toner com defeito registrado com sucesso!',
+                'id'      => $novoId,
+            ]);
+
+        } catch (\PDOException $e) {
+            error_log('storeDefeito PDO error: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Erro ao registrar: ' . $e->getMessage()]);
+        } catch (\Exception $e) {
+            error_log('storeDefeito error: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Erro interno: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Serve foto de evidência armazenada como BLOB
+     * GET /toners/defeitos/{id}/foto/{n}  (n = 1, 2 ou 3)
+     */
+    public function downloadFotoDefeito(): void
+    {
+        // Extrair parâmetros da URL /toners/defeitos/{id}/foto/{n}
+        $path   = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+        $parts  = explode('/', trim($path, '/'));
+        // Esperado: ['toners', 'defeitos', '{id}', 'foto', '{n}']
+        $id = isset($parts[2]) ? (int)$parts[2] : 0;
+        $n  = isset($parts[4]) ? (int)$parts[4] : 1;
+
+        if ($id <= 0 || !in_array($n, [1, 2, 3])) {
+            http_response_code(400);
+            echo 'Parâmetros inválidos';
+            return;
+        }
+
+        try {
+            $col = "foto{$n}";
+            $stmt = $this->db->prepare(
+                "SELECT {$col}, foto{$n}_nome AS nome, foto{$n}_tipo AS tipo FROM toners_defeitos WHERE id = ?"
+            );
+            $stmt->execute([$id]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$row || empty($row[$col])) {
+                http_response_code(404);
+                echo 'Foto não encontrada';
+                return;
+            }
+
+            $mime = $row['tipo'] ?: 'image/jpeg';
+            $nome = $row['nome'] ?: "foto{$n}.jpg";
+
+            header('Content-Type: ' . $mime);
+            header('Content-Disposition: inline; filename="' . $nome . '"');
+            header('Cache-Control: max-age=3600');
+            echo $row[$col];
+
+        } catch (\PDOException $e) {
+            http_response_code(500);
+            echo 'Erro ao recuperar imagem';
+        }
+    }
 }
