@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>PRD — Layout, Sidebar, Login & Logout | SGQ OTI DJ</title>
+    <style>
+        @page {
+            margin: 2cm;
+            size: A4
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #1e293b;
+            line-height: 1.7;
+            padding: 40px 50px;
+            max-width: 920px;
+            margin: 0 auto
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #0f172a;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 12px;
+            margin-bottom: 8px
+        }
+
+        h2 {
+            font-size: 20px;
+            color: #1e40af;
+            margin-top: 36px;
+            margin-bottom: 12px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 12px
+        }
+
+        h3 {
+            font-size: 16px;
+            color: #334155;
+            margin-top: 20px;
+            margin-bottom: 8px
+        }
+
+        h4 {
+            font-size: 14px;
+            color: #475569;
+            margin-top: 14px;
+            margin-bottom: 6px
+        }
+
+        p,
+        li {
+            font-size: 13px
+        }
+
+        p {
+            margin-bottom: 10px
+        }
+
+        ul,
+        ol {
+            margin-left: 20px;
+            margin-bottom: 12px
+        }
+
+        li {
+            margin-bottom: 4px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0 20px;
+            font-size: 12px
+        }
+
+        th {
+            background: #1e40af;
+            color: #fff;
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 600
+        }
+
+        td {
+            padding: 7px 10px;
+            border-bottom: 1px solid #e2e8f0
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc
+        }
+
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #7c3aed
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600
+        }
+
+        .b-blue {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        .b-green {
+            background: #dcfce7;
+            color: #166534
+        }
+
+        .b-red {
+            background: #fef2f2;
+            color: #991b1b
+        }
+
+        .b-yellow {
+            background: #fefce8;
+            color: #854d0e
+        }
+
+        .b-purple {
+            background: #f3e8ff;
+            color: #6b21a8
+        }
+
+        .b-orange {
+            background: #fff7ed;
+            color: #9a3412
+        }
+
+        .b-gray {
+            background: #f1f5f9;
+            color: #475569
+        }
+
+        .box {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0
+        }
+
+        .box-warn {
+            background: #fffbeb;
+            border-color: #fcd34d
+        }
+
+        .box-green {
+            background: #f0fdf4;
+            border-color: #86efac
+        }
+
+        .box-red {
+            background: #fef2f2;
+            border-color: #fca5a5
+        }
+
+        .cover {
+            text-align: center;
+            padding: 60px 0 40px;
+            page-break-after: always
+        }
+
+        .cover h1 {
+            font-size: 36px;
+            border: none;
+            margin-bottom: 16px
+        }
+
+        .cover p {
+            font-size: 16px;
+            color: #64748b
+        }
+
+        .cover .version {
+            margin-top: 40px;
+            font-size: 13px;
+            color: #94a3b8
+        }
+
+        .pb {
+            page-break-before: always
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 4px
+        }
+
+        .tag-g {
+            background: #dcfce7;
+            color: #166534
+        }
+
+        .tag-a {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .tag-p {
+            background: #ede9fe;
+            color: #6b21a8
+        }
+
+        .tag-r {
+            background: #fef2f2;
+            color: #991b1b
+        }
+
+        /* MOCKUPS */
+        .mock {
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 0;
+            margin: 16px 0;
+            background: #fff;
+            overflow: hidden
+        }
+
+        .mock-top {
+            background: #1e293b;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .mock-top .logo {
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px
+        }
+
+        .mock-top .logo span {
+            color: #60a5fa
+        }
+
+        .mock-top-icons {
+            display: flex;
+            gap: 12px;
+            align-items: center
+        }
+
+        .mock-top-icons span {
+            color: #94a3b8;
+            font-size: 16px;
+            cursor: pointer
+        }
+
+        .mock-body {
+            display: flex;
+            min-height: 420px
+        }
+
+        /* Sidebar mock */
+        .sb {
+            width: 250px;
+            background: #1e293b;
+            padding: 12px;
+            flex-shrink: 0;
+            border-right: 1px solid #334155
+        }
+
+        .sb-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: #94a3b8;
+            font-size: 12px;
+            margin-bottom: 2px;
+            cursor: default
+        }
+
+        .sb-item:hover,
+        .sb-item.active {
+            background: #334155;
+            color: #fff
+        }
+
+        .sb-item.active {
+            background: #2563eb;
+            color: #fff
+        }
+
+        .sb-cat {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #64748b;
+            font-weight: 700;
+            padding: 16px 12px 6px;
+            margin-top: 4px
+        }
+
+        .sb-sub {
+            margin-left: 24px
+        }
+
+        .sb-sep {
+            border-top: 1px solid #334155;
+            margin: 8px 0
+        }
+
+        .sb-badge {
+            background: #eab308;
+            color: #000;
+            font-size: 9px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            margin-left: auto
+        }
+
+        .sb-badge-purple {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: #fff
+        }
+
+        .sb-user {
+            border-top: 1px solid #334155;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: auto
+        }
+
+        .sb-avatar {
+            width: 32px;
+            height: 32px;
+            background: #2563eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 13px
+        }
+
+        .sb-user-info {
+            flex: 1
+        }
+
+        .sb-user-info div:first-child {
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600
+        }
+
+        .sb-user-info div:last-child {
+            color: #64748b;
+            font-size: 10px
+        }
+
+        .sb-icons {
+            display: flex;
+            gap: 8px
+        }
+
+        .sb-icons span {
+            color: #64748b;
+            font-size: 14px
+        }
+
+        /* Content area */
+        .content {
+            flex: 1;
+            background: #f8fafc;
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .content-placeholder {
+            text-align: center;
+            color: #94a3b8
+        }
+
+        .content-placeholder .icon {
+            font-size: 48px;
+            margin-bottom: 12px
+        }
+
+        .content-placeholder .text {
+            font-size: 14px
+        }
+
+        /* Login mock */
+        .login-mock {
+            display: flex;
+            min-height: 480px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #cbd5e1;
+            margin: 16px 0
+        }
+
+        .login-left {
+            flex: 1;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #6366f1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px
+        }
+
+        .login-form {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 340px;
+            border: 1px solid rgba(255, 255, 255, 0.2)
+        }
+
+        .login-form h3 {
+            color: #fff;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 4px
+        }
+
+        .login-form p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            text-align: center;
+            margin-bottom: 20px
+        }
+
+        .login-field {
+            margin-bottom: 14px
+        }
+
+        .login-field label {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 11px;
+            margin-bottom: 4px;
+            font-weight: 600
+        }
+
+        .login-field .inp {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 12px
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+            margin-top: 8px;
+            cursor: pointer
+        }
+
+        .login-links {
+            text-align: center;
+            margin-top: 16px
+        }
+
+        .login-links a {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 11px;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 6px
+        }
+
+        .login-right {
+            flex: 1;
+            background: linear-gradient(135deg, #fff 0%, #f8fafc 50%, #f1f5f9 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px
+        }
+
+        .login-right .brand {
+            text-align: center
+        }
+
+        .login-right .brand h1 {
+            font-size: 72px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #1e40af, #3b82f6, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px
+        }
+
+        .login-right .brand p {
+            color: #94a3b8;
+            font-size: 14px
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 10px;
+            flex-wrap: wrap
+        }
+
+        .form-field {
+            flex: 1;
+            min-width: 180px
+        }
+
+        .form-field label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 3px;
+            text-transform: uppercase
+        }
+
+        .form-field .input {
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 12px;
+            color: #334155;
+            background: #f8fafc;
+            width: 100%
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px
+        }
+
+        .btn-p {
+            background: #3b82f6;
+            color: #fff
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- CAPA -->
+    <div class="cover">
+        <p style="font-size:14px;color:#3b82f6;font-weight:600;letter-spacing:2px">SGQ OTI DJ</p>
+        <h1>Layout, Sidebar, Login & Logout</h1>
+        <p>Especificação do layout principal, estrutura de navegação do sidebar,<br>fluxo de login/logout/registro e
+            listagem de todos os módulos.</p>
+        <div class="version">
+            <p>Versão 1.0 — Fevereiro 2026</p>
+            <p>Stack alvo: Next.js 14 + TypeScript + Tailwind CSS + shadcn/ui</p>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 1. VISÃO GERAL DO LAYOUT -->
+    <!-- ============================================ -->
+
+    <h2>1. Visão Geral do Layout</h2>
+
+    <p>O sistema usa dois layouts distintos:</p>
+    <table>
+        <tr>
+            <th>Layout</th>
+            <th>Arquivo PHP</th>
+            <th>Next.js</th>
+            <th>Onde é usado</th>
+        </tr>
+        <tr>
+            <td><strong>Auth Layout</strong></td>
+            <td><code>layouts/auth.php</code></td>
+            <td><code>app/(auth)/layout.tsx</code></td>
+            <td>Login, Registro, Recuperação de Senha, Solicitar Acesso</td>
+        </tr>
+        <tr>
+            <td><strong>Main Layout</strong></td>
+            <td><code>layouts/main.php</code></td>
+            <td><code>app/(dashboard)/layout.tsx</code></td>
+            <td>Todas as páginas autenticadas (com sidebar)</td>
+        </tr>
+    </table>
+
+    <h3>1.1 Estrutura do Main Layout</h3>
+    <div class="mock">
+        <div class="mock-top">
+            <div class="logo"><span>OTI</span> — SGQ</div>
+            <div class="mock-top-icons">
+                <span>🔔</span>
+                <span>🎫 Suporte</span>
+                <span>👤</span>
+            </div>
+        </div>
+        <div class="mock-body">
+            <div class="sb" style="display:flex;flex-direction:column">
+                <div>
+                    <div class="sb-item active">🏠 Início</div>
+                    <div class="sb-item">📊 Dashboard</div>
+                    <div class="sb-item">🎓 e-Learning Atlas <span class="sb-badge sb-badge-purple">EM BREVE</span>
+                    </div>
+                    <div class="sb-item">👥 RH</div>
+                    <div class="sb-sep"></div>
+                    <div class="sb-cat">📝 Cadastros</div>
+                    <div class="sb-sub sb-item">📦 Cadastros 2.0 <span class="sb-badge">NOVO</span></div>
+                    <div class="sb-sub sb-item">💧 Cadastro de Toners</div>
+                    <div class="sb-sub sb-item">🖨️ Cadastro de Máquinas</div>
+                    <div class="sb-sub sb-item">🔧 Cadastro de Peças</div>
+                    <div class="sb-sub sb-item">🏭 Cadastro de Fornecedores</div>
+                    <div class="sb-sub sb-item">📄 Cadastro de Contratos</div>
+                    <div class="sb-sub sb-item">👥 Cadastro de Clientes</div>
+                    <div class="sb-sep"></div>
+                    <div class="sb-cat">📋 Gestão da Qualidade</div>
+                    <div class="sb-sub sb-item" style="color:#64748b;font-size:10px">... (ver seção 3)</div>
+                    <div class="sb-sep"></div>
+                    <div class="sb-cat">⚙️ Administrativo</div>
+                    <div class="sb-sub sb-item" style="color:#64748b;font-size:10px">... (ver seção 3)</div>
+                </div>
+                <div style="margin-top:auto">
+                    <div class="sb-user">
+                        <div class="sb-avatar">J</div>
+                        <div class="sb-user-info">
+                            <div>João Silva</div>
+                            <div>admin</div>
+                        </div>
+                        <div class="sb-icons"><span>🔔</span><span>🚪</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="content">
+                <div class="content-placeholder">
+                    <div class="icon">📄</div>
+                    <div class="text"><strong>Conteúdo da Página</strong><br>Cada módulo renderiza seu conteúdo
+                        aqui.<br>As páginas dos módulos devem ser <strong>criadas vazias</strong> (placeholder)<br>e
+                        serão desenvolvidas uma a uma.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>1.2 Comportamento Responsivo</h3>
+    <table>
+        <tr>
+            <th>Viewport</th>
+            <th>Sidebar</th>
+            <th>Header Mobile</th>
+        </tr>
+        <tr>
+            <td><strong>Desktop</strong> (≥1024px / <code>lg:</code>)</td>
+            <td>Sidebar fixo, 288px (<code>w-72</code>), sempre visível</td>
+            <td>Oculto</td>
+        </tr>
+        <tr>
+            <td><strong>Mobile</strong> (<1024px)< /td>
+            <td>Drawer oculto, abre com botão hambúrguer, overlay escuro</td>
+            <td>Barra de 56px com logo e botão menu</td>
+        </tr>
+    </table>
+
+    <div class="box box-warn">
+        <strong>⚠️ Para o Dev:</strong> No Next.js, o sidebar será um componente <code>Sidebar.tsx</code> importado no
+        layout. Usar <code>useState</code> para controlar exibição do drawer mobile. As classes TailwindCSS
+        <code>hidden lg:flex</code> controlam a visibilidade responsiva.
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 2. LOGIN, LOGOUT & AUTENTICAÇÃO -->
+    <!-- ============================================ -->
+
+    <h2 class="pb">2. Login, Logout & Autenticação</h2>
+
+    <h3>2.1 Mockup — Tela de Login</h3>
+    <div class="login-mock">
+        <div class="login-left">
+            <div class="login-form">
+                <h3>🔐 Entrar no SGQ</h3>
+                <p>Sistema de Gestão da Qualidade OTI</p>
+                <div class="login-field">
+                    <label>Email</label>
+                    <div class="inp">usuario@oti.com.br</div>
+                </div>
+                <div class="login-field">
+                    <label>Senha</label>
+                    <div class="inp">••••••••</div>
+                </div>
+                <div class="login-btn">ENTRAR</div>
+                <div class="login-links">
+                    <a href="#">Esqueceu a senha?</a>
+                    <a href="#">Solicitar acesso</a>
+                    <a href="#">Criar conta</a>
+                </div>
+            </div>
+        </div>
+        <div class="login-right">
+            <div class="brand">
+                <h1>OTI</h1>
+                <p>Organização Tecnológica Integrada</p>
+            </div>
+        </div>
+    </div>
+
+    <h3>2.2 Rotas de Autenticação</h3>
+    <table>
+        <tr>
+            <th>Método</th>
+            <th>Rota PHP</th>
+            <th>Rota Next.js</th>
+            <th>Descrição</th>
+        </tr>
+        <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/login</code></td>
+            <td><code>/login</code></td>
+            <td>Tela de login</td>
+        </tr>
+        <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/auth/login</code></td>
+            <td><code>/api/auth/signin</code></td>
+            <td>Autenticar (NextAuth)</td>
+        </tr>
+        <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/logout</code></td>
+            <td><code>/api/auth/signout</code></td>
+            <td>Finalizar sessão</td>
+        </tr>
+        <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/register</code></td>
+            <td><code>/register</code></td>
+            <td>Tela de registro</td>
+        </tr>
+        <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/auth/register</code></td>
+            <td><code>/api/auth/register</code></td>
+            <td>Processar registro</td>
+        </tr>
+        <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/password-reset/request</code></td>
+            <td><code>/forgot-password</code></td>
+            <td>Solicitar reset de senha</td>
+        </tr>
+        <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/password-reset/request</code></td>
+            <td><code>/api/auth/reset-password</code></td>
+            <td>Enviar email de reset</td>
+        </tr>
+        <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/password-reset/verify</code></td>
+            <td><code>/reset-password/verify</code></td>
+            <td>Verificar código</td>
+        </tr>
+        <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/password-reset/reset</code></td>
+            <td><code>/api/auth/new-password</code></td>
+            <td>Nova senha</td>
+        </tr>
+        <tr>
+            <td><span class="badge b-blue">GET</span></td>
+            <td><code>/request-access</code></td>
+            <td><code>/request-access</code></td>
+            <td>Solicitar acesso (público)</td>
+        </tr>
+        <tr>
+            <td><span class="badge b-green">POST</span></td>
+            <td><code>/access-request/process</code></td>
+            <td><code>/api/access-request</code></td>
+            <td>Processar solicitação</td>
+        </tr>
+    </table>
+
+    <h3>2.3 Fluxo de Autenticação</h3>
+    <div class="box">
+        <p style="font-size:12px;margin:0">
+            <strong>1.</strong> Usuário acessa <code>/login</code> → Auth Layout (sem sidebar)<br>
+            <strong>2.</strong> Preenche email + senha → POST para NextAuth <code>CredentialsProvider</code><br>
+            <strong>3.</strong> NextAuth valida no MariaDB via Prisma → Cria sessão JWT<br>
+            <strong>4.</strong> Redireciona para <code>/inicio</code> (todos) ou <code>/dashboard</code> (se tiver
+            permissão)<br>
+            <strong>5.</strong> Main Layout renderiza com sidebar + conteúdo da página<br>
+            <strong>6.</strong> Logout: Chamada para <code>/api/auth/signout</code> → limpa sessão → redireciona
+            <code>/login</code>
+        </p>
+    </div>
+
+    <h3>2.4 Layout da Tela de Login</h3>
+    <ul>
+        <li><strong>Split 50/50:</strong> Painel esquerdo (gradiente azul/roxo) com formulário</li>
+        <li><strong>Painel direito:</strong> Branding "OTI" com efeito typwriter "Organização Tecnológica Integrada"
+        </li>
+        <li><strong>Glassmorphism:</strong> Formulário com fundo semi-transparente + blur</li>
+        <li><strong>Mobile:</strong> Painel direito oculto — apenas formulário ocupa 100%</li>
+        <li><strong>Tema Natalino:</strong> Em dezembro, neve caindo + Papai Noel voando (opcional para Next.js)</li>
+    </ul>
+
+    <h3>2.5 Sessão do Usuário (dados armazenados)</h3>
+    <table>
+        <tr>
+            <th>Campo</th>
+            <th>Sessão PHP</th>
+            <th>JWT Next.js</th>
+            <th>Uso</th>
+        </tr>
+        <tr>
+            <td>ID do usuário</td>
+            <td><code>$_SESSION['user_id']</code></td>
+            <td><code>session.user.id</code></td>
+            <td>Identificação</td>
+        </tr>
+        <tr>
+            <td>Nome</td>
+            <td><code>$_SESSION['user_name']</code></td>
+            <td><code>session.user.name</code></td>
+            <td>Exibição</td>
+        </tr>
+        <tr>
+            <td>Email</td>
+            <td><code>$_SESSION['user_email']</code></td>
+            <td><code>session.user.email</code></td>
+            <td>Identificação</td>
+        </tr>
+        <tr>
+            <td>Role</td>
+            <td><code>$_SESSION['user_role']</code></td>
+            <td><code>session.user.role</code></td>
+            <td>Controle de acesso</td>
+        </tr>
+        <tr>
+            <td>Setor</td>
+            <td><code>$_SESSION['user_setor']</code></td>
+            <td><code>session.user.setor</code></td>
+            <td>Filtro RH no sidebar</td>
+        </tr>
+        <tr>
+            <td>Notificações</td>
+            <td><code>$_SESSION['notificacoes_ativadas']</code></td>
+            <td><code>session.user.notifications</code></td>
+            <td>Exibir/ocultar sininho</td>
+        </tr>
+    </table>
+
+    <!-- ============================================ -->
+    <!-- 3. ESTRUTURA COMPLETA DO SIDEBAR -->
+    <!-- ============================================ -->
+
+    <h2 class="pb">3. Estrutura Completa do Sidebar — Todos os Módulos</h2>
+
+    <div class="box box-red">
+        <strong>🚨 IMPORTANTE PARA O DEV:</strong> Todas as páginas de módulos listadas abaixo devem ser <strong>criadas
+            VAZIAS</strong> (apenas o layout com o título do módulo). O conteúdo de cada módulo será implementado um a
+        um, conforme a prioridade definida no roadmap.
+    </div>
+
+    <h3>3.1 Itens Fixos (Topo — Sem Categoria)</h3>
+    <table>
+        <tr>
+            <th>Ícone</th>
+            <th>Label</th>
+            <th>Rota</th>
+            <th>Permissão</th>
+            <th>Obs</th>
+        </tr>
+        <tr>
+            <td>🏠</td>
+            <td><strong>Início</strong></td>
+            <td><code>/inicio</code></td>
+            <td>Todos autenticados</td>
+            <td>Página inicial pós-login</td>
+        </tr>
+        <tr>
+            <td>📊</td>
+            <td><strong>Dashboard</strong></td>
+            <td><code>/dashboard</code></td>
+            <td><code>dashboard.view</code></td>
+            <td>Dashboard analítico</td>
+        </tr>
+        <tr>
+            <td>🎓</td>
+            <td><strong>e-Learning Atlas</strong></td>
+            <td>—</td>
+            <td>Todos</td>
+            <td><span class="tag tag-p">EM BREVE</span> Mostra animação</td>
+        </tr>
+        <tr>
+            <td>👥</td>
+            <td><strong>RH</strong></td>
+            <td>Link externo</td>
+            <td>Admin OU Setor = "RH"</td>
+            <td>Abre nova aba</td>
+        </tr>
+    </table>
+
+    <h3>3.2 Categoria: 📝 Cadastros</h3>
+    <table>
+        <tr>
+            <th>Ícone</th>
+            <th>Label</th>
+            <th>Rota Next.js</th>
+            <th>Módulo (permissão)</th>
+            <th>Obs</th>
+        </tr>
+        <tr>
+            <td>📦</td>
+            <td>Cadastros 2.0</td>
+            <td><code>/cadastros</code></td>
+            <td><code>cadastros_2</code></td>
+            <td><span class="sb-badge">NOVO</span> Apenas super_admin</td>
+        </tr>
+        <tr>
+            <td>💧</td>
+            <td>Cadastro de Toners</td>
+            <td><code>/toners/cadastro</code></td>
+            <td><code>toners_cadastro</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>🖨️</td>
+            <td>Cadastro de Máquinas</td>
+            <td><code>/cadastro-maquinas</code></td>
+            <td><code>cadastro_maquinas</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>🔧</td>
+            <td>Cadastro de Peças</td>
+            <td><code>/cadastro-pecas</code></td>
+            <td><code>cadastro_pecas</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>🏭</td>
+            <td>Cadastro de Fornecedores</td>
+            <td><code>/registros/fornecedores</code></td>
+            <td><code>registros_fornecedores</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>📄</td>
+            <td>Cadastro de Contratos</td>
+            <td><code>/cadastros/contratos</code></td>
+            <td><code>cadastro_contratos</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>👥</td>
+            <td>Cadastro de Clientes</td>
+            <td><code>/cadastros/clientes</code></td>
+            <td><code>cadastro_clientes</code></td>
+            <td><span class="tag tag-a">Admin only</span></td>
+        </tr>
+    </table>
+
+    <h3>3.3 Categoria: 📋 Gestão da Qualidade</h3>
+    <table>
+        <tr>
+            <th>Ícone</th>
+            <th>Label</th>
+            <th>Rota Next.js</th>
+            <th>Módulo (permissão)</th>
+            <th>Obs</th>
+        </tr>
+        <tr>
+            <td>📋</td>
+            <td>Registro de Retornados</td>
+            <td><code>/toners/retornados</code></td>
+            <td><code>toners_retornados</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>⚠️</td>
+            <td>Toners com Defeito</td>
+            <td><code>/toners/defeitos</code></td>
+            <td><code>toners_defeitos</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>🔬</td>
+            <td>Amostragens 2.0</td>
+            <td><code>/amostragens</code></td>
+            <td><code>amostragens_2</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>♻️</td>
+            <td>Controle de Descartes</td>
+            <td><code>/controle-descartes</code></td>
+            <td><code>controle_descartes</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>Homologações</td>
+            <td><code>/homologacoes</code></td>
+            <td><code>homologacoes</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>📜</td>
+            <td>Certificados</td>
+            <td><code>/certificados</code></td>
+            <td><code>certificados</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>📈</td>
+            <td>FMEA</td>
+            <td><code>/fmea</code></td>
+            <td><code>fmea</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>📚</td>
+            <td>POPs e ITs</td>
+            <td><code>/pops-e-its</code></td>
+            <td><code>pops_its_visualizacao</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>🔀</td>
+            <td>Fluxogramas</td>
+            <td><code>/fluxogramas</code></td>
+            <td><code>fluxogramas</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>🔍</td>
+            <td>Auditorias</td>
+            <td><code>/auditorias</code></td>
+            <td><code>auditorias</code></td>
+            <td><span class="tag tag-a">Admin only</span></td>
+        </tr>
+        <tr>
+            <td>⚠️</td>
+            <td>Não Conformidades</td>
+            <td><code>/nao-conformidades</code></td>
+            <td><code>nao_conformidades</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>🚀</td>
+            <td>Melhoria Contínua</td>
+            <td><code>/melhoria-continua</code></td>
+            <td><code>melhoria_continua_2</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>🗂️</td>
+            <td>Controle de RC</td>
+            <td><code>/controle-de-rc</code></td>
+            <td><code>controle_rc</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td colspan="5" style="background:#f0f9ff"><strong>🛡️ Garantia</strong> <em>(submenu aninhado)</em></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td>↳ Registro de Garantias</td>
+            <td><code>/garantias</code></td>
+            <td><code>garantias</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td>↳ Requisição de Garantias</td>
+            <td><code>/garantias/requisicao</code></td>
+            <td><code>garantias</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td>↳ Requisições Pendentes</td>
+            <td><code>/garantias/pendentes</code></td>
+            <td><code>garantias</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td>↳ Consulta de Garantias</td>
+            <td><code>/garantias/consulta</code></td>
+            <td><code>garantias</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>📊</td>
+            <td>Formulários Online</td>
+            <td><code>/nps</code></td>
+            <td><code>nps</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+    </table>
+
+    <h3>3.4 Categoria: ⚙️ Administrativo</h3>
+    <table>
+        <tr>
+            <th>Ícone</th>
+            <th>Label</th>
+            <th>Rota Next.js</th>
+            <th>Módulo (permissão)</th>
+            <th>Obs</th>
+        </tr>
+        <tr>
+            <td>👥</td>
+            <td>Gerenciar Usuários</td>
+            <td><code>/admin/users</code></td>
+            <td><code>admin_usuarios</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>🎭</td>
+            <td>Gerenciar Perfis</td>
+            <td><code>/admin/profiles</code></td>
+            <td><code>admin_perfis</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>📧</td>
+            <td>Solicitações de Acesso</td>
+            <td><code>/admin/access-requests</code></td>
+            <td><code>admin_convites</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>📊</td>
+            <td>APIs para Power BI</td>
+            <td><code>/admin/powerbi</code></td>
+            <td><code>api_powerbi</code></td>
+            <td><span class="sb-badge">BETA</span></td>
+        </tr>
+        <tr>
+            <td>🏢</td>
+            <td>Filiais</td>
+            <td><code>/admin/registros/filiais</code></td>
+            <td><code>registros_filiais</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>🏛️</td>
+            <td>Departamentos</td>
+            <td><code>/admin/registros/departamentos</code></td>
+            <td><code>registros_departamentos</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>🏭</td>
+            <td>Fornecedores</td>
+            <td><code>/admin/registros/fornecedores</code></td>
+            <td><code>registros_fornecedores</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+        <tr>
+            <td>📊</td>
+            <td>Parâmetros de Retornados</td>
+            <td><code>/admin/registros/parametros</code></td>
+            <td><code>registros_parametros</code></td>
+            <td><span class="tag tag-g">VAZIO</span></td>
+        </tr>
+    </table>
+
+    <h3>3.5 Itens Especiais (Abaixo das categorias)</h3>
+    <table>
+        <tr>
+            <th>Ícone</th>
+            <th>Label</th>
+            <th>Rota</th>
+            <th>Permissão</th>
+            <th>Obs</th>
+        </tr>
+        <tr>
+            <td>📊</td>
+            <td><strong>Usabilidade</strong></td>
+            <td><code>/usabilidade</code></td>
+            <td>Apenas super_admin</td>
+            <td>Métricas de uso do sistema</td>
+        </tr>
+    </table>
+
+    <h3>3.6 Rodapé do Sidebar — Área do Usuário</h3>
+    <table>
+        <tr>
+            <th>Elemento</th>
+            <th>Descrição</th>
+            <th>Ação</th>
+        </tr>
+        <tr>
+            <td><strong>Avatar</strong></td>
+            <td>Círculo com inicial do nome ou foto de perfil</td>
+            <td>Clica → vai para <code>/profile</code></td>
+        </tr>
+        <tr>
+            <td><strong>Nome + Role</strong></td>
+            <td>Nome completo + cargo/role do usuário</td>
+            <td>Clica → vai para <code>/profile</code></td>
+        </tr>
+        <tr>
+            <td><strong>🔔 Notificações</strong></td>
+            <td>Sino com contador de não lidas</td>
+            <td>Clica → dropdown com lista</td>
+        </tr>
+        <tr>
+            <td><strong>🚪 Logout</strong></td>
+            <td>Botão sair</td>
+            <td>Clica → <code>/logout</code></td>
+        </tr>
+    </table>
+
+    <!-- ============================================ -->
+    <!-- 4. SISTEMA DE PERMISSÕES DO SIDEBAR -->
+    <!-- ============================================ -->
+
+    <h2>4. Sistema de Permissões do Sidebar</h2>
+
+    <p>O sidebar renderiza os itens de menu <strong>dinamicamente</strong> baseado nas permissões do usuário logado. Um
+        item só aparece se o usuário tem permissão <code>view</code> para o módulo associado.</p>
+
+    <h3>4.1 Regras de Visibilidade</h3>
+    <table>
+        <tr>
+            <th>Regra</th>
+            <th>Comportamento</th>
+        </tr>
+        <tr>
+            <td><code>admin_only: true</code></td>
+            <td>Apenas roles admin/super_admin veem o item (sem checagem no banco)</td>
+        </tr>
+        <tr>
+            <td><code>roles: ['super_admin']</code></td>
+            <td>Apenas roles listados veem o item</td>
+        </tr>
+        <tr>
+            <td><code>module: 'nome_modulo'</code></td>
+            <td>Checa <code>PermissionService.hasPermission(userId, module, 'view')</code></td>
+        </tr>
+        <tr>
+            <td>Categoria pai</td>
+            <td>Só aparece se pelo menos 1 submenu é visível</td>
+        </tr>
+        <tr>
+            <td>Submenu aninhado</td>
+            <td>Pai só aparece se pelo menos 1 filho é visível</td>
+        </tr>
+    </table>
+
+    <h3>4.2 Implementação Next.js</h3>
+    <div class="box">
+        <p style="font-size:12px;margin:0">
+            <strong>1.</strong> No layout, carregar permissões do usuário via <code>getServerSession()</code> +
+            Prisma<br>
+            <strong>2.</strong> Passar array de permissões para o componente
+            <code>&lt;Sidebar permissions={[...]} /&gt;</code><br>
+            <strong>3.</strong> Sidebar filtra localmente o array de menu com base nas permissões<br>
+            <strong>4.</strong> Itens sem permissão = não renderizam (nem no DOM)<br>
+            <strong>5.</strong> API Routes também devem verificar permissões (não confiar apenas no frontend)
+        </p>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 5. TEMPLATE DE PÁGINA VAZIA -->
+    <!-- ============================================ -->
+
+    <h2 class="pb">5. Template de Página Vazia (Para Todos os Módulos)</h2>
+
+    <p>Cada módulo listado nas seções 3.2 a 3.5 deve ser criado como uma página vazia que exibe apenas:</p>
+
+    <div class="mock">
+        <div class="mock-top">
+            <div class="logo"><span>OTI</span> — SGQ</div>
+            <div class="mock-top-icons"><span>🔔</span><span>👤</span></div>
+        </div>
+        <div class="mock-body">
+            <div class="sb" style="width:60px;display:flex;flex-direction:column;align-items:center;padding:8px">
+                <div style="color:#64748b;font-size:10px;margin-top:8px">sidebar<br>colapsado</div>
+            </div>
+            <div class="content" style="flex-direction:column">
+                <div class="content-placeholder">
+                    <div class="icon">🚧</div>
+                    <div class="text" style="font-size:16px"><strong>Nome do Módulo</strong></div>
+                    <div class="text" style="margin-top:8px;color:#94a3b8">Este módulo está em desenvolvimento.<br>Em
+                        breve você terá acesso a todas as funcionalidades.</div>
+                    <div
+                        style="margin-top:20px;background:#f1f5f9;border-radius:8px;padding:12px 24px;display:inline-block">
+                        <span style="font-size:12px;color:#64748b">🔒 Permissão necessária:
+                            <code>modulo.view</code></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>5.1 Componente Next.js — Página Placeholder</h3>
+    <div class="box"
+        style="font-family:Consolas,monospace;font-size:11px;line-height:1.5;white-space:pre;overflow-x:auto">//
+        app/(dashboard)/[module]/page.tsx
+
+        export default function ModulePage() {
+        return (
+        &lt;div className="flex flex-col items-center justify-center min-h-[60vh]"&gt;
+        &lt;div className="text-6xl mb-4"&gt;🚧&lt;/div&gt;
+        &lt;h1 className="text-2xl font-bold text-slate-700"&gt;
+        Nome do Módulo
+        &lt;/h1&gt;
+        &lt;p className="text-slate-400 mt-2 text-center"&gt;
+        Este módulo está em desenvolvimento.&lt;br/&gt;
+        Em breve você terá acesso a todas as funcionalidades.
+        &lt;/p&gt;
+        &lt;/div&gt;
+        );
+        }</div>
+
+    <!-- ============================================ -->
+    <!-- 6. LISTA COMPLETA DE MÓDULOS (SLUGS) -->
+    <!-- ============================================ -->
+
+    <h2>6. Lista Completa de Módulos — Slugs para Permissões</h2>
+
+    <p>Estes são os <code>module</code> slugs que devem existir na tabela <code>profile_permissions</code> para cada
+        perfil:</p>
+
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Slug do Módulo</th>
+            <th>Label</th>
+            <th>Categoria</th>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td><code>dashboard</code></td>
+            <td>Dashboard</td>
+            <td>Fixo</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td><code>cadastros_2</code></td>
+            <td>Cadastros 2.0</td>
+            <td>Cadastros</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td><code>toners_cadastro</code></td>
+            <td>Cadastro de Toners</td>
+            <td>Cadastros</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td><code>cadastro_maquinas</code></td>
+            <td>Cadastro de Máquinas</td>
+            <td>Cadastros</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td><code>cadastro_pecas</code></td>
+            <td>Cadastro de Peças</td>
+            <td>Cadastros</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td><code>registros_fornecedores</code></td>
+            <td>Fornecedores</td>
+            <td>Cadastros / Admin</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td><code>cadastro_contratos</code></td>
+            <td>Contratos</td>
+            <td>Cadastros</td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td><code>cadastro_clientes</code></td>
+            <td>Clientes</td>
+            <td>Cadastros</td>
+        </tr>
+        <tr>
+            <td>9</td>
+            <td><code>toners_retornados</code></td>
+            <td>Retornados</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>10</td>
+            <td><code>toners_defeitos</code></td>
+            <td>Toners com Defeito</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>11</td>
+            <td><code>amostragens_2</code></td>
+            <td>Amostragens</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>12</td>
+            <td><code>controle_descartes</code></td>
+            <td>Descartes</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>13</td>
+            <td><code>homologacoes</code></td>
+            <td>Homologações</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>14</td>
+            <td><code>certificados</code></td>
+            <td>Certificados</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>15</td>
+            <td><code>fmea</code></td>
+            <td>FMEA</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>16</td>
+            <td><code>pops_its_visualizacao</code></td>
+            <td>POPs e ITs</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>17</td>
+            <td><code>fluxogramas</code></td>
+            <td>Fluxogramas</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>18</td>
+            <td><code>auditorias</code></td>
+            <td>Auditorias</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>19</td>
+            <td><code>nao_conformidades</code></td>
+            <td>Não Conformidades</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>20</td>
+            <td><code>melhoria_continua_2</code></td>
+            <td>Melhoria Contínua</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>21</td>
+            <td><code>controle_rc</code></td>
+            <td>Controle de RC</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>22</td>
+            <td><code>garantias</code></td>
+            <td>Garantias (todas)</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>23</td>
+            <td><code>nps</code></td>
+            <td>Formulários Online</td>
+            <td>Qualidade</td>
+        </tr>
+        <tr>
+            <td>24</td>
+            <td><code>admin_usuarios</code></td>
+            <td>Gerenciar Usuários</td>
+            <td>Admin</td>
+        </tr>
+        <tr>
+            <td>25</td>
+            <td><code>admin_perfis</code></td>
+            <td>Gerenciar Perfis</td>
+            <td>Admin</td>
+        </tr>
+        <tr>
+            <td>26</td>
+            <td><code>admin_convites</code></td>
+            <td>Solicitações Acesso</td>
+            <td>Admin</td>
+        </tr>
+        <tr>
+            <td>27</td>
+            <td><code>api_powerbi</code></td>
+            <td>APIs Power BI</td>
+            <td>Admin</td>
+        </tr>
+        <tr>
+            <td>28</td>
+            <td><code>registros_filiais</code></td>
+            <td>Filiais</td>
+            <td>Admin</td>
+        </tr>
+        <tr>
+            <td>29</td>
+            <td><code>registros_departamentos</code></td>
+            <td>Departamentos</td>
+            <td>Admin</td>
+        </tr>
+        <tr>
+            <td>30</td>
+            <td><code>registros_parametros</code></td>
+            <td>Parâmetros Retornados</td>
+            <td>Admin</td>
+        </tr>
+    </table>
+
+    <!-- RODAPÉ -->
+    <div
+        style="margin-top:60px;padding-top:20px;border-top:2px solid #e2e8f0;text-align:center;color:#94a3b8;font-size:11px">
+        <p>SGQ OTI DJ — Layout, Sidebar, Login & Logout — PRD v1.0</p>
+        <p>Gerado em 21/02/2026 | Confidencial — Uso Interno</p>
+    </div>
+
+</body>
+
+</html>

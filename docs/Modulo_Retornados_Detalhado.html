@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>PRD — Módulo Toners Retornados | SGQ OTI DJ</title>
+  <style>
+    @page { margin: 2cm; size: A4; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; line-height: 1.7; padding: 40px 50px; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 28px; color: #0f172a; border-bottom: 3px solid #3b82f6; padding-bottom: 12px; margin-bottom: 8px; }
+    h2 { font-size: 20px; color: #1e40af; margin-top: 36px; margin-bottom: 12px; border-left: 4px solid #3b82f6; padding-left: 12px; }
+    h3 { font-size: 16px; color: #334155; margin-top: 20px; margin-bottom: 8px; }
+    h4 { font-size: 14px; color: #475569; margin-top: 16px; margin-bottom: 6px; }
+    p, li { font-size: 13px; }
+    p { margin-bottom: 10px; }
+    ul, ol { margin-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 20px 0; font-size: 12px; }
+    th { background: #1e40af; color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; }
+    td { padding: 7px 10px; border-bottom: 1px solid #e2e8f0; }
+    tr:nth-child(even) { background: #f8fafc; }
+    code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #7c3aed; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-red { background: #fef2f2; color: #991b1b; }
+    .badge-yellow { background: #fefce8; color: #854d0e; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .box { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 16px; margin: 12px 0; }
+    .box-warn { background: #fffbeb; border-color: #fcd34d; }
+    .box-green { background: #f0fdf4; border-color: #86efac; }
+    .cover { text-align: center; padding: 60px 0 40px 0; page-break-after: always; }
+    .cover h1 { font-size: 36px; border: none; margin-bottom: 16px; }
+    .cover p { font-size: 16px; color: #64748b; }
+    .cover .version { margin-top: 40px; font-size: 13px; color: #94a3b8; }
+    .field-table td:first-child { font-weight: 600; white-space: nowrap; }
+    .page-break { page-break-before: always; }
+    .formula { background: #fef3c7; border: 1px solid #fcd34d; padding: 12px 16px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 13px; margin: 10px 0; }
+    .flowchart { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    .step { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .arrow { color: #94a3b8; font-size: 18px; }
+    .mock { border: 2px solid #cbd5e1; border-radius: 12px; padding: 20px; margin: 16px 0; background: #fff; }
+    .mock-header { background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 10px 16px; margin: -20px -20px 16px -20px; border-radius: 10px 10px 0 0; font-weight: 600; color: #334155; font-size: 14px; }
+    .form-row { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+    .form-field { flex: 1; min-width: 180px; }
+    .form-field label { display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 3px; text-transform: uppercase; }
+    .form-field .input { border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 10px; font-size: 12px; color: #334155; background: #f8fafc; width: 100%; }
+    .btn-mock { display: inline-block; padding: 8px 20px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-right: 8px; margin-top: 8px; }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-success { background: #22c55e; color: white; }
+    .btn-secondary { background: #64748b; color: white; }
+  </style>
+</head>
+<body>
+
+<!-- CAPA -->
+<div class="cover">
+  <p style="font-size:14px; color:#3b82f6; font-weight:600; letter-spacing:2px;">SGQ OTI DJ</p>
+  <h1>Módulo: Toners Retornados</h1>
+  <p>Documento de Requisitos Detalhado</p>
+  <p style="margin-top:8px;">Especificação completa de funcionalidades, formulários, regras de negócio, API e modelo de dados para migração Next.js</p>
+  <div class="version">
+    <p>Versão 1.0 — Fevereiro 2026</p>
+    <p>Stack alvo: Next.js 14 + TypeScript + Prisma + MariaDB</p>
+  </div>
+</div>
+
+<!-- 1. VISÃO GERAL -->
+<h2>1. Visão Geral do Módulo</h2>
+<p>O módulo <strong>Toners Retornados</strong> gerencia o registro e controle de cartuchos de toner devolvidos por clientes. Ele permite calcular o valor residual de cada toner com base no percentual de toner restante (medido por peso ou leitura de chip), registrar a quantidade, o destino (estoque ou descarte) e gerar relatórios exportáveis.</p>
+
+<div class="box">
+  <strong>Objetivo Principal:</strong> Rastrear cada toner devolvido, calcular automaticamente seu valor residual, decidir se vai para estoque ou descarte, e manter histórico completo para análise financeira e de qualidade.
+</div>
+
+<h3>Funcionalidades Resumidas</h3>
+<ul>
+  <li>Registro de toners retornados com cálculo automático de valor</li>
+  <li>Dois modos de medição: <strong>Peso</strong> (balança) e <strong>Chip</strong> (leitura digital)</li>
+  <li>Destino configurável: <strong>Estoque</strong> (com valoração) ou <strong>Descarte</strong></li>
+  <li>Integração com cadastro de toners para dados de referência (gramatura, capacidade, custo)</li>
+  <li>Tabela de registros com paginação (100 por página)</li>
+  <li>Exportação CSV com filtros de data e busca</li>
+  <li>Importação em massa via CSV</li>
+  <li>Exclusão individual de registros</li>
+</ul>
+
+<!-- 2. ROTAS E ENDPOINTS -->
+<h2>2. Rotas e Endpoints da API</h2>
+
+<h3>2.1 Rotas Atuais (PHP)</h3>
+<table>
+  <tr><th>Método</th><th>Rota</th><th>Função</th><th>Descrição</th></tr>
+  <tr><td><span class="badge badge-blue">GET</span></td><td><code>/toners/retornados</code></td><td>retornados()</td><td>Página principal com listagem paginada</td></tr>
+  <tr><td><span class="badge badge-green">POST</span></td><td><code>/toners/retornados</code></td><td>storeRetornado()</td><td>Criar novo registro de retornado</td></tr>
+  <tr><td><span class="badge badge-red">DELETE</span></td><td><code>/toners/retornados/delete/{id}</code></td><td>deleteRetornado()</td><td>Excluir registro por ID</td></tr>
+  <tr><td><span class="badge badge-blue">GET</span></td><td><code>/toners/retornados/export</code></td><td>exportRetornados()</td><td>Exportar CSV com filtros</td></tr>
+  <tr><td><span class="badge badge-green">POST</span></td><td><code>/toners/retornados/import</code></td><td>importRetornados()</td><td>Importar registros via CSV</td></tr>
+</table>
+
+<h3>2.2 Rotas Next.js (Migração Proposta)</h3>
+<table>
+  <tr><th>Método</th><th>Rota</th><th>Arquivo</th></tr>
+  <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/toners/retornados</code></td><td>app/api/toners/retornados/route.ts</td></tr>
+  <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/toners/retornados</code></td><td>app/api/toners/retornados/route.ts</td></tr>
+  <tr><td><span class="badge badge-red">DELETE</span></td><td><code>/api/toners/retornados/[id]</code></td><td>app/api/toners/retornados/[id]/route.ts</td></tr>
+  <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/toners/retornados/export</code></td><td>app/api/toners/retornados/export/route.ts</td></tr>
+  <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/toners/retornados/import</code></td><td>app/api/toners/retornados/import/route.ts</td></tr>
+</table>
+
+<p><strong>Página:</strong> <code>app/(dashboard)/toners/retornados/page.tsx</code></p>
+
+<!-- 3. MODELO DE DADOS -->
+<h2>3. Modelo de Dados</h2>
+
+<h3>3.1 Tabela: <code>retornados</code></h3>
+<table class="field-table">
+  <tr><th>Coluna</th><th>Tipo</th><th>Obrigatório</th><th>Default</th><th>Descrição</th></tr>
+  <tr><td>id</td><td>INT AUTO_INCREMENT</td><td>PK</td><td>auto</td><td>Identificador único</td></tr>
+  <tr><td>modelo</td><td>VARCHAR(255)</td><td>✅</td><td>—</td><td>Nome/modelo do toner retornado</td></tr>
+  <tr><td>modelo_cadastrado</td><td>TINYINT(1)</td><td>✅</td><td>0</td><td>1 se o modelo existe na tabela <code>toners</code></td></tr>
+  <tr><td>usuario</td><td>VARCHAR(255)</td><td>✅</td><td>—</td><td>Nome do operador que registrou</td></tr>
+  <tr><td>filial</td><td>VARCHAR(255)</td><td>✅</td><td>—</td><td>Filial de origem</td></tr>
+  <tr><td>codigo_cliente</td><td>VARCHAR(255)</td><td>✅</td><td>—</td><td>Código identificador do cliente</td></tr>
+  <tr><td>modo</td><td>ENUM('peso','chip')</td><td>✅</td><td>—</td><td>Método de medição utilizado</td></tr>
+  <tr><td>peso_retornado</td><td>DECIMAL(10,2)</td><td>❌</td><td>NULL</td><td>Peso medido na balança (gramas)</td></tr>
+  <tr><td>percentual_chip</td><td>DECIMAL(5,2)</td><td>❌</td><td>NULL</td><td>Percentual lido no chip (%)</td></tr>
+  <tr><td>gramatura_existente</td><td>DECIMAL(10,2)</td><td>❌</td><td>NULL</td><td>Gramatura de toner restante (calculado)</td></tr>
+  <tr><td>percentual_restante</td><td>DECIMAL(5,2)</td><td>❌</td><td>NULL</td><td>% de toner restante (calculado)</td></tr>
+  <tr><td>quantidade</td><td>INT</td><td>✅</td><td>1</td><td>Quantidade de unidades retornadas</td></tr>
+  <tr><td>destino</td><td>ENUM('estoque','descarte')</td><td>✅</td><td>—</td><td>Destino final do toner</td></tr>
+  <tr><td>valor_calculado</td><td>DECIMAL(10,2)</td><td>❌</td><td>0.00</td><td>Valor financeiro residual (R$)</td></tr>
+  <tr><td>observacao</td><td>TEXT</td><td>❌</td><td>NULL</td><td>Observações livres</td></tr>
+  <tr><td>data_registro</td><td>DATE</td><td>✅</td><td>CURRENT_DATE</td><td>Data do registro de retorno</td></tr>
+  <tr><td>created_at</td><td>TIMESTAMP</td><td>auto</td><td>CURRENT_TIMESTAMP</td><td>Data de criação no sistema</td></tr>
+</table>
+
+<h3>3.2 Schema Prisma (Next.js)</h3>
+<div class="box" style="font-family: Consolas, monospace; font-size: 12px; line-height: 1.5; white-space: pre; overflow-x: auto;">model Retornado {
+  id                  Int       @id @default(autoincrement())
+  modelo              String
+  modeloCadastrado    Boolean   @default(false) @map("modelo_cadastrado")
+  usuario             String
+  filial              String
+  codigoCliente       String    @map("codigo_cliente")
+  modo                String    // "peso" | "chip"
+  pesoRetornado       Decimal?  @map("peso_retornado") @db.Decimal(10,2)
+  percentualChip      Decimal?  @map("percentual_chip") @db.Decimal(5,2)
+  gramaturaExistente  Decimal?  @map("gramatura_existente") @db.Decimal(10,2)
+  percentualRestante  Decimal?  @map("percentual_restante") @db.Decimal(5,2)
+  quantidade          Int       @default(1)
+  destino             String    // "estoque" | "descarte"
+  valorCalculado      Decimal   @default(0) @map("valor_calculado") @db.Decimal(10,2)
+  observacao          String?   @db.Text
+  dataRegistro        DateTime  @map("data_registro") @db.Date
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  @@map("retornados")
+}</div>
+
+<h3>3.3 Dependências de Dados</h3>
+<p>O cálculo automático depende de dados da tabela <code>toners</code>:</p>
+<table>
+  <tr><th>Campo em <code>toners</code></th><th>Uso no Retornados</th></tr>
+  <tr><td>peso_cheio</td><td>Referência de peso total (não usado diretamente no cálculo)</td></tr>
+  <tr><td>peso_vazio</td><td>Subtraído do peso retornado para obter gramatura existente</td></tr>
+  <tr><td>gramatura</td><td>Base para calcular o percentual restante</td></tr>
+  <tr><td>capacidade_folhas</td><td>Usado para calcular folhas restantes</td></tr>
+  <tr><td>custo_por_folha</td><td>Multiplicador para valoração financeira</td></tr>
+</table>
+
+<!-- 4. REGRAS DE NEGÓCIO -->
+<h2 class="page-break">4. Regras de Negócio e Cálculos</h2>
+
+<h3>4.1 Modo de Medição: Peso (Balança)</h3>
+<p>Quando o operador pesa o toner retornado na balança:</p>
+<div class="formula">
+  gramatura_existente = peso_retornado − peso_vazio<br>
+  percentual_restante = (gramatura_existente / gramatura_total) × 100<br>
+  <em>// Limitado entre 0% e 100%</em>
+</div>
+
+<h3>4.2 Modo de Medição: Chip (Leitura Digital)</h3>
+<p>Quando o percentual é lido diretamente do chip do toner:</p>
+<div class="formula">
+  percentual_restante = percentual_chip <em>(valor direto, limitado 0-100)</em><br>
+  gramatura_existente = (percentual_restante / 100) × gramatura_total
+</div>
+
+<h3>4.3 Cálculo de Valor (apenas destino = "estoque")</h3>
+<p>O valor financeiro residual <strong>só é calculado quando o destino é "estoque"</strong>:</p>
+<div class="formula">
+  folhas_restantes = (percentual_restante / 100) × capacidade_folhas<br>
+  valor_unitário = folhas_restantes × custo_por_folha<br>
+  valor_total = valor_unitário × quantidade
+</div>
+
+<div class="box box-warn">
+  <strong>⚠️ Condições para o cálculo funcionar:</strong>
+  <ul style="margin-top:6px;">
+    <li>O modelo deve estar cadastrado na tabela <code>toners</code> (modelo_cadastrado = 1)</li>
+    <li>Os campos <code>gramatura</code>, <code>capacidade_folhas</code> e <code>custo_por_folha</code> devem ser > 0</li>
+    <li>Se algum dado estiver faltando, o valor_calculado fica como R$ 0,00</li>
+  </ul>
+</div>
+
+<h3>4.4 Verificação de Modelo Cadastrado</h3>
+<p>Ao registrar um retornado, o sistema verifica se o modelo existe no cadastro de toners:</p>
+<ul>
+  <li><strong>modelo_id informado:</strong> Busca por ID (prioridade)</li>
+  <li><strong>Apenas nome do modelo:</strong> Busca por nome exato (fallback)</li>
+  <li>Se encontrado → <code>modelo_cadastrado = 1</code>, dados de referência disponíveis</li>
+  <li>Se não encontrado → <code>modelo_cadastrado = 0</code>, sem cálculo automático</li>
+</ul>
+
+<h3>4.5 Validações (Campos Obrigatórios)</h3>
+<table>
+  <tr><th>Campo</th><th>Validação</th><th>Mensagem de Erro</th></tr>
+  <tr><td>modelo</td><td>Não pode ser vazio</td><td>"Campos obrigatórios faltando: modelo"</td></tr>
+  <tr><td>usuario</td><td>Não pode ser vazio</td><td>"Campos obrigatórios faltando: usuario"</td></tr>
+  <tr><td>filial</td><td>Não pode ser vazio</td><td>"Campos obrigatórios faltando: filial"</td></tr>
+  <tr><td>codigo_cliente</td><td>Não pode ser vazio</td><td>"Campos obrigatórios faltando: codigo_cliente"</td></tr>
+  <tr><td>modo</td><td>Deve ser "peso" ou "chip"</td><td>"Campos obrigatórios faltando: modo"</td></tr>
+  <tr><td>destino</td><td>Deve ser "estoque" ou "descarte"</td><td>"Campos obrigatórios faltando: destino"</td></tr>
+  <tr><td>quantidade</td><td>Mínimo 1</td><td>Auto-corrigido para 1</td></tr>
+</table>
+
+<!-- 5. FORMULÁRIOS -->
+<h2>5. Formulários da Interface</h2>
+
+<h3>5.1 Formulário: Registrar Novo Retornado</h3>
+
+<div class="mock">
+  <div class="mock-header">📋 Novo Registro de Retornado</div>
+
+  <div class="form-row">
+    <div class="form-field">
+      <label>Modelo do Toner *</label>
+      <div class="input">▼ Selecione ou digite o modelo</div>
+    </div>
+    <div class="form-field">
+      <label>Código do Cliente *</label>
+      <div class="input">Ex: CLI-00123</div>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-field">
+      <label>Usuário / Operador *</label>
+      <div class="input">Nome do operador (preenchido auto)</div>
+    </div>
+    <div class="form-field">
+      <label>Filial *</label>
+      <div class="input">▼ Selecione a filial</div>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-field">
+      <label>Modo de Medição *</label>
+      <div class="input">◉ Peso (Balança)&nbsp;&nbsp;&nbsp;○ Chip (Leitura)</div>
+    </div>
+    <div class="form-field">
+      <label>Data do Registro</label>
+      <div class="input">21/02/2026</div>
+    </div>
+  </div>
+
+  <div class="form-row" style="background:#f0f9ff; padding:12px; border-radius:8px;">
+    <div class="form-field">
+      <label>Peso Retornado (g) — Modo Peso</label>
+      <div class="input">Ex: 520.50</div>
+    </div>
+    <div class="form-field">
+      <label>Percentual do Chip (%) — Modo Chip</label>
+      <div class="input">Ex: 35</div>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-field">
+      <label>Quantidade *</label>
+      <div class="input">1</div>
+    </div>
+    <div class="form-field">
+      <label>Destino *</label>
+      <div class="input">▼ Estoque / Descarte</div>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-field" style="flex:2;">
+      <label>Observações</label>
+      <div class="input" style="min-height:50px;">Observações opcionais sobre o retorno...</div>
+    </div>
+  </div>
+
+  <div style="margin-top:12px; border-top: 1px solid #e2e8f0; padding-top: 12px;">
+    <span class="btn-mock btn-primary">💾 Salvar Registro</span>
+    <span class="btn-mock btn-secondary">🔄 Limpar</span>
+  </div>
+</div>
+
+<h4>Especificação dos Campos do Formulário</h4>
+<table>
+  <tr><th>Campo</th><th>Tipo HTML</th><th>Fonte de Dados</th><th>Comportamento</th></tr>
+  <tr><td>Modelo</td><td>select + search</td><td>GET /api/toners (lista)</td><td>Dropdown com busca. Ao selecionar, envia <code>modelo_id</code> + <code>modelo</code></td></tr>
+  <tr><td>Código Cliente</td><td>input text</td><td>Digitação livre</td><td>Campo de texto livre</td></tr>
+  <tr><td>Usuário</td><td>input text</td><td>Sessão do usuário</td><td>Preenchido automaticamente com nome do usuário logado</td></tr>
+  <tr><td>Filial</td><td>select</td><td>Tabela <code>filiais</code></td><td>Dropdown carregado do banco</td></tr>
+  <tr><td>Modo</td><td>radio buttons</td><td>Fixo: peso/chip</td><td>Alterna visibilidade dos campos condicionais</td></tr>
+  <tr><td>Peso Retornado</td><td>input number</td><td>Digitação</td><td>Visível apenas se modo = "peso". Step 0.01</td></tr>
+  <tr><td>Percentual Chip</td><td>input number</td><td>Digitação</td><td>Visível apenas se modo = "chip". Min 0, Max 100</td></tr>
+  <tr><td>Quantidade</td><td>input number</td><td>Digitação</td><td>Mínimo 1, default 1</td></tr>
+  <tr><td>Destino</td><td>select</td><td>Fixo: estoque/descarte</td><td>Se "estoque", valor é calculado automaticamente</td></tr>
+  <tr><td>Data do Registro</td><td>input date</td><td>Default: hoje</td><td>Data editável</td></tr>
+  <tr><td>Observações</td><td>textarea</td><td>Digitação livre</td><td>Campo opcional</td></tr>
+</table>
+
+<!-- 6. TABELA DE REGISTROS -->
+<h2 class="page-break">6. Tabela de Registros (Grid)</h2>
+
+<h3>6.1 Colunas Exibidas</h3>
+<table>
+  <tr><th>#</th><th>Coluna</th><th>Fonte</th><th>Formato</th></tr>
+  <tr><td>1</td><td>Modelo</td><td>modelo</td><td>Texto + badge se modelo_cadastrado</td></tr>
+  <tr><td>2</td><td>Cód. Cliente</td><td>codigo_cliente</td><td>Texto</td></tr>
+  <tr><td>3</td><td>Usuário</td><td>usuario</td><td>Texto</td></tr>
+  <tr><td>4</td><td>Filial</td><td>filial</td><td>Texto</td></tr>
+  <tr><td>5</td><td>Destino</td><td>destino</td><td>Badge: <span class="badge badge-green">Estoque</span> ou <span class="badge badge-red">Descarte</span></td></tr>
+  <tr><td>6</td><td>Qtd</td><td>quantidade</td><td>Número inteiro</td></tr>
+  <tr><td>7</td><td>Valor (R$)</td><td>valor_calculado</td><td>Moeda: R$ 1.234,56</td></tr>
+  <tr><td>8</td><td>Data</td><td>data_registro</td><td>dd/mm/aaaa</td></tr>
+  <tr><td>9</td><td>Observação</td><td>observacao</td><td>Texto truncado</td></tr>
+  <tr><td>10</td><td>Ações</td><td>—</td><td>Botão excluir 🗑️</td></tr>
+</table>
+
+<h3>6.2 Paginação</h3>
+<ul>
+  <li><strong>Registros por página:</strong> 100</li>
+  <li>Exibe: "Mostrando página X de Y (total: N registros)"</li>
+  <li>Botões: ← Anterior | Próxima →</li>
+  <li>Ordenação padrão: <code>created_at DESC</code> (mais recentes primeiro)</li>
+</ul>
+
+<!-- 7. EXPORTAÇÃO -->
+<h2>7. Exportação CSV</h2>
+
+<h3>7.1 Filtros Disponíveis</h3>
+<table>
+  <tr><th>Parâmetro</th><th>Tipo</th><th>Descrição</th></tr>
+  <tr><td><code>date_from</code></td><td>date (YYYY-MM-DD)</td><td>Data inicial do período</td></tr>
+  <tr><td><code>date_to</code></td><td>date (YYYY-MM-DD)</td><td>Data final do período</td></tr>
+  <tr><td><code>search</code></td><td>string</td><td>Busca em modelo, codigo_cliente, usuario</td></tr>
+</table>
+
+<h3>7.2 Colunas do CSV Exportado</h3>
+<p>Separador: <code>;</code> (ponto e vírgula) — Codificação: UTF-8 BOM</p>
+<table>
+  <tr><th>#</th><th>Cabeçalho</th><th>Campo</th><th>Formatação</th></tr>
+  <tr><td>1</td><td>Modelo</td><td>modelo</td><td>Texto</td></tr>
+  <tr><td>2</td><td>Código Cliente</td><td>codigo_cliente</td><td>Texto</td></tr>
+  <tr><td>3</td><td>Usuário</td><td>usuario</td><td>Texto</td></tr>
+  <tr><td>4</td><td>Filial</td><td>filial</td><td>Texto</td></tr>
+  <tr><td>5</td><td>Modo</td><td>modo</td><td>Texto</td></tr>
+  <tr><td>6</td><td>Peso Retornado (g)</td><td>peso_retornado</td><td>Decimal com vírgula</td></tr>
+  <tr><td>7</td><td>Percentual Chip (%)</td><td>percentual_chip</td><td>Decimal com vírgula</td></tr>
+  <tr><td>8</td><td>Quantidade</td><td>quantidade</td><td>Inteiro</td></tr>
+  <tr><td>9</td><td>Destino</td><td>destino</td><td>Primeira letra maiúscula</td></tr>
+  <tr><td>10</td><td>Valor Calculado (R$)</td><td>valor_calculado</td><td>R$ 1.234,56</td></tr>
+  <tr><td>11</td><td>Observação</td><td>observacao</td><td>Texto</td></tr>
+  <tr><td>12</td><td>Data Registro</td><td>data_registro</td><td>dd/mm/aaaa HH:ii</td></tr>
+</table>
+
+<p><strong>Nome do arquivo:</strong> <code>retornados_YYYY-MM-DD_HH-ii-ss.csv</code></p>
+
+<!-- 8. IMPORTAÇÃO -->
+<h2>8. Importação CSV</h2>
+
+<h3>8.1 Formato do Arquivo</h3>
+<p>Arquivo CSV com separador <code>;</code>. A primeira linha é o cabeçalho e é ignorada.</p>
+
+<table>
+  <tr><th>Posição (índice)</th><th>Campo</th><th>Obrigatório</th></tr>
+  <tr><td>[0]</td><td>Modelo</td><td>✅</td></tr>
+  <tr><td>[1]</td><td>Código Cliente</td><td>✅</td></tr>
+  <tr><td>[2]</td><td>Usuário</td><td>Default: "Importado"</td></tr>
+  <tr><td>[3]</td><td>Filial</td><td>Default: "Jundiaí"</td></tr>
+  <tr><td>[4]</td><td>(Reservado)</td><td>—</td></tr>
+  <tr><td>[5]</td><td>Peso Retornado</td><td>Opcional</td></tr>
+  <tr><td>[6]</td><td>Percentual Chip</td><td>Opcional</td></tr>
+  <tr><td>[7]</td><td>Destino</td><td>Default: "descarte"</td></tr>
+  <tr><td>[8]</td><td>(Reservado)</td><td>—</td></tr>
+  <tr><td>[9]</td><td>Observação</td><td>Opcional</td></tr>
+</table>
+
+<h3>8.2 Comportamento</h3>
+<ul>
+  <li>Modo padrão: <code>peso</code></li>
+  <li>Decimais aceitos com vírgula (convertidos para ponto)</li>
+  <li>Destino convertido para lowercase com underscores</li>
+  <li>Retorna JSON com contagem de importados e lista de erros por linha</li>
+</ul>
+
+<!-- 9. EXCLUSÃO -->
+<h2>9. Exclusão de Registros</h2>
+
+<h3>9.1 Fluxo</h3>
+<div class="flowchart">
+  <span class="step">Clique no 🗑️</span>
+  <span class="arrow">→</span>
+  <span class="step">Confirmação</span>
+  <span class="arrow">→</span>
+  <span class="step">DELETE /api/.../[id]</span>
+  <span class="arrow">→</span>
+  <span class="step">Feedback visual</span>
+</div>
+
+<h3>9.2 Validações</h3>
+<ul>
+  <li>Verifica se o ID é numérico válido</li>
+  <li>Verifica se o registro existe antes de excluir</li>
+  <li>Retorna mensagem de erro se não encontrado</li>
+  <li>Atualiza a tabela sem reload da página (AJAX)</li>
+</ul>
+
+<!-- 10. FLUXO OPERACIONAL -->
+<h2 class="page-break">10. Fluxo Operacional Completo</h2>
+
+<div class="flowchart" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+  <div style="display:flex; align-items:center; gap:8px;">
+    <span class="step" style="background:#6366f1;">1. Acesso</span>
+    <span style="font-size:12px; color:#64748b;">Usuário acessa /toners/retornados (requer permissão: toners.view)</span>
+  </div>
+  <span class="arrow" style="margin-left:40px;">↓</span>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <span class="step" style="background:#0891b2;">2. Carregar Dados</span>
+    <span style="font-size:12px; color:#64748b;">Sistema carrega: lista de modelos de toners + filiais + registros paginados</span>
+  </div>
+  <span class="arrow" style="margin-left:40px;">↓</span>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <span class="step" style="background:#059669;">3. Preencher Form</span>
+    <span style="font-size:12px; color:#64748b;">Operador seleciona modelo, preenche cliente, escolhe modo (peso/chip)</span>
+  </div>
+  <span class="arrow" style="margin-left:40px;">↓</span>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <span class="step" style="background:#d97706;">4. Cálculo Auto</span>
+    <span style="font-size:12px; color:#64748b;">Sistema busca dados do toner cadastrado → calcula percentual e valor</span>
+  </div>
+  <span class="arrow" style="margin-left:40px;">↓</span>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <span class="step" style="background:#dc2626;">5. Salvar</span>
+    <span style="font-size:12px; color:#64748b;">POST com todos os dados → INSERT no banco → resposta JSON</span>
+  </div>
+  <span class="arrow" style="margin-left:40px;">↓</span>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <span class="step" style="background:#7c3aed;">6. Atualizar Grid</span>
+    <span style="font-size:12px; color:#64748b;">Tabela atualiza mostrando o novo registro no topo</span>
+  </div>
+</div>
+
+<!-- 11. PERMISSÕES -->
+<h2>11. Permissões Requeridas</h2>
+
+<table>
+  <tr><th>Ação</th><th>Módulo</th><th>Permissão</th><th>Descrição</th></tr>
+  <tr><td>Acessar página</td><td><code>toners</code></td><td><code>can_view</code></td><td>Visualizar lista e formulário</td></tr>
+  <tr><td>Criar registro</td><td><code>toners</code></td><td><code>can_edit</code></td><td>Submeter formulário de retornado</td></tr>
+  <tr><td>Excluir registro</td><td><code>toners</code></td><td><code>can_delete</code></td><td>Botão de excluir na tabela</td></tr>
+  <tr><td>Importar CSV</td><td><code>toners</code></td><td><code>can_import</code></td><td>Upload de arquivo CSV</td></tr>
+  <tr><td>Exportar CSV</td><td><code>toners</code></td><td><code>can_export</code></td><td>Download do relatório</td></tr>
+</table>
+
+<!-- 12. COMPONENTES NEXT.JS -->
+<h2>12. Componentes React (Next.js)</h2>
+
+<table>
+  <tr><th>Componente</th><th>Arquivo</th><th>Responsabilidade</th></tr>
+  <tr><td><code>RetornadosPage</code></td><td>page.tsx</td><td>Server Component — carrega dados iniciais via Prisma</td></tr>
+  <tr><td><code>RetornadoForm</code></td><td>components/RetornadoForm.tsx</td><td>Client Component — formulário com validação Zod</td></tr>
+  <tr><td><code>RetornadosTable</code></td><td>components/RetornadosTable.tsx</td><td>Client Component — TanStack Table com paginação</td></tr>
+  <tr><td><code>RetornadoExportBar</code></td><td>components/RetornadoExportBar.tsx</td><td>Client Component — filtros de data + botões export/import</td></tr>
+  <tr><td><code>ImportDialog</code></td><td>components/ImportDialog.tsx</td><td>Client Component — modal com upload e feedback</td></tr>
+  <tr><td><code>DeleteConfirmDialog</code></td><td>components/DeleteConfirmDialog.tsx</td><td>Client Component — confirmação de exclusão</td></tr>
+  <tr><td><code>ModeloSelector</code></td><td>components/ModeloSelector.tsx</td><td>Client Component — combobox com busca de modelos</td></tr>
+</table>
+
+<!-- 13. SCHEMA ZOD -->
+<h2>13. Schema de Validação (Zod)</h2>
+
+<div class="box" style="font-family: Consolas, monospace; font-size: 12px; line-height: 1.5; white-space: pre; overflow-x: auto;">const retornadoSchema = z.object({
+  modelo:         z.string().min(1, "Modelo é obrigatório"),
+  modeloId:       z.number().optional(),
+  codigoCliente:  z.string().min(1, "Código do cliente é obrigatório"),
+  usuario:        z.string().min(1, "Usuário é obrigatório"),
+  filial:         z.string().min(1, "Filial é obrigatória"),
+  modo:           z.enum(["peso", "chip"]),
+  pesoRetornado:  z.number().positive().optional().nullable(),
+  percentualChip: z.number().min(0).max(100).optional().nullable(),
+  quantidade:     z.number().int().min(1).default(1),
+  destino:        z.enum(["estoque", "descarte"]),
+  observacao:     z.string().optional(),
+  dataRegistro:   z.string().date(),
+}).refine(data => {
+  if (data.modo === "peso") return data.pesoRetornado != null;
+  if (data.modo === "chip") return data.percentualChip != null;
+  return true;
+}, { message: "Informe o peso ou percentual conforme o modo selecionado" });</div>
+
+<!-- 14. RESPOSTAS API -->
+<h2>14. Formato de Respostas da API</h2>
+
+<h4>Sucesso ao criar:</h4>
+<div class="box" style="font-family: Consolas, monospace; font-size: 12px; white-space: pre;">{
+  "success": true,
+  "message": "Retornado registrado com sucesso!",
+  "data": {
+    "percentual_restante": 35.5,
+    "valor_calculado": 48.72,
+    "modelo_cadastrado": 1
+  }
+}</div>
+
+<h4>Erro de validação:</h4>
+<div class="box" style="font-family: Consolas, monospace; font-size: 12px; white-space: pre;">{
+  "success": false,
+  "message": "Campos obrigatórios faltando: modelo, filial"
+}</div>
+
+<h4>Importação concluída:</h4>
+<div class="box" style="font-family: Consolas, monospace; font-size: 12px; white-space: pre;">{
+  "success": true,
+  "message": "Importação concluída! 45 registros importados",
+  "imported": 45,
+  "errors": ["Linha 12: Erro no banco - Duplicate entry"]
+}</div>
+
+<!-- RODAPÉ -->
+<div style="margin-top: 60px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center; color: #94a3b8; font-size: 11px;">
+  <p>SGQ OTI DJ — Módulo Toners Retornados — PRD v1.0</p>
+  <p>Gerado em 21/02/2026 | Confidencial — Uso Interno</p>
+</div>
+
+</body>
+</html>
