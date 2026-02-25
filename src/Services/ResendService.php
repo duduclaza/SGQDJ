@@ -13,17 +13,17 @@ class ResendService
     private string $fromEmail;
     private string $fromName;
     private ?string $lastError = null;
-    
+
     public function __construct()
     {
         // API Key do Resend
-        $this->apiKey = $this->env('RESEND_API_KEY', 're_PauUxFwk_N3UPnUa3PTsyk5rPA7bmckFR');
-        
-        // Email do domínio verificado no Resend (sgqoti.com.br)
-        $this->fromEmail = $this->env('RESEND_FROM_EMAIL', 'suporte@sgqoti.com.br');
+        $this->apiKey = $this->env('RESEND_API_KEY', 're_KTUc33tE_HP8BGt11jhZmokDXrjznhnKK');
+
+        // Email do domínio verificado no Resend (tiuai.com.br)
+        $this->fromEmail = $this->env('RESEND_FROM_EMAIL', 'suporte@tiuai.com.br');
         $this->fromName = $this->env('MAIL_FROM_NAME', 'SGQ OTI DJ');
     }
-    
+
     /**
      * Obter variável de ambiente
      */
@@ -41,7 +41,7 @@ class ResendService
         }
         return $default;
     }
-    
+
     /**
      * Enviar email via API Resend
      * 
@@ -54,22 +54,22 @@ class ResendService
     public function send($to, string $subject, string $html, ?string $text = null): bool
     {
         $this->lastError = null;
-        
+
         try {
             error_log("=== ENVIANDO EMAIL VIA RESEND API ===");
             error_log("Para: " . (is_array($to) ? implode(', ', $to) : $to));
             error_log("Assunto: " . $subject);
-            
+
             // Preparar destinatários
             $recipients = is_array($to) ? $to : [$to];
             $recipients = array_filter($recipients); // Remove vazios
-            
+
             if (empty($recipients)) {
                 $this->lastError = 'Nenhum destinatário válido';
                 error_log("❌ Erro: " . $this->lastError);
                 return false;
             }
-            
+
             // Montar payload da API
             $payload = [
                 'from' => "{$this->fromName} <{$this->fromEmail}>",
@@ -77,14 +77,14 @@ class ResendService
                 'subject' => $subject,
                 'html' => $html,
             ];
-            
+
             if ($text) {
                 $payload['text'] = $text;
             }
-            
+
             // Fazer requisição para API Resend
             $ch = curl_init();
-            
+
             curl_setopt_array($ch, [
                 CURLOPT_URL => 'https://api.resend.com/emails',
                 CURLOPT_RETURNTRANSFER => true,
@@ -97,40 +97,41 @@ class ResendService
                 CURLOPT_TIMEOUT => 30,
                 CURLOPT_CONNECTTIMEOUT => 10,
             ]);
-            
+
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $curlError = curl_error($ch);
-            
+
             curl_close($ch);
-            
+
             if ($curlError) {
                 $this->lastError = "Erro cURL: " . $curlError;
                 error_log("❌ " . $this->lastError);
                 return false;
             }
-            
+
             $responseData = json_decode($response, true);
-            
+
             error_log("Resposta API (HTTP {$httpCode}): " . $response);
-            
+
             if ($httpCode >= 200 && $httpCode < 300) {
                 error_log("✅ Email enviado com sucesso via Resend! ID: " . ($responseData['id'] ?? 'N/A'));
                 return true;
             }
-            
+
             // Erro na API
             $this->lastError = $responseData['message'] ?? $responseData['error'] ?? "Erro HTTP {$httpCode}";
             error_log("❌ Erro Resend API: " . $this->lastError);
             return false;
-            
-        } catch (\Exception $e) {
+
+        }
+        catch (\Exception $e) {
             $this->lastError = $e->getMessage();
             error_log("❌ Exceção ao enviar email: " . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Obter último erro
      */
@@ -138,7 +139,7 @@ class ResendService
     {
         return $this->lastError;
     }
-    
+
     /**
      * Testar conexão com API
      */
@@ -146,7 +147,7 @@ class ResendService
     {
         try {
             $ch = curl_init();
-            
+
             curl_setopt_array($ch, [
                 CURLOPT_URL => 'https://api.resend.com/domains',
                 CURLOPT_RETURNTRANSFER => true,
@@ -156,34 +157,35 @@ class ResendService
                 ],
                 CURLOPT_TIMEOUT => 10,
             ]);
-            
+
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $curlError = curl_error($ch);
-            
+
             curl_close($ch);
-            
+
             if ($curlError) {
                 return [
                     'success' => false,
                     'message' => 'Erro de conexão: ' . $curlError
                 ];
             }
-            
+
             if ($httpCode >= 200 && $httpCode < 300) {
                 return [
                     'success' => true,
                     'message' => 'Conexão com API Resend OK!'
                 ];
             }
-            
+
             $responseData = json_decode($response, true);
             return [
                 'success' => false,
                 'message' => 'Erro API: ' . ($responseData['message'] ?? "HTTP {$httpCode}")
             ];
-            
-        } catch (\Exception $e) {
+
+        }
+        catch (\Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Exceção: ' . $e->getMessage()
