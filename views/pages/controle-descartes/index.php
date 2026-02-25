@@ -727,27 +727,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Carregar data do primeiro registro para o filtro
 function carregarDataInicial() {
     fetch('/controle-descartes/first-date')
         .then(response => response.json())
         .then(data => {
             if (data.success && data.first_date) {
                 document.getElementById('filtro-data-inicio').value = data.first_date;
+            } else {
+                // Caso não tenha registros, colocar 30 dias atrás como padrão
+                const trintaDiasAtras = new Date();
+                trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
+                document.getElementById('filtro-data-inicio').value = trintaDiasAtras.toISOString().split('T')[0];
             }
-        })
-        .catch(error => console.error('Erro ao carregar data inicial:', error));
+        });
 }
 
-// Carregar lista de descartes com paginação
-function carregarDescartes(page = null) {
-    if (page !== null) {
-        paginacao.page = page;
-    }
-    
-    document.getElementById('no-data').classList.add('hidden');
-    document.getElementById('paginacao-container').classList.add('hidden');
-    
+function carregarDescartes(page = 1) {
     const params = new URLSearchParams();
     const numeroSerie = document.getElementById('filtro-numero-serie').value;
     const codigoProduto = document.getElementById('filtro-codigo-produto').value;
@@ -765,16 +760,18 @@ function carregarDescartes(page = null) {
     if (dataFim) params.append('data_fim', dataFim);
     if (statusAndamento) params.append('status_andamento', statusAndamento);
     
-    // Adicionar parâmetros de paginação
-    params.append('page', paginacao.page);
+    params.append('page', page);
     params.append('per_page', paginacao.per_page);
-    
+
+    // Feedback visual de carregamento
+    document.getElementById('tabela-descartes').innerHTML = '<tr><td colspan="10" class="px-6 py-4 text-center">Carregando...</td></tr>';
+
     fetch(`/controle-descartes/list?${params.toString()}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 descartes = data.data;
-                paginacao = data.pagination || paginacao;
+                paginacao = data.pagination;
                 renderizarTabela();
                 atualizarControlesPaginacao();
             } else {
@@ -787,17 +784,17 @@ function carregarDescartes(page = null) {
         });
 }
 
-// Renderizar tabela
 function renderizarTabela() {
     const tbody = document.getElementById('tabela-descartes');
+    const noData = document.getElementById('no-data');
     
     if (descartes.length === 0) {
-        document.getElementById('no-data').classList.remove('hidden');
         tbody.innerHTML = '';
+        noData.classList.remove('hidden');
         return;
     }
     
-    document.getElementById('no-data').classList.add('hidden');
+    noData.classList.add('hidden');
     
     tbody.innerHTML = descartes.map(descarte => `
         <tr class="hover:bg-gray-50">
@@ -973,10 +970,21 @@ document.getElementById('btn-salvar-descarte').addEventListener('click', functio
     e.preventDefault();
     e.stopPropagation();
     
+    const btn = this;
+    const originalText = btn.innerHTML;
+    
     const form = document.getElementById('form-descarte');
+    
+    // Validação básica frontend
+    if (!form.checkVisibility()) return; // Ignorar se não visível
+    
     const formData = new FormData(form);
     const isEdit = document.getElementById('descarte-id').value !== '';
     const url = isEdit ? '/controle-descartes/update' : '/controle-descartes/create';
+
+    // Desabilitar botão para evitar double-click
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Salvando...';
 
     fetch(url, {
         method: 'POST',
@@ -1004,11 +1012,17 @@ document.getElementById('btn-salvar-descarte').addEventListener('click', functio
     .catch(error => {
         console.error('Erro:', error);
         alert('Erro ao salvar descarte');
+    })
+    .finally(() => {
+        // Reabilitar botão
+        btn.disabled = false;
+        btn.innerHTML = originalText;
     });
 });
 
 // Funções auxiliares
 function escapeHtml(text) {
+    if (text === null || text === undefined) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;

@@ -235,6 +235,13 @@ class ControleDescartesController
                     return;
                 }
             }
+
+            // Verificar duplicidade de OS
+            $numero_os = $_POST['numero_os'] ?? null;
+            if ($numero_os && $this->isOsDuplicada($numero_os)) {
+                echo json_encode(['success' => false, 'message' => "A Ordem de Servico (OS) '{$numero_os}' ja esta cadastrada no sistema. Verifique os dados."]);
+                return;
+            }
             
             // Converter array de IDs em string separada por vírgula (opcional)
             $notificarUsuarios = null;
@@ -411,6 +418,13 @@ class ControleDescartesController
                     echo json_encode(['success' => false, 'message' => "Campo '{$field}' é obrigatório"]);
                     return;
                 }
+            }
+
+            // Verificar duplicidade de OS (excluindo o atual)
+            $numero_os = $_POST['numero_os'] ?? null;
+            if ($numero_os && $this->isOsDuplicada($numero_os, $descarte_id)) {
+                echo json_encode(['success' => false, 'message' => "A Ordem de Servico (OS) '{$numero_os}' ja esta cadastrada em outro registro."]);
+                return;
             }
 
             // Data do descarte
@@ -815,6 +829,24 @@ class ControleDescartesController
     }
 
     // Métodos auxiliares
+
+    // Verificar se OS já está cadastrada (anti-duplicidade)
+    private function isOsDuplicada($numeroOs, $excludeId = null): bool
+    {
+        if (empty($numeroOs)) return false;
+
+        $sql = "SELECT id FROM controle_descartes WHERE numero_os = ?";
+        $params = [$numeroOs];
+
+        if ($excludeId !== null) {
+            $sql .= " AND id != ?";
+            $params[] = $excludeId;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->rowCount() > 0;
+    }
     private function getDescarteById($id)
     {
         $stmt = $this->db->prepare("
@@ -1062,6 +1094,12 @@ class ControleDescartesController
                     } else {
                         // Tentar converter data
                         $dataDescarte = date('Y-m-d', strtotime($dataDescarte));
+                    }
+
+                    // Verificar duplicidade de OS na importacao
+                    if (!empty($numeroOs) && $this->isOsDuplicada($numeroOs)) {
+                        $errors[] = "Linha $linha: OS '$numeroOs' ja existe no sistema e foi pulada";
+                        continue;
                     }
 
                     // Inserir descarte
