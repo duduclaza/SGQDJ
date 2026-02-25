@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Sistema SGQ OTI DJ - Versão Corrigida
 session_start();
 
@@ -665,12 +665,6 @@ $router->get('/cadastros-2/get/{id}', [App\Controllers\CadastrosProdutosControll
 $router->post('/cadastros-2/store', [App\Controllers\CadastrosProdutosController::class , 'store']);
 $router->post('/cadastros-2/update', [App\Controllers\CadastrosProdutosController::class , 'update']);
 $router->post('/cadastros-2/delete', [App\Controllers\CadastrosProdutosController::class , 'delete']);
-
-// ===== MODULO ATENDIMENTO =====
-$router->get('/atendimento/calculadora-toners', [App\Controllers\AtendimentoController::class , 'index']);
-$router->get('/atendimento/calculadora-toners/buscar', [App\Controllers\AtendimentoController::class , 'buscarToners']);
-$router->get('/atendimento/calculadora-toners/config', [App\Controllers\AtendimentoController::class , 'getConfig']);
-$router->post('/atendimento/calculadora-toners/config', [App\Controllers\AtendimentoController::class , 'saveConfig']);
 
 // Dispatch
 try {
