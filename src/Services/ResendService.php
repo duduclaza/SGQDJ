@@ -21,7 +21,7 @@ class ResendService
 
         // Email do domínio verificado no Resend (tiuai.com.br)
         $this->fromEmail = $this->env('RESEND_FROM_EMAIL', 'suporte@tiuai.com.br');
-        $this->fromName = $this->env('MAIL_FROM_NAME', 'SGQ OTI DJ');
+        $this->fromName = $this->env('MAIL_FROM_NAME', 'SGI ATLAS');
     }
 
     /**
