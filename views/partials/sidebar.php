@@ -82,6 +82,16 @@ $menu = [
     ]
   ],
   [
+    'label' => 'Atendimento', 
+    'href' => '#', 
+    'icon' => '📞', 
+    'category' => true,
+    'modules' => ['calculadora_toners'],
+    'submenu' => [
+      ['label' => 'Calculadora de Envio', 'href' => '/atendimento/calculadora-toners', 'icon' => '🧮', 'module' => 'calculadora_toners'],
+    ]
+  ],
+  [
     'label' => 'Administrativo', 
     'href' => '#', 
     'icon' => '⚙️', 
