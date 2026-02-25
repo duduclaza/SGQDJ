@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Sistema SGQ OTI DJ - Versão Corrigida
 session_start();
 

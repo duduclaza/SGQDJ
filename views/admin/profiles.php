@@ -1,4 +1,4 @@
-﻿<style>
+<style>
 /* Toggle Switch Moderno */
 .toggle-switch {
   position: relative;

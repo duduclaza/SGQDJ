@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Function to check if user has permission
 function hasPermission($module, $action = 'view') {
     if (!isset($_SESSION['user_id'])) {

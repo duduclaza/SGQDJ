@@ -55,7 +55,9 @@ class AtendimentoController
         ];
 
         extract($data);
-        require __DIR__ . '/../../views/pages/atendimento/calculadora-toners.php';
+        $title = 'Calculadora de Envio de Toners - SGQ OTI DJ';
+        $viewFile = __DIR__ . '/../../views/pages/atendimento/calculadora-toners.php';
+        include __DIR__ . '/../../views/layouts/main.php';
     }
 
     /**
