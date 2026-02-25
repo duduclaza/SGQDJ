@@ -344,6 +344,9 @@ const modulesByCategory = {
     { key: 'area_tecnica_checklist', name: 'Checklist Virtual' },
     { key: 'area_tecnica_consulta', name: 'Consulta Checklists' }
   ],
+  'Atendimento': [
+    { key: 'calculadora_toners', name: 'Calculadora de Envio de Toners 🧮' }
+  ],
   'Administrativo': [
     { key: 'admin_usuarios', name: 'Gerenciar Usuários 👥' },
     { key: 'admin_perfis', name: 'Gerenciar Perfis 🎭' },
