@@ -1,4 +1,4 @@
-<style>
+﻿<style>
 /* Toggle Switch Moderno */
 .toggle-switch {
   position: relative;
@@ -94,7 +94,6 @@
       <span>Novo Perfil</span>
     </button>
   </div>
-
   <!-- Profile Form -->
   <div id="profileFormContainer" class="hidden bg-white rounded-lg shadow-lg border border-gray-200 p-6">
     <div class="flex justify-between items-center mb-6">
@@ -135,13 +134,28 @@
         <div class="bg-gray-50 p-4 rounded-lg">
           <div class="overflow-x-auto">
             <div class="min-w-full">
-              <div class="grid grid-cols-6 gap-2 mb-4 min-w-max">
-                <div class="font-semibold text-gray-700 text-sm">Módulo</div>
-                <div class="font-semibold text-gray-700 text-center text-sm">Visualizar</div>
-                <div class="font-semibold text-gray-700 text-center text-sm">Editar</div>
-                <div class="font-semibold text-gray-700 text-center text-sm">Excluir</div>
-                <div class="font-semibold text-gray-700 text-center text-sm">Importar</div>
-                <div class="font-semibold text-gray-700 text-center text-sm">Exportar</div>
+              <div class="grid grid-cols-6 gap-2 mb-4 min-w-max sticky top-0 bg-white z-10 py-2 border-b-2 border-gray-200">
+                <div class="font-bold text-gray-800 text-sm">Módulo</div>
+                <div class="flex flex-col items-center gap-1">
+                  <span class="font-bold text-gray-800 text-xs">Visualizar</span>
+                  <button type="button" onclick="toggleColumn('view', true)" class="text-[9px] text-blue-600 hover:underline">Todos</button>
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                  <span class="font-bold text-gray-800 text-xs">Editar</span>
+                  <button type="button" onclick="toggleColumn('edit', true)" class="text-[9px] text-blue-600 hover:underline">Todos</button>
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                  <span class="font-bold text-gray-800 text-xs">Excluir</span>
+                  <button type="button" onclick="toggleColumn('delete', true)" class="text-[9px] text-blue-600 hover:underline">Todos</button>
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                  <span class="font-bold text-gray-800 text-xs">Importar</span>
+                  <button type="button" onclick="toggleColumn('import', true)" class="text-[9px] text-blue-600 hover:underline">Todos</button>
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                  <span class="font-bold text-gray-800 text-xs">Exportar</span>
+                  <button type="button" onclick="toggleColumn('export', true)" class="text-[9px] text-blue-600 hover:underline">Todos</button>
+                </div>
               </div>
               
               <div id="permissionsGrid">
@@ -151,7 +165,6 @@
           </div>
         </div>
       </div>
-
       <!-- Dashboard Tabs Permissions Section -->
       <div class="mt-6">
         <h4 class="text-md font-semibold text-gray-900 mb-4">📊 Permissões de Abas do Dashboard</h4>
@@ -262,47 +275,89 @@
     </div>
   </div>
 </section>
-
 <script>
 let currentProfileId = null;
-const modules = [
-  { key: 'dashboard', name: 'Dashboard' },
-  { key: 'toners_cadastro', name: 'Cadastro de Toners' },
-  { key: 'cadastro_maquinas', name: 'Cadastro de Máquinas 🖨️' },
-  { key: 'cadastro_pecas', name: 'Cadastro de Peças 🔧' },
-  { key: 'toners_retornados', name: 'Registro de Retornados' },
-  { key: 'toners_defeitos', name: 'Toners com Defeito \u{1F534}' },
-  { key: 'homologacoes', name: 'Homologações' },
-  { key: 'amostragens_2', name: 'Amostragens 2.0 🔬' },
-  { key: 'garantias', name: 'Garantias' },
-  { key: 'controle_descartes', name: 'Controle de Descartes' },
-  { key: 'fmea', name: 'FMEA' },
-  { key: 'certificados', name: 'Certificados' },
-  { key: 'pops_its', name: 'POPs e ITs' },
-  { key: 'pops_its_cadastro_titulos', name: '→ Cadastro de Títulos' },
-  { key: 'pops_its_meus_registros', name: '→ Meus Registros' },
-  { key: 'pops_its_pendente_aprovacao', name: '→ Pendente Aprovação' },
-  { key: 'pops_its_visualizacao', name: '→ Visualização' },
-  { key: 'pops_its_solicitacoes', name: '→ Solicitações de Exclusão' },
-  { key: '5w2h', name: '5W2H' },
-  { key: 'fluxogramas', name: 'Fluxogramas' },
-  { key: 'melhoria_continua_2', name: 'Melhoria Contínua 2.0 🚀' },
-  { key: 'controle_rc', name: 'Controle de RC' },
-  { key: 'auditorias', name: 'Auditorias' },
-  { key: 'nao_conformidades', name: 'Não Conformidades ⚠️' },
-  { key: 'nps', name: 'NPS - Net Promoter Score 🎯' },
-  { key: 'registros_filiais', name: 'Filiais' },
-  { key: 'registros_departamentos', name: 'Departamentos' },
-  { key: 'registros_fornecedores', name: 'Fornecedores' },
-  { key: 'registros_parametros', name: 'Parâmetros de Retornados' },
-  { key: 'configuracoes_gerais', name: 'Configurações Gerais' },
-  { key: 'admin_usuarios', name: 'Gerenciar Usuários' },
-  { key: 'admin_perfis', name: 'Gerenciar Perfis' },
-  { key: 'admin_convites', name: 'Solicitações de Acesso' },
-  { key: 'admin_painel', name: 'Painel Administrativo' },
-  { key: 'profile', name: 'Perfil do Usuário' },
-  { key: 'email_config', name: 'Configurações de Email' }
-];
+const modulesByCategory = {
+  'Geral': [
+    { key: 'dashboard', name: 'Dashboard 📊' },
+    { key: 'profile', name: 'Perfil do Usuário 👤' }
+  ],
+  'Cadastros': [
+    { key: 'cadastros_2', name: 'Cadastros 2.0 📦' },
+    { key: 'toners_cadastro', name: 'Cadastro de Toners 💧' },
+    { key: 'cadastro_maquinas', name: 'Cadastro de Máquinas 🖨️' },
+    { key: 'cadastro_pecas', name: 'Cadastro de Peças 🔧' },
+    { key: 'registros_fornecedores', name: 'Cadastro de Fornecedores 🏭' },
+    { key: 'cadastro_contratos', name: 'Cadastro de Contratos 📄' },
+    { key: 'cadastro_clientes', name: 'Cadastro de Clientes 👥' },
+    { key: 'registros_filiais', name: 'Filiais 🏢' },
+    { key: 'registros_departamentos', name: 'Departamentos 🏛️' }
+  ],
+  'Qualidade': [
+    { key: 'toners_retornados', name: 'Registro de Retornados 📋' },
+    { key: 'toners_defeitos', name: 'Toners com Defeito 🔴' },
+    { key: 'amostragens_2', name: 'Amostragens 2.0 🔬' },
+    { key: 'garantias', name: 'Garantias 🛡️' },
+    { key: 'controle_descartes', name: 'Controle de Descartes ♻️' },
+    { key: 'homologacoes', name: 'Homologações ✅' },
+    { key: 'certificados', name: 'Certificados 📜' },
+    { key: 'fmea', name: 'FMEA 📈' },
+    { key: 'pops_its', name: 'POPs e ITs 📚' },
+    { key: 'pops_its_cadastro_titulos', name: '→ Cadastro de Títulos' },
+    { key: 'pops_its_meus_registros', name: '→ Meus Registros' },
+    { key: 'pops_its_pendente_aprovacao', name: '→ Pendente Aprovação' },
+    { key: 'pops_its_visualizacao', name: '→ Visualização' },
+    { key: 'pops_its_solicitacoes', name: '→ Solicitações de Exclusão' },
+    { key: 'fluxogramas', name: 'Fluxogramas 🔀' },
+    { key: 'auditorias', name: 'Auditorias 🔍' },
+    { key: 'nao_conformidades', name: 'Não Conformidades ⚠️' },
+    { key: 'melhoria_continua_2', name: 'Melhoria Contínua 2.0 🚀' },
+    { key: 'controle_rc', name: 'Controle de RC 🗂️' },
+    { key: 'nps', name: 'NPS - Net Promoter Score 🎯' }
+  ],
+  'Implantação': [
+    { key: 'implantacao_dpo', name: 'DPO (Data Prevista Operação)' },
+    { key: 'implantacao_ordem_servicos', name: 'Ordem de Serviços' },
+    { key: 'implantacao_fluxo', name: 'Fluxo de Implantação' },
+    { key: 'implantacao_relatorios', name: 'Relatórios de Implantação' }
+  ],
+  'CRM': [
+    { key: 'crm_prospeccao', name: 'Prospecção' },
+    { key: 'crm_vendas', name: 'Gestão de Vendas' },
+    { key: 'crm_relacionamento', name: 'Relacionamento' },
+    { key: 'crm_marketing', name: 'Marketing' },
+    { key: 'crm_relatorios', name: 'CRM - Relatórios' },
+    { key: 'crm_dashboards', name: 'CRM - Dashboards' }
+  ],
+  'Logística': [
+    { key: 'logistica_entrada_estoque', name: 'Entrada de Estoque' },
+    { key: 'logistica_entrada_almoxarifados', name: 'Entrada Almoxarifados' },
+    { key: 'logistica_inventarios', name: 'Inventários' },
+    { key: 'logistica_consulta_estoque', name: 'Consulta Estoque' },
+    { key: 'logistica_consulta_almoxarifado', name: 'Consulta Almoxarifado' },
+    { key: 'logistica_transferencias_internas', name: 'Transf. Internas' },
+    { key: 'logistica_transferencias_externas', name: 'Transf. Externas' },
+    { key: 'logistica_estoque_tecnico', name: 'Estoque Técnico' }
+  ],
+  'Área Técnica': [
+    { key: 'area_tecnica', name: 'Visão Geral Técnica' },
+    { key: 'area_tecnica_checklist', name: 'Checklist Virtual' },
+    { key: 'area_tecnica_consulta', name: 'Consulta Checklists' }
+  ],
+  'Administrativo': [
+    { key: 'admin_usuarios', name: 'Gerenciar Usuários 👥' },
+    { key: 'admin_perfis', name: 'Gerenciar Perfis 🎭' },
+    { key: 'admin_convites', name: 'Solicitações de Acesso 📧' },
+    { key: 'admin_painel', name: 'Painel Administrativo ⚙️' },
+    { key: 'registros_parametros', name: 'Parâmetros de Retornados 📊' },
+    { key: 'api_powerbi', name: 'APIs para Power BI 📊' },
+    { key: 'configuracoes_gerais', name: 'Configurações Gerais' },
+    { key: 'email_config', name: 'Configurações de Email' }
+  ]
+};
+
+// Flatten modules for legacy support in some functions
+const modules = Object.values(modulesByCategory).flat();
 
 // Email do usuário logado (Master User pode editar tudo)
 const currentUserEmail = '<?= $_SESSION['user_email'] ?? '' ?>';
@@ -350,45 +405,70 @@ function generatePermissionsGrid() {
   const grid = document.getElementById('permissionsGrid');
   let html = '';
   
-  modules.forEach(module => {
+  Object.keys(modulesByCategory).forEach(category => {
     html += `
-      <div class="grid grid-cols-6 gap-2 py-3 border-b border-gray-200 items-center min-w-max">
-        <div class="font-medium text-gray-900 text-sm pr-2">${module.name}</div>
-        <div class="text-center">
-          <label class="toggle-switch">
-            <input type="checkbox" name="permissions[${module.key}][view]">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="text-center">
-          <label class="toggle-switch">
-            <input type="checkbox" name="permissions[${module.key}][edit]">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="text-center">
-          <label class="toggle-switch">
-            <input type="checkbox" name="permissions[${module.key}][delete]">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="text-center">
-          <label class="toggle-switch">
-            <input type="checkbox" name="permissions[${module.key}][import]">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="text-center">
-          <label class="toggle-switch">
-            <input type="checkbox" name="permissions[${module.key}][export]">
-            <span class="toggle-slider"></span>
-          </label>
+      <div class="mt-8 mb-4 border-b-2 border-blue-100 pb-2 flex justify-between items-center bg-blue-50/50 p-2 rounded-t-lg">
+        <h5 class="text-sm font-bold text-blue-800 uppercase tracking-wider">${category}</h5>
+        <div class="flex gap-2">
+          <button type="button" onclick="toggleCategory('${category}', true)" class="text-[10px] bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 transition-colors font-semibold">Marcar Todos</button>
+          <button type="button" onclick="toggleCategory('${category}', false)" class="text-[10px] bg-gray-100 text-gray-600 px-2 py-1 rounded hover:bg-gray-200 transition-colors font-semibold">Desmarcar Todos</button>
         </div>
       </div>
     `;
+    
+    modulesByCategory[category].forEach(module => {
+      html += `
+        <div class="grid grid-cols-6 gap-2 py-3 border-b border-gray-100 items-center hover:bg-gray-50 transition-all rounded px-2" data-category="${category}">
+          <div class="font-medium text-gray-700 text-sm pr-2">${module.name}</div>
+          <div class="text-center">
+            <label class="toggle-switch">
+              <input type="checkbox" name="permissions[${module.key}][view]" data-module="${module.key}" data-type="view">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="text-center">
+            <label class="toggle-switch">
+              <input type="checkbox" name="permissions[${module.key}][edit]" data-module="${module.key}" data-type="edit">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="text-center">
+            <label class="toggle-switch">
+              <input type="checkbox" name="permissions[${module.key}][delete]" data-module="${module.key}" data-type="delete">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="text-center">
+            <label class="toggle-switch">
+              <input type="checkbox" name="permissions[${module.key}][import]" data-module="${module.key}" data-type="import">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="text-center">
+            <label class="toggle-switch">
+              <input type="checkbox" name="permissions[${module.key}][export]" data-module="${module.key}" data-type="export">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      `;
+    });
   });
   
   grid.innerHTML = html;
+}
+
+function toggleCategory(category, checked) {
+  const rows = document.querySelectorAll(`div[data-category="${category}"]`);
+  rows.forEach(row => {
+    const checkboxes = row.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => cb.checked = checked);
+  });
+}
+
+function toggleColumn(type, checked) {
+  const checkboxes = document.querySelectorAll(`input[data-type="${type}"]`);
+  checkboxes.forEach(cb => cb.checked = checked);
 }
 
 function displayProfiles(profiles) {
