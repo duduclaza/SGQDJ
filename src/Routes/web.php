@@ -46,6 +46,7 @@ $router->post('/cadastros/clientes/criar', [ClientesController::class , 'criar']
 $router->post('/cadastros/clientes/atualizar', [ClientesController::class , 'atualizar']);
 $router->post('/cadastros/clientes/excluir', [ClientesController::class , 'excluir']);
 $router->post('/cadastros/clientes/importar', [ClientesController::class , 'importar']);
+$router->get('/cadastros/clientes/exportar', [ClientesController::class , 'exportar']);
 $router->get('/cadastros/clientes/template', [ClientesController::class , 'template']);
 
 // Contratos (placeholder)

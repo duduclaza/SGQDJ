@@ -10,9 +10,17 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
       <h1 class="text-3xl font-bold text-gray-900">🖨️ Cadastro de Máquinas</h1>
       <p class="text-gray-600 mt-1">Gerenciamento de máquinas cadastradas</p>
     </div>
-    <button onclick="openFormModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg">
-      + Nova Máquina
-    </button>
+    <div class="flex gap-2">
+      <button onclick="openFormModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg">
+        + Nova Máquina
+      </button>
+      <button onclick="exportMaquinas(event)" class="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors shadow-lg flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        Exportar Excel
+      </button>
+    </div>
   </div>
 
   <!-- Formulário Inline -->
@@ -132,6 +140,26 @@ async function deleteMaquina(id) {
   } catch (error) {
     alert('Erro ao excluir máquina');
   }
+}
+
+function exportMaquinas(e) {
+  const button = e ? e.target.closest('button') : document.querySelector('button[onclick*="exportMaquinas"]');
+  const originalContent = button.innerHTML;
+  button.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Exportando...';
+  button.disabled = true;
+
+  const link = document.createElement('a');
+  link.href = '/cadastro-maquinas/export';
+  link.download = 'maquinas_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  setTimeout(() => {
+    button.innerHTML = originalContent;
+    button.disabled = false;
+    alert('Exportação concluída com sucesso!');
+  }, 2000);
 }
 
 document.getElementById('maquinaForm').addEventListener('submit', async function(e) {

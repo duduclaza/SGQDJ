@@ -252,6 +252,58 @@ class ClientesController
     }
 
     /**
+     * Exportar clientes para CSV
+     */
+    public function exportar()
+    {
+        if (!$this->isAdmin()) {
+            header('Location: /');
+            exit;
+        }
+
+        try {
+            $stmt = $this->db->query("SELECT * FROM clientes ORDER BY nome ASC");
+            $clientes = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($clientes)) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Nenhum cliente encontrado para exportar']);
+                return;
+            }
+
+            $filename = 'clientes_' . date('Y-m-d_H-i-s') . '.csv';
+
+            header('Content-Type: text/csv; charset=UTF-8');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Expires: 0');
+
+            $output = fopen('php://output', 'w');
+            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($output, ['Código do Cliente', 'Nome do Cliente', 'Data Cadastro', 'Última Atualização'], ';');
+
+            foreach ($clientes as $cliente) {
+                $row = [
+                    $cliente['codigo'],
+                    $cliente['nome'],
+                    !empty($cliente['created_at']) ? date('d/m/Y H:i', strtotime($cliente['created_at'])) : '',
+                    !empty($cliente['updated_at']) ? date('d/m/Y H:i', strtotime($cliente['updated_at'])) : '',
+                ];
+                fputcsv($output, $row, ';');
+            }
+
+            fclose($output);
+            exit;
+
+        } catch (\Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Erro ao exportar: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
+    /**
      * Download do template Excel
      */
     public function template()

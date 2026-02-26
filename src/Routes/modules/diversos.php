@@ -104,6 +104,7 @@ $router->get('/cadastro-maquinas', [CadastroMaquinasController::class, 'index'])
 $router->post('/cadastro-maquinas/store', [CadastroMaquinasController::class, 'store']);
 $router->post('/cadastro-maquinas/update', [CadastroMaquinasController::class, 'update']);
 $router->post('/cadastro-maquinas/delete', [CadastroMaquinasController::class, 'delete']);
+$router->get('/cadastro-maquinas/export', [CadastroMaquinasController::class, 'export']);
 
 // ===== CADASTRO DE PEÇAS =====
 

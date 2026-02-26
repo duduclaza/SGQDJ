@@ -144,4 +144,55 @@ class CadastroMaquinasController
             echo json_encode(['success' => false, 'message' => 'Erro ao excluir: ' . $e->getMessage()]);
         }
     }
+
+    public function export(): void
+    {
+        try {
+            $stmt = $this->db->prepare('
+                SELECT m.*, u.name as criador_nome
+                FROM cadastro_maquinas m
+                LEFT JOIN users u ON m.created_by = u.id
+                ORDER BY m.modelo ASC
+            ');
+            $stmt->execute();
+            $maquinas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($maquinas)) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Nenhuma máquina encontrada para exportar']);
+                return;
+            }
+
+            $filename = 'maquinas_' . date('Y-m-d_H-i-s') . '.csv';
+
+            header('Content-Type: text/csv; charset=UTF-8');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Expires: 0');
+
+            $output = fopen('php://output', 'w');
+            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($output, ['ID', 'Modelo', 'Código Referência', 'Criado por', 'Data Cadastro', 'Última Atualização'], ';');
+
+            foreach ($maquinas as $maquina) {
+                $row = [
+                    $maquina['id'],
+                    $maquina['modelo'],
+                    $maquina['cod_referencia'],
+                    $maquina['criador_nome'] ?? 'N/A',
+                    !empty($maquina['created_at']) ? date('d/m/Y H:i', strtotime($maquina['created_at'])) : '',
+                    !empty($maquina['updated_at']) ? date('d/m/Y H:i', strtotime($maquina['updated_at'])) : '',
+                ];
+                fputcsv($output, $row, ';');
+            }
+
+            fclose($output);
+            exit;
+
+        } catch (\Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Erro ao exportar: ' . $e->getMessage()]);
+        }
+    }
 }
