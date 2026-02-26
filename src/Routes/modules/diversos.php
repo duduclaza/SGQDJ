@@ -43,6 +43,7 @@ $router->get('/controle-descartes/{id}', [ControleDescartesController::class, 'g
 $router->get('/controle-descartes/anexo/{id}', [ControleDescartesController::class, 'downloadAnexo']);
 $router->get('/controle-descartes/template', [ControleDescartesController::class, 'downloadTemplate']);
 $router->post('/controle-descartes/importar', [ControleDescartesController::class, 'importar']);
+$router->get('/controle-descartes/exportar', [ControleDescartesController::class, 'exportar']);
 $router->get('/controle-descartes/relatorios', [ControleDescartesController::class, 'relatorios']);
 
 // ===== NÃO CONFORMIDADES =====

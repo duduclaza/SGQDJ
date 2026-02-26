@@ -1493,4 +1493,133 @@ class ControleDescartesController
             error_log("Erro ao notificar mudança de status: " . $e->getMessage());
         }
     }
+
+    // Exportar descartes como CSV
+    public function exportar()
+    {
+        try {
+            if (!PermissionService::hasPermission($_SESSION['user_id'], 'controle_descartes', 'export')) {
+                http_response_code(403);
+                echo 'Sem permissão para exportar descartes.';
+                return;
+            }
+
+            $numero_serie    = $_GET['numero_serie'] ?? '';
+            $codigo_produto  = $_GET['codigo_produto'] ?? '';
+            $numero_os       = $_GET['numero_os'] ?? '';
+            $filial_id       = $_GET['filial_id'] ?? '';
+            $data_inicio     = $_GET['data_inicio'] ?? '';
+            $data_fim        = $_GET['data_fim'] ?? '';
+            $status_andamento = $_GET['status_andamento'] ?? '';
+
+            $sql = "
+                SELECT d.id,
+                       d.numero_serie,
+                       d.codigo_produto,
+                       d.descricao_produto,
+                       f.nome AS filial,
+                       d.data_descarte,
+                       d.numero_os,
+                       d.responsavel_tecnico,
+                       d.status,
+                       COALESCE(d.status_andamento, 'Em aberto') AS status_andamento,
+                       d.observacoes,
+                       uc.name AS criado_por,
+                       d.created_at
+                FROM controle_descartes d
+                LEFT JOIN filiais f ON d.filial_id = f.id
+                LEFT JOIN users uc ON d.created_by = uc.id
+                WHERE 1=1
+            ";
+
+            $params = [];
+
+            if ($numero_serie) {
+                $sql .= " AND d.numero_serie LIKE ?";
+                $params[] = "%{$numero_serie}%";
+            }
+            if ($codigo_produto) {
+                $sql .= " AND d.codigo_produto LIKE ?";
+                $params[] = "%{$codigo_produto}%";
+            }
+            if ($numero_os) {
+                $sql .= " AND d.numero_os LIKE ?";
+                $params[] = "%{$numero_os}%";
+            }
+            if ($filial_id) {
+                $sql .= " AND d.filial_id = ?";
+                $params[] = $filial_id;
+            }
+            if ($data_inicio) {
+                $sql .= " AND d.data_descarte >= ?";
+                $params[] = $data_inicio;
+            }
+            if ($data_fim) {
+                $sql .= " AND d.data_descarte <= ?";
+                $params[] = $data_fim;
+            }
+            if ($status_andamento) {
+                $sql .= " AND COALESCE(d.status_andamento, 'Em aberto') = ?";
+                $params[] = $status_andamento;
+            }
+
+            $sql .= " ORDER BY d.data_descarte DESC, d.created_at DESC";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $descartes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $filename = 'controle_descartes_' . date('Y-m-d_H-i-s') . '.csv';
+
+            header('Content-Type: text/csv; charset=UTF-8');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+
+            $output = fopen('php://output', 'w');
+            fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM UTF-8 para Excel
+
+            fputcsv($output, [
+                'ID',
+                'Número de Série',
+                'Código do Produto',
+                'Descrição do Produto',
+                'Filial',
+                'Data do Descarte',
+                'Número OS',
+                'Responsável Técnico',
+                'Status',
+                'Status Andamento',
+                'Observações',
+                'Criado Por',
+                'Data de Criação',
+            ], ';');
+
+            foreach ($descartes as $row) {
+                fputcsv($output, [
+                    $row['id'],
+                    $row['numero_serie'],
+                    $row['codigo_produto'],
+                    $row['descricao_produto'],
+                    $row['filial'],
+                    $row['data_descarte'],
+                    $row['numero_os'],
+                    $row['responsavel_tecnico'],
+                    $row['status'],
+                    $row['status_andamento'],
+                    $row['observacoes'],
+                    $row['criado_por'],
+                    $row['created_at'],
+                ], ';');
+            }
+
+            fclose($output);
+            exit;
+
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo 'Erro ao exportar descartes: ' . $e->getMessage();
+        }
+    }
 }

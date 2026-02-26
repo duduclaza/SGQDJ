@@ -1035,8 +1035,26 @@ function formatarData(data) {
 }
 
 function exportarDescartes() {
-    // TODO: Implementar exportação
-    alert('Funcionalidade de exportação será implementada em breve');
+    const params = new URLSearchParams();
+
+    const numeroSerie = document.getElementById('filtro-numero-serie')?.value || '';
+    const codigoProduto = document.getElementById('filtro-codigo-produto')?.value || '';
+    const numeroOs = document.getElementById('filtro-numero-os')?.value || '';
+    const filialId = document.getElementById('filtro-filial')?.value || '';
+    const dataInicio = document.getElementById('filtro-data-inicio')?.value || '';
+    const dataFim = document.getElementById('filtro-data-fim')?.value || '';
+    const statusAndamento = document.getElementById('filtro-status-andamento')?.value || '';
+
+    if (numeroSerie) params.append('numero_serie', numeroSerie);
+    if (codigoProduto) params.append('codigo_produto', codigoProduto);
+    if (numeroOs) params.append('numero_os', numeroOs);
+    if (filialId) params.append('filial_id', filialId);
+    if (dataInicio) params.append('data_inicio', dataInicio);
+    if (dataFim) params.append('data_fim', dataFim);
+    if (statusAndamento) params.append('status_andamento', statusAndamento);
+    params.append('export', 'csv');
+
+    window.location.href = '/controle-descartes/exportar?' + params.toString();
 }
 
 // Verificar se pode alterar status
