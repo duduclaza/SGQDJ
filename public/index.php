@@ -334,6 +334,7 @@ $router->post('/controle-descartes/update', [App\Controllers\ControleDescartesCo
 $router->post('/controle-descartes/delete', [App\Controllers\ControleDescartesController::class , 'delete']);
 $router->post('/controle-descartes/alterar-status', [App\Controllers\ControleDescartesController::class , 'alterarStatus']);
 $router->post('/controle-descartes/alterar-status-andamento', [App\Controllers\ControleDescartesController::class , 'alterarStatusAndamento']);
+$router->get('/controle-descartes/exportar', [App\Controllers\ControleDescartesController::class , 'exportar']);
 $router->get('/controle-descartes/{id}', [App\Controllers\ControleDescartesController::class , 'getDescarte']);
 $router->get('/controle-descartes/anexo/{id}', [App\Controllers\ControleDescartesController::class , 'downloadAnexo']);
 $router->get('/controle-descartes/template', [App\Controllers\ControleDescartesController::class , 'downloadTemplate']);
