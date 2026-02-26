@@ -1044,6 +1044,7 @@ function downloadTemplate() {
   // Download direto do backend (template CSV simples)
   window.location.href = '/toners/template';
   return;
+}
   
   // Código antigo comentado (caso queira voltar ao Excel complexo)
   /*
@@ -1207,6 +1208,7 @@ function downloadTemplate() {
     btn.disabled = false;
   }, 2000);
 }
+*/
 
 function importExcel() {
   console.log('Iniciando importação...');
