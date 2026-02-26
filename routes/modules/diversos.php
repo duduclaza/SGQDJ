@@ -39,6 +39,7 @@ $router->get('/controle-descartes/action-logs', [ControleDescartesController::cl
 $router->get('/controle-descartes/first-date', [ControleDescartesController::class, 'getFirstRecordDate']);
 $router->get('/controle-descartes/template', [ControleDescartesController::class, 'downloadTemplate']);
 $router->get('/controle-descartes/relatorios', [ControleDescartesController::class, 'relatorios']);
+$router->get('/controle-descartes/exportar', [ControleDescartesController::class, 'exportar']);
 $router->get('/controle-descartes/anexo/{id}', [ControleDescartesController::class, 'downloadAnexo']);
 $router->get('/controle-descartes/{id}', [ControleDescartesController::class, 'getDescarte']);
 $router->post('/controle-descartes/verify-admin', [ControleDescartesController::class, 'verifyAdminPassword']);
