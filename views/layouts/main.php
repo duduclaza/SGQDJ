@@ -198,6 +198,19 @@ if (!function_exists('flash')) {
           <div id="chat-conversation-header" class="chat-conversation-header hidden"></div>
           <div id="chat-messages" class="chat-messages hidden"></div>
           <form id="chat-form" class="chat-form hidden">
+            <button id="chat-emoji-toggle" class="chat-emoji-toggle" type="button" title="Emojis">😊</button>
+            <div id="chat-emoji-picker" class="chat-emoji-picker hidden">
+              <button type="button" data-emoji="😀">😀</button>
+              <button type="button" data-emoji="😂">😂</button>
+              <button type="button" data-emoji="😉">😉</button>
+              <button type="button" data-emoji="😍">😍</button>
+              <button type="button" data-emoji="👍">👍</button>
+              <button type="button" data-emoji="🙏">🙏</button>
+              <button type="button" data-emoji="🎉">🎉</button>
+              <button type="button" data-emoji="✅">✅</button>
+              <button type="button" data-emoji="⚠️">⚠️</button>
+              <button type="button" data-emoji="❤️">❤️</button>
+            </div>
             <input id="chat-message-input" type="text" maxlength="2000" placeholder="Digite sua mensagem..." autocomplete="off">
             <button type="submit">Enviar</button>
           </form>
@@ -208,7 +221,7 @@ if (!function_exists('flash')) {
 
   <style>
     .chat-widget { position: fixed; right: 20px; bottom: 20px; z-index: 1200; font-family: inherit; }
-    .chat-toggle { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 10px 16px; background: #0f172a; color: #fff; font-size: 14px; cursor: pointer; box-shadow: 0 8px 24px rgba(2, 6, 23, 0.28); }
+    .chat-toggle { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 8px 13px; background: #0f172a; color: #fff; font-size: 13px; cursor: pointer; box-shadow: 0 8px 24px rgba(2, 6, 23, 0.28); }
     .chat-unread-badge { min-width: 18px; height: 18px; padding: 0 6px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #ef4444; display: inline-flex; align-items: center; justify-content: center; }
     .chat-unread-badge.hidden { display: none; }
     .chat-panel { width: min(760px, calc(100vw - 28px)); height: 480px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; margin-top: 10px; box-shadow: 0 20px 55px rgba(15, 23, 42, 0.2); overflow: hidden; }
@@ -223,23 +236,41 @@ if (!function_exists('flash')) {
     .chat-contact-item { width: 100%; border: 0; text-align: left; padding: 10px; border-radius: 10px; margin-bottom: 6px; background: transparent; cursor: pointer; }
     .chat-contact-item:hover, .chat-contact-item.active { background: #e2e8f0; }
     .chat-contact-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .chat-contact-person { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+    .chat-contact-avatar { width: 26px; height: 26px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; background: #334155; overflow: hidden; flex-shrink: 0; }
+    .chat-contact-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .chat-contact-name { font-size: 13px; color: #111827; font-weight: 600; }
     .chat-contact-status { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #64748b; }
     .chat-status-dot { width: 8px; height: 8px; border-radius: 999px; background: #94a3b8; }
     .chat-status-dot.online { background: #22c55e; }
     .chat-unread { background: #ef4444; color: #fff; border-radius: 999px; font-size: 10px; padding: 2px 6px; font-weight: 700; }
-    .chat-conversation { display: flex; flex-direction: column; min-width: 0; }
+    .chat-conversation { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
     .chat-empty { margin: auto; color: #6b7280; font-size: 13px; }
     .chat-conversation-header { padding: 10px 14px; border-bottom: 1px solid #e5e7eb; font-size: 13px; font-weight: 600; color: #1f2937; }
     .chat-conversation-header.hidden { display: none; }
-    .chat-messages { flex: 1; overflow: auto; padding: 12px; background: #f8fafc; }
+    .chat-conversation-title { display: inline-flex; align-items: center; gap: 8px; }
+    .chat-conversation-sub { color: #64748b; font-weight: 500; font-size: 11px; }
+    .chat-messages { flex: 1; min-height: 0; overflow: auto; padding: 12px; background: #f8fafc; }
     .chat-messages.hidden { display: none; }
-    .chat-message { max-width: 80%; margin-bottom: 10px; padding: 8px 10px; border-radius: 10px; font-size: 13px; line-height: 1.35; white-space: pre-wrap; word-break: break-word; }
-    .chat-message.me { margin-left: auto; background: #dbeafe; color: #1e3a8a; }
-    .chat-message.other { margin-right: auto; background: #e5e7eb; color: #111827; }
-    .chat-message-time { margin-top: 4px; font-size: 10px; opacity: 0.7; }
-    .chat-form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid #e5e7eb; }
+    .chat-message-row { display: flex; align-items: flex-end; gap: 6px; margin-bottom: 8px; }
+    .chat-message-row.me { justify-content: flex-end; }
+    .chat-message-row.other { justify-content: flex-start; }
+    .chat-message-avatar { width: 24px; height: 24px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; background: #64748b; overflow: hidden; flex-shrink: 0; }
+    .chat-message-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .chat-message { width: fit-content; max-width: 62%; padding: 7px 9px; border-radius: 11px; font-size: 13px; line-height: 1.35; white-space: pre-wrap; word-break: break-word; }
+    .chat-message.me { background: #dbeafe; color: #1e3a8a; }
+    .chat-message.other { background: #e5e7eb; color: #111827; }
+    .chat-message-meta { margin-top: 4px; font-size: 10px; opacity: 0.8; display: inline-flex; align-items: center; gap: 4px; }
+    .chat-read-status { font-size: 11px; letter-spacing: -1px; }
+    .chat-read-status.sent { color: #64748b; }
+    .chat-read-status.read { color: #2563eb; }
+    .chat-form { position: relative; display: flex; flex-shrink: 0; gap: 8px; padding: 10px; border-top: 1px solid #e5e7eb; background: #fff; }
     .chat-form.hidden { display: none; }
+    .chat-emoji-toggle { border: 1px solid #d1d5db; background: #fff; color: #374151; border-radius: 10px; width: 36px; min-width: 36px; height: 36px; cursor: pointer; }
+    .chat-emoji-picker { position: absolute; bottom: 54px; left: 10px; z-index: 10; background: #fff; border: 1px solid #d1d5db; border-radius: 10px; padding: 6px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; box-shadow: 0 8px 18px rgba(2, 6, 23, 0.15); }
+    .chat-emoji-picker.hidden { display: none; }
+    .chat-emoji-picker button { border: 0; background: #fff; font-size: 16px; line-height: 1; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; }
+    .chat-emoji-picker button:hover { background: #f1f5f9; }
     .chat-form input { flex: 1; border: 1px solid #d1d5db; border-radius: 10px; padding: 8px 10px; font-size: 13px; }
     .chat-form button { border: 0; background: #2563eb; color: #fff; border-radius: 10px; padding: 8px 14px; font-size: 13px; cursor: pointer; }
     @media (max-width: 900px) {
@@ -252,17 +283,51 @@ if (!function_exists('flash')) {
   <script>
     (function() {
       const meId = <?= (int)($_SESSION['user_id'] ?? 0) ?>;
+      const meName = <?= json_encode((string)($_SESSION['user_name'] ?? 'Você')) ?>;
       if (!meId) return;
 
       let contacts = [];
       let activeMode = 'global';
       let activeContactId = null;
+      let lastGlobalSeenId = 0;
+      const lastDirectSeenByUser = {};
       let pollTimer = null;
       let heartbeatTimer = null;
 
       const ui = {};
 
       function q(id) { return document.getElementById(id); }
+      function getInitial(name) {
+        return (String(name || '?').trim().charAt(0) || '?').toUpperCase();
+      }
+
+      function avatarHtml(userId, name, hasPhoto, className) {
+        const cls = className || 'chat-contact-avatar';
+        if (Number(hasPhoto) === 1) {
+          return `<span class="${cls}"><img src="/profile/photo/${userId}" alt="${escapeHtml(name)}"></span>`;
+        }
+        return `<span class="${cls}">${escapeHtml(getInitial(name))}</span>`;
+      }
+
+      function playMessageSound(kind) {
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return;
+          const ctx = new AudioCtx();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.type = 'sine';
+          osc.frequency.value = kind === 'send' ? 760 : 560;
+          gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.06, ctx.currentTime + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.13);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.14);
+        } catch (_) {}
+      }
+
       function escapeHtml(value) {
         return String(value)
           .replace(/&/g, '&amp;')
@@ -304,7 +369,10 @@ if (!function_exists('flash')) {
           const globalButton = `
             <button class="chat-contact-item ${activeMode === 'global' ? 'active' : ''}" data-mode="global">
               <div class="chat-contact-top">
-                <span class="chat-contact-name">Sala Geral</span>
+                <span class="chat-contact-person">
+                  <span class="chat-contact-avatar">#</span>
+                  <span class="chat-contact-name">Sala Geral</span>
+                </span>
               </div>
               <div class="chat-contact-status">
                 <span class="chat-status-dot online"></span>
@@ -320,7 +388,10 @@ if (!function_exists('flash')) {
             return `
               <button class="chat-contact-item ${(activeMode === 'direct' && isActive) ? 'active' : ''}" data-mode="direct" data-user-id="${c.id}">
                 <div class="chat-contact-top">
-                  <span class="chat-contact-name">${escapeHtml(c.name)}</span>
+                  <span class="chat-contact-person">
+                    ${avatarHtml(c.id, c.name, c.has_photo, 'chat-contact-avatar')}
+                    <span class="chat-contact-name">${escapeHtml(c.name)}</span>
+                  </span>
                   ${unread > 0 ? `<span class="chat-unread">${unread}</span>` : ''}
                 </div>
                 <div class="chat-contact-status">
@@ -345,21 +416,32 @@ if (!function_exists('flash')) {
         try {
           const data = await fetchJson('/api/chat/messages/global');
           if (!data.success) return;
+          const messages = data.messages || [];
+
+          const maxId = messages.reduce((max, item) => Math.max(max, Number(item.id || 0)), 0);
+          if (lastGlobalSeenId > 0) {
+            const hasIncomingNew = messages.some(m => Number(m.id) > lastGlobalSeenId && Number(m.sender_id) !== meId);
+            if (hasIncomingNew) playMessageSound('receive');
+          }
+          if (maxId > 0) lastGlobalSeenId = Math.max(lastGlobalSeenId, maxId);
 
           ui.empty.classList.add('hidden');
           ui.convHeader.classList.remove('hidden');
-          ui.convHeader.textContent = 'Sala Geral (todos com todos)';
+          ui.convHeader.innerHTML = `<span class="chat-conversation-title"><span class="chat-contact-avatar">#</span><span>Sala Geral</span></span> <span class="chat-conversation-sub">(todos com todos)</span>`;
           ui.messages.classList.remove('hidden');
           ui.form.classList.remove('hidden');
 
-          ui.messages.innerHTML = (data.messages || []).map(m => {
+          ui.messages.innerHTML = messages.map(m => {
             const mine = Number(m.sender_id) === meId;
-            const author = mine ? 'Você' : (m.sender_name || 'Usuário');
+            const author = mine ? meName : (m.sender_name || 'Usuário');
             return `
-              <div class="chat-message ${mine ? 'me' : 'other'}">
-                <div style="font-size:11px;font-weight:700;opacity:.85;margin-bottom:3px;">${escapeHtml(author)}</div>
-                <div>${escapeHtml(m.message)}</div>
-                <div class="chat-message-time">${fmtDate(m.created_at)}</div>
+              <div class="chat-message-row ${mine ? 'me' : 'other'}">
+                ${mine ? '' : avatarHtml(m.sender_id, author, m.sender_has_photo, 'chat-message-avatar')}
+                <div class="chat-message ${mine ? 'me' : 'other'}">
+                  <div style="font-size:11px;font-weight:700;opacity:.85;margin-bottom:3px;">${escapeHtml(author)}</div>
+                  <div>${escapeHtml(m.message)}</div>
+                  <div class="chat-message-meta">${fmtDate(m.created_at)}</div>
+                </div>
               </div>
             `;
           }).join('');
@@ -373,20 +455,38 @@ if (!function_exists('flash')) {
         try {
           const data = await fetchJson(`/api/chat/messages/${activeContactId}`);
           if (!data.success) return;
+          const messages = data.messages || [];
+
+          const prevSeen = Number(lastDirectSeenByUser[activeContactId] || 0);
+          const maxId = messages.reduce((max, item) => Math.max(max, Number(item.id || 0)), 0);
+          if (prevSeen > 0) {
+            const hasIncomingNew = messages.some(m => Number(m.id) > prevSeen && Number(m.sender_id) !== meId);
+            if (hasIncomingNew) playMessageSound('receive');
+          }
+          if (maxId > 0) lastDirectSeenByUser[activeContactId] = Math.max(prevSeen, maxId);
 
           const selectedContact = contacts.find(c => String(c.id) === String(activeContactId));
           ui.empty.classList.add('hidden');
           ui.convHeader.classList.remove('hidden');
-          ui.convHeader.textContent = selectedContact ? `${selectedContact.name} (${Number(selectedContact.is_online) === 1 ? 'Online' : 'Offline'})` : 'Conversa';
+          if (selectedContact) {
+            ui.convHeader.innerHTML = `<span class="chat-conversation-title">${avatarHtml(selectedContact.id, selectedContact.name, selectedContact.has_photo, 'chat-contact-avatar')}<span>${escapeHtml(selectedContact.name)}</span></span> <span class="chat-conversation-sub">(${Number(selectedContact.is_online) === 1 ? 'Online' : 'Offline'})</span>`;
+          } else {
+            ui.convHeader.textContent = 'Conversa';
+          }
           ui.messages.classList.remove('hidden');
           ui.form.classList.remove('hidden');
 
-          ui.messages.innerHTML = (data.messages || []).map(m => {
+          ui.messages.innerHTML = messages.map(m => {
             const mine = Number(m.sender_id) === meId;
+            const readClass = m.read_at ? 'read' : 'sent';
+            const readLabel = mine ? `<span class="chat-read-status ${readClass}">${m.read_at ? '✓✓' : '✓'}</span>` : '';
             return `
-              <div class="chat-message ${mine ? 'me' : 'other'}">
-                <div>${escapeHtml(m.message)}</div>
-                <div class="chat-message-time">${fmtDate(m.created_at)}</div>
+              <div class="chat-message-row ${mine ? 'me' : 'other'}">
+                ${mine ? '' : (selectedContact ? avatarHtml(selectedContact.id, selectedContact.name, selectedContact.has_photo, 'chat-message-avatar') : '')}
+                <div class="chat-message ${mine ? 'me' : 'other'}">
+                  <div>${escapeHtml(m.message)}</div>
+                  <div class="chat-message-meta">${fmtDate(m.created_at)} ${readLabel}</div>
+                </div>
               </div>
             `;
           }).join('');
@@ -424,6 +524,7 @@ if (!function_exists('flash')) {
           }
 
           ui.messageInput.value = '';
+          playMessageSound('send');
           if (activeMode === 'global') {
             await loadGlobalMessages();
           } else {
@@ -461,6 +562,25 @@ if (!function_exists('flash')) {
         });
 
         ui.search.addEventListener('input', loadContacts);
+        ui.emojiToggle.addEventListener('click', function() {
+          ui.emojiPicker.classList.toggle('hidden');
+        });
+
+        ui.emojiPicker.addEventListener('click', function(event) {
+          const btn = event.target.closest('button[data-emoji]');
+          if (!btn) return;
+          ui.messageInput.value += btn.getAttribute('data-emoji');
+          ui.messageInput.focus();
+        });
+
+        document.addEventListener('click', function(event) {
+          if (!ui.form.contains(event.target) || event.target === ui.messageInput) {
+            if (event.target !== ui.emojiToggle && !ui.emojiPicker.contains(event.target)) {
+              ui.emojiPicker.classList.add('hidden');
+            }
+          }
+        });
+
         ui.contactsList.addEventListener('click', function(event) {
           const btn = event.target.closest('.chat-contact-item');
           if (!btn) return;
@@ -486,6 +606,8 @@ if (!function_exists('flash')) {
         ui.messages = q('chat-messages');
         ui.form = q('chat-form');
         ui.messageInput = q('chat-message-input');
+        ui.emojiToggle = q('chat-emoji-toggle');
+        ui.emojiPicker = q('chat-emoji-picker');
 
         if (!ui.toggle || !ui.panel) return;
 

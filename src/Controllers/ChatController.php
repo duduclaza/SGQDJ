@@ -103,6 +103,7 @@ class ChatController
                         u.id,
                         u.name,
                         u.email,
+                        CASE WHEN u.profile_photo IS NOT NULL THEN 1 ELSE 0 END AS has_photo,
                         CASE
                             WHEN p.last_seen IS NOT NULL AND p.last_seen >= DATE_SUB(NOW(), INTERVAL 2 MINUTE)
                             THEN 1
@@ -215,7 +216,8 @@ class ChatController
                     m.payload_json,
                     m.created_at,
                     m.read_at,
-                    u.name AS sender_name
+                    u.name AS sender_name,
+                    CASE WHEN u.profile_photo IS NOT NULL THEN 1 ELSE 0 END AS sender_has_photo
                 FROM chat_messages m
                 LEFT JOIN users u ON u.id = m.sender_id
                 WHERE m.receiver_id = 0
