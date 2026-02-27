@@ -43,6 +43,20 @@ class PermissionService
         }
         
         $permissions = self::$userPermissions[$userId] ?? [];
+
+        // Compatibilidade: perfis antigos podem ter apenas permissões granulares de POPs e ITs
+        // e não a chave de visualização principal. Nesse caso, liberar acesso ao módulo principal.
+        if ($module === 'pops_its_visualizacao' && $action === 'view') {
+            $hasPopsMain = isset($permissions['pops_its']) && ($permissions['pops_its']['view'] ?? false);
+            $hasAnyPopsGranular =
+                (isset($permissions['pops_its_cadastro_titulos']) && ($permissions['pops_its_cadastro_titulos']['view'] ?? false)) ||
+                (isset($permissions['pops_its_meus_registros']) && ($permissions['pops_its_meus_registros']['view'] ?? false)) ||
+                (isset($permissions['pops_its_pendente_aprovacao']) && ($permissions['pops_its_pendente_aprovacao']['view'] ?? false));
+
+            if ($hasPopsMain || $hasAnyPopsGranular) {
+                return true;
+            }
+        }
         
         // Check if user has permission for this module and action
         return isset($permissions[$module]) && ($permissions[$module][$action] ?? false);
