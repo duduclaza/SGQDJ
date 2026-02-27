@@ -88,27 +88,30 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   /* Fullscreen chart */
   .chart-expand-btn { cursor:pointer; padding:4px; border-radius:8px; color:var(--dash-muted); transition:all 0.2s; border:none; background:transparent; }
   .chart-expand-btn:hover { color:#fff; background:rgba(255,255,255,0.08); }
-  .chart-fullscreen-overlay { display:none; position:fixed; inset:0; z-index:9999; background:rgba(5,10,25,0.95); backdrop-filter:blur(8px); padding:32px; flex-direction:column; }
+  .chart-fullscreen-overlay { display:none; position:fixed; inset:0; z-index:99999; background:#060c1b; padding:0; flex-direction:column; align-items:center; justify-content:center; }
   .chart-fullscreen-overlay.active { display:flex; }
-  .chart-fullscreen-overlay .fs-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
-  .chart-fullscreen-overlay .fs-title { font-size:1.25rem; font-weight:700; color:#fff; }
-  .chart-fullscreen-overlay .fs-subtitle { font-size:0.82rem; color:var(--dash-muted); margin-top:2px; }
-  .chart-fullscreen-overlay .fs-close { cursor:pointer; padding:8px 16px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#e2e8f0; font-size:0.82rem; font-weight:600; transition:all 0.2s; }
+  .chart-fullscreen-overlay .fs-inner { width:90vw; max-width:1100px; height:85vh; display:flex; flex-direction:column; }
+  .chart-fullscreen-overlay .fs-header { display:flex; align-items:center; justify-content:space-between; padding:20px 0 16px; flex-shrink:0; }
+  .chart-fullscreen-overlay .fs-title { font-size:1.4rem; font-weight:700; color:#fff; }
+  .chart-fullscreen-overlay .fs-subtitle { font-size:0.85rem; color:var(--dash-muted); margin-top:2px; }
+  .chart-fullscreen-overlay .fs-close { cursor:pointer; padding:10px 20px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#e2e8f0; font-size:0.85rem; font-weight:600; transition:all 0.2s; }
   .chart-fullscreen-overlay .fs-close:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.25); }
-  .chart-fullscreen-overlay .fs-body { flex:1; position:relative; min-height:0; }
+  .chart-fullscreen-overlay .fs-body { flex:1; position:relative; min-height:0; border-radius:16px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.03); padding:24px; }
   .chart-fullscreen-overlay .fs-body canvas { width:100% !important; height:100% !important; }
 </style>
 
 <!-- Fullscreen overlay -->
-<div id="chartFullscreen" class="chart-fullscreen-overlay">
-  <div class="fs-header">
-    <div>
-      <div class="fs-title" id="fsTitle"></div>
-      <div class="fs-subtitle" id="fsSubtitle"></div>
+<div id="chartFullscreen" class="chart-fullscreen-overlay" onclick="if(event.target===this)fecharFullscreen()">
+  <div class="fs-inner">
+    <div class="fs-header">
+      <div>
+        <div class="fs-title" id="fsTitle"></div>
+        <div class="fs-subtitle" id="fsSubtitle"></div>
+      </div>
+      <button class="fs-close" onclick="fecharFullscreen()">ESC &nbsp;✕&nbsp; Fechar</button>
     </div>
-    <button class="fs-close" onclick="fecharFullscreen()">ESC &nbsp;✕&nbsp; Fechar</button>
+    <div class="fs-body"><canvas id="chartFullscreenCanvas"></canvas></div>
   </div>
-  <div class="fs-body"><canvas id="chartFullscreenCanvas"></canvas></div>
 </div>
 
 <section class="dash-container -m-6 p-6 lg:p-8 rounded-none">
