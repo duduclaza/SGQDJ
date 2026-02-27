@@ -56,7 +56,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     --dash-orange: #fb923c;
     --dash-yellow: #fbbf24;
   }
-  .dash-container { background: var(--dash-bg); color: var(--dash-text); min-height: 100vh; }
+  .dash-container { background: var(--dash-bg); color: var(--dash-text); min-height: calc(100vh - 60px); }
   .dash-card { background: var(--dash-surface); border: 1px solid var(--dash-border); border-radius: 16px; backdrop-filter: blur(12px); }
   .dash-card-glow { box-shadow: 0 0 0 1px rgba(34,211,238,0.08), 0 8px 32px rgba(0,0,0,0.25); }
   .kpi-value { font-size: 1.85rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
@@ -78,7 +78,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   .dash-destino-badge { padding: 3px 10px; border-radius: 9999px; font-size: 0.72rem; font-weight: 600; }
 </style>
 
-<section class="dash-container -m-4 -mt-2 p-6 lg:p-8">
+<section class="dash-container -m-6 p-6 lg:p-8 rounded-none">
   <!-- Header -->
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 dash-animate">
     <div>

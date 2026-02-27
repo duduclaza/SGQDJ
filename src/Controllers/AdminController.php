@@ -131,14 +131,14 @@ class AdminController
 
         if (!isset($_SESSION['user_id']) || !\App\Services\PermissionService::hasPermission($_SESSION['user_id'], 'dashboard', 'view')) {
             echo json_encode(['success' => false, 'message' => 'Sem permissão']);
-            return;
+            exit;
         }
 
         try {
             $tableExists = $this->db->query("SHOW TABLES LIKE 'triagem_toners'")->rowCount() > 0;
             if (!$tableExists) {
                 echo json_encode(['success' => true, 'kpis' => [], 'charts' => []]);
-                return;
+                exit;
             }
 
             // --- Build dynamic WHERE ---
@@ -146,16 +146,16 @@ class AdminController
             $params = [];
 
             if (!empty($_GET['modelo'])) {
-                $where .= ' AND t.toner_modelo LIKE ?';
-                $params[] = '%' . trim($_GET['modelo']) . '%';
+                $where .= ' AND t.toner_modelo = ?';
+                $params[] = trim($_GET['modelo']);
             }
             if (!empty($_GET['cliente'])) {
-                $where .= ' AND t.cliente_nome LIKE ?';
-                $params[] = '%' . trim($_GET['cliente']) . '%';
+                $where .= ' AND t.cliente_nome = ?';
+                $params[] = trim($_GET['cliente']);
             }
             if (!empty($_GET['defeito'])) {
-                $where .= ' AND t.defeito_nome LIKE ?';
-                $params[] = '%' . trim($_GET['defeito']) . '%';
+                $where .= ' AND t.defeito_nome = ?';
+                $params[] = trim($_GET['defeito']);
             }
             if (!empty($_GET['destino'])) {
                 $where .= ' AND t.destino = ?';
@@ -301,6 +301,7 @@ class AdminController
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Erro: ' . $e->getMessage()]);
         }
+        exit;
     }
 
     private function getTriagemDashboard2Stats(): array
