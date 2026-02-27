@@ -447,12 +447,12 @@ class ChatController
     private function generateAiResponse(int $userId, string $message): string
     {
         if (!$this->isSupportedTopic($message)) {
-            return 'Sou o Daniel do Suporte (IA). Posso ajudar somente com: impressoras, toners, notebooks, notas fiscais, cálculos fiscais e dúvidas sobre módulos do sistema.';
+            return 'Oi! Eu sou o Daniel do Suporte 🙂 Posso te ajudar com impressoras, toners, notebooks, notas fiscais, cálculos fiscais e dúvidas sobre os módulos do sistema. Se quiser, me manda sua dúvida nesses temas que eu te ajudo agora.';
         }
 
         $apiKey = trim((string)($_ENV['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY') ?: ''));
         if ($apiKey === '') {
-            return 'No momento estou sem integração com a IA. O administrador precisa configurar a variável GEMINI_API_KEY no ambiente do sistema.';
+            return 'Estou sem acesso à IA neste momento 😕. O administrador precisa configurar a variável GEMINI_API_KEY no ambiente para eu responder normalmente.';
         }
 
         if (!function_exists('curl_init')) {
@@ -463,10 +463,13 @@ class ChatController
         $historyText = $history === '' ? '(sem histórico anterior)' : $history;
 
         $prompt = "Você é Daniel do Suporte, assistente de IA interno do sistema SGQ.\n"
-            . "Responda sempre em português do Brasil, de forma objetiva e prática.\n"
+            . "Fale sempre em português do Brasil com tom natural, humano e descontraído, como um colega prestativo do time de suporte.\n"
+            . "Seja claro e direto; use frases curtas e exemplos práticos quando ajudar.\n"
+            . "Demonstre empatia e cordialidade sem exageros.\n"
             . "Limite estrito de escopo: impressoras, toners, notebooks, notas fiscais, cálculos fiscais e dúvidas sobre módulos do sistema.\n"
-            . "Se a pergunta sair desse escopo, recuse educadamente e informe os temas permitidos.\n"
-            . "Nunca invente acesso a banco de dados em tempo real. Não peça senha.\n"
+            . "Se a pergunta sair desse escopo, recuse educadamente e convide a pessoa a perguntar sobre os temas permitidos.\n"
+            . "Nunca invente acesso a banco de dados em tempo real. Nunca peça senha, token ou dados sensíveis.\n"
+            . "Sempre que fizer sentido, termine com uma pergunta curta para continuar o atendimento (ex.: 'quer que eu te guie no passo a passo?').\n"
             . "Histórico recente:\n" . $historyText . "\n\n"
             . "Pergunta atual do usuário: " . $message;
 
@@ -481,7 +484,8 @@ class ChatController
                 ]
             ],
             'generationConfig' => [
-                'temperature' => 0.5,
+                'temperature' => 0.75,
+                'topP' => 0.9,
                 'maxOutputTokens' => 500
             ]
         ];
