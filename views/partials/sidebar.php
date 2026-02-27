@@ -32,9 +32,8 @@ $menu = [
     'href' => '#', 
     'icon' => '📝', 
     'category' => true,
-    'modules' => ['cadastros_2', 'toners_cadastro', 'cadastro_maquinas', 'cadastro_pecas', 'cadastro_defeitos', 'registros_fornecedores', 'cadastro_contratos', 'cadastro_clientes'],
+    'modules' => ['toners_cadastro', 'cadastro_maquinas', 'cadastro_pecas', 'cadastro_defeitos', 'registros_fornecedores', 'cadastro_contratos', 'cadastro_clientes'],
     'submenu' => [
-      ['label' => 'Cadastros 2.0', 'href' => '/cadastros-2', 'icon' => '📦', 'module' => 'cadastros_2', 'badge' => 'NOVO', 'roles' => ['super_admin']],
       ['label' => 'Cadastro de Toners', 'href' => '/toners/cadastro', 'icon' => '💧', 'module' => 'toners_cadastro'],
       ['label' => 'Cadastro de Máquinas', 'href' => '/cadastro-maquinas', 'icon' => '🖨️', 'module' => 'cadastro_maquinas'],
       ['label' => 'Cadastro de Peças', 'href' => '/cadastro-pecas', 'icon' => '🔧', 'module' => 'cadastro_pecas'],
