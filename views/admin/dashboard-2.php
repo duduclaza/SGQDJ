@@ -754,7 +754,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           html += '<td class="text-slate-200">' + esc(r.cliente_nome || '-') + '</td>';
           html += '<td class="font-medium text-white">' + esc(r.toner_modelo || '-') + '</td>';
           html += '<td class="text-orange-300">' + esc(r.defeito_nome || 'N/I') + '</td>';
-          html += '<td>' + pct + '%</td>';
+          html += '<td class="text-slate-200 font-semibold">' + pct + '%</td>';
           html += '<td class="text-emerald-400">' + val + '</td>';
           html += '<td class="text-slate-400">' + dt + '</td>';
           html += '</tr>';

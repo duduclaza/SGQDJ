@@ -424,6 +424,14 @@ let filtrosDebounce = null;
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', () => {
+  // Move modals to <body> to avoid fixed-position issues inside transformed containers
+  ['modal-triagem', 'modal-delete', 'modal-importacao', 'modal-params', 'modal-duplicate-cliente'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.parentElement !== document.body) {
+      document.body.appendChild(el);
+    }
+  });
+
   const searchInput = document.getElementById('f-search');
   const destinoSelect = document.getElementById('f-destino');
   const dataInicioInput = document.getElementById('f-data-inicio');
