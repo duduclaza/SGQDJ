@@ -210,6 +210,16 @@ $router->post('/toners/defeitos/delete', [App\Controllers\TonersController::clas
 $router->post('/toners/defeitos/devolutiva/store', [App\Controllers\TonersController::class , 'storeDevolutiva']);
 $router->get('/toners/defeitos/{id}/devolutiva-foto/{n}', [App\Controllers\TonersController::class , 'downloadFotoDevolutiva']);
 
+// Triagem de Toners
+$router->get('/triagem-toners', [App\Controllers\TriagemTonersController::class, 'index']);
+$router->get('/triagem-toners/list', [App\Controllers\TriagemTonersController::class, 'list']);
+$router->post('/triagem-toners/calcular', [App\Controllers\TriagemTonersController::class, 'calcular']);
+$router->post('/triagem-toners/store', [App\Controllers\TriagemTonersController::class, 'store']);
+$router->post('/triagem-toners/update', [App\Controllers\TriagemTonersController::class, 'update']);
+$router->post('/triagem-toners/delete', [App\Controllers\TriagemTonersController::class, 'delete']);
+$router->get('/triagem-toners/parametros', [App\Controllers\TriagemTonersController::class, 'getParametrosApi']);
+$router->post('/triagem-toners/parametros/save', [App\Controllers\TriagemTonersController::class, 'saveParametros']);
+
 
 // Melhoria Contínua 2.0 routes
 $router->get('/melhoria-continua-2', [App\Controllers\MelhoriaContinua2Controller::class , 'index']);
