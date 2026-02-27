@@ -373,9 +373,14 @@ class ChatController
             return 'Oi! Eu sou o Daniel do Suporte 🙂 Posso te ajudar com impressoras, toners, notebooks, notas fiscais, cálculos fiscais e dúvidas sobre os módulos do sistema. Se quiser, me manda sua dúvida nesses temas que eu te ajudo agora.';
         }
 
-        $apiKey = trim((string)($_ENV['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY') ?: ''));
-        if ($apiKey === '') {
-            return 'Estou sem acesso à IA neste momento 😕. O administrador precisa configurar a variável GEMINI_API_KEY no ambiente para eu responder normalmente.';
+        $geminiApiKey = trim((string)($_ENV['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY') ?: ''));
+        $groqApiKey = trim((string)($_ENV['GROQ_API_KEY'] ?? getenv('GROQ_API_KEY') ?: ''));
+        if ($groqApiKey === '' && strpos($geminiApiKey, 'gsk_') === 0) {
+            $groqApiKey = $geminiApiKey;
+        }
+
+        if ($geminiApiKey === '' && $groqApiKey === '') {
+            return 'Estou sem acesso à IA neste momento 😕. Configure GEMINI_API_KEY ou GROQ_API_KEY no ambiente para eu responder normalmente.';
         }
 
         if (!function_exists('curl_init')) {
@@ -395,6 +400,66 @@ class ChatController
             . "Sempre que fizer sentido, termine com uma pergunta curta para continuar o atendimento (ex.: 'quer que eu te guie no passo a passo?').\n"
             . "Histórico recente:\n" . $historyText . "\n\n"
             . "Pergunta atual do usuário: " . $message;
+
+        if ($groqApiKey !== '') {
+            $groqModel = trim((string)($_ENV['GROQ_MODEL'] ?? getenv('GROQ_MODEL') ?: 'llama-3.1-8b-instant'));
+            $groqPayload = [
+                'model' => $groqModel,
+                'messages' => [
+                    ['role' => 'system', 'content' => 'Você é Daniel do Suporte, assistente interno do SGQ. Responda sempre em pt-BR com tom humano, direto e colaborativo. Limite-se a: impressoras, toners, notebooks, notas fiscais, cálculos fiscais e módulos do sistema.'],
+                    ['role' => 'user', 'content' => $prompt]
+                ],
+                'temperature' => 0.75,
+                'max_tokens' => 500
+            ];
+
+            $ch = curl_init('https://api.groq.com/openai/v1/chat/completions');
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $groqApiKey
+                ],
+                CURLOPT_POSTFIELDS => json_encode($groqPayload, JSON_UNESCAPED_UNICODE),
+                CURLOPT_CONNECTTIMEOUT => 10,
+                CURLOPT_TIMEOUT => 30
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            if ($response === false) {
+                error_log('Daniel Groq cURL: ' . $curlError);
+            } else {
+                $json = json_decode($response, true);
+                if ($httpCode >= 200 && $httpCode < 300) {
+                    $text = trim((string)($json['choices'][0]['message']['content'] ?? ''));
+                    if ($text !== '') {
+                        return $text;
+                    }
+                    error_log('Daniel Groq resposta vazia: ' . $response);
+                } else {
+                    $apiError = trim((string)($json['error']['message'] ?? ''));
+                    if ($httpCode === 401) {
+                        return 'A chave da Groq parece inválida. Confirme a GROQ_API_KEY no .env.';
+                    }
+                    if ($httpCode === 429) {
+                        return 'A Groq respondeu com limite temporário (rate limit). Tente novamente em alguns instantes.';
+                    }
+                    if ($httpCode === 403) {
+                        return 'A chave da Groq está sem permissão para esse modelo. Confira o GROQ_MODEL e o projeto da chave.';
+                    }
+                    error_log('Daniel Groq HTTP ' . $httpCode . ': ' . ($apiError !== '' ? $apiError : 'erro desconhecido'));
+                }
+            }
+        }
+
+        if ($geminiApiKey === '') {
+            return 'Não consegui responder via Groq agora. Verifique GROQ_API_KEY/GROQ_MODEL ou configure GEMINI_API_KEY como fallback.';
+        }
 
         $payload = [
             'contents' => [
@@ -423,7 +488,7 @@ class ChatController
         $hadQuotaError = false;
         $hadPermissionError = false;
         foreach ($models as $model) {
-            $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' . $model . ':generateContent?key=' . urlencode($apiKey);
+            $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' . $model . ':generateContent?key=' . urlencode($geminiApiKey);
 
             $ch = curl_init($endpoint);
             curl_setopt_array($ch, [
