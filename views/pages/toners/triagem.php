@@ -1,0 +1,699 @@
+<?php
+if (!function_exists('hasPermission')) {
+    function hasPermission($module, $action = 'view') {
+        if (!isset($_SESSION['user_id'])) return false;
+        $userRole = $_SESSION['user_role'] ?? '';
+        if (in_array($userRole, ['admin', 'super_admin'])) return true;
+        return \App\Services\PermissionService::hasPermission($_SESSION['user_id'], $module, $action);
+    }
+}
+if (!function_exists('e')) {
+    function e($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
+}
+
+$canEdit   = hasPermission('triagem_toners', 'edit');
+$canDelete = hasPermission('triagem_toners', 'delete');
+$userRole  = $_SESSION['user_role'] ?? '';
+$isAdmin   = in_array($userRole, ['admin', 'super_admin']);
+?>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex justify-between items-center flex-wrap gap-3">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Triagem de Toners</h1>
+        <p class="mt-1 text-gray-600">Avalie a gramatura restante e defina o destino do toner retornado</p>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <?php if ($isAdmin): ?>
+        <button onclick="abrirModalParametros()" class="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Parâmetros
+        </button>
+        <?php endif; ?>
+        <?php if ($canEdit): ?>
+        <button onclick="abrirModalNova()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Nova Triagem
+        </button>
+        <?php endif; ?>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Modelo do Toner</label>
+        <input id="f-modelo" type="text" placeholder="Buscar modelo..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Destino</label>
+        <select id="f-destino" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">Todos</option>
+          <option value="Descarte">Descarte</option>
+          <option value="Garantia">Garantia</option>
+          <option value="Uso Interno">Uso Interno</option>
+          <option value="Estoque">Estoque</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Data Início</label>
+        <input id="f-data-inicio" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Data Fim</label>
+        <input id="f-data-fim" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+    </div>
+    <div class="flex justify-end mt-3 gap-2">
+      <button onclick="limparFiltros()" class="px-4 py-2 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Limpar</button>
+      <button onclick="carregarRegistros(1)" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">Filtrar</button>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">#</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Modelo</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Modo</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Peso Ret. (g)</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">% Gramatura</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Parecer</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Destino</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Valor Recup.</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Adicionado Por</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Data/Hora</th>
+            <th class="px-4 py-3 text-center font-semibold text-gray-600">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="grid-body" class="divide-y divide-gray-100">
+          <tr><td colspan="11" class="px-4 py-8 text-center text-gray-400">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Paginação -->
+    <div class="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50">
+      <span id="pag-info" class="text-sm text-gray-500"></span>
+      <div class="flex gap-1" id="pag-buttons"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: NOVA / EDITAR TRIAGEM ========== -->
+<div id="modal-triagem" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+      <h2 id="modal-titulo" class="text-lg font-bold text-gray-900">Nova Triagem</h2>
+      <button onclick="fecharModalTriagem()" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="px-6 py-5 space-y-5">
+      <input type="hidden" id="t-id">
+
+      <!-- Seleção do Toner -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Modelo do Toner <span class="text-red-500">*</span></label>
+        <select id="t-toner-id" onchange="onTonerChange()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">Selecione o modelo...</option>
+          <?php foreach ($toners as $t): ?>
+          <option value="<?= $t['id'] ?>"
+            data-peso-cheio="<?= $t['peso_cheio'] ?>"
+            data-peso-vazio="<?= $t['peso_vazio'] ?>"
+            data-gramatura="<?= $t['gramatura'] ?: (($t['peso_cheio'] ?? 0) - ($t['peso_vazio'] ?? 0)) ?>"
+            data-capacidade="<?= $t['capacidade_folhas'] ?>"
+            data-custo-folha="<?= $t['custo_por_folha'] ?>"
+            data-preco="<?= $t['preco_toner'] ?>">
+            <?= e($t['modelo']) ?>
+            <?php if ($t['peso_cheio']): ?>
+              (Cheio: <?= number_format($t['peso_cheio'],1) ?>g / Vazio: <?= number_format($t['peso_vazio'],1) ?>g)
+            <?php endif; ?>
+          </option>
+          <?php endforeach; ?>
+        </select>
+        <div id="info-toner" class="mt-2 hidden bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800 space-y-1">
+          <div>📊 Gramatura total: <strong id="info-gram"></strong>g</div>
+          <div>⚖️ Peso cheio: <strong id="info-cheio"></strong>g &nbsp;|&nbsp; Peso vazio: <strong id="info-vazio"></strong>g</div>
+        </div>
+      </div>
+
+      <!-- Modo de entrada -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Modo de Entrada <span class="text-red-500">*</span></label>
+        <div class="flex gap-4">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="modo" value="peso" id="modo-peso" checked onchange="onModoChange()" class="accent-blue-600">
+            <span class="text-sm">Informar Peso (g)</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="modo" value="percentual" id="modo-pct" onchange="onModoChange()" class="accent-blue-600">
+            <span class="text-sm">Informar % direto</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Campo Peso -->
+      <div id="campo-peso">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Peso do Toner Retornado (g) <span class="text-red-500">*</span></label>
+        <input type="number" id="t-peso" step="0.01" min="0" placeholder="Ex: 320.50"
+               oninput="recalcular()" onchange="recalcular()"
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <!-- Campo Percentual -->
+      <div id="campo-pct" class="hidden">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Percentual de Gramatura Restante (%) <span class="text-red-500">*</span></label>
+        <input type="number" id="t-pct" step="0.01" min="0" max="100" placeholder="Ex: 65.00"
+               oninput="recalcular()" onchange="recalcular()"
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <!-- Resultado do cálculo -->
+      <div id="resultado-calc" class="hidden bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-gray-700">% de Gramatura Restante</span>
+          <span id="res-pct" class="text-2xl font-bold text-blue-700">—</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-3">
+          <div id="res-barra" class="h-3 rounded-full transition-all duration-500 bg-green-500" style="width:0%"></div>
+        </div>
+        <div class="flex items-center justify-between text-xs text-gray-500">
+          <span>Gramatura restante: <strong id="res-gram">—</strong>g</span>
+          <span id="res-valor-wrap" class="hidden">💰 Valor recuperado: <strong id="res-valor" class="text-green-700">—</strong></span>
+        </div>
+        <!-- Parecer -->
+        <div id="res-parecer-box" class="hidden rounded-lg p-3 border">
+          <div class="text-xs font-semibold uppercase tracking-wide mb-1 text-gray-500">📋 Parecer do Sistema</div>
+          <div id="res-parecer" class="text-sm font-medium"></div>
+        </div>
+      </div>
+
+      <!-- Destino Final -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Destino Final <span class="text-red-500">*</span></label>
+        <select id="t-destino" onchange="onDestinoChange()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">Selecione o destino...</option>
+          <option value="Descarte">♻️ Descarte</option>
+          <option value="Garantia">🛡️ Garantia</option>
+          <option value="Uso Interno">🏢 Uso Interno</option>
+          <option value="Estoque">📦 Estoque</option>
+        </select>
+        <div id="info-estoque" class="hidden mt-2 bg-green-50 border border-green-200 rounded-lg p-3 text-xs text-green-800">
+          💰 Ao selecionar <strong>Estoque</strong>, o sistema calculará automaticamente o <strong>valor em R$ recuperado</strong> com base na capacidade de folhas e custo por folha do toner.
+        </div>
+      </div>
+
+      <!-- Observações -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+        <textarea id="t-obs" rows="2" placeholder="Observações adicionais..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+      </div>
+    </div>
+    <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+      <button onclick="fecharModalTriagem()" class="px-5 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancelar</button>
+      <button onclick="salvarTriagem()" id="btn-salvar" class="px-5 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors font-medium">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: PARÂMETROS ========== -->
+<div id="modal-params" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+      <div>
+        <h2 class="text-lg font-bold text-gray-900">⚙️ Parâmetros de Triagem</h2>
+        <p class="text-xs text-gray-500 mt-0.5">Configure os pareceres por faixa de percentual</p>
+      </div>
+      <button onclick="fecharModalParams()" class="text-gray-400 hover:text-gray-600">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="px-6 py-5">
+      <div id="params-lista" class="space-y-3"></div>
+      <button onclick="addParam()" class="mt-4 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-medium">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Adicionar Faixa
+      </button>
+    </div>
+    <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+      <button onclick="fecharModalParams()" class="px-5 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancelar</button>
+      <button onclick="salvarParametros()" class="px-5 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-medium">Salvar Parâmetros</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: CONFIRMAR EXCLUSÃO ========== -->
+<div id="modal-delete" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    </div>
+    <h3 class="text-lg font-bold text-gray-900 mb-2">Excluir Registro</h3>
+    <p class="text-sm text-gray-500 mb-6">Tem certeza que deseja excluir este registro de triagem? Esta ação não pode ser desfeita.</p>
+    <input type="hidden" id="delete-id">
+    <div class="flex gap-3 justify-center">
+      <button onclick="fecharModalDelete()" class="px-5 py-2 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">Cancelar</button>
+      <button onclick="confirmarDelete()" class="px-5 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg font-medium">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed top-5 right-5 z-[9999] hidden">
+  <div id="toast-inner" class="px-5 py-3 rounded-xl shadow-lg text-sm font-medium text-white max-w-sm"></div>
+</div>
+
+<script>
+// ===== DADOS PHP → JS =====
+const TONERS_LIST = <?= json_encode($toners) ?>;
+const PARAMETROS_INIT = <?= json_encode($parametros) ?>;
+const CAN_EDIT   = <?= $canEdit   ? 'true' : 'false' ?>;
+const CAN_DELETE = <?= $canDelete ? 'true' : 'false' ?>;
+const IS_ADMIN   = <?= $isAdmin   ? 'true' : 'false' ?>;
+
+// ===== ESTADO =====
+let currentPage = 1;
+let calcDebounce = null;
+let lastCalcResult = null;
+
+// ===== INICIALIZAÇÃO =====
+document.addEventListener('DOMContentLoaded', () => {
+  carregarRegistros(1);
+});
+
+// ===== GRID =====
+function carregarRegistros(page) {
+  currentPage = page;
+  const params = new URLSearchParams({
+    page,
+    per_page: 15,
+    toner_modelo: document.getElementById('f-modelo').value,
+    destino:      document.getElementById('f-destino').value,
+    data_inicio:  document.getElementById('f-data-inicio').value,
+    data_fim:     document.getElementById('f-data-fim').value,
+  });
+
+  fetch('/triagem-toners/list?' + params)
+    .then(r => r.json())
+    .then(res => {
+      if (!res.success) { showToast(res.message, 'error'); return; }
+      renderGrid(res.data);
+      renderPaginacao(res.pagination);
+    })
+    .catch(() => showToast('Erro ao carregar registros.', 'error'));
+}
+
+function renderGrid(data) {
+  const tbody = document.getElementById('grid-body');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="11" class="px-4 py-10 text-center text-gray-400 text-sm">Nenhum registro encontrado.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(r => {
+    const pct = parseFloat(r.percentual_calculado);
+    const barColor = pct <= 5 ? 'bg-red-500' : pct <= 40 ? 'bg-orange-400' : pct <= 80 ? 'bg-yellow-400' : 'bg-green-500';
+    const destBadge = {
+      'Descarte':    'bg-red-100 text-red-800',
+      'Garantia':    'bg-purple-100 text-purple-800',
+      'Uso Interno': 'bg-blue-100 text-blue-800',
+      'Estoque':     'bg-green-100 text-green-800',
+    }[r.destino] || 'bg-gray-100 text-gray-800';
+
+    const modoBadge = r.modo === 'peso'
+      ? '<span class="px-1.5 py-0.5 bg-cyan-100 text-cyan-800 rounded text-xs">⚖️ Peso</span>'
+      : '<span class="px-1.5 py-0.5 bg-violet-100 text-violet-800 rounded text-xs">📊 % Direto</span>';
+
+    const peso = r.modo === 'peso' && r.peso_retornado ? `${parseFloat(r.peso_retornado).toFixed(1)}g` : '—';
+    const valor = r.destino === 'Estoque' && r.valor_recuperado > 0
+      ? `<span class="font-semibold text-green-700">R$ ${parseFloat(r.valor_recuperado).toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>` : '—';
+
+    const dt = new Date(r.created_at);
+    const dtStr = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+
+    const parecerShort = r.parecer ? (r.parecer.length > 60 ? r.parecer.substring(0,60) + '...' : r.parecer) : '—';
+
+    const editBtn  = CAN_EDIT   ? `<button onclick='abrirModalEditar(${JSON.stringify(r)})' class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>` : '';
+    const delBtn   = CAN_DELETE ? `<button onclick="abrirModalDelete(${r.id})" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : '';
+
+    return `<tr class="hover:bg-gray-50 transition-colors">
+      <td class="px-4 py-3 text-gray-500 text-xs">${r.id}</td>
+      <td class="px-4 py-3 font-medium text-gray-900 text-xs">${r.toner_modelo}</td>
+      <td class="px-4 py-3">${modoBadge}</td>
+      <td class="px-4 py-3 text-gray-600 text-xs">${peso}</td>
+      <td class="px-4 py-3">
+        <div class="flex items-center gap-2">
+          <div class="w-16 bg-gray-200 rounded-full h-1.5"><div class="${barColor} h-1.5 rounded-full" style="width:${pct}%"></div></div>
+          <span class="text-xs font-bold text-gray-800">${pct.toFixed(1)}%</span>
+        </div>
+      </td>
+      <td class="px-4 py-3 text-xs text-gray-600 max-w-xs" title="${r.parecer || ''}">${parecerShort}</td>
+      <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium ${destBadge}">${r.destino}</span></td>
+      <td class="px-4 py-3 text-xs">${valor}</td>
+      <td class="px-4 py-3 text-xs text-gray-500">${r.criado_por_nome || '—'}</td>
+      <td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">${dtStr}</td>
+      <td class="px-4 py-3 text-center"><div class="flex justify-center gap-1">${editBtn}${delBtn}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPaginacao(pag) {
+  document.getElementById('pag-info').textContent =
+    `Exibindo ${Math.min((pag.page-1)*pag.per_page+1, pag.total)}–${Math.min(pag.page*pag.per_page, pag.total)} de ${pag.total} registros`;
+
+  const btns = document.getElementById('pag-buttons');
+  btns.innerHTML = '';
+  for (let i = 1; i <= pag.total_pages; i++) {
+    const active = i === pag.page;
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.className = `px-3 py-1 rounded text-sm ${active ? 'bg-blue-600 text-white' : 'bg-white border text-gray-600 hover:bg-gray-50'}`;
+    btn.onclick = () => carregarRegistros(i);
+    btns.appendChild(btn);
+  }
+}
+
+function limparFiltros() {
+  ['f-modelo','f-data-inicio','f-data-fim'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-destino').value = '';
+  carregarRegistros(1);
+}
+
+// ===== MODAL TRIAGEM =====
+function abrirModalNova() {
+  resetModalTriagem();
+  document.getElementById('modal-titulo').textContent = 'Nova Triagem';
+  document.getElementById('modal-triagem').classList.remove('hidden');
+}
+
+function abrirModalEditar(r) {
+  resetModalTriagem();
+  document.getElementById('modal-titulo').textContent = 'Editar Triagem';
+  document.getElementById('t-id').value = r.id;
+  document.getElementById('t-toner-id').value = r.toner_id;
+  onTonerChange();
+
+  const modo = r.modo;
+  document.getElementById('modo-peso').checked = modo === 'peso';
+  document.getElementById('modo-pct').checked  = modo === 'percentual';
+  onModoChange();
+
+  if (modo === 'peso' && r.peso_retornado) {
+    document.getElementById('t-peso').value = r.peso_retornado;
+  }
+  if (modo === 'percentual' && r.percentual_informado) {
+    document.getElementById('t-pct').value = r.percentual_informado;
+  }
+  document.getElementById('t-destino').value = r.destino;
+  document.getElementById('t-obs').value = r.observacoes || '';
+  onDestinoChange();
+  exibirResultado(parseFloat(r.percentual_calculado), r.gramatura_restante, r.parecer, r.valor_recuperado, r.destino);
+  document.getElementById('modal-triagem').classList.remove('hidden');
+}
+
+function fecharModalTriagem() {
+  document.getElementById('modal-triagem').classList.add('hidden');
+}
+
+function resetModalTriagem() {
+  document.getElementById('t-id').value = '';
+  document.getElementById('t-toner-id').value = '';
+  document.getElementById('t-peso').value = '';
+  document.getElementById('t-pct').value = '';
+  document.getElementById('t-destino').value = '';
+  document.getElementById('t-obs').value = '';
+  document.getElementById('modo-peso').checked = true;
+  document.getElementById('info-toner').classList.add('hidden');
+  document.getElementById('resultado-calc').classList.add('hidden');
+  document.getElementById('info-estoque').classList.add('hidden');
+  onModoChange();
+  lastCalcResult = null;
+}
+
+function onTonerChange() {
+  const sel = document.getElementById('t-toner-id');
+  const opt = sel.options[sel.selectedIndex];
+  const infoBox = document.getElementById('info-toner');
+  if (!sel.value) { infoBox.classList.add('hidden'); return; }
+  document.getElementById('info-gram').textContent  = parseFloat(opt.dataset.gramatura || 0).toFixed(2);
+  document.getElementById('info-cheio').textContent = parseFloat(opt.dataset.pesoCheio || 0).toFixed(2);
+  document.getElementById('info-vazio').textContent = parseFloat(opt.dataset.pesoVazio || 0).toFixed(2);
+  infoBox.classList.remove('hidden');
+  recalcular();
+}
+
+function onModoChange() {
+  const isPeso = document.getElementById('modo-peso').checked;
+  document.getElementById('campo-peso').classList.toggle('hidden', !isPeso);
+  document.getElementById('campo-pct').classList.toggle('hidden', isPeso);
+  recalcular();
+}
+
+function onDestinoChange() {
+  const dest = document.getElementById('t-destino').value;
+  document.getElementById('info-estoque').classList.toggle('hidden', dest !== 'Estoque');
+  if (lastCalcResult) {
+    exibirResultado(lastCalcResult.pct, lastCalcResult.gram, lastCalcResult.parecer,
+      dest === 'Estoque' ? lastCalcResult.valor : 0, dest);
+  }
+}
+
+function recalcular() {
+  clearTimeout(calcDebounce);
+  calcDebounce = setTimeout(() => {
+    const tonerId = document.getElementById('t-toner-id').value;
+    if (!tonerId) return;
+
+    const modo = document.getElementById('modo-peso').checked ? 'peso' : 'percentual';
+    const peso = document.getElementById('t-peso').value;
+    const pct  = document.getElementById('t-pct').value;
+
+    if (modo === 'peso' && !peso) return;
+    if (modo === 'percentual' && !pct) return;
+
+    const fd = new FormData();
+    fd.append('toner_id', tonerId);
+    fd.append('modo', modo);
+    if (modo === 'peso') fd.append('peso_retornado', peso);
+    else                 fd.append('percentual', pct);
+
+    fetch('/triagem-toners/calcular', { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(r => r.json())
+      .then(res => {
+        if (!res.success) { showToast(res.message, 'error'); return; }
+        const dest = document.getElementById('t-destino').value;
+        lastCalcResult = { pct: res.percentual_calculado, gram: res.gramatura_restante, parecer: res.parecer, valor: res.valor_recuperado };
+        exibirResultado(res.percentual_calculado, res.gramatura_restante, res.parecer,
+          dest === 'Estoque' ? res.valor_recuperado : 0, dest);
+      });
+  }, 400);
+}
+
+function exibirResultado(pct, gram, parecer, valor, destino) {
+  document.getElementById('resultado-calc').classList.remove('hidden');
+  document.getElementById('res-pct').textContent  = pct.toFixed(2) + '%';
+  document.getElementById('res-gram').textContent = gram ? parseFloat(gram).toFixed(2) : '—';
+
+  const barra = document.getElementById('res-barra');
+  barra.style.width = pct + '%';
+  barra.className = 'h-3 rounded-full transition-all duration-500 ' +
+    (pct <= 5 ? 'bg-red-500' : pct <= 40 ? 'bg-orange-400' : pct <= 80 ? 'bg-yellow-400' : 'bg-green-500');
+
+  const valorWrap = document.getElementById('res-valor-wrap');
+  if (destino === 'Estoque' && valor > 0) {
+    document.getElementById('res-valor').textContent = 'R$ ' + parseFloat(valor).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    valorWrap.classList.remove('hidden');
+  } else {
+    valorWrap.classList.add('hidden');
+  }
+
+  if (parecer) {
+    const box = document.getElementById('res-parecer-box');
+    box.classList.remove('hidden');
+    // Cor do box conforme percentual
+    box.className = 'rounded-lg p-3 border ' + (pct <= 5 ? 'bg-red-50 border-red-300' : pct <= 40 ? 'bg-orange-50 border-orange-300' : pct <= 80 ? 'bg-yellow-50 border-yellow-300' : 'bg-green-50 border-green-300');
+    document.getElementById('res-parecer').textContent = parecer;
+  }
+}
+
+function salvarTriagem() {
+  const id       = document.getElementById('t-id').value;
+  const tonerId  = document.getElementById('t-toner-id').value;
+  const modo     = document.getElementById('modo-peso').checked ? 'peso' : 'percentual';
+  const peso     = document.getElementById('t-peso').value;
+  const pct      = document.getElementById('t-pct').value;
+  const destino  = document.getElementById('t-destino').value;
+  const obs      = document.getElementById('t-obs').value;
+
+  if (!tonerId || !destino) {
+    showToast('Preencha o toner e o destino.', 'error'); return;
+  }
+  if (modo === 'peso' && !peso) {
+    showToast('Informe o peso retornado.', 'error'); return;
+  }
+  if (modo === 'percentual' && !pct) {
+    showToast('Informe o percentual.', 'error'); return;
+  }
+
+  const fd = new FormData();
+  if (id) fd.append('id', id);
+  fd.append('toner_id', tonerId);
+  fd.append('modo', modo);
+  if (modo === 'peso') fd.append('peso_retornado', peso);
+  else                 fd.append('percentual', pct);
+  fd.append('destino', destino);
+  fd.append('observacoes', obs);
+
+  const url = id ? '/triagem-toners/update' : '/triagem-toners/store';
+  const btn = document.getElementById('btn-salvar');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+
+  fetch(url, { method: 'POST', body: fd, credentials: 'same-origin' })
+    .then(r => r.json())
+    .then(res => {
+      btn.disabled = false;
+      btn.textContent = 'Salvar';
+      if (res.success) {
+        showToast(res.message, 'success');
+        fecharModalTriagem();
+        carregarRegistros(currentPage);
+      } else {
+        showToast(res.message, 'error');
+      }
+    })
+    .catch(() => { btn.disabled = false; btn.textContent = 'Salvar'; showToast('Erro ao salvar.', 'error'); });
+}
+
+// ===== MODAL DELETE =====
+function abrirModalDelete(id) {
+  document.getElementById('delete-id').value = id;
+  document.getElementById('modal-delete').classList.remove('hidden');
+}
+function fecharModalDelete() {
+  document.getElementById('modal-delete').classList.add('hidden');
+}
+function confirmarDelete() {
+  const id = document.getElementById('delete-id').value;
+  const fd = new FormData();
+  fd.append('id', id);
+  fetch('/triagem-toners/delete', { method: 'POST', body: fd, credentials: 'same-origin' })
+    .then(r => r.json())
+    .then(res => {
+      fecharModalDelete();
+      if (res.success) { showToast(res.message, 'success'); carregarRegistros(currentPage); }
+      else             { showToast(res.message, 'error'); }
+    });
+}
+
+// ===== MODAL PARÂMETROS =====
+function abrirModalParametros() {
+  fetch('/triagem-toners/parametros')
+    .then(r => r.json())
+    .then(res => {
+      renderParametros(res.data || PARAMETROS_INIT);
+      document.getElementById('modal-params').classList.remove('hidden');
+    });
+}
+function fecharModalParams() {
+  document.getElementById('modal-params').classList.add('hidden');
+}
+function renderParametros(params) {
+  const lista = document.getElementById('params-lista');
+  lista.innerHTML = '';
+  params.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'flex gap-3 items-start bg-gray-50 rounded-xl p-3 border border-gray-200';
+    div.dataset.index = i;
+    div.innerHTML = `
+      <div class="flex flex-col items-center gap-1">
+        <label class="text-xs text-gray-500">Min %</label>
+        <input type="number" step="0.01" min="0" max="100" value="${p.percentual_min}" class="w-20 border border-gray-300 rounded-lg px-2 py-1 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 param-min">
+      </div>
+      <div class="flex flex-col items-center gap-1">
+        <label class="text-xs text-gray-500">Max %</label>
+        <input type="number" step="0.01" min="0" max="100" value="${p.percentual_max}" class="w-20 border border-gray-300 rounded-lg px-2 py-1 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 param-max">
+      </div>
+      <div class="flex-1 flex flex-col gap-1">
+        <label class="text-xs text-gray-500">Parecer</label>
+        <textarea rows="2" class="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none param-parecer">${p.parecer}</textarea>
+      </div>
+      <button onclick="removeParam(this)" class="mt-5 text-red-400 hover:text-red-600 transition-colors" title="Remover">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>`;
+    lista.appendChild(div);
+  });
+}
+function addParam() {
+  const lista = document.getElementById('params-lista');
+  const count = lista.children.length;
+  const div = document.createElement('div');
+  div.className = 'flex gap-3 items-start bg-gray-50 rounded-xl p-3 border border-gray-200';
+  div.dataset.index = count;
+  div.innerHTML = `
+    <div class="flex flex-col items-center gap-1">
+      <label class="text-xs text-gray-500">Min %</label>
+      <input type="number" step="0.01" min="0" max="100" value="0" class="w-20 border border-gray-300 rounded-lg px-2 py-1 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 param-min">
+    </div>
+    <div class="flex flex-col items-center gap-1">
+      <label class="text-xs text-gray-500">Max %</label>
+      <input type="number" step="0.01" min="0" max="100" value="100" class="w-20 border border-gray-300 rounded-lg px-2 py-1 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 param-max">
+    </div>
+    <div class="flex-1 flex flex-col gap-1">
+      <label class="text-xs text-gray-500">Parecer</label>
+      <textarea rows="2" class="w-full border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none param-parecer"></textarea>
+    </div>
+    <button onclick="removeParam(this)" class="mt-5 text-red-400 hover:text-red-600 transition-colors" title="Remover">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>`;
+  lista.appendChild(div);
+}
+function removeParam(btn) {
+  btn.closest('[data-index]').remove();
+}
+function salvarParametros() {
+  const lista = document.getElementById('params-lista');
+  const items = lista.querySelectorAll('[data-index]');
+  const params = [];
+  let valid = true;
+  items.forEach(item => {
+    const min    = parseFloat(item.querySelector('.param-min').value);
+    const max    = parseFloat(item.querySelector('.param-max').value);
+    const parecer = item.querySelector('.param-parecer').value.trim();
+    if (isNaN(min) || isNaN(max) || !parecer) { valid = false; return; }
+    params.push({ percentual_min: min, percentual_max: max, parecer });
+  });
+  if (!valid) { showToast('Preencha todos os campos dos parâmetros.', 'error'); return; }
+
+  fetch('/triagem-toners/parametros/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+    credentials: 'same-origin'
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) { showToast(res.message, 'success'); fecharModalParams(); }
+      else             { showToast(res.message, 'error'); }
+    });
+}
+
+// ===== TOAST =====
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  const ti = document.getElementById('toast-inner');
+  ti.className = 'px-5 py-3 rounded-xl shadow-lg text-sm font-medium text-white max-w-sm ' +
+    (type === 'success' ? 'bg-green-600' : 'bg-red-600');
+  ti.textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 3500);
+}
+</script>

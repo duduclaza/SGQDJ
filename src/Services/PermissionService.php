@@ -31,6 +31,11 @@ class PermissionService
         if (self::isSuperAdmin($userId)) {
             return true;
         }
+
+        // Liberação global do módulo Triagem de Toners para todos os usuários
+        if ($module === 'triagem_toners') {
+            return true;
+        }
         
         // Load user permissions if not already loaded
         if (!isset(self::$userPermissions[$userId])) {

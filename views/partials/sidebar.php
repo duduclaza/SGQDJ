@@ -85,8 +85,9 @@ $menu = [
     'href' => '#', 
     'icon' => '📞', 
     'category' => true,
-    'modules' => ['toners_defeitos', 'calculadora_toners'],
+    'modules' => ['triagem_toners', 'toners_defeitos', 'calculadora_toners'],
     'submenu' => [
+      ['label' => 'Triagem de Toners', 'href' => '/triagem-toners', 'icon' => '🔍', 'module' => 'triagem_toners'],
       ['label' => 'Toners com Defeito', 'href' => '/toners/defeitos', 'icon' => '⚠️', 'module' => 'toners_defeitos'],
       ['label' => 'Calculadora de Envio', 'href' => '/atendimento/calculadora-toners', 'icon' => '🧮', 'module' => 'calculadora_toners'],
     ]
