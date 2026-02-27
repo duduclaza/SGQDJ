@@ -59,8 +59,9 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   .dash-container { background: var(--dash-bg); color: var(--dash-text); min-height: calc(100vh - 60px); }
   .dash-card { background: var(--dash-surface); border: 1px solid var(--dash-border); border-radius: 16px; backdrop-filter: blur(12px); }
   .dash-card-glow { box-shadow: 0 0 0 1px rgba(34,211,238,0.08), 0 8px 32px rgba(0,0,0,0.25); }
-  .kpi-value { font-size: 1.85rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
-  .kpi-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dash-muted); }
+  .kpi-value { font-size: 1.85rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; white-space: nowrap; }
+  .kpi-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dash-muted); min-height: 2.4em; display: flex; align-items: flex-end; }
+  .kpi-card-inner { display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
   .kpi-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; font-weight: 600; padding: 2px 8px; border-radius: 9999px; }
   .filter-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--dash-text); border-radius: 10px; padding: 8px 12px; font-size: 0.82rem; transition: border-color 0.2s; outline: none; width: 100%; }
   .filter-input:focus { border-color: var(--dash-accent); box-shadow: 0 0 0 2px rgba(34,211,238,0.15); }
@@ -140,28 +141,40 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   <!-- KPI Cards -->
   <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
     <div class="dash-card dash-card-glow p-4 dash-animate" style="animation-delay:0.08s">
-      <div class="kpi-label mb-2">Total Registros</div>
-      <div class="kpi-value text-white" id="kpiTotal">–</div>
+      <div class="kpi-card-inner">
+        <div class="kpi-label">Total Registros</div>
+        <div class="kpi-value text-white mt-2" id="kpiTotal">–</div>
+      </div>
     </div>
     <div class="dash-card dash-card-glow p-4 dash-animate" style="animation-delay:0.11s">
-      <div class="kpi-label mb-2">Média % Gramatura</div>
-      <div class="kpi-value text-cyan-300" id="kpiMedia">–</div>
+      <div class="kpi-card-inner">
+        <div class="kpi-label">Média % Gramatura</div>
+        <div class="kpi-value text-cyan-300 mt-2" id="kpiMedia">–</div>
+      </div>
     </div>
     <div class="dash-card dash-card-glow p-4 dash-animate" style="animation-delay:0.14s">
-      <div class="kpi-label mb-2">Em Estoque</div>
-      <div class="kpi-value text-indigo-300" id="kpiEstoque">–</div>
+      <div class="kpi-card-inner">
+        <div class="kpi-label">Em Estoque</div>
+        <div class="kpi-value text-indigo-300 mt-2" id="kpiEstoque">–</div>
+      </div>
     </div>
     <div class="dash-card dash-card-glow p-4 dash-animate" style="animation-delay:0.17s">
-      <div class="kpi-label mb-2">Descartes</div>
-      <div class="kpi-value text-red-400" id="kpiDescarte">–</div>
+      <div class="kpi-card-inner">
+        <div class="kpi-label">Descartes</div>
+        <div class="kpi-value text-red-400 mt-2" id="kpiDescarte">–</div>
+      </div>
     </div>
     <div class="dash-card dash-card-glow p-4 dash-animate" style="animation-delay:0.20s">
-      <div class="kpi-label mb-2">Garantias</div>
-      <div class="kpi-value text-orange-300" id="kpiGarantia">–</div>
+      <div class="kpi-card-inner">
+        <div class="kpi-label">Garantias</div>
+        <div class="kpi-value text-orange-300 mt-2" id="kpiGarantia">–</div>
+      </div>
     </div>
     <div class="dash-card p-4 dash-animate" style="animation-delay:0.23s; background: linear-gradient(135deg, rgba(52,211,153,0.12), rgba(16,185,129,0.06)); border: 1px solid rgba(52,211,153,0.25);">
-      <div class="kpi-label mb-2" style="color:#6ee7b7">Valor Recuperado</div>
-      <div class="kpi-value" style="color:#34d399" id="kpiValor">–</div>
+      <div class="kpi-card-inner">
+        <div class="kpi-label" style="color:#6ee7b7">Valor Recuperado</div>
+        <div class="kpi-value mt-2" style="color:#34d399; font-size:1.55rem" id="kpiValor">–</div>
+      </div>
     </div>
   </div>
 
