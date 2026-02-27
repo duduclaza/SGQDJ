@@ -16,6 +16,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
 ?>
 
 <section class="space-y-6">
+  <?php if ($moduloAtual !== 'triagem'): ?>
   <div class="flex items-center justify-between">
     <div>
       <h1 class="text-2xl font-semibold text-gray-900">Dashboard 2.0</h1>
@@ -38,6 +39,15 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       </div>
     </a>
   </div>
+  <?php else: ?>
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900">Dashboard de Triagem de Toners</h1>
+      <p class="text-sm text-gray-600 mt-1">Página individual de indicadores da triagem</p>
+    </div>
+    <a href="/dashboard-2" class="text-sm px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">Voltar para módulos</a>
+  </div>
+  <?php endif; ?>
 
   <?php if ($moduloAtual === 'triagem'): ?>
   <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-xl">
