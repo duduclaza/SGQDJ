@@ -296,6 +296,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
                   $hasNestedSubmenu = isset($sub['has_submenu']) && $sub['has_submenu'] && isset($sub['submenu']);
                 ?>
                   <li>
+                    <?php $isRetornadosDeprecated = (($sub['module'] ?? '') === 'toners_retornados'); ?>
                     <?php if ($hasNestedSubmenu): ?>
                       <!-- Submenu aninhado -->
                       <div class="submenu-container">
@@ -332,14 +333,17 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
                       </div>
                     <?php else: ?>
                       <!-- Link normal do submenu -->
-                      <a href="<?= e($sub['href']) ?>" class="page-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-700 <?php echo $subActive?'bg-blue-500 text-white shadow-md':'text-slate-400 hover:text-white'; ?> <?php echo isset($sub['beta']) && $sub['beta'] ? 'beta-menu' : ''; ?>">
-                        <span class="text-base"><?= e($sub['icon']) ?></span>
-                        <span class="flex items-center gap-2">
+                      <a href="<?= e($sub['href']) ?>" class="page-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-700 <?php echo $subActive?'bg-blue-500 text-white shadow-md':'text-slate-400 hover:text-white'; ?> <?php echo isset($sub['beta']) && $sub['beta'] ? 'beta-menu' : ''; ?> <?php echo $isRetornadosDeprecated ? 'retornados-warning' : ''; ?>">
+                        <span class="text-base <?php echo $isRetornadosDeprecated ? 'bomb-icon' : ''; ?>"><?= $isRetornadosDeprecated ? '💣' : e($sub['icon']) ?></span>
+                        <span class="flex items-center gap-2 <?php echo $isRetornadosDeprecated ? 'flex-col items-start gap-0.5' : ''; ?>">
                           <?= e($sub['label']) ?>
                           <?php if (isset($sub['beta']) && $sub['beta']): ?>
                             <span class="beta-badge">BETA</span>
                           <?php elseif (isset($sub['badge'])): ?>
                             <span class="px-1.5 py-0.5 bg-yellow-500 text-yellow-900 text-xs font-bold rounded"><?= e($sub['badge']) ?></span>
+                          <?php endif; ?>
+                          <?php if ($isRetornadosDeprecated): ?>
+                            <span class="retornados-warning-text">Breve esse módulo deixará de existir</span>
                           <?php endif; ?>
                         </span>
                       </a>
@@ -520,6 +524,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
           <!-- Para mobile, mostrar todos os subitens que o usuário tem permissão -->
           <?php foreach ($item['submenu'] as $sub): ?>
             <?php 
+              $isRetornadosDeprecatedMobile = (($sub['module'] ?? '') === 'toners_retornados');
               // Verificar se é admin_only
               if (isset($sub['admin_only']) && $sub['admin_only']) {
                 $isAdmin = isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'super_admin', 'superadmin']);
@@ -533,8 +538,11 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
                 if (!isset($sub['has_submenu']) || !$sub['has_submenu']) continue;
               }
             ?>
-            <a href="<?= e($sub['href']) ?>" class="page-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200 ml-2">
-              <span class="text-sm"><?= e($sub['icon']) ?></span> <?= e($sub['label']) ?>
+            <a href="<?= e($sub['href']) ?>" class="page-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200 ml-2 <?php echo $isRetornadosDeprecatedMobile ? 'retornados-warning' : ''; ?>">
+              <span class="text-sm <?php echo $isRetornadosDeprecatedMobile ? 'bomb-icon' : ''; ?>"><?= $isRetornadosDeprecatedMobile ? '💣' : e($sub['icon']) ?></span> <?= e($sub['label']) ?>
+              <?php if ($isRetornadosDeprecatedMobile): ?>
+                <span class="retornados-warning-text mt-1 block">Breve esse módulo deixará de existir</span>
+              <?php endif; ?>
             </a>
           <?php endforeach; ?>
         <?php else: ?>
@@ -594,6 +602,67 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
     
     .beta-menu:hover .beta-badge {
       animation: pulse 0.5s;
+    }
+
+    /* Alerta de descontinuação - Registro de Retornados */
+    .retornados-warning {
+      position: relative;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.5), rgba(127, 29, 29, 0.45));
+      animation: retornadosBlink 0.95s steps(2, end) infinite;
+      overflow: hidden;
+    }
+
+    .retornados-warning::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      background: #ef4444;
+      transform: translateY(-50%);
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.75);
+      animation: bombBlast 1.15s ease-out infinite;
+    }
+
+    .bomb-icon {
+      animation: bombShake 0.6s ease-in-out infinite;
+      filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8));
+    }
+
+    .retornados-warning-text {
+      font-size: 0.62rem;
+      color: #fecaca;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+      text-transform: uppercase;
+      opacity: 0.95;
+    }
+
+    @keyframes retornadosBlink {
+      0%, 49% {
+        background: linear-gradient(90deg, rgba(0, 0, 0, 0.58), rgba(17, 24, 39, 0.6));
+        color: #fecaca;
+      }
+      50%, 100% {
+        background: linear-gradient(90deg, rgba(127, 29, 29, 0.85), rgba(220, 38, 38, 0.45));
+        color: #ffffff;
+      }
+    }
+
+    @keyframes bombBlast {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.75); opacity: 1; }
+      70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); opacity: 0.65; }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); opacity: 0.25; }
+    }
+
+    @keyframes bombShake {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(-1px) rotate(-8deg); }
+      50% { transform: translateX(1px) rotate(6deg); }
+      75% { transform: translateX(-1px) rotate(-6deg); }
     }
     
     /* Ocultar scrollbar da sidebar */
