@@ -77,7 +77,31 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   .dash-table td { padding: 10px 14px; font-size: 0.82rem; border-top: 1px solid var(--dash-border); }
   .dash-table tr:hover td { background: rgba(255,255,255,0.03); }
   .dash-destino-badge { padding: 3px 10px; border-radius: 9999px; font-size: 0.72rem; font-weight: 600; }
+  /* Fullscreen chart */
+  .chart-expand-btn { cursor:pointer; padding:4px; border-radius:8px; color:var(--dash-muted); transition:all 0.2s; border:none; background:transparent; }
+  .chart-expand-btn:hover { color:#fff; background:rgba(255,255,255,0.08); }
+  .chart-fullscreen-overlay { display:none; position:fixed; inset:0; z-index:9999; background:rgba(5,10,25,0.95); backdrop-filter:blur(8px); padding:32px; flex-direction:column; }
+  .chart-fullscreen-overlay.active { display:flex; }
+  .chart-fullscreen-overlay .fs-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .chart-fullscreen-overlay .fs-title { font-size:1.25rem; font-weight:700; color:#fff; }
+  .chart-fullscreen-overlay .fs-subtitle { font-size:0.82rem; color:var(--dash-muted); margin-top:2px; }
+  .chart-fullscreen-overlay .fs-close { cursor:pointer; padding:8px 16px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#e2e8f0; font-size:0.82rem; font-weight:600; transition:all 0.2s; }
+  .chart-fullscreen-overlay .fs-close:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.25); }
+  .chart-fullscreen-overlay .fs-body { flex:1; position:relative; min-height:0; }
+  .chart-fullscreen-overlay .fs-body canvas { width:100% !important; height:100% !important; }
 </style>
+
+<!-- Fullscreen overlay -->
+<div id="chartFullscreen" class="chart-fullscreen-overlay">
+  <div class="fs-header">
+    <div>
+      <div class="fs-title" id="fsTitle"></div>
+      <div class="fs-subtitle" id="fsSubtitle"></div>
+    </div>
+    <button class="fs-close" onclick="fecharFullscreen()">ESC &nbsp;✕&nbsp; Fechar</button>
+  </div>
+  <div class="fs-body"><canvas id="chartFullscreenCanvas"></canvas></div>
+</div>
 
 <section class="dash-container -m-6 p-6 lg:p-8 rounded-none">
   <!-- Header -->
@@ -173,7 +197,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     <div class="dash-card p-4 dash-animate" style="animation-delay:0.23s; background: linear-gradient(135deg, rgba(52,211,153,0.12), rgba(16,185,129,0.06)); border: 1px solid rgba(52,211,153,0.25);">
       <div class="kpi-card-inner">
         <div class="kpi-label" style="color:#6ee7b7">Valor Recuperado</div>
-        <div class="kpi-value mt-2" style="color:#34d399; font-size:1.55rem" id="kpiValor">–</div>
+        <div class="kpi-value mt-2" style="color:#34d399; font-size:clamp(1rem, 2.5vw, 1.55rem)" id="kpiValor">–</div>
       </div>
     </div>
   </div>
@@ -187,7 +211,12 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           <h3 class="text-sm font-semibold text-white">Top Modelos por Volume</h3>
           <p class="text-xs text-slate-400 mt-0.5">15 modelos mais triados</p>
         </div>
-        <span class="kpi-badge bg-cyan-400/15 text-cyan-300 border border-cyan-400/20">Barras</span>
+        <div class="flex items-center gap-2">
+          <span class="kpi-badge bg-cyan-400/15 text-cyan-300 border border-cyan-400/20">Barras</span>
+          <button class="chart-expand-btn" onclick="expandirGrafico('modelos','Top Modelos por Volume','15 modelos mais triados')" title="Expandir">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+        </div>
       </div>
       <div class="chart-wrapper" style="height:320px"><canvas id="chartModelos"></canvas></div>
     </div>
@@ -199,7 +228,12 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           <h3 class="text-sm font-semibold text-white">Pareto de Defeitos</h3>
           <p class="text-xs text-slate-400 mt-0.5">Contagem + % acumulado</p>
         </div>
-        <span class="kpi-badge bg-indigo-400/15 text-indigo-300 border border-indigo-400/20">Pareto</span>
+        <div class="flex items-center gap-2">
+          <span class="kpi-badge bg-indigo-400/15 text-indigo-300 border border-indigo-400/20">Pareto</span>
+          <button class="chart-expand-btn" onclick="expandirGrafico('pareto','Pareto de Defeitos','Contagem + % acumulado')" title="Expandir">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+        </div>
       </div>
       <div class="chart-wrapper" style="height:320px"><canvas id="chartPareto"></canvas></div>
     </div>
@@ -211,7 +245,12 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           <h3 class="text-sm font-semibold text-white">Faixas de Retorno (%)</h3>
           <p class="text-xs text-slate-400 mt-0.5">Distribuição por faixa de gramatura</p>
         </div>
-        <span class="kpi-badge bg-amber-400/15 text-amber-300 border border-amber-400/20">Donut</span>
+        <div class="flex items-center gap-2">
+          <span class="kpi-badge bg-amber-400/15 text-amber-300 border border-amber-400/20">Donut</span>
+          <button class="chart-expand-btn" onclick="expandirGrafico('faixas','Faixas de Retorno (%)','Distribuição por faixa de gramatura')" title="Expandir">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+        </div>
       </div>
       <div class="chart-wrapper flex justify-center" style="height:320px"><canvas id="chartFaixas"></canvas></div>
     </div>
@@ -223,7 +262,12 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           <h3 class="text-sm font-semibold text-white">Evolução Mensal de Reprovação</h3>
           <p class="text-xs text-slate-400 mt-0.5">% de descartes por mês</p>
         </div>
-        <span class="kpi-badge bg-rose-400/15 text-rose-300 border border-rose-400/20">Linha</span>
+        <div class="flex items-center gap-2">
+          <span class="kpi-badge bg-rose-400/15 text-rose-300 border border-rose-400/20">Linha</span>
+          <button class="chart-expand-btn" onclick="expandirGrafico('evolucao','Evolução Mensal de Reprovação','% de descartes por mês')" title="Expandir">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+        </div>
       </div>
       <div class="chart-wrapper" style="height:320px"><canvas id="chartEvolucao"></canvas></div>
     </div>
@@ -233,7 +277,12 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   <div class="grid grid-cols-1 xl:grid-cols-5 gap-5 mb-6">
     <!-- Donut Destino -->
     <div class="xl:col-span-2 dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.38s">
-      <h3 class="text-sm font-semibold text-white mb-4">Distribuição por Destino</h3>
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-white">Distribuição por Destino</h3>
+        <button class="chart-expand-btn" onclick="expandirGrafico('destino','Distribuição por Destino','Proporção de cada destino')" title="Expandir">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+        </button>
+      </div>
       <div class="chart-wrapper flex justify-center" style="height:260px"><canvas id="chartDestino"></canvas></div>
       <div id="destinoLegend" class="mt-4 space-y-1.5"></div>
     </div>
@@ -637,6 +686,81 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     });
     fetchDashboard();
   };
+
+  // ===== Fullscreen =====
+  let fullscreenChart = null;
+
+  window.expandirGrafico = function(chartKey, title, subtitle) {
+    const source = chartInstances[chartKey];
+    if (!source) return;
+
+    const overlay = document.getElementById('chartFullscreen');
+    document.getElementById('fsTitle').textContent = title;
+    document.getElementById('fsSubtitle').textContent = subtitle;
+
+    // Destroy previous fullscreen chart
+    if (fullscreenChart) { fullscreenChart.destroy(); fullscreenChart = null; }
+
+    // Clone config from source chart
+    const srcConfig = source.config;
+    const clonedData = JSON.parse(JSON.stringify(srcConfig.data));
+    const clonedOptions = JSON.parse(JSON.stringify(srcConfig.options || {}));
+
+    // Bigger fonts for presentation
+    clonedOptions.plugins = clonedOptions.plugins || {};
+    clonedOptions.plugins.legend = clonedOptions.plugins.legend || {};
+    clonedOptions.plugins.legend.labels = clonedOptions.plugins.legend.labels || {};
+    clonedOptions.plugins.legend.labels.font = { size: 14 };
+    clonedOptions.plugins.legend.labels.padding = 20;
+    if (clonedOptions.scales) {
+      Object.values(clonedOptions.scales).forEach(s => {
+        s.ticks = s.ticks || {};
+        s.ticks.font = { size: 13 };
+        if (s.title) s.title.font = { size: 14, weight: '600' };
+      });
+    }
+    clonedOptions.plugins.tooltip = clonedOptions.plugins.tooltip || {};
+    clonedOptions.plugins.tooltip.titleFont = { size: 14 };
+    clonedOptions.plugins.tooltip.bodyFont = { size: 13 };
+
+    // Rebuild datasets with functions stripped (borderDash etc are plain arrays, safe)
+    // For multi-type charts, preserve the type per dataset
+    const datasets = clonedData.datasets.map((ds, i) => {
+      const orig = srcConfig.data.datasets[i];
+      // Copy backgroundColor/borderColor from original (may be arrays)
+      if (orig.backgroundColor && typeof orig.backgroundColor !== 'string') {
+        ds.backgroundColor = Array.isArray(orig.backgroundColor) ? [...orig.backgroundColor] : orig.backgroundColor;
+      }
+      if (orig.borderColor && typeof orig.borderColor !== 'string') {
+        ds.borderColor = Array.isArray(orig.borderColor) ? [...orig.borderColor] : orig.borderColor;
+      }
+      return ds;
+    });
+    clonedData.datasets = datasets;
+
+    const fsCanvas = document.getElementById('chartFullscreenCanvas');
+    const ctx = fsCanvas.getContext('2d');
+    fullscreenChart = new Chart(ctx, {
+      type: srcConfig.type,
+      data: clonedData,
+      options: { ...clonedOptions, responsive: true, maintainAspectRatio: false },
+    });
+
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.fecharFullscreen = function() {
+    const overlay = document.getElementById('chartFullscreen');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    if (fullscreenChart) { fullscreenChart.destroy(); fullscreenChart = null; }
+  };
+
+  // ESC key to close
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') window.fecharFullscreen();
+  });
 
   // ===== Init =====
   document.addEventListener('DOMContentLoaded', () => {
