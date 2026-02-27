@@ -971,6 +971,9 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     ['filtroDefeito','filtroDestino','filtroDataInicio','filtroDataFim'].forEach(id => {
       document.getElementById(id).addEventListener('change', onFilterChange);
     });
+    ['filtroDataInicio','filtroDataFim'].forEach(id => {
+      document.getElementById(id).addEventListener('input', onFilterChange);
+    });
     fetchDashboard();
   });
 })();

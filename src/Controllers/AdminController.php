@@ -161,13 +161,31 @@ class AdminController
                 $where .= ' AND t.destino = ?';
                 $params[] = trim($_GET['destino']);
             }
-            if (!empty($_GET['data_inicio'])) {
-                $where .= ' AND DATE(t.created_at) >= ?';
-                $params[] = $_GET['data_inicio'];
+
+            $dataInicio = !empty($_GET['data_inicio']) ? trim((string)$_GET['data_inicio']) : null;
+            $dataFim = !empty($_GET['data_fim']) ? trim((string)$_GET['data_fim']) : null;
+
+            $inicioDate = null;
+            $fimDate = null;
+            if ($dataInicio && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataInicio)) {
+                $inicioDate = $dataInicio;
             }
-            if (!empty($_GET['data_fim'])) {
-                $where .= ' AND DATE(t.created_at) <= ?';
-                $params[] = $_GET['data_fim'];
+            if ($dataFim && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataFim)) {
+                $fimDate = $dataFim;
+            }
+
+            // Se o usuário informar invertido (fim antes de início), corrige automaticamente
+            if ($inicioDate && $fimDate && $inicioDate > $fimDate) {
+                [$inicioDate, $fimDate] = [$fimDate, $inicioDate];
+            }
+
+            if ($inicioDate) {
+                $where .= ' AND t.created_at >= ?';
+                $params[] = $inicioDate . ' 00:00:00';
+            }
+            if ($fimDate) {
+                $where .= ' AND t.created_at < DATE_ADD(?, INTERVAL 1 DAY)';
+                $params[] = $fimDate;
             }
 
             // --- KPIs ---

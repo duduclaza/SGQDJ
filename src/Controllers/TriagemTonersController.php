@@ -162,6 +162,7 @@ class TriagemTonersController
                 'Destino (Descarte/Garantia/Uso Interno/Estoque)',
                 'Valor Recuperado (R$) [calculado automaticamente]',
                 'Observações',
+                'Data Registro (DD/MM/AAAA ou DD/MM/AAAA HH:MM)',
                 'Filial (automático no sistema)',
                 'Colaborador (automático no sistema)',
             ], ';');
@@ -177,6 +178,7 @@ class TriagemTonersController
                 'Estoque',
                 '',
                 'Lote de teste de importação',
+                date('d/m/Y H:i'),
                 '',
                 '',
             ], ';');
@@ -227,12 +229,16 @@ class TriagemTonersController
             $header = array_map(static fn($v) => strtolower(trim((string)$v)), $rows[0] ?? []);
             $hasDefeitoColumn = false;
             $hasValorRecuperadoColumn = false;
+            $hasDataColumn = false;
             foreach ($header as $h) {
                 if (strpos($h, 'defeito') !== false) {
                     $hasDefeitoColumn = true;
                 }
                 if (strpos($h, 'valor recuperado') !== false) {
                     $hasValorRecuperadoColumn = true;
+                }
+                if (strpos($h, 'data') !== false) {
+                    $hasDataColumn = true;
                 }
             }
 
@@ -266,7 +272,13 @@ class TriagemTonersController
                         $pesoRet       = $row[5] ?? '';
                         $pctRaw        = $row[6] ?? '';
                         $destinoRaw    = $row[7] ?? '';
-                        $observacoes   = $hasValorRecuperadoColumn ? ($row[9] ?? null) : ($row[8] ?? null);
+                        if ($hasValorRecuperadoColumn) {
+                            $observacoes = $row[9] ?? null;
+                            $dataRegistroRaw = $hasDataColumn ? ($row[10] ?? null) : null;
+                        } else {
+                            $observacoes = $row[8] ?? null;
+                            $dataRegistroRaw = $hasDataColumn ? ($row[9] ?? null) : null;
+                        }
                     } else {
                         $defeitoNomeRaw = '';
                         $modeloToner   = $row[2] ?? '';
@@ -274,7 +286,29 @@ class TriagemTonersController
                         $pesoRet       = $row[4] ?? '';
                         $pctRaw        = $row[5] ?? '';
                         $destinoRaw    = $row[6] ?? '';
-                        $observacoes   = $hasValorRecuperadoColumn ? ($row[8] ?? null) : ($row[7] ?? null);
+                        if ($hasValorRecuperadoColumn) {
+                            $observacoes = $row[8] ?? null;
+                            $dataRegistroRaw = $hasDataColumn ? ($row[9] ?? null) : null;
+                        } else {
+                            $observacoes = $row[7] ?? null;
+                            $dataRegistroRaw = $hasDataColumn ? ($row[8] ?? null) : null;
+                        }
+                    }
+
+                    $createdAtImport = null;
+                    $dataRegistroRaw = trim((string)($dataRegistroRaw ?? ''));
+                    if ($dataRegistroRaw !== '') {
+                        $dt = \DateTime::createFromFormat('d/m/Y H:i', $dataRegistroRaw)
+                            ?: \DateTime::createFromFormat('d/m/Y', $dataRegistroRaw)
+                            ?: \DateTime::createFromFormat('Y-m-d H:i:s', $dataRegistroRaw)
+                            ?: \DateTime::createFromFormat('Y-m-d', $dataRegistroRaw);
+                        if ($dt) {
+                            // Se vier só data, completa com 00:00:00
+                            if (strlen($dataRegistroRaw) === 10 && strpos($dataRegistroRaw, ':') === false) {
+                                $dt->setTime(0, 0, 0);
+                            }
+                            $createdAtImport = $dt->format('Y-m-d H:i:s');
+                        }
                     }
 
                     // Legado: ignorar linhas sem chaves mínimas em vez de quebrar importação
@@ -373,8 +407,8 @@ class TriagemTonersController
                              defeito_id, defeito_nome, modo,
                              peso_retornado, percentual_informado, gramatura_restante,
                              percentual_calculado, parecer, destino, valor_recuperado,
-                             observacoes, created_by)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                             observacoes, created_by, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ");
 
                     $percentualParaSalvar = $modo === 'percentual' ? $pctNum : $percentualCalculado;
@@ -399,6 +433,7 @@ class TriagemTonersController
                         $valorRecuperado,
                         $observacoes,
                         $_SESSION['user_id'],
+                        $createdAtImport,
                     ]);
 
                     $importedDetails[] = sprintf(
