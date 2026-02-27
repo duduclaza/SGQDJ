@@ -940,6 +940,15 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
 
   // ===== Init =====
   document.addEventListener('DOMContentLoaded', () => {
+    // Move overlays to <body> to escape transformed parent stacking context
+    // (.page-transition uses transform in main layout, which breaks fixed centering)
+    ['chartFullscreen', 'reprovOverlay'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.parentElement !== document.body) {
+        document.body.appendChild(el);
+      }
+    });
+
     ['filtroDefeito','filtroDestino','filtroDataInicio','filtroDataFim'].forEach(id => {
       document.getElementById(id).addEventListener('change', onFilterChange);
     });
