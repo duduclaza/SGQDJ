@@ -191,6 +191,15 @@ class TriagemTonersController
                 return;
             }
 
+            $header = array_map(static fn($v) => strtolower(trim((string)$v)), $rows[0] ?? []);
+            $hasDefeitoColumn = false;
+            foreach ($header as $h) {
+                if (strpos($h, 'defeito') !== false) {
+                    $hasDefeitoColumn = true;
+                    break;
+                }
+            }
+
             $imported = 0;
             $errors = [];
 
@@ -209,13 +218,25 @@ class TriagemTonersController
                 try {
                     $codigoCliente = $row[0] ?? '';
                     $codigoRequisicao = $row[1] ?? null;
-                    $defeitoNomeRaw = $row[2] ?? '';
-                    $modeloToner   = $row[3] ?? '';
-                    $modoRaw       = strtolower($row[4] ?? 'peso');
-                    $pesoRet       = $row[5] ?? '';
-                    $pctRaw        = $row[6] ?? '';
-                    $destinoRaw    = $row[7] ?? '';
-                    $observacoes   = $row[8] ?? null;
+
+                    // Compatibilidade: layout antigo (sem coluna Defeito) e novo layout (com Defeito)
+                    if ($hasDefeitoColumn) {
+                        $defeitoNomeRaw = $row[2] ?? '';
+                        $modeloToner   = $row[3] ?? '';
+                        $modoRaw       = strtolower($row[4] ?? 'peso');
+                        $pesoRet       = $row[5] ?? '';
+                        $pctRaw        = $row[6] ?? '';
+                        $destinoRaw    = $row[7] ?? '';
+                        $observacoes   = $row[8] ?? null;
+                    } else {
+                        $defeitoNomeRaw = '';
+                        $modeloToner   = $row[2] ?? '';
+                        $modoRaw       = strtolower($row[3] ?? 'peso');
+                        $pesoRet       = $row[4] ?? '';
+                        $pctRaw        = $row[5] ?? '';
+                        $destinoRaw    = $row[6] ?? '';
+                        $observacoes   = $row[7] ?? null;
+                    }
 
                     if ($codigoCliente === '' || $modeloToner === '' || $destinoRaw === '') {
                         $errors[] = "Linha {$line}: Código Cliente, Modelo e Destino são obrigatórios.";
@@ -333,11 +354,17 @@ class TriagemTonersController
                 }
             }
 
+            $success = $imported > 0 || empty($errors);
+            $message = "Importação concluída: {$imported} registro(s) importado(s).";
+            if ($imported === 0 && !empty($errors)) {
+                $message = 'Nenhum registro foi importado. Verifique os erros da planilha.';
+            }
+
             echo json_encode([
-                'success' => true,
+                'success' => $success,
                 'imported' => $imported,
                 'errors' => $errors,
-                'message' => "Importação concluída: {$imported} registro(s) importado(s).",
+                'message' => $message,
             ]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Erro na importação: ' . $e->getMessage()]);
