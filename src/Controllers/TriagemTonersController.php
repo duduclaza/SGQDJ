@@ -84,6 +84,11 @@ class TriagemTonersController
             if (!$colDefeitoNome) {
                 $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN defeito_nome VARCHAR(255) NULL AFTER defeito_id");
             }
+            $colValorRecuperado = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'valor_recuperado'")->fetch();
+            if (!$colValorRecuperado) {
+                $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN valor_recuperado DECIMAL(10,2) NULL DEFAULT 0.00 AFTER destino");
+            }
+            $this->db->exec("UPDATE triagem_toners SET valor_recuperado = 0.00 WHERE valor_recuperado IS NULL");
 
             $this->db->exec("
                 CREATE TABLE IF NOT EXISTS triagem_toners_parametros (
@@ -143,6 +148,7 @@ class TriagemTonersController
                 'Peso Retornado (g)',
                 '% Toner (%)',
                 'Destino (Descarte/Garantia/Uso Interno/Estoque)',
+                'Valor Recuperado (R$) [calculado automaticamente]',
                 'Observações',
                 'Filial (automático no sistema)',
                 'Colaborador (automático no sistema)',
@@ -157,6 +163,7 @@ class TriagemTonersController
                 '320.5',
                 '',
                 'Estoque',
+                '',
                 'Lote de teste de importação',
                 '',
                 '',
@@ -207,10 +214,13 @@ class TriagemTonersController
 
             $header = array_map(static fn($v) => strtolower(trim((string)$v)), $rows[0] ?? []);
             $hasDefeitoColumn = false;
+            $hasValorRecuperadoColumn = false;
             foreach ($header as $h) {
                 if (strpos($h, 'defeito') !== false) {
                     $hasDefeitoColumn = true;
-                    break;
+                }
+                if (strpos($h, 'valor recuperado') !== false) {
+                    $hasValorRecuperadoColumn = true;
                 }
             }
 
@@ -244,7 +254,7 @@ class TriagemTonersController
                         $pesoRet       = $row[5] ?? '';
                         $pctRaw        = $row[6] ?? '';
                         $destinoRaw    = $row[7] ?? '';
-                        $observacoes   = $row[8] ?? null;
+                        $observacoes   = $hasValorRecuperadoColumn ? ($row[9] ?? null) : ($row[8] ?? null);
                     } else {
                         $defeitoNomeRaw = '';
                         $modeloToner   = $row[2] ?? '';
@@ -252,7 +262,7 @@ class TriagemTonersController
                         $pesoRet       = $row[4] ?? '';
                         $pctRaw        = $row[5] ?? '';
                         $destinoRaw    = $row[6] ?? '';
-                        $observacoes   = $row[7] ?? null;
+                        $observacoes   = $hasValorRecuperadoColumn ? ($row[8] ?? null) : ($row[7] ?? null);
                     }
 
                     // Legado: ignorar linhas sem chaves mínimas em vez de quebrar importação
@@ -496,6 +506,7 @@ class TriagemTonersController
 
             $stmt = $this->db->prepare("
                 SELECT t.*,
+                       COALESCE(t.valor_recuperado, 0.00) AS valor_recuperado,
                        COALESCE(t.colaborador_registro, u.name) AS colaborador_registro_nome,
                        COALESCE(t.filial_registro, '') AS filial_registro_nome,
                        u.name  AS criado_por_nome,

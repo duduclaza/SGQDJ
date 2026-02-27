@@ -425,8 +425,10 @@ function renderGrid(data) {
       : '<span class="px-1.5 py-0.5 bg-violet-100 text-violet-800 rounded text-xs">📊 % Direto</span>';
 
     const peso = r.modo === 'peso' && r.peso_retornado ? `${parseFloat(r.peso_retornado).toFixed(1)}g` : '—';
-    const valor = r.destino === 'Estoque' && r.valor_recuperado > 0
-      ? `<span class="font-semibold text-green-700">R$ ${parseFloat(r.valor_recuperado).toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>` : '—';
+    const valorRecuperado = parseFloat(r.valor_recuperado || 0);
+    const valor = r.destino === 'Estoque'
+      ? `<span class="font-semibold text-green-700">R$ ${valorRecuperado.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>`
+      : '—';
 
     const dt = new Date(r.created_at);
     const dtStr = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
