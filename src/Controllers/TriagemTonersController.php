@@ -367,7 +367,8 @@ class TriagemTonersController
             $success = $imported > 0 || empty($errors);
             $message = "Importação concluída: {$imported} registro(s) importado(s).";
             if ($imported === 0 && !empty($errors)) {
-                $message = 'Nenhum registro foi importado. Verifique os erros da planilha.';
+                $preview = implode(' | ', array_slice($errors, 0, 3));
+                $message = 'Nenhum registro foi importado. ' . ($preview !== '' ? $preview : 'Verifique os erros da planilha.');
             }
 
             echo json_encode([

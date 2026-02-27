@@ -513,8 +513,12 @@ function importarPlanilha() {
         showToast(res.message, 'success');
         carregarRegistros(1);
       } else {
+        const erros = (res.errors && res.errors.length)
+          ? `\n\nErros:\n- ${res.errors.slice(0, 8).join('\n- ')}`
+          : '';
         feedback.className = 'text-sm rounded-lg p-3 bg-red-50 border border-red-200 text-red-700';
-        feedback.textContent = res.message || 'Erro ao importar arquivo.';
+        feedback.classList.add('whitespace-pre-line');
+        feedback.textContent = `${res.message || 'Erro ao importar arquivo.'}${erros}`;
         feedback.classList.remove('hidden');
         showToast(res.message || 'Erro ao importar arquivo.', 'error');
       }
