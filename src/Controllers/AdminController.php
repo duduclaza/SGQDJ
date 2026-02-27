@@ -76,8 +76,21 @@ class AdminController
             return;
         }
 
+        $modulo = strtolower(trim((string)($_GET['modulo'] ?? '')));
+
         try {
-            $triagemStats = $this->getTriagemDashboard2Stats();
+            $triagemStats = [
+                'total_registros' => 0,
+                'media_percentual' => 0,
+                'total_estoque' => 0,
+                'valor_recuperado' => 0,
+                'por_destino' => [],
+                'ultimos_registros' => [],
+            ];
+
+            if ($modulo === 'triagem') {
+                $triagemStats = $this->getTriagemDashboard2Stats();
+            }
 
             $title = 'Dashboard 2.0 - SGQ OTI DJ';
             $viewFile = __DIR__ . '/../../views/admin/dashboard-2.php';

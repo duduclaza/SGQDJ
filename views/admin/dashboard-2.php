@@ -11,6 +11,8 @@ $triagemStats = $triagemStats ?? [
   'por_destino' => [],
   'ultimos_registros' => [],
 ];
+
+$moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
 ?>
 
 <section class="space-y-6">
@@ -21,11 +23,30 @@ $triagemStats = $triagemStats ?? [
     </div>
   </div>
 
-  <!-- Bloco solicitado -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    <a href="/dashboard-2?modulo=triagem" class="group bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md hover:border-cyan-300 transition-all">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-base font-semibold text-gray-900">Triagem de Toners</h2>
+          <p class="text-sm text-gray-600 mt-1">Acessar indicadores de triagem e valor recuperado.</p>
+        </div>
+        <span class="text-xl">🧪</span>
+      </div>
+      <div class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-cyan-700 group-hover:text-cyan-800">
+        Entrar no dashboard
+        <span>→</span>
+      </div>
+    </a>
+  </div>
+
+  <?php if ($moduloAtual === 'triagem'): ?>
   <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
-    <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-cyan-50 to-blue-50">
-      <h2 class="text-lg font-semibold text-gray-900">Dashboard de Triagem de Toners</h2>
-      <p class="text-sm text-gray-600 mt-1">Resumo de desempenho e destino das triagens</p>
+    <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-cyan-50 to-blue-50 flex items-center justify-between gap-3">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">Dashboard de Triagem de Toners</h2>
+        <p class="text-sm text-gray-600 mt-1">Resumo de desempenho e destino das triagens</p>
+      </div>
+      <a href="/dashboard-2" class="text-sm px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">Voltar</a>
     </div>
 
     <div class="p-5 space-y-5">
@@ -100,4 +121,5 @@ $triagemStats = $triagemStats ?? [
       </div>
     </div>
   </div>
+  <?php endif; ?>
 </section>
