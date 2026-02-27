@@ -40,77 +40,83 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   </div>
 
   <?php if ($moduloAtual === 'triagem'): ?>
-  <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
-    <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-cyan-50 to-blue-50 flex items-center justify-between gap-3">
+  <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-xl">
+    <div class="absolute -top-20 -right-20 h-56 w-56 rounded-full bg-cyan-400/20 blur-3xl"></div>
+    <div class="absolute -bottom-16 -left-12 h-48 w-48 rounded-full bg-blue-500/20 blur-3xl"></div>
+
+    <div class="relative px-6 py-5 border-b border-white/10 flex items-center justify-between gap-3">
       <div>
-        <h2 class="text-lg font-semibold text-gray-900">Dashboard de Triagem de Toners</h2>
-        <p class="text-sm text-gray-600 mt-1">Resumo de desempenho e destino das triagens</p>
+        <span class="inline-flex items-center gap-2 rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-cyan-100">
+          Dashboard de Performance
+        </span>
+        <h2 class="mt-3 text-xl font-semibold text-white">Triagem de Toners</h2>
+        <p class="text-sm text-slate-300 mt-1">Painel inteligente de volume, destino e valor recuperado</p>
       </div>
-      <a href="/dashboard-2" class="text-sm px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">Voltar</a>
+      <a href="/dashboard-2" class="text-sm px-3 py-1.5 rounded-lg border border-slate-500/60 bg-slate-900/60 text-slate-200 hover:bg-slate-800 transition-colors">Voltar</a>
     </div>
 
-    <div class="p-5 space-y-5">
+    <div class="relative p-6 space-y-5">
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <div class="rounded-lg border border-gray-200 p-4 bg-gray-50">
-          <div class="text-xs text-gray-500 uppercase">Total de Registros</div>
-          <div class="text-2xl font-bold text-gray-900 mt-1"><?= number_format((int)$triagemStats['total_registros'], 0, ',', '.') ?></div>
+        <div class="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+          <div class="text-[11px] uppercase tracking-[0.08em] text-slate-300">Total de Registros</div>
+          <div class="text-3xl font-semibold text-white mt-2"><?= number_format((int)$triagemStats['total_registros'], 0, ',', '.') ?></div>
         </div>
 
-        <div class="rounded-lg border border-gray-200 p-4 bg-gray-50">
-          <div class="text-xs text-gray-500 uppercase">Média % Gramatura</div>
-          <div class="text-2xl font-bold text-gray-900 mt-1"><?= number_format((float)$triagemStats['media_percentual'], 2, ',', '.') ?>%</div>
+        <div class="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+          <div class="text-[11px] uppercase tracking-[0.08em] text-slate-300">Média % Gramatura</div>
+          <div class="text-3xl font-semibold text-white mt-2"><?= number_format((float)$triagemStats['media_percentual'], 2, ',', '.') ?>%</div>
         </div>
 
-        <div class="rounded-lg border border-gray-200 p-4 bg-gray-50">
-          <div class="text-xs text-gray-500 uppercase">Triagens em Estoque</div>
-          <div class="text-2xl font-bold text-gray-900 mt-1"><?= number_format((int)$triagemStats['total_estoque'], 0, ',', '.') ?></div>
+        <div class="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+          <div class="text-[11px] uppercase tracking-[0.08em] text-slate-300">Triagens em Estoque</div>
+          <div class="text-3xl font-semibold text-white mt-2"><?= number_format((int)$triagemStats['total_estoque'], 0, ',', '.') ?></div>
         </div>
 
-        <div class="rounded-lg border border-emerald-200 p-4 bg-emerald-50">
-          <div class="text-xs text-emerald-700 uppercase">Valor Recuperado</div>
-          <div class="text-2xl font-bold text-emerald-700 mt-1">R$ <?= number_format((float)$triagemStats['valor_recuperado'], 2, ',', '.') ?></div>
+        <div class="rounded-xl border border-emerald-300/40 bg-emerald-400/10 backdrop-blur-sm p-4">
+          <div class="text-[11px] uppercase tracking-[0.08em] text-emerald-100">Valor Recuperado</div>
+          <div class="text-3xl font-semibold text-emerald-200 mt-2">R$ <?= number_format((float)$triagemStats['valor_recuperado'], 2, ',', '.') ?></div>
         </div>
       </div>
 
       <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        <div class="rounded-lg border border-gray-200 p-4">
-          <h3 class="text-sm font-semibold text-gray-800 mb-3">Distribuição por Destino</h3>
+        <div class="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+          <h3 class="text-sm font-semibold text-white mb-3">Distribuição por Destino</h3>
           <?php if (empty($triagemStats['por_destino'])): ?>
-            <p class="text-sm text-gray-500">Sem dados para exibir.</p>
+            <p class="text-sm text-slate-300">Sem dados para exibir.</p>
           <?php else: ?>
             <div class="space-y-2">
               <?php foreach ($triagemStats['por_destino'] as $item): ?>
-                <div class="flex items-center justify-between text-sm">
-                  <span class="text-gray-700"><?= e($item['destino']) ?></span>
-                  <span class="font-semibold text-gray-900"><?= (int)$item['total'] ?></span>
+                <div class="flex items-center justify-between rounded-lg border border-white/10 bg-slate-900/40 px-3 py-2 text-sm">
+                  <span class="text-slate-200"><?= e($item['destino']) ?></span>
+                  <span class="font-semibold text-white"><?= (int)$item['total'] ?></span>
                 </div>
               <?php endforeach; ?>
             </div>
           <?php endif; ?>
         </div>
 
-        <div class="rounded-lg border border-gray-200 p-4">
-          <h3 class="text-sm font-semibold text-gray-800 mb-3">Últimas Triagens</h3>
+        <div class="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-4">
+          <h3 class="text-sm font-semibold text-white mb-3">Últimas Triagens</h3>
           <?php if (empty($triagemStats['ultimos_registros'])): ?>
-            <p class="text-sm text-gray-500">Sem registros recentes.</p>
+            <p class="text-sm text-slate-300">Sem registros recentes.</p>
           <?php else: ?>
-            <div class="max-h-72 overflow-auto">
+            <div class="max-h-72 overflow-auto rounded-lg border border-white/10">
               <table class="w-full text-sm">
                 <thead>
-                  <tr class="text-left text-gray-500 border-b border-gray-100">
-                    <th class="py-2 pr-2">Cliente</th>
-                    <th class="py-2 pr-2">Modelo</th>
-                    <th class="py-2 pr-2">%</th>
-                    <th class="py-2 pr-2">Destino</th>
+                  <tr class="text-left text-slate-300 border-b border-white/10 bg-slate-900/50">
+                    <th class="py-2.5 px-3">Cliente</th>
+                    <th class="py-2.5 px-3">Modelo</th>
+                    <th class="py-2.5 px-3">%</th>
+                    <th class="py-2.5 px-3">Destino</th>
                   </tr>
                 </thead>
                 <tbody>
                   <?php foreach ($triagemStats['ultimos_registros'] as $row): ?>
-                    <tr class="border-b border-gray-50">
-                      <td class="py-2 pr-2 text-gray-700"><?= e($row['cliente_nome'] ?? '-') ?></td>
-                      <td class="py-2 pr-2 text-gray-700"><?= e($row['toner_modelo'] ?? '-') ?></td>
-                      <td class="py-2 pr-2 font-medium text-gray-900"><?= number_format((float)($row['percentual_calculado'] ?? 0), 2, ',', '.') ?>%</td>
-                      <td class="py-2 pr-2 text-gray-700"><?= e($row['destino'] ?? '-') ?></td>
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td class="py-2.5 px-3 text-slate-200"><?= e($row['cliente_nome'] ?? '-') ?></td>
+                      <td class="py-2.5 px-3 text-slate-200"><?= e($row['toner_modelo'] ?? '-') ?></td>
+                      <td class="py-2.5 px-3 font-semibold text-white"><?= number_format((float)($row['percentual_calculado'] ?? 0), 2, ',', '.') ?>%</td>
+                      <td class="py-2.5 px-3 text-slate-200"><?= e($row['destino'] ?? '-') ?></td>
                     </tr>
                   <?php endforeach; ?>
                 </tbody>
