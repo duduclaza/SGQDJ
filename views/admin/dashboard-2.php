@@ -98,6 +98,14 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   .chart-fullscreen-overlay .fs-close:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.25); }
   .chart-fullscreen-overlay .fs-body { flex:1; position:relative; min-height:0; border-radius:16px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.03); padding:24px; }
   .chart-fullscreen-overlay .fs-body canvas { width:100% !important; height:100% !important; }
+  /* Modal detalhamento reprovados */
+  .reprov-overlay { display:none; position:fixed; inset:0; z-index:99998; background:rgba(5,10,25,0.92); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:24px; }
+  .reprov-overlay.active { display:flex; }
+  .reprov-modal { background:#1e293b; border:1px solid rgba(255,255,255,0.1); border-radius:16px; width:95vw; max-width:950px; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+  .reprov-modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid rgba(255,255,255,0.06); flex-shrink:0; }
+  .reprov-modal-body { flex:1; overflow-y:auto; padding:20px 24px; }
+  .reprov-cliente-bar { display:flex; align-items:center; gap:8px; padding:6px 0; font-size:0.82rem; }
+  .reprov-cliente-bar .bar { height:8px; border-radius:4px; background:var(--dash-accent); transition:width 0.4s ease; }
 </style>
 
 <!-- Fullscreen overlay -->
@@ -111,6 +119,28 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       <button class="fs-close" onclick="fecharFullscreen()">ESC &nbsp;✕&nbsp; Fechar</button>
     </div>
     <div class="fs-body"><canvas id="chartFullscreenCanvas"></canvas></div>
+  </div>
+</div>
+
+<!-- Modal detalhamento reprovados -->
+<div id="reprovOverlay" class="reprov-overlay" onclick="if(event.target===this)fecharReprovados()">
+  <div class="reprov-modal">
+    <div class="reprov-modal-header">
+      <div>
+        <h2 class="text-lg font-bold text-white" id="reprovTitle">Reprovados</h2>
+        <p class="text-xs text-slate-400 mt-1" id="reprovSubtitle"></p>
+      </div>
+      <button onclick="fecharReprovados()" class="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-slate-200 text-sm font-semibold hover:bg-white/10 transition">✕ Fechar</button>
+    </div>
+    <div class="reprov-modal-body">
+      <div id="reprovClientes" class="mb-5"></div>
+      <div class="overflow-auto rounded-xl border border-white/5">
+        <table class="w-full dash-table">
+          <thead><tr class="bg-white/[0.02]"><th>Cliente</th><th>Modelo</th><th>Defeito</th><th>%</th><th>Valor Rec.</th><th>Data</th></tr></thead>
+          <tbody id="reprovTabela"><tr><td colspan="6" class="text-center text-slate-500 py-8">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -275,7 +305,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       <div class="flex items-center justify-between mb-4">
         <div>
           <h3 class="text-sm font-semibold text-white">Evolução Mensal de Reprovação</h3>
-          <p class="text-xs text-slate-400 mt-0.5">% de descartes por mês</p>
+          <p class="text-xs text-slate-400 mt-0.5">% de garantias (reprovados) por mês · clique no ponto para detalhes</p>
         </div>
         <div class="flex items-center gap-2">
           <span class="kpi-badge bg-rose-400/15 text-rose-300 border border-rose-400/20">Linha</span>
@@ -609,8 +639,10 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   }
 
   // ===== Chart 4: Evolução Mensal (line) =====
+  let evolucaoRawData = [];
   function renderChartEvolucao(data) {
     resetChart('evolucao');
+    evolucaoRawData = data;
     const ctx = document.getElementById('chartEvolucao').getContext('2d');
     const labels = data.map(d => {
       const [y,m] = d.mes.split('-');
@@ -623,14 +655,17 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
         labels,
         datasets: [
           {
-            label: '% Reprovação',
+            label: '% Reprovação (Garantia)',
             data: data.map(d => d.pct_reprovacao),
             borderColor: '#f87171',
             backgroundColor: 'rgba(248,113,113,0.1)',
             borderWidth: 2.5,
-            pointRadius: 4,
+            pointRadius: 5,
             pointBackgroundColor: '#f87171',
-            pointHoverRadius: 6,
+            pointHoverRadius: 8,
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: '#f87171',
+            pointHoverBorderWidth: 3,
             tension: 0.35,
             fill: true,
             yAxisID: 'y',
@@ -649,6 +684,13 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
         ]
       },
       options: {
+        onClick: (evt, elements) => {
+          if (elements.length > 0) {
+            const idx = elements[0].index;
+            const mesData = evolucaoRawData[idx];
+            if (mesData && mesData.mes) abrirReprovados(mesData.mes);
+          }
+        },
         scales: {
           x: { grid:{display:false} },
           y: { position:'left', min:0, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{callback:v=>v+'%'}, title:{display:true, text:'% Reprovação', color:'#f87171'} },
@@ -659,14 +701,75 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           tooltip: {
             callbacks: {
               label: ctx => ctx.datasetIndex === 0
-                ? `  ${ctx.parsed.y}% reprovados`
+                ? `  ${ctx.parsed.y}% reprovados (garantia)`
                 : `  ${ctx.parsed.y} avaliados`
-            }
+            },
+            footer: () => ['', 'Clique para ver detalhes']
           }
         }
       }
     });
   }
+
+  // ===== Modal Reprovados =====
+  async function abrirReprovados(mes) {
+    const overlay = document.getElementById('reprovOverlay');
+    const [y, m] = mes.split('-');
+    const meses = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const mesNome = meses[parseInt(m)] + ' / ' + y;
+
+    document.getElementById('reprovTitle').textContent = 'Reprovados (Garantia) — ' + mesNome;
+    document.getElementById('reprovSubtitle').textContent = 'Carregando...';
+    document.getElementById('reprovClientes').innerHTML = '';
+    document.getElementById('reprovTabela').innerHTML = '<tr><td colspan="6" class="text-center text-slate-500 py-8"><span class="dash-spinner"></span> Buscando dados...</td></tr>';
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    try {
+      const resp = await fetch('/dashboard-2/triagem/reprovados?mes=' + encodeURIComponent(mes));
+      const json = await resp.json();
+      if (!json.success) { document.getElementById('reprovSubtitle').textContent = json.message || 'Erro'; return; }
+
+      document.getElementById('reprovSubtitle').textContent = json.total + ' toner(s) reprovado(s) neste mês';
+
+      // Barras por cliente
+      const maxCli = json.por_cliente.length > 0 ? json.por_cliente[0].total : 1;
+      let cliHtml = '<p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Reprovações por cliente</p>';
+      json.por_cliente.forEach(c => {
+        const pct = Math.round((c.total / maxCli) * 100);
+        cliHtml += '<div class="reprov-cliente-bar"><span class="text-slate-300 w-40 truncate shrink-0" title="' + esc(c.cliente) + '">' + esc(c.cliente) + '</span><div class="bar" style="width:' + pct + '%;min-width:4px"></div><span class="text-slate-400 text-xs font-semibold">' + c.total + '</span></div>';
+      });
+      document.getElementById('reprovClientes').innerHTML = cliHtml;
+
+      // Tabela detalhada
+      if (json.registros.length === 0) {
+        document.getElementById('reprovTabela').innerHTML = '<tr><td colspan="6" class="text-center text-slate-500 py-8">Nenhum registro encontrado</td></tr>';
+      } else {
+        let html = '';
+        json.registros.forEach(r => {
+          const pct = Number(r.percentual_calculado || 0).toFixed(2);
+          const val = 'R$ ' + Number(r.valor_recuperado || 0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+          const dt = r.created_at ? r.created_at.substring(0,10).split('-').reverse().join('/') : '-';
+          html += '<tr>';
+          html += '<td class="text-slate-200">' + esc(r.cliente_nome || '-') + '</td>';
+          html += '<td class="font-medium text-white">' + esc(r.toner_modelo || '-') + '</td>';
+          html += '<td class="text-orange-300">' + esc(r.defeito_nome || 'N/I') + '</td>';
+          html += '<td>' + pct + '%</td>';
+          html += '<td class="text-emerald-400">' + val + '</td>';
+          html += '<td class="text-slate-400">' + dt + '</td>';
+          html += '</tr>';
+        });
+        document.getElementById('reprovTabela').innerHTML = html;
+      }
+    } catch(err) {
+      document.getElementById('reprovSubtitle').textContent = 'Erro ao carregar: ' + err.message;
+    }
+  }
+
+  window.fecharReprovados = function() {
+    document.getElementById('reprovOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  };
 
   // ===== Chart 5: Destino Donut =====
   function renderChartDestino(data) {
@@ -824,9 +927,15 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     if (fullscreenChart) { fullscreenChart.destroy(); fullscreenChart = null; }
   };
 
-  // ESC key to close
+  // ESC key to close modals
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') window.fecharFullscreen();
+    if (e.key === 'Escape') {
+      if (document.getElementById('reprovOverlay').classList.contains('active')) {
+        window.fecharReprovados();
+      } else {
+        window.fecharFullscreen();
+      }
+    }
   });
 
   // ===== Init =====

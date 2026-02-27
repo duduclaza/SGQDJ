@@ -143,6 +143,7 @@ $router->get('/dashboard', function () {
 $router->get('/dashboard-2', [App\Controllers\AdminController::class, 'dashboard2']);
 $router->get('/dashboard-2/triagem', [App\Controllers\AdminController::class, 'dashboard2Triagem']);
 $router->get('/dashboard-2/triagem/data', [App\Controllers\AdminController::class, 'dashboard2TriagemData']);
+$router->get('/dashboard-2/triagem/reprovados', [App\Controllers\AdminController::class, 'dashboard2TriagemReprovados']);
 
 // Rota de diagnóstico POPs (apenas para admins)
 $router->get('/admin/diagnostico/pops-pendentes', [App\Controllers\PopItsController::class , 'diagnosticoPendentes']);

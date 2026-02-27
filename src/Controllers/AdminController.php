@@ -230,11 +230,11 @@ class AdminController
                 ['label' => '89% – 100%','total' => (int)($faixas['faixa_89_100'] ?? 0)],
             ];
 
-            // --- Chart 4: Evolução mensal de reprovação (destino=Descarte) ---
+            // --- Chart 4: Evolução mensal de reprovação (destino=Garantia) ---
             $chart4Sql = "SELECT
                 DATE_FORMAT(t.created_at, '%Y-%m') AS mes,
                 COUNT(*) AS total_avaliados,
-                SUM(CASE WHEN t.destino = 'Descarte' THEN 1 ELSE 0 END) AS total_reprovados
+                SUM(CASE WHEN t.destino = 'Garantia' THEN 1 ELSE 0 END) AS total_reprovados
                 FROM triagem_toners t WHERE {$where}
                 GROUP BY mes ORDER BY mes ASC";
             $stmt = $this->db->prepare($chart4Sql);
@@ -297,6 +297,68 @@ class AdminController
                     'clientes' => $clientes ?: [],
                     'defeitos' => $defeitos ?: [],
                 ],
+            ]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Erro: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
+    /**
+     * API JSON: Detalhes dos toners reprovados (Garantia) de um mês
+     * GET /dashboard-2/triagem/reprovados?mes=YYYY-MM
+     */
+    public function dashboard2TriagemReprovados()
+    {
+        if (ob_get_level()) ob_clean();
+        header('Content-Type: application/json; charset=utf-8');
+
+        if (!isset($_SESSION['user_id']) || !\App\Services\PermissionService::hasPermission($_SESSION['user_id'], 'dashboard', 'view')) {
+            echo json_encode(['success' => false, 'message' => 'Sem permissão']);
+            exit;
+        }
+
+        try {
+            $mes = trim($_GET['mes'] ?? '');
+            if (!preg_match('/^\d{4}-\d{2}$/', $mes)) {
+                echo json_encode(['success' => false, 'message' => 'Parâmetro mes inválido (YYYY-MM)']);
+                exit;
+            }
+
+            $tableExists = $this->db->query("SHOW TABLES LIKE 'triagem_toners'")->rowCount() > 0;
+            if (!$tableExists) {
+                echo json_encode(['success' => true, 'mes' => $mes, 'registros' => []]);
+                exit;
+            }
+
+            $sql = "SELECT t.id, t.cliente_nome, t.toner_modelo, t.defeito_nome, t.percentual_calculado,
+                           t.destino, t.valor_recuperado, t.observacoes, t.created_at
+                    FROM triagem_toners t
+                    WHERE t.destino = 'Garantia' AND DATE_FORMAT(t.created_at, '%Y-%m') = ?
+                    ORDER BY t.created_at DESC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$mes]);
+            $registros = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Resumo por cliente
+            $porCliente = [];
+            foreach ($registros as $r) {
+                $cli = $r['cliente_nome'] ?: 'Não informado';
+                if (!isset($porCliente[$cli])) $porCliente[$cli] = 0;
+                $porCliente[$cli]++;
+            }
+            arsort($porCliente);
+            $resumoClientes = [];
+            foreach ($porCliente as $nome => $qtd) {
+                $resumoClientes[] = ['cliente' => $nome, 'total' => $qtd];
+            }
+
+            echo json_encode([
+                'success' => true,
+                'mes' => $mes,
+                'total' => count($registros),
+                'registros' => $registros,
+                'por_cliente' => $resumoClientes,
             ]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Erro: ' . $e->getMessage()]);

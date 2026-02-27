@@ -51,6 +51,7 @@ $router->get('/dashboard', function() {
 $router->get('/dashboard-2', [AdminController::class, 'dashboard2']);
 $router->get('/dashboard-2/triagem', [AdminController::class, 'dashboard2Triagem']);
 $router->get('/dashboard-2/triagem/data', [AdminController::class, 'dashboard2TriagemData']);
+$router->get('/dashboard-2/triagem/reprovados', [AdminController::class, 'dashboard2TriagemReprovados']);
 
 // Admin (alias para dashboard)
 $router->get('/admin', function() {
