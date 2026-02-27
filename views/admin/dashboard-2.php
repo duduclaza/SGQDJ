@@ -68,6 +68,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   .filter-input::placeholder { color: var(--dash-muted); }
   .filter-input option { background: #1e293b; color: var(--dash-text); }
   .search-dropdown { position: relative; }
+  .search-dropdown.open { z-index: 120; }
   .search-dropdown .sd-list { display:none; position:absolute; top:100%; left:0; right:0; z-index:50; max-height:220px; overflow-y:auto; margin-top:4px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:#1e293b; box-shadow:0 12px 32px rgba(0,0,0,0.4); }
   .search-dropdown.open .sd-list { display:block; }
   .search-dropdown .sd-item { padding:7px 12px; font-size:0.82rem; color:var(--dash-text); cursor:pointer; transition:background 0.15s; }
@@ -163,7 +164,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   </div>
 
   <!-- Filters -->
-  <div class="dash-card dash-card-glow p-4 mb-6 dash-animate" style="animation-delay:0.05s">
+  <div class="dash-card dash-card-glow p-4 mb-6 dash-animate relative z-[70]" style="animation-delay:0.05s">
     <div class="flex items-center gap-2 mb-3">
       <svg class="w-4 h-4 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
       <span class="text-xs font-semibold uppercase tracking-widest text-slate-300">Filtros Globais</span>
@@ -242,7 +243,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     <div class="dash-card p-4 dash-animate" style="animation-delay:0.23s; background: linear-gradient(135deg, rgba(52,211,153,0.12), rgba(16,185,129,0.06)); border: 1px solid rgba(52,211,153,0.25);">
       <div class="kpi-card-inner">
         <div class="kpi-label" style="color:#6ee7b7">Valor Recuperado</div>
-        <div class="kpi-value mt-2" style="color:#34d399; font-size:clamp(1rem, 2.5vw, 1.55rem)" id="kpiValor">–</div>
+        <div class="kpi-value mt-2" style="color:#34d399; font-size:clamp(0.88rem, 1.5vw, 1.2rem); letter-spacing:-0.01em" id="kpiValor">–</div>
       </div>
     </div>
   </div>
