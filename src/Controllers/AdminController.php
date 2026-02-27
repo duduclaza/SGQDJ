@@ -325,6 +325,9 @@ class AdminController
                 exit;
             }
 
+            $inicioMes = $mes . '-01';
+            $fimMes = (new \DateTime($inicioMes))->modify('first day of next month')->format('Y-m-d');
+
             $tableExists = $this->db->query("SHOW TABLES LIKE 'triagem_toners'")->rowCount() > 0;
             if (!$tableExists) {
                 echo json_encode(['success' => true, 'mes' => $mes, 'registros' => []]);
@@ -334,10 +337,10 @@ class AdminController
             $sql = "SELECT t.id, t.cliente_nome, t.toner_modelo, t.defeito_nome, t.percentual_calculado,
                            t.destino, t.valor_recuperado, t.observacoes, t.created_at
                     FROM triagem_toners t
-                    WHERE t.destino = 'Garantia' AND DATE_FORMAT(t.created_at, '%Y-%m') = ?
+                    WHERE t.destino = 'Garantia' AND t.created_at >= ? AND t.created_at < ?
                     ORDER BY t.created_at DESC";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute([$mes]);
+            $stmt->execute([$inicioMes, $fimMes]);
             $registros = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             // Resumo por cliente
