@@ -420,6 +420,8 @@ class ChatController
         ];
 
         $lastError = '';
+        $hadQuotaError = false;
+        $hadPermissionError = false;
         foreach ($models as $model) {
             $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' . $model . ':generateContent?key=' . urlencode($apiKey);
 
@@ -461,16 +463,41 @@ class ChatController
             }
 
             $apiError = trim((string)($json['error']['message'] ?? ''));
+            $apiStatus = strtoupper(trim((string)($json['error']['status'] ?? '')));
             $apiErrorUpper = strtoupper($apiError);
-            if (strpos($apiErrorUpper, 'API_KEY_INVALID') !== false || strpos($apiErrorUpper, 'PERMISSION_DENIED') !== false) {
+
+            if ($apiStatus === 'UNAUTHENTICATED' || strpos($apiErrorUpper, 'API_KEY_INVALID') !== false) {
                 return 'A chave do Gemini parece inválida ou sem permissão. Confirme a GEMINI_API_KEY no .env e se a API Generative Language está habilitada no Google Cloud.';
             }
 
-            if (strpos($apiErrorUpper, 'QUOTA') !== false || strpos($apiErrorUpper, 'RATE LIMIT') !== false || $httpCode === 429) {
-                return 'A cota da API do Gemini foi atingida no momento. Tente novamente em instantes.';
+            if ($httpCode === 404 || $apiStatus === 'NOT_FOUND' || strpos($apiErrorUpper, 'NOT FOUND') !== false) {
+                $lastError = 'Modelo indisponível (' . $model . '): ' . ($apiError !== '' ? $apiError : 'NOT_FOUND');
+                continue;
+            }
+
+            if ($httpCode === 429 || $apiStatus === 'RESOURCE_EXHAUSTED' || strpos($apiErrorUpper, 'RATE LIMIT') !== false || strpos($apiErrorUpper, 'QUOTA') !== false) {
+                $hadQuotaError = true;
+                $lastError = 'Quota/rate (' . $model . '): ' . ($apiError !== '' ? $apiError : 'HTTP 429');
+                continue;
+            }
+
+            if ($httpCode === 403 || $apiStatus === 'PERMISSION_DENIED' || strpos($apiErrorUpper, 'PERMISSION_DENIED') !== false) {
+                $hadPermissionError = true;
+                $lastError = 'Sem permissão (' . $model . '): ' . ($apiError !== '' ? $apiError : 'PERMISSION_DENIED');
+                continue;
             }
 
             $lastError = 'HTTP ' . $httpCode . ' (' . $model . '): ' . ($apiError !== '' ? $apiError : 'erro desconhecido');
+        }
+
+        if ($hadQuotaError) {
+            error_log('Daniel Gemini quota/rate: ' . $lastError);
+            return 'A API do Gemini respondeu com limite temporário (quota/rate). Tente novamente em alguns instantes.';
+        }
+
+        if ($hadPermissionError) {
+            error_log('Daniel Gemini permission: ' . $lastError);
+            return 'O projeto/chave do Gemini está sem permissão para o modelo testado. Confirme no Google Cloud se a API Generative Language está habilitada e se a chave pode usar Gemini.';
         }
 
         error_log('Daniel Gemini falhou: ' . $lastError);
