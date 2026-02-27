@@ -15,6 +15,7 @@ use App\Controllers\FMEAController;
 use App\Controllers\CertificadosController;
 use App\Controllers\CadastroMaquinasController;
 use App\Controllers\CadastroPecasController;
+use App\Controllers\CadastroDefeitosController;
 
 // ===== CONTROLE DE RC =====
 
@@ -114,3 +115,11 @@ $router->post('/cadastro-pecas/store', [CadastroPecasController::class, 'store']
 $router->post('/cadastro-pecas/update', [CadastroPecasController::class, 'update']);
 $router->post('/cadastro-pecas/delete', [CadastroPecasController::class, 'delete']);
 $router->post('/cadastro-pecas/import', [CadastroPecasController::class, 'import']);
+
+// ===== CADASTRO DE DEFEITOS =====
+
+$router->get('/cadastro-defeitos', [CadastroDefeitosController::class, 'index']);
+$router->post('/cadastro-defeitos/store', [CadastroDefeitosController::class, 'store']);
+$router->post('/cadastro-defeitos/update', [CadastroDefeitosController::class, 'update']);
+$router->post('/cadastro-defeitos/delete', [CadastroDefeitosController::class, 'delete']);
+$router->get('/cadastro-defeitos/{id}/imagem', [CadastroDefeitosController::class, 'imagem']);

@@ -27,6 +27,8 @@ class TriagemTonersController
                     cliente_id INT NULL,
                     cliente_nome VARCHAR(255) NULL,
                     codigo_requisicao VARCHAR(100) NULL,
+                    defeito_id INT NULL,
+                    defeito_nome VARCHAR(255) NULL,
                     modo ENUM('peso','percentual') NOT NULL DEFAULT 'peso',
                     peso_retornado DECIMAL(10,2) NULL,
                     percentual_informado DECIMAL(5,2) NULL,
@@ -42,6 +44,7 @@ class TriagemTonersController
                     updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
                     INDEX idx_toner_id (toner_id),
                     INDEX idx_cliente_id (cliente_id),
+                    INDEX idx_defeito_id (defeito_id),
                     INDEX idx_destino (destino),
                     INDEX idx_created_at (created_at),
                     INDEX idx_created_by (created_by)
@@ -61,6 +64,15 @@ class TriagemTonersController
             $colCodigoRequisicao = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'codigo_requisicao'")->fetch();
             if (!$colCodigoRequisicao) {
                 $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN codigo_requisicao VARCHAR(100) NULL AFTER cliente_nome");
+            }
+            $colDefeitoId = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'defeito_id'")->fetch();
+            if (!$colDefeitoId) {
+                $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN defeito_id INT NULL AFTER codigo_requisicao");
+                $this->db->exec("ALTER TABLE triagem_toners ADD INDEX idx_defeito_id (defeito_id)");
+            }
+            $colDefeitoNome = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'defeito_nome'")->fetch();
+            if (!$colDefeitoNome) {
+                $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN defeito_nome VARCHAR(255) NULL AFTER defeito_id");
             }
 
             $this->db->exec("
@@ -115,6 +127,7 @@ class TriagemTonersController
             fputcsv($output, [
                 'Código Cliente',
                 'Código de Requisição',
+                'Defeito (nome simples)',
                 'Modelo Toner',
                 'Modo (peso/percentual)',
                 'Peso Retornado (g)',
@@ -126,6 +139,7 @@ class TriagemTonersController
             fputcsv($output, [
                 '000123',
                 'REQ-2026-0001',
+                'Risco no cilindro',
                 'HP CF280A',
                 'peso',
                 '320.5',
@@ -195,12 +209,13 @@ class TriagemTonersController
                 try {
                     $codigoCliente = $row[0] ?? '';
                     $codigoRequisicao = $row[1] ?? null;
-                    $modeloToner   = $row[2] ?? '';
-                    $modoRaw       = strtolower($row[3] ?? 'peso');
-                    $pesoRet       = $row[4] ?? '';
-                    $pctRaw        = $row[5] ?? '';
-                    $destinoRaw    = $row[6] ?? '';
-                    $observacoes   = $row[7] ?? null;
+                    $defeitoNomeRaw = $row[2] ?? '';
+                    $modeloToner   = $row[3] ?? '';
+                    $modoRaw       = strtolower($row[4] ?? 'peso');
+                    $pesoRet       = $row[5] ?? '';
+                    $pctRaw        = $row[6] ?? '';
+                    $destinoRaw    = $row[7] ?? '';
+                    $observacoes   = $row[8] ?? null;
 
                     if ($codigoCliente === '' || $modeloToner === '' || $destinoRaw === '') {
                         $errors[] = "Linha {$line}: Código Cliente, Modelo e Destino são obrigatórios.";
@@ -257,6 +272,20 @@ class TriagemTonersController
                         continue;
                     }
 
+                    $defeitoId = null;
+                    $defeitoNome = null;
+                    if ($defeitoNomeRaw !== '') {
+                        $defeitoStmt = $this->db->prepare("SELECT id, nome_defeito FROM cadastro_defeitos WHERE LOWER(nome_defeito) = LOWER(?) LIMIT 1");
+                        $defeitoStmt->execute([$defeitoNomeRaw]);
+                        $defeito = $defeitoStmt->fetch(PDO::FETCH_ASSOC);
+                        if (!$defeito) {
+                            $errors[] = "Linha {$line}: Defeito '{$defeitoNomeRaw}' não encontrado no cadastro geral.";
+                            continue;
+                        }
+                        $defeitoId = (int)$defeito['id'];
+                        $defeitoNome = $defeito['nome_defeito'];
+                    }
+
                     $parecer = $this->getParecer($percentualCalculado);
 
                     $valorRecuperado = 0.00;
@@ -270,11 +299,12 @@ class TriagemTonersController
 
                     $insert = $this->db->prepare("
                         INSERT INTO triagem_toners
-                            (toner_id, toner_modelo, cliente_id, cliente_nome, codigo_requisicao, modo,
+                            (toner_id, toner_modelo, cliente_id, cliente_nome, codigo_requisicao,
+                             defeito_id, defeito_nome, modo,
                              peso_retornado, percentual_informado, gramatura_restante,
                              percentual_calculado, parecer, destino, valor_recuperado,
                              observacoes, created_by)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ");
 
                     $insert->execute([
@@ -283,6 +313,8 @@ class TriagemTonersController
                         $cliente['id'],
                         $cliente['nome'],
                         $codigoRequisicao !== '' ? $codigoRequisicao : null,
+                        $defeitoId,
+                        $defeitoNome,
                         $modo,
                         $modo === 'peso' ? $pesoRetNum : null,
                         $modo === 'percentual' ? $pctNum : null,
@@ -336,6 +368,13 @@ class TriagemTonersController
             $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Exception $e) {
             $clientes = [];
+        }
+
+        try {
+            $stmt = $this->db->query("SELECT id, nome_defeito FROM cadastro_defeitos ORDER BY nome_defeito ASC");
+            $defeitos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            $defeitos = [];
         }
 
         $parametros = $this->getParametros();
@@ -508,6 +547,7 @@ class TriagemTonersController
             $pct_inf     = isset($_POST['percentual'])      && $_POST['percentual'] !== ''     ? (float)$_POST['percentual']     : null;
             $destino     = $_POST['destino']     ?? '';
             $codigoRequisicao = trim($_POST['codigo_requisicao'] ?? '');
+            $defeitoId   = isset($_POST['defeito_id']) && $_POST['defeito_id'] !== '' ? (int)$_POST['defeito_id'] : null;
             $observacoes = $_POST['observacoes'] ?? null;
 
             if (!$toner_id || !$cliente_id || !$destino) {
@@ -521,6 +561,18 @@ class TriagemTonersController
             if (!$cliente) {
                 echo json_encode(['success' => false, 'message' => 'Cliente não encontrado.']);
                 return;
+            }
+
+            $defeitoNome = null;
+            if ($defeitoId) {
+                $stmtDefeito = $this->db->prepare("SELECT id, nome_defeito FROM cadastro_defeitos WHERE id = ? LIMIT 1");
+                $stmtDefeito->execute([$defeitoId]);
+                $defeito = $stmtDefeito->fetch(PDO::FETCH_ASSOC);
+                if (!$defeito) {
+                    echo json_encode(['success' => false, 'message' => 'Defeito selecionado não encontrado.']);
+                    return;
+                }
+                $defeitoNome = $defeito['nome_defeito'];
             }
 
             $stmt = $this->db->prepare("SELECT modelo, peso_cheio, peso_vazio, gramatura, capacidade_folhas, custo_por_folha FROM toners WHERE id = ?");
@@ -564,10 +616,11 @@ class TriagemTonersController
 
             $insert = $this->db->prepare("
                 INSERT INTO triagem_toners
-                    (toner_id, toner_modelo, cliente_id, cliente_nome, codigo_requisicao, modo, peso_retornado, percentual_informado,
+                    (toner_id, toner_modelo, cliente_id, cliente_nome, codigo_requisicao, defeito_id, defeito_nome,
+                     modo, peso_retornado, percentual_informado,
                      gramatura_restante, percentual_calculado, parecer, destino,
                      valor_recuperado, observacoes, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $insert->execute([
                 $toner_id,
@@ -575,6 +628,8 @@ class TriagemTonersController
                 $cliente_id,
                 $cliente['nome'],
                 $codigoRequisicao !== '' ? $codigoRequisicao : null,
+                $defeitoId,
+                $defeitoNome,
                 $modo,
                 $peso_ret,
                 $pct_inf,
@@ -613,6 +668,7 @@ class TriagemTonersController
             $pct_inf     = isset($_POST['percentual'])     && $_POST['percentual'] !== ''     ? (float)$_POST['percentual']     : null;
             $destino     = $_POST['destino']     ?? '';
             $codigoRequisicao = trim($_POST['codigo_requisicao'] ?? '');
+            $defeitoId   = isset($_POST['defeito_id']) && $_POST['defeito_id'] !== '' ? (int)$_POST['defeito_id'] : null;
             $observacoes = $_POST['observacoes'] ?? null;
 
             if (!$id || !$toner_id || !$cliente_id || !$destino) {
@@ -626,6 +682,18 @@ class TriagemTonersController
             if (!$cliente) {
                 echo json_encode(['success' => false, 'message' => 'Cliente não encontrado.']);
                 return;
+            }
+
+            $defeitoNome = null;
+            if ($defeitoId) {
+                $stmtDefeito = $this->db->prepare("SELECT id, nome_defeito FROM cadastro_defeitos WHERE id = ? LIMIT 1");
+                $stmtDefeito->execute([$defeitoId]);
+                $defeito = $stmtDefeito->fetch(PDO::FETCH_ASSOC);
+                if (!$defeito) {
+                    echo json_encode(['success' => false, 'message' => 'Defeito selecionado não encontrado.']);
+                    return;
+                }
+                $defeitoNome = $defeito['nome_defeito'];
             }
 
             $stmt = $this->db->prepare("SELECT modelo, peso_cheio, peso_vazio, gramatura, capacidade_folhas, custo_por_folha FROM toners WHERE id = ?");
@@ -664,7 +732,8 @@ class TriagemTonersController
 
             $upd = $this->db->prepare("
                 UPDATE triagem_toners SET
-                    toner_id = ?, toner_modelo = ?, cliente_id = ?, cliente_nome = ?, codigo_requisicao = ?, modo = ?,
+                    toner_id = ?, toner_modelo = ?, cliente_id = ?, cliente_nome = ?, codigo_requisicao = ?,
+                    defeito_id = ?, defeito_nome = ?, modo = ?,
                     peso_retornado = ?, percentual_informado = ?,
                     gramatura_restante = ?, percentual_calculado = ?,
                     parecer = ?, destino = ?, valor_recuperado = ?,
@@ -672,7 +741,8 @@ class TriagemTonersController
                 WHERE id = ?
             ");
             $upd->execute([
-                $toner_id, $toner['modelo'], $cliente_id, $cliente['nome'], $codigoRequisicao !== '' ? $codigoRequisicao : null, $modo,
+                $toner_id, $toner['modelo'], $cliente_id, $cliente['nome'], $codigoRequisicao !== '' ? $codigoRequisicao : null,
+                $defeitoId, $defeitoNome, $modo,
                 $peso_ret, $pct_inf,
                 $gramatura_restante, $percentual_calculado,
                 $parecer, $destino, $valor_recuperado,
@@ -718,11 +788,12 @@ class TriagemTonersController
 
             $insert = $this->db->prepare("
                 INSERT INTO triagem_toners (
-                    toner_id, toner_modelo, cliente_id, cliente_nome, codigo_requisicao, modo,
+                    toner_id, toner_modelo, cliente_id, cliente_nome, codigo_requisicao,
+                    defeito_id, defeito_nome, modo,
                     peso_retornado, percentual_informado, gramatura_restante,
                     percentual_calculado, parecer, destino, valor_recuperado,
                     observacoes, created_by
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             $insert->execute([
@@ -731,6 +802,8 @@ class TriagemTonersController
                 $original['cliente_id'],
                 $original['cliente_nome'],
                 $original['codigo_requisicao'] ?? null,
+                $original['defeito_id'] ?? null,
+                $original['defeito_nome'] ?? null,
                 $original['modo'],
                 $original['peso_retornado'],
                 $original['percentual_informado'],

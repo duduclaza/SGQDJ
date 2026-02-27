@@ -278,6 +278,13 @@ $router->post('/cadastro-pecas/update', [App\Controllers\CadastroPecasController
 $router->post('/cadastro-pecas/delete', [App\Controllers\CadastroPecasController::class , 'delete']);
 $router->post('/cadastro-pecas/import', [App\Controllers\CadastroPecasController::class , 'import']);
 
+// Cadastro de Defeitos routes
+$router->get('/cadastro-defeitos', [App\Controllers\CadastroDefeitosController::class , 'index']);
+$router->post('/cadastro-defeitos/store', [App\Controllers\CadastroDefeitosController::class , 'store']);
+$router->post('/cadastro-defeitos/update', [App\Controllers\CadastroDefeitosController::class , 'update']);
+$router->post('/cadastro-defeitos/delete', [App\Controllers\CadastroDefeitosController::class , 'delete']);
+$router->get('/cadastro-defeitos/{id}/imagem', [App\Controllers\CadastroDefeitosController::class , 'imagem']);
+
 // Financeiro routes
 $router->get('/financeiro', [App\Controllers\FinanceiroController::class , 'index']);
 $router->post('/financeiro/anexar-comprovante', [App\Controllers\FinanceiroController::class , 'anexarComprovante']);

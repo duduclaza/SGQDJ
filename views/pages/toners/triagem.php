@@ -95,6 +95,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
             <th class="px-4 py-3 text-left font-semibold text-gray-600">#</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Cliente</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Cód. Requisição</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Defeito</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Modelo</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Modo</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Peso Ret. (g)</th>
@@ -108,7 +109,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
           </tr>
         </thead>
         <tbody id="grid-body" class="divide-y divide-gray-100">
-          <tr><td colspan="13" class="px-4 py-8 text-center text-gray-400">Carregando...</td></tr>
+          <tr><td colspan="14" class="px-4 py-8 text-center text-gray-400">Carregando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -267,6 +268,17 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
         </div>
       </div>
 
+      <!-- Defeito (Opcional) -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Defeito <span class="text-gray-400 text-xs">(opcional)</span></label>
+        <select id="t-defeito-id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">Sem defeito</option>
+          <?php foreach (($defeitos ?? []) as $d): ?>
+            <option value="<?= (int)$d['id'] ?>"><?= e($d['nome_defeito'] ?? '') ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
       <!-- Código de Requisição (Opcional) -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Código de Requisição <span class="text-gray-400 text-xs">(opcional)</span></label>
@@ -377,7 +389,7 @@ function carregarRegistros(page) {
 function renderGrid(data) {
   const tbody = document.getElementById('grid-body');
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="13" class="px-4 py-10 text-center text-gray-400 text-sm">Nenhum registro encontrado.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="14" class="px-4 py-10 text-center text-gray-400 text-sm">Nenhum registro encontrado.</td></tr>';
     return;
   }
 
@@ -412,6 +424,7 @@ function renderGrid(data) {
       <td class="px-4 py-3 text-gray-500 text-xs">${r.id}</td>
       <td class="px-4 py-3 text-gray-700 text-xs">${r.cliente_nome || '—'}</td>
       <td class="px-4 py-3 text-gray-700 text-xs">${r.codigo_requisicao || '—'}</td>
+      <td class="px-4 py-3 text-gray-700 text-xs">${r.defeito_nome || '—'}</td>
       <td class="px-4 py-3 font-medium text-gray-900 text-xs">${r.toner_modelo}</td>
       <td class="px-4 py-3">${modoBadge}</td>
       <td class="px-4 py-3 text-gray-600 text-xs">${peso}</td>
@@ -529,6 +542,7 @@ function abrirModalEditar(r) {
   document.getElementById('t-id').value = r.id;
   document.getElementById('t-cliente-id').value = r.cliente_id || '';
   document.getElementById('t-toner-id').value = r.toner_id;
+  document.getElementById('t-defeito-id').value = r.defeito_id || '';
   document.getElementById('t-codigo-req').value = r.codigo_requisicao || '';
   sincronizarInputComSelect('t-cliente-id','t-cliente-search');
   sincronizarInputComSelect('t-toner-id','t-toner-search');
@@ -565,6 +579,7 @@ function resetModalTriagem() {
   document.getElementById('t-peso').value = '';
   document.getElementById('t-pct').value = '';
   document.getElementById('t-destino').value = '';
+  document.getElementById('t-defeito-id').value = '';
   document.getElementById('t-codigo-req').value = '';
   document.getElementById('t-obs').value = '';
   document.getElementById('modo-peso').checked = true;
@@ -669,6 +684,7 @@ function salvarTriagem() {
   const peso     = document.getElementById('t-peso').value;
   const pct      = document.getElementById('t-pct').value;
   const destino  = document.getElementById('t-destino').value;
+  const defeitoId = document.getElementById('t-defeito-id').value;
   const codigoReq = document.getElementById('t-codigo-req').value;
   const obs      = document.getElementById('t-obs').value;
 
@@ -690,6 +706,7 @@ function salvarTriagem() {
   if (modo === 'peso') fd.append('peso_retornado', peso);
   else                 fd.append('percentual', pct);
   fd.append('destino', destino);
+  fd.append('defeito_id', defeitoId);
   fd.append('codigo_requisicao', codigoReq);
   fd.append('observacoes', obs);
 

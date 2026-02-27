@@ -13,6 +13,7 @@ use App\Controllers\MasterController;
 use App\Controllers\AreaTecnicaController;
 use App\Controllers\ProfileController;
 use App\Controllers\TriagemTonersController;
+use App\Controllers\CadastroDefeitosController;
 
 // ===== REGISTROS GERAIS =====
 
@@ -102,6 +103,13 @@ $router->get('/profile', [ProfileController::class , 'index']);
 
 // Dashboard 2.0
 $router->get('/dashboard-2', [App\Controllers\AdminController::class, 'dashboard2']);
+
+// Cadastro de Defeitos (fallback)
+$router->get('/cadastro-defeitos', [CadastroDefeitosController::class, 'index']);
+$router->post('/cadastro-defeitos/store', [CadastroDefeitosController::class, 'store']);
+$router->post('/cadastro-defeitos/update', [CadastroDefeitosController::class, 'update']);
+$router->post('/cadastro-defeitos/delete', [CadastroDefeitosController::class, 'delete']);
+$router->get('/cadastro-defeitos/{id}/imagem', [CadastroDefeitosController::class, 'imagem']);
 
 // ===== TONERS COM DEFEITO =====
 use App\Controllers\TonersController;

@@ -27,6 +27,13 @@ class PermissionMiddleware
         '/toners/defeitos/store' => 'toners_defeitos',
         '/toners/defeitos/delete' => 'toners_defeitos',
         '/toners/defeitos/{id}/foto/{n}' => 'toners_defeitos',
+
+        // Cadastro de Defeitos (Cadastros Gerais)
+        '/cadastro-defeitos' => 'cadastro_defeitos',
+        '/cadastro-defeitos/store' => 'cadastro_defeitos',
+        '/cadastro-defeitos/update' => 'cadastro_defeitos',
+        '/cadastro-defeitos/delete' => 'cadastro_defeitos',
+        '/cadastro-defeitos/{id}/imagem' => 'cadastro_defeitos',
         
         // Módulos principais
         '/homologacoes' => 'homologacoes',
