@@ -292,7 +292,7 @@ if (!function_exists('flash')) {
       if (!meId) return;
 
       let contacts = [];
-      let activeMode = 'global';
+      let activeMode = 'direct';
       let activeContactId = null;
       let lastGlobalSeenId = 0;
       const lastDirectSeenByUser = {};
@@ -300,6 +300,10 @@ if (!function_exists('flash')) {
       let heartbeatTimer = null;
       let isChatOpen = false;
       let isAppVisible = true;
+      let pollBackoffLevel = 0;
+      let lastUnreadTotal = 0;
+
+      const POLL_INTERVALS_MS = [15000, 30000, 60000];
 
       const ui = {};
 
@@ -366,7 +370,7 @@ if (!function_exists('flash')) {
 
       function stopChatPolling() {
         if (pollTimer) {
-          clearInterval(pollTimer);
+          clearTimeout(pollTimer);
           pollTimer = null;
         }
         if (heartbeatTimer) {
@@ -375,27 +379,62 @@ if (!function_exists('flash')) {
         }
       }
 
-      async function startChatPolling() {
-        if (!isAppVisible) return;
-        stopChatPolling();
+      function registerChatActivity() {
+        pollBackoffLevel = 0;
+      }
 
-        await heartbeat();
+      function getPollIntervalMs() {
+        const idx = Math.min(pollBackoffLevel, POLL_INTERVALS_MS.length - 1);
+        return POLL_INTERVALS_MS[idx];
+      }
+
+      function scheduleNextPoll() {
+        if (!isChatOpen || !isAppVisible) return;
+
+        if (pollTimer) {
+          clearTimeout(pollTimer);
+          pollTimer = null;
+        }
+
+        pollTimer = setTimeout(runPollCycle, getPollIntervalMs());
+      }
+
+      async function runPollCycle() {
+        if (!isChatOpen || !isAppVisible) return;
+
         await loadContacts();
-        if (activeMode === 'global') {
-          await loadGlobalMessages();
-        } else if (activeContactId) {
+        if (activeContactId) {
           await loadMessages();
         }
 
-        pollTimer = setInterval(async function() {
-          if (!isChatOpen || !isAppVisible) return;
-          await loadContacts();
-          if (activeMode === 'global') {
-            await loadGlobalMessages();
-          } else if (activeContactId) {
-            await loadMessages();
+        if (pollBackoffLevel < POLL_INTERVALS_MS.length - 1) {
+          pollBackoffLevel += 1;
+        }
+
+        scheduleNextPoll();
+      }
+
+      async function startChatPolling() {
+        if (!isAppVisible) return;
+        stopChatPolling();
+        registerChatActivity();
+
+        await heartbeat();
+        await loadContacts();
+        if (!activeContactId) {
+          const daniel = contacts.find(c => Number(c.is_ai) === 1);
+          const fallback = contacts[0] || null;
+          const initial = daniel || fallback;
+          if (initial) {
+            activeContactId = String(initial.id);
           }
-        }, 15000);
+        }
+
+        if (activeContactId) {
+          await loadMessages();
+        }
+
+        scheduleNextPoll();
 
         heartbeatTimer = setInterval(function() {
           if (!isChatOpen || !isAppVisible) return;
@@ -423,27 +462,12 @@ if (!function_exists('flash')) {
             c.email.toLowerCase().includes(searchValue)
           );
 
-          const globalButton = `
-            <button class="chat-contact-item ${activeMode === 'global' ? 'active' : ''}" data-mode="global">
-              <div class="chat-contact-top">
-                <span class="chat-contact-person">
-                  <span class="chat-contact-avatar">#</span>
-                  <span class="chat-contact-name">Sala Geral</span>
-                </span>
-              </div>
-              <div class="chat-contact-status">
-                <span class="chat-status-dot online"></span>
-                Todos os usuários
-              </div>
-            </button>
-          `;
-
-          ui.contactsList.innerHTML = globalButton + (filtered.map(c => {
+          ui.contactsList.innerHTML = (filtered.map(c => {
             const isActive = String(c.id) === String(activeContactId);
             const online = Number(c.is_online) === 1;
             const unread = Number(c.unread_count || 0);
             return `
-              <button class="chat-contact-item ${(activeMode === 'direct' && isActive) ? 'active' : ''}" data-mode="direct" data-user-id="${c.id}">
+              <button class="chat-contact-item ${isActive ? 'active' : ''}" data-user-id="${c.id}">
                 <div class="chat-contact-top">
                   <span class="chat-contact-person">
                     ${avatarHtml(c.id, c.name, c.has_photo, 'chat-contact-avatar', c.avatar_url)}
@@ -460,50 +484,16 @@ if (!function_exists('flash')) {
           }).join('') || '<div style="padding:10px;color:#64748b;font-size:12px;">Nenhum usuário encontrado.</div>');
 
           const totalUnread = contacts.reduce((sum, c) => sum + Number(c.unread_count || 0), 0);
+          if (totalUnread !== lastUnreadTotal) {
+            lastUnreadTotal = totalUnread;
+            registerChatActivity();
+          }
           if (totalUnread > 0) {
             ui.badge.textContent = totalUnread > 99 ? '99+' : String(totalUnread);
             ui.badge.classList.remove('hidden');
           } else {
             ui.badge.classList.add('hidden');
           }
-        } catch (_) {}
-      }
-
-      async function loadGlobalMessages() {
-        try {
-          const data = await fetchJson('/api/chat/messages/global');
-          if (!data.success) return;
-          const messages = data.messages || [];
-
-          const maxId = messages.reduce((max, item) => Math.max(max, Number(item.id || 0)), 0);
-          if (lastGlobalSeenId > 0) {
-            const hasIncomingNew = messages.some(m => Number(m.id) > lastGlobalSeenId && Number(m.sender_id) !== meId);
-            if (hasIncomingNew) playMessageSound('receive');
-          }
-          if (maxId > 0) lastGlobalSeenId = Math.max(lastGlobalSeenId, maxId);
-
-          ui.empty.classList.add('hidden');
-          ui.convHeader.classList.remove('hidden');
-          ui.convHeader.innerHTML = `<span class="chat-conversation-title"><span class="chat-contact-avatar">#</span><span>Sala Geral</span></span> <span class="chat-conversation-sub">(todos com todos)</span>`;
-          ui.messages.classList.remove('hidden');
-          ui.form.classList.remove('hidden');
-
-          ui.messages.innerHTML = messages.map(m => {
-            const mine = Number(m.sender_id) === meId;
-            const author = mine ? meName : (m.sender_name || 'Usuário');
-            return `
-              <div class="chat-message-row ${mine ? 'me' : 'other'}">
-                ${mine ? '' : avatarHtml(m.sender_id, author, m.sender_has_photo, 'chat-message-avatar')}
-                <div class="chat-message ${mine ? 'me' : 'other'}">
-                  <div style="font-size:11px;font-weight:700;opacity:.85;margin-bottom:3px;">${escapeHtml(author)}</div>
-                  <div>${escapeHtml(m.message)}</div>
-                  <div class="chat-message-meta">${fmtDate(m.created_at)}</div>
-                </div>
-              </div>
-            `;
-          }).join('');
-
-          ui.messages.scrollTop = ui.messages.scrollHeight;
         } catch (_) {}
       }
 
@@ -518,7 +508,10 @@ if (!function_exists('flash')) {
           const maxId = messages.reduce((max, item) => Math.max(max, Number(item.id || 0)), 0);
           if (prevSeen > 0) {
             const hasIncomingNew = messages.some(m => Number(m.id) > prevSeen && Number(m.sender_id) !== meId);
-            if (hasIncomingNew) playMessageSound('receive');
+            if (hasIncomingNew) {
+              playMessageSound('receive');
+              registerChatActivity();
+            }
           }
           if (maxId > 0) lastDirectSeenByUser[activeContactId] = Math.max(prevSeen, maxId);
 
@@ -558,15 +551,10 @@ if (!function_exists('flash')) {
         if (!text) return;
 
         const payload = new URLSearchParams();
-        let endpoint = '/api/chat/send';
-        if (activeMode === 'global') {
-          endpoint = '/api/chat/send-global';
-          payload.set('message', text);
-        } else {
-          if (!activeContactId) return;
-          payload.set('receiver_id', activeContactId);
-          payload.set('message', text);
-        }
+        const endpoint = '/api/chat/send';
+        if (!activeContactId) return;
+        payload.set('receiver_id', activeContactId);
+        payload.set('message', text);
 
         try {
           const data = await fetchJson(endpoint, {
@@ -582,26 +570,18 @@ if (!function_exists('flash')) {
 
           ui.messageInput.value = '';
           playMessageSound('send');
-          if (activeMode === 'global') {
-            await loadGlobalMessages();
-          } else {
-            await loadMessages();
-          }
+          registerChatActivity();
+          await loadMessages();
           await loadContacts();
         } catch (_) {
           alert('Erro ao enviar mensagem');
         }
       }
 
-      function selectGlobal() {
-        activeMode = 'global';
-        activeContactId = null;
-        loadContacts().then(loadGlobalMessages);
-      }
-
       function selectContact(contactId) {
         activeMode = 'direct';
         activeContactId = String(contactId);
+        registerChatActivity();
         loadContacts().then(loadMessages);
       }
 
@@ -632,17 +612,24 @@ if (!function_exists('flash')) {
           }
         });
 
-        ui.search.addEventListener('input', loadContacts);
+        ui.search.addEventListener('input', function() {
+          registerChatActivity();
+          loadContacts();
+        });
         ui.emojiToggle.addEventListener('click', function() {
+          registerChatActivity();
           ui.emojiPicker.classList.toggle('hidden');
         });
 
         ui.emojiPicker.addEventListener('click', function(event) {
           const btn = event.target.closest('button[data-emoji]');
           if (!btn) return;
+          registerChatActivity();
           ui.messageInput.value += btn.getAttribute('data-emoji');
           ui.messageInput.focus();
         });
+
+        ui.messageInput.addEventListener('input', registerChatActivity);
 
         document.addEventListener('click', function(event) {
           if (!ui.form.contains(event.target) || event.target === ui.messageInput) {
@@ -655,11 +642,6 @@ if (!function_exists('flash')) {
         ui.contactsList.addEventListener('click', function(event) {
           const btn = event.target.closest('.chat-contact-item');
           if (!btn) return;
-          const mode = btn.getAttribute('data-mode');
-          if (mode === 'global') {
-            selectGlobal();
-            return;
-          }
           selectContact(btn.getAttribute('data-user-id'));
         });
 
@@ -684,6 +666,14 @@ if (!function_exists('flash')) {
 
         bindEvents();
         await loadContacts();
+        if (!activeContactId) {
+          const daniel = contacts.find(c => Number(c.is_ai) === 1);
+          const fallback = contacts[0] || null;
+          const initial = daniel || fallback;
+          if (initial) {
+            activeContactId = String(initial.id);
+          }
+        }
 
         window.addEventListener('beforeunload', function() {
           stopChatPolling();

@@ -232,43 +232,8 @@ class ChatController
             return;
         }
 
-        try {
-            $this->touchPresence($userId);
-
-            $stmt = $this->db->prepare("SELECT
-                    m.id,
-                    m.sender_id,
-                    m.receiver_id,
-                    m.message,
-                    m.payload_json,
-                    m.created_at,
-                    m.read_at,
-                    u.name AS sender_name,
-                    CASE WHEN u.profile_photo IS NOT NULL THEN 1 ELSE 0 END AS sender_has_photo
-                FROM chat_messages m
-                LEFT JOIN users u ON u.id = m.sender_id
-                WHERE m.receiver_id = 0
-                ORDER BY m.id DESC
-                LIMIT 150");
-            $stmt->execute();
-            $messages = array_reverse($stmt->fetchAll(\PDO::FETCH_ASSOC));
-
-            foreach ($messages as &$msg) {
-                if (!empty($msg['payload_json'])) {
-                    $payload = json_decode((string)$msg['payload_json'], true);
-                    if (is_array($payload) && isset($payload['text'])) {
-                        $msg['message'] = (string)$payload['text'];
-                    }
-                }
-                unset($msg['payload_json']);
-            }
-            unset($msg);
-
-            echo json_encode(['success' => true, 'messages' => $messages]);
-        } catch (\Throwable $e) {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Erro ao carregar mensagens da sala geral']);
-        }
+        http_response_code(410);
+        echo json_encode(['success' => false, 'message' => 'Sala geral desativada. Use conversas privadas.']);
     }
 
     public function sendMessage(): void
@@ -345,50 +310,8 @@ class ChatController
             return;
         }
 
-        $message = trim((string)($_POST['message'] ?? ''));
-        if ($message === '') {
-            http_response_code(422);
-            echo json_encode(['success' => false, 'message' => 'Mensagem é obrigatória']);
-            return;
-        }
-
-        if (mb_strlen($message) > 2000) {
-            http_response_code(422);
-            echo json_encode(['success' => false, 'message' => 'Mensagem muito longa (máximo 2000 caracteres)']);
-            return;
-        }
-
-        try {
-            $payload = [
-                'text' => $message,
-                'format' => 'plain_text',
-                'version' => 1,
-                'chat_type' => 'global',
-                'sent_at' => date('c')
-            ];
-
-            $stmt = $this->db->prepare("INSERT INTO chat_messages (sender_id, receiver_id, message, payload_json, created_at)
-                VALUES (?, 0, ?, ?, NOW())");
-            $stmt->execute([$userId, $message, json_encode($payload, JSON_UNESCAPED_UNICODE)]);
-
-            $this->touchPresence($userId);
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Mensagem enviada na sala geral',
-                'data' => [
-                    'id' => (int)$this->db->lastInsertId(),
-                    'sender_id' => $userId,
-                    'receiver_id' => 0,
-                    'sender_name' => $_SESSION['user_name'] ?? 'Você',
-                    'message' => $message,
-                    'created_at' => date('Y-m-d H:i:s')
-                ]
-            ]);
-        } catch (\Throwable $e) {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Erro ao enviar mensagem na sala geral']);
-        }
+        http_response_code(410);
+        echo json_encode(['success' => false, 'message' => 'Sala geral desativada. Use conversas privadas.']);
     }
 
     private function touchPresence(int $userId): void
@@ -473,7 +396,6 @@ class ChatController
             . "Histórico recente:\n" . $historyText . "\n\n"
             . "Pergunta atual do usuário: " . $message;
 
-        $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . urlencode($apiKey);
         $payload = [
             'contents' => [
                 [
@@ -490,31 +412,69 @@ class ChatController
             ]
         ];
 
-        $ch = curl_init($endpoint);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST => true,
-            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-            CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
-            CURLOPT_TIMEOUT => 18
-        ]);
+        $models = [
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-latest',
+            'gemini-2.0-flash',
+            'gemini-2.0-flash-exp'
+        ];
 
-        $response = curl_exec($ch);
-        $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        $lastError = '';
+        foreach ($models as $model) {
+            $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' . $model . ':generateContent?key=' . urlencode($apiKey);
 
-        if ($response === false || $httpCode < 200 || $httpCode >= 300) {
-            return 'Estou com instabilidade para responder agora. Tente novamente em alguns segundos.';
+            $ch = curl_init($endpoint);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+                CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
+                CURLOPT_CONNECTTIMEOUT => 10,
+                CURLOPT_TIMEOUT => 30
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            if ($response === false) {
+                $lastError = 'cURL (' . $model . '): ' . $curlError;
+                continue;
+            }
+
+            $json = json_decode($response, true);
+
+            if ($httpCode >= 200 && $httpCode < 300) {
+                $text = trim((string)($json['candidates'][0]['content']['parts'][0]['text'] ?? ''));
+                if ($text !== '') {
+                    return $text;
+                }
+
+                $blockReason = (string)($json['promptFeedback']['blockReason'] ?? '');
+                if ($blockReason !== '') {
+                    return 'Não consegui responder essa mensagem do jeito que ela foi enviada. Pode reformular em uma pergunta mais objetiva sobre o sistema?';
+                }
+
+                $lastError = 'Resposta vazia (' . $model . ')';
+                continue;
+            }
+
+            $apiError = trim((string)($json['error']['message'] ?? ''));
+            $apiErrorUpper = strtoupper($apiError);
+            if (strpos($apiErrorUpper, 'API_KEY_INVALID') !== false || strpos($apiErrorUpper, 'PERMISSION_DENIED') !== false) {
+                return 'A chave do Gemini parece inválida ou sem permissão. Confirme a GEMINI_API_KEY no .env e se a API Generative Language está habilitada no Google Cloud.';
+            }
+
+            if (strpos($apiErrorUpper, 'QUOTA') !== false || strpos($apiErrorUpper, 'RATE LIMIT') !== false || $httpCode === 429) {
+                return 'A cota da API do Gemini foi atingida no momento. Tente novamente em instantes.';
+            }
+
+            $lastError = 'HTTP ' . $httpCode . ' (' . $model . '): ' . ($apiError !== '' ? $apiError : 'erro desconhecido');
         }
 
-        $json = json_decode($response, true);
-        $text = trim((string)($json['candidates'][0]['content']['parts'][0]['text'] ?? ''));
-
-        if ($text === '') {
-            return 'Não consegui montar uma resposta agora. Pode reformular sua dúvida?';
-        }
-
-        return $text;
+        error_log('Daniel Gemini falhou: ' . $lastError);
+        return 'Estou enfrentando instabilidade para responder agora. Tente novamente em alguns segundos.';
     }
 
     private function loadAiHistory(int $userId): string

@@ -897,7 +897,7 @@ async function loadMeusRegistros() {
                             <div class="text-xs text-gray-500">${registro.extensao.toUpperCase()} - ${formatFileSize(registro.tamanho_arquivo)}</div>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="text-sm text-gray-900">${registro.publico ? '🌍 Público' : '🏢 Restrito'}</div>
+                            <div class="text-sm text-gray-900">${registro.publico ? '🌍 Público' : '✅ Permitido ao setor'}</div>
                             ${!registro.publico && registro.departamentos_permitidos ? 
                                 `<div class="text-xs text-gray-500">${registro.departamentos_permitidos.join(', ')}</div>` : ''}
                         </td>
@@ -1506,8 +1506,8 @@ function getVisibilidadeDisplay(registro) {
             if (deptList.length <= maxVisible) {
                 return `
                     <div class="text-xs">
-                        <span class="inline-flex px-2 py-1 font-semibold rounded-full bg-yellow-100 text-yellow-800 mb-1">
-                            🔒 Restrito
+                        <span class="inline-flex px-2 py-1 font-semibold rounded-full bg-emerald-100 text-emerald-800 mb-1">
+                            ✅ Permitido ao setor
                         </span>
                         <div class="text-gray-600 text-xs">
                             ${departamentos}
@@ -1520,8 +1520,8 @@ function getVisibilidadeDisplay(registro) {
                 
                 return `
                     <div class="text-xs">
-                        <span class="inline-flex px-2 py-1 font-semibold rounded-full bg-yellow-100 text-yellow-800 mb-1">
-                            🔒 Restrito
+                        <span class="inline-flex px-2 py-1 font-semibold rounded-full bg-emerald-100 text-emerald-800 mb-1">
+                            ✅ Permitido ao setor
                         </span>
                         <div class="text-gray-600 text-xs" title="${departamentos}">
                             ${visibleDepts}
@@ -1536,8 +1536,8 @@ function getVisibilidadeDisplay(registro) {
             // Para usuários comuns, não deveria aparecer na lista
             return `
                 <div class="text-xs">
-                    <span class="inline-flex px-2 py-1 font-semibold rounded-full bg-orange-100 text-orange-800 mb-1">
-                        🔒 Restrito
+                    <span class="inline-flex px-2 py-1 font-semibold rounded-full bg-emerald-100 text-emerald-800 mb-1">
+                        ✅ Permitido ao setor
                     </span>
                     <div class="text-gray-600 text-xs">
                         Sem departamentos definidos
