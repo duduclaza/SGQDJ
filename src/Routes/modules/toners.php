@@ -11,6 +11,7 @@
 
 use App\Controllers\TonersController;
 use App\Controllers\AmostragemController;
+use App\Controllers\TriagemTonersController;
 
 // ===== CADASTRO DE TONERS =====
 
@@ -32,6 +33,17 @@ $router->post('/toners/retornados', [TonersController::class, 'storeRetornado'])
 $router->delete('/toners/retornados/delete/{id}', [TonersController::class, 'deleteRetornado']);
 $router->get('/toners/retornados/export', [TonersController::class, 'exportRetornados']);
 $router->post('/toners/retornados/import', [TonersController::class, 'importRetornados']);
+
+// ===== TRIAGEM DE TONERS =====
+
+$router->get('/triagem-toners', [TriagemTonersController::class, 'index']);
+$router->get('/triagem-toners/list', [TriagemTonersController::class, 'list']);
+$router->post('/triagem-toners/calcular', [TriagemTonersController::class, 'calcular']);
+$router->post('/triagem-toners/store', [TriagemTonersController::class, 'store']);
+$router->post('/triagem-toners/update', [TriagemTonersController::class, 'update']);
+$router->post('/triagem-toners/delete', [TriagemTonersController::class, 'delete']);
+$router->get('/triagem-toners/parametros', [TriagemTonersController::class, 'getParametrosApi']);
+$router->post('/triagem-toners/parametros/save', [TriagemTonersController::class, 'saveParametros']);
 
 // ===== AMOSTRAGENS (LEGADO) =====
 
