@@ -100,6 +100,9 @@ $router->get('/area-tecnica/checklists/{id}', [AreaTecnicaController::class , 'v
 
 $router->get('/profile', [ProfileController::class , 'index']);
 
+// Dashboard 2.0
+$router->get('/dashboard-2', [App\Controllers\AdminController::class, 'dashboard2']);
+
 // ===== TONERS COM DEFEITO =====
 use App\Controllers\TonersController;
 $router->get('/toners/defeitos', [TonersController::class , 'defeitos']);
@@ -110,6 +113,8 @@ $router->post('/toners/defeitos/delete', [TonersController::class , 'deleteDefei
 // ===== TRIAGEM DE TONERS (fallback) =====
 $router->get('/triagem-toners', [TriagemTonersController::class, 'index']);
 $router->get('/triagem-toners/list', [TriagemTonersController::class, 'list']);
+$router->get('/triagem-toners/template', [TriagemTonersController::class, 'downloadTemplate']);
+$router->post('/triagem-toners/importar', [TriagemTonersController::class, 'importar']);
 $router->post('/triagem-toners/calcular', [TriagemTonersController::class, 'calcular']);
 $router->post('/triagem-toners/store', [TriagemTonersController::class, 'store']);
 $router->post('/triagem-toners/update', [TriagemTonersController::class, 'update']);

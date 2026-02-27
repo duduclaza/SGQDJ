@@ -47,6 +47,9 @@ $router->get('/dashboard', function() {
     }
 });
 
+// Dashboard 2.0
+$router->get('/dashboard-2', [AdminController::class, 'dashboard2']);
+
 // Admin (alias para dashboard)
 $router->get('/admin', function() {
     if (!isset($_SESSION['user_id'])) {

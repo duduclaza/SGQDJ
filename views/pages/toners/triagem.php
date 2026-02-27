@@ -13,6 +13,7 @@ if (!function_exists('e')) {
 
 $canEdit   = hasPermission('triagem_toners', 'edit');
 $canDelete = hasPermission('triagem_toners', 'delete');
+$canImport = hasPermission('triagem_toners', 'import');
 $userRole  = $_SESSION['user_role'] ?? '';
 $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 ?>
@@ -27,6 +28,16 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
         <p class="mt-1 text-gray-600">Avalie a gramatura restante e defina o destino do toner retornado</p>
       </div>
       <div class="flex gap-2 flex-wrap">
+        <?php if ($canImport): ?>
+        <a href="/triagem-toners/template" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m0 0l-3-3m3 3l3-3m-9 4h12"/></svg>
+          Baixar Modelo
+        </a>
+        <button onclick="abrirModalImportacao()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          Importar Planilha
+        </button>
+        <?php endif; ?>
         <?php if ($isAdmin): ?>
         <button onclick="abrirModalParametros()" class="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -83,6 +94,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
           <tr>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">#</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Cliente</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Cód. Requisição</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Modelo</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Modo</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Peso Ret. (g)</th>
@@ -96,7 +108,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
           </tr>
         </thead>
         <tbody id="grid-body" class="divide-y divide-gray-100">
-          <tr><td colspan="12" class="px-4 py-8 text-center text-gray-400">Carregando...</td></tr>
+          <tr><td colspan="13" class="px-4 py-8 text-center text-gray-400">Carregando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -104,6 +116,34 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
     <div class="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50">
       <span id="pag-info" class="text-sm text-gray-500"></span>
       <div class="flex gap-1" id="pag-buttons"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: IMPORTAÇÃO ========== -->
+<div id="modal-importacao" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-bold text-gray-900">Importar Triagens</h2>
+      <button onclick="fecharModalImportacao()" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="px-6 py-5 space-y-4">
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
+        1) Baixe o modelo em <strong>Baixar Modelo</strong>.<br>
+        2) Preencha os dados da triagem.<br>
+        3) Importe o arquivo CSV/XLS/XLSX.
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Arquivo</label>
+        <input id="arquivo-importacao" type="file" accept=".csv,.xls,.xlsx" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div id="import-feedback" class="hidden text-sm rounded-lg p-3"></div>
+    </div>
+    <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+      <button onclick="fecharModalImportacao()" class="px-5 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancelar</button>
+      <button id="btn-importar" onclick="importarPlanilha()" class="px-5 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors font-medium">Importar</button>
     </div>
   </div>
 </div>
@@ -227,6 +267,13 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
         </div>
       </div>
 
+      <!-- Código de Requisição (Opcional) -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Código de Requisição <span class="text-gray-400 text-xs">(opcional)</span></label>
+        <input id="t-codigo-req" type="text" maxlength="100" placeholder="Ex: REQ-2026-0001"
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+
       <!-- Observações -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
@@ -330,7 +377,7 @@ function carregarRegistros(page) {
 function renderGrid(data) {
   const tbody = document.getElementById('grid-body');
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="12" class="px-4 py-10 text-center text-gray-400 text-sm">Nenhum registro encontrado.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="13" class="px-4 py-10 text-center text-gray-400 text-sm">Nenhum registro encontrado.</td></tr>';
     return;
   }
 
@@ -364,6 +411,7 @@ function renderGrid(data) {
     return `<tr class="hover:bg-gray-50 transition-colors">
       <td class="px-4 py-3 text-gray-500 text-xs">${r.id}</td>
       <td class="px-4 py-3 text-gray-700 text-xs">${r.cliente_nome || '—'}</td>
+      <td class="px-4 py-3 text-gray-700 text-xs">${r.codigo_requisicao || '—'}</td>
       <td class="px-4 py-3 font-medium text-gray-900 text-xs">${r.toner_modelo}</td>
       <td class="px-4 py-3">${modoBadge}</td>
       <td class="px-4 py-3 text-gray-600 text-xs">${peso}</td>
@@ -405,6 +453,69 @@ function limparFiltros() {
   carregarRegistros(1);
 }
 
+// ===== IMPORTAÇÃO =====
+function abrirModalImportacao() {
+  document.getElementById('modal-importacao').classList.remove('hidden');
+  const feedback = document.getElementById('import-feedback');
+  feedback.classList.add('hidden');
+  feedback.textContent = '';
+}
+
+function fecharModalImportacao() {
+  document.getElementById('modal-importacao').classList.add('hidden');
+  document.getElementById('arquivo-importacao').value = '';
+}
+
+function importarPlanilha() {
+  const input = document.getElementById('arquivo-importacao');
+  const btn = document.getElementById('btn-importar');
+  const feedback = document.getElementById('import-feedback');
+
+  if (!input.files || !input.files[0]) {
+    feedback.className = 'text-sm rounded-lg p-3 bg-red-50 border border-red-200 text-red-700';
+    feedback.textContent = 'Selecione um arquivo para importar.';
+    feedback.classList.remove('hidden');
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append('arquivo', input.files[0]);
+
+  btn.disabled = true;
+  btn.textContent = 'Importando...';
+
+  fetch('/triagem-toners/importar', { method: 'POST', body: fd, credentials: 'same-origin' })
+    .then(r => r.json())
+    .then(res => {
+      btn.disabled = false;
+      btn.textContent = 'Importar';
+
+      if (res.success) {
+        const erros = (res.errors && res.errors.length)
+          ? `\n\nErros:\n- ${res.errors.slice(0, 5).join('\n- ')}`
+          : '';
+        feedback.className = 'text-sm rounded-lg p-3 bg-green-50 border border-green-200 text-green-700 whitespace-pre-line';
+        feedback.textContent = `${res.message}${erros}`;
+        feedback.classList.remove('hidden');
+        showToast(res.message, 'success');
+        carregarRegistros(1);
+      } else {
+        feedback.className = 'text-sm rounded-lg p-3 bg-red-50 border border-red-200 text-red-700';
+        feedback.textContent = res.message || 'Erro ao importar arquivo.';
+        feedback.classList.remove('hidden');
+        showToast(res.message || 'Erro ao importar arquivo.', 'error');
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.textContent = 'Importar';
+      feedback.className = 'text-sm rounded-lg p-3 bg-red-50 border border-red-200 text-red-700';
+      feedback.textContent = 'Erro ao importar arquivo.';
+      feedback.classList.remove('hidden');
+      showToast('Erro ao importar arquivo.', 'error');
+    });
+}
+
 // ===== MODAL TRIAGEM =====
 function abrirModalNova() {
   resetModalTriagem();
@@ -418,6 +529,7 @@ function abrirModalEditar(r) {
   document.getElementById('t-id').value = r.id;
   document.getElementById('t-cliente-id').value = r.cliente_id || '';
   document.getElementById('t-toner-id').value = r.toner_id;
+  document.getElementById('t-codigo-req').value = r.codigo_requisicao || '';
   sincronizarInputComSelect('t-cliente-id','t-cliente-search');
   sincronizarInputComSelect('t-toner-id','t-toner-search');
   onTonerChange();
@@ -453,6 +565,7 @@ function resetModalTriagem() {
   document.getElementById('t-peso').value = '';
   document.getElementById('t-pct').value = '';
   document.getElementById('t-destino').value = '';
+  document.getElementById('t-codigo-req').value = '';
   document.getElementById('t-obs').value = '';
   document.getElementById('modo-peso').checked = true;
   document.getElementById('info-toner').classList.add('hidden');
@@ -556,6 +669,7 @@ function salvarTriagem() {
   const peso     = document.getElementById('t-peso').value;
   const pct      = document.getElementById('t-pct').value;
   const destino  = document.getElementById('t-destino').value;
+  const codigoReq = document.getElementById('t-codigo-req').value;
   const obs      = document.getElementById('t-obs').value;
 
   if (!clienteId || !tonerId || !destino) {
@@ -576,6 +690,7 @@ function salvarTriagem() {
   if (modo === 'peso') fd.append('peso_retornado', peso);
   else                 fd.append('percentual', pct);
   fd.append('destino', destino);
+  fd.append('codigo_requisicao', codigoReq);
   fd.append('observacoes', obs);
 
   const url = id ? '/triagem-toners/update' : '/triagem-toners/store';

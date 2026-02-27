@@ -137,6 +137,12 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
           <span>Dashboard</span>
         </a>
       </li>
+      <li>
+        <a href="/dashboard-2" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-700 <?php echo $current==='/dashboard-2'?'bg-blue-600 text-white shadow-lg':'text-slate-300 hover:text-white'; ?>">
+          <span class="text-lg">🧭</span>
+          <span>Dashboard 2.0</span>
+        </a>
+      </li>
       <?php endif; ?>
       
       <?php foreach ($menu as $item):

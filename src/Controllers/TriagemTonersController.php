@@ -26,6 +26,7 @@ class TriagemTonersController
                     toner_modelo VARCHAR(255) NOT NULL,
                     cliente_id INT NULL,
                     cliente_nome VARCHAR(255) NULL,
+                    codigo_requisicao VARCHAR(100) NULL,
                     modo ENUM('peso','percentual') NOT NULL DEFAULT 'peso',
                     peso_retornado DECIMAL(10,2) NULL,
                     percentual_informado DECIMAL(5,2) NULL,
@@ -57,6 +58,10 @@ class TriagemTonersController
             if (!$colClienteNome) {
                 $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN cliente_nome VARCHAR(255) NULL AFTER cliente_id");
             }
+            $colCodigoRequisicao = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'codigo_requisicao'")->fetch();
+            if (!$colCodigoRequisicao) {
+                $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN codigo_requisicao VARCHAR(100) NULL AFTER cliente_nome");
+            }
 
             $this->db->exec("
                 CREATE TABLE IF NOT EXISTS triagem_toners_parametros (
@@ -84,6 +89,226 @@ class TriagemTonersController
             }
         } catch (\Exception $e) {
             error_log('Erro ao criar tabelas de triagem: ' . $e->getMessage());
+        }
+    }
+
+    // Baixar modelo de importação
+    public function downloadTemplate(): void
+    {
+        try {
+            if (!PermissionService::hasPermission($_SESSION['user_id'], 'triagem_toners', 'import')) {
+                http_response_code(403);
+                echo 'Sem permissão para baixar modelo.';
+                return;
+            }
+
+            $filename = 'modelo_importacao_triagem_toners_' . date('Ymd') . '.csv';
+
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+
+            $output = fopen('php://output', 'w');
+            fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($output, [
+                'Código Cliente',
+                'Código de Requisição',
+                'Modelo Toner',
+                'Modo (peso/percentual)',
+                'Peso Retornado (g)',
+                'Percentual (%)',
+                'Destino (Descarte/Garantia/Uso Interno/Estoque)',
+                'Observações',
+            ], ';');
+
+            fputcsv($output, [
+                '000123',
+                'REQ-2026-0001',
+                'HP CF280A',
+                'peso',
+                '320.5',
+                '',
+                'Estoque',
+                'Lote de teste de importação',
+            ], ';');
+
+            fclose($output);
+            exit;
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo 'Erro ao gerar modelo: ' . $e->getMessage();
+        }
+    }
+
+    // Importar triagens em lote via Excel/CSV
+    public function importar(): void
+    {
+        ob_clean();
+        header('Content-Type: application/json');
+
+        if (!PermissionService::hasPermission($_SESSION['user_id'], 'triagem_toners', 'import')) {
+            echo json_encode(['success' => false, 'message' => 'Sem permissão para importar.']);
+            return;
+        }
+
+        try {
+            if (!isset($_FILES['arquivo']) || $_FILES['arquivo']['error'] !== UPLOAD_ERR_OK) {
+                echo json_encode(['success' => false, 'message' => 'Arquivo não enviado ou com erro.']);
+                return;
+            }
+
+            $file = $_FILES['arquivo'];
+            if ($file['size'] > 10 * 1024 * 1024) {
+                echo json_encode(['success' => false, 'message' => 'Arquivo muito grande. Máximo 10MB.']);
+                return;
+            }
+
+            $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            if (!in_array($extension, ['csv', 'xls', 'xlsx'])) {
+                echo json_encode(['success' => false, 'message' => 'Formato inválido. Use CSV, XLS ou XLSX.']);
+                return;
+            }
+
+            $rows = $this->readSpreadsheetRows($file['tmp_name'], $extension);
+            if (empty($rows) || count($rows) <= 1) {
+                echo json_encode(['success' => false, 'message' => 'Planilha vazia ou inválida.']);
+                return;
+            }
+
+            $imported = 0;
+            $errors = [];
+
+            foreach ($rows as $index => $row) {
+                if ($index === 0) {
+                    continue; // cabeçalho
+                }
+
+                $line = $index + 1;
+                $row = array_map(static fn($v) => trim((string)$v), $row);
+
+                if (empty(array_filter($row))) {
+                    continue;
+                }
+
+                try {
+                    $codigoCliente = $row[0] ?? '';
+                    $codigoRequisicao = $row[1] ?? null;
+                    $modeloToner   = $row[2] ?? '';
+                    $modoRaw       = strtolower($row[3] ?? 'peso');
+                    $pesoRet       = $row[4] ?? '';
+                    $pctRaw        = $row[5] ?? '';
+                    $destinoRaw    = $row[6] ?? '';
+                    $observacoes   = $row[7] ?? null;
+
+                    if ($codigoCliente === '' || $modeloToner === '' || $destinoRaw === '') {
+                        $errors[] = "Linha {$line}: Código Cliente, Modelo e Destino são obrigatórios.";
+                        continue;
+                    }
+
+                    $cliente = $this->findClienteByCodigoOrNome($codigoCliente);
+                    if (!$cliente) {
+                        $errors[] = "Linha {$line}: Cliente '{$codigoCliente}' não encontrado.";
+                        continue;
+                    }
+
+                    $tonerStmt = $this->db->prepare("SELECT id, modelo, peso_vazio, peso_cheio, gramatura, capacidade_folhas, custo_por_folha FROM toners WHERE LOWER(modelo) = LOWER(?) LIMIT 1");
+                    $tonerStmt->execute([$modeloToner]);
+                    $toner = $tonerStmt->fetch(PDO::FETCH_ASSOC);
+                    if (!$toner) {
+                        $errors[] = "Linha {$line}: Toner '{$modeloToner}' não encontrado.";
+                        continue;
+                    }
+
+                    $modo = in_array($modoRaw, ['percentual', 'pct', '%']) ? 'percentual' : 'peso';
+
+                    $pesoRetNum = ($pesoRet === '') ? null : (float)str_replace(',', '.', $pesoRet);
+                    $pctNum     = ($pctRaw === '')  ? null : (float)str_replace(',', '.', $pctRaw);
+
+                    if ($modo === 'peso' && ($pesoRetNum === null || $pesoRetNum < 0)) {
+                        $errors[] = "Linha {$line}: Peso Retornado inválido para modo peso.";
+                        continue;
+                    }
+                    if ($modo === 'percentual' && ($pctNum === null || $pctNum < 0)) {
+                        $errors[] = "Linha {$line}: Percentual inválido para modo percentual.";
+                        continue;
+                    }
+
+                    $gramaturaToner = (float)($toner['gramatura'] ?: ((float)$toner['peso_cheio'] - (float)$toner['peso_vazio']));
+                    $gramaturaRestante = null;
+                    $percentualCalculado = 0;
+
+                    if ($modo === 'peso') {
+                        $gramaturaRestante = max(0, $pesoRetNum - (float)$toner['peso_vazio']);
+                        $percentualCalculado = $gramaturaToner > 0
+                            ? min(100, max(0, round(($gramaturaRestante / $gramaturaToner) * 100, 2)))
+                            : 0;
+                    } else {
+                        $percentualCalculado = min(100, max(0, round((float)$pctNum, 2)));
+                        if ($gramaturaToner > 0) {
+                            $gramaturaRestante = round(($percentualCalculado / 100) * $gramaturaToner, 2);
+                        }
+                    }
+
+                    $destino = $this->normalizeDestino($destinoRaw);
+                    if ($destino === null) {
+                        $errors[] = "Linha {$line}: Destino '{$destinoRaw}' inválido.";
+                        continue;
+                    }
+
+                    $parecer = $this->getParecer($percentualCalculado);
+
+                    $valorRecuperado = 0.00;
+                    if ($destino === 'Estoque') {
+                        $capacidade = (float)($toner['capacidade_folhas'] ?? 0);
+                        $custoFolha = (float)($toner['custo_por_folha'] ?? 0);
+                        if ($capacidade > 0 && $custoFolha > 0) {
+                            $valorRecuperado = round((($percentualCalculado / 100) * $capacidade) * $custoFolha, 2);
+                        }
+                    }
+
+                    $insert = $this->db->prepare("
+                        INSERT INTO triagem_toners
+                            (toner_id, toner_modelo, cliente_id, cliente_nome, codigo_requisicao, modo,
+                             peso_retornado, percentual_informado, gramatura_restante,
+                             percentual_calculado, parecer, destino, valor_recuperado,
+                             observacoes, created_by)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ");
+
+                    $insert->execute([
+                        $toner['id'],
+                        $toner['modelo'],
+                        $cliente['id'],
+                        $cliente['nome'],
+                        $codigoRequisicao !== '' ? $codigoRequisicao : null,
+                        $modo,
+                        $modo === 'peso' ? $pesoRetNum : null,
+                        $modo === 'percentual' ? $pctNum : null,
+                        $gramaturaRestante,
+                        $percentualCalculado,
+                        $parecer,
+                        $destino,
+                        $valorRecuperado,
+                        $observacoes,
+                        $_SESSION['user_id'],
+                    ]);
+
+                    $imported++;
+                } catch (\Exception $e) {
+                    $errors[] = "Linha {$line}: " . $e->getMessage();
+                }
+            }
+
+            echo json_encode([
+                'success' => true,
+                'imported' => $imported,
+                'errors' => $errors,
+                'message' => "Importação concluída: {$imported} registro(s) importado(s).",
+            ]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Erro na importação: ' . $e->getMessage()]);
         }
     }
 
@@ -282,6 +507,7 @@ class TriagemTonersController
             $peso_ret    = isset($_POST['peso_retornado'])  && $_POST['peso_retornado'] !== '' ? (float)$_POST['peso_retornado'] : null;
             $pct_inf     = isset($_POST['percentual'])      && $_POST['percentual'] !== ''     ? (float)$_POST['percentual']     : null;
             $destino     = $_POST['destino']     ?? '';
+            $codigoRequisicao = trim($_POST['codigo_requisicao'] ?? '');
             $observacoes = $_POST['observacoes'] ?? null;
 
             if (!$toner_id || !$cliente_id || !$destino) {
@@ -338,16 +564,17 @@ class TriagemTonersController
 
             $insert = $this->db->prepare("
                 INSERT INTO triagem_toners
-                    (toner_id, toner_modelo, cliente_id, cliente_nome, modo, peso_retornado, percentual_informado,
+                    (toner_id, toner_modelo, cliente_id, cliente_nome, codigo_requisicao, modo, peso_retornado, percentual_informado,
                      gramatura_restante, percentual_calculado, parecer, destino,
                      valor_recuperado, observacoes, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $insert->execute([
                 $toner_id,
                 $toner['modelo'],
                 $cliente_id,
                 $cliente['nome'],
+                $codigoRequisicao !== '' ? $codigoRequisicao : null,
                 $modo,
                 $peso_ret,
                 $pct_inf,
@@ -385,6 +612,7 @@ class TriagemTonersController
             $peso_ret    = isset($_POST['peso_retornado']) && $_POST['peso_retornado'] !== '' ? (float)$_POST['peso_retornado'] : null;
             $pct_inf     = isset($_POST['percentual'])     && $_POST['percentual'] !== ''     ? (float)$_POST['percentual']     : null;
             $destino     = $_POST['destino']     ?? '';
+            $codigoRequisicao = trim($_POST['codigo_requisicao'] ?? '');
             $observacoes = $_POST['observacoes'] ?? null;
 
             if (!$id || !$toner_id || !$cliente_id || !$destino) {
@@ -436,7 +664,7 @@ class TriagemTonersController
 
             $upd = $this->db->prepare("
                 UPDATE triagem_toners SET
-                    toner_id = ?, toner_modelo = ?, cliente_id = ?, cliente_nome = ?, modo = ?,
+                    toner_id = ?, toner_modelo = ?, cliente_id = ?, cliente_nome = ?, codigo_requisicao = ?, modo = ?,
                     peso_retornado = ?, percentual_informado = ?,
                     gramatura_restante = ?, percentual_calculado = ?,
                     parecer = ?, destino = ?, valor_recuperado = ?,
@@ -444,7 +672,7 @@ class TriagemTonersController
                 WHERE id = ?
             ");
             $upd->execute([
-                $toner_id, $toner['modelo'], $cliente_id, $cliente['nome'], $modo,
+                $toner_id, $toner['modelo'], $cliente_id, $cliente['nome'], $codigoRequisicao !== '' ? $codigoRequisicao : null, $modo,
                 $peso_ret, $pct_inf,
                 $gramatura_restante, $percentual_calculado,
                 $parecer, $destino, $valor_recuperado,
@@ -490,11 +718,11 @@ class TriagemTonersController
 
             $insert = $this->db->prepare("
                 INSERT INTO triagem_toners (
-                    toner_id, toner_modelo, cliente_id, cliente_nome, modo,
+                    toner_id, toner_modelo, cliente_id, cliente_nome, codigo_requisicao, modo,
                     peso_retornado, percentual_informado, gramatura_restante,
                     percentual_calculado, parecer, destino, valor_recuperado,
                     observacoes, created_by
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             $insert->execute([
@@ -502,6 +730,7 @@ class TriagemTonersController
                 $original['toner_modelo'],
                 $original['cliente_id'],
                 $original['cliente_nome'],
+                $original['codigo_requisicao'] ?? null,
                 $original['modo'],
                 $original['peso_retornado'],
                 $original['percentual_informado'],
@@ -617,5 +846,68 @@ class TriagemTonersController
             }
         }
         return 'Sem parecer definido para este percentual. Verifique os parâmetros de triagem.';
+    }
+
+    private function normalizeDestino(string $destino): ?string
+    {
+        $d = mb_strtolower(trim($destino));
+        return match ($d) {
+            'descarte' => 'Descarte',
+            'garantia' => 'Garantia',
+            'uso interno', 'uso_interno' => 'Uso Interno',
+            'estoque' => 'Estoque',
+            default => null,
+        };
+    }
+
+    private function findClienteByCodigoOrNome(string $codigoOuNome): ?array
+    {
+        $valor = trim($codigoOuNome);
+
+        $stmt = $this->db->prepare("SELECT id, nome FROM clientes WHERE codigo = ? LIMIT 1");
+        $stmt->execute([$valor]);
+        $cliente = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($cliente) {
+            return $cliente;
+        }
+
+        $stmt = $this->db->prepare("SELECT id, nome FROM clientes WHERE LOWER(nome) = LOWER(?) LIMIT 1");
+        $stmt->execute([$valor]);
+        $cliente = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $cliente ?: null;
+    }
+
+    private function readSpreadsheetRows(string $filePath, string $extension): array
+    {
+        if ($extension === 'csv') {
+            $rows = [];
+            $handle = fopen($filePath, 'r');
+            if ($handle === false) {
+                return [];
+            }
+
+            $bom = fread($handle, 3);
+            if ($bom !== chr(0xEF) . chr(0xBB) . chr(0xBF)) {
+                rewind($handle);
+            }
+
+            while (($line = fgetcsv($handle, 0, ';')) !== false) {
+                if (count($line) === 1 && str_contains((string)$line[0], ',')) {
+                    $line = str_getcsv($line[0], ',');
+                }
+                $rows[] = $line;
+            }
+            fclose($handle);
+            return $rows;
+        }
+
+        // XLS/XLSX com PhpSpreadsheet
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray(null, true, true, false);
+        $spreadsheet->disconnectWorksheets();
+        unset($spreadsheet);
+
+        return $rows;
     }
 }

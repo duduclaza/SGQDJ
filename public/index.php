@@ -139,6 +139,9 @@ $router->get('/dashboard', function () {
     }
 });
 
+// Dashboard 2.0
+$router->get('/dashboard-2', [App\Controllers\AdminController::class, 'dashboard2']);
+
 // Rota de diagnóstico POPs (apenas para admins)
 $router->get('/admin/diagnostico/pops-pendentes', [App\Controllers\PopItsController::class , 'diagnosticoPendentes']);
 
@@ -213,6 +216,8 @@ $router->get('/toners/defeitos/{id}/devolutiva-foto/{n}', [App\Controllers\Toner
 // Triagem de Toners
 $router->get('/triagem-toners', [App\Controllers\TriagemTonersController::class, 'index']);
 $router->get('/triagem-toners/list', [App\Controllers\TriagemTonersController::class, 'list']);
+$router->get('/triagem-toners/template', [App\Controllers\TriagemTonersController::class, 'downloadTemplate']);
+$router->post('/triagem-toners/importar', [App\Controllers\TriagemTonersController::class, 'importar']);
 $router->post('/triagem-toners/calcular', [App\Controllers\TriagemTonersController::class, 'calcular']);
 $router->post('/triagem-toners/store', [App\Controllers\TriagemTonersController::class, 'store']);
 $router->post('/triagem-toners/update', [App\Controllers\TriagemTonersController::class, 'update']);

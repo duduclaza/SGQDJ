@@ -38,6 +38,8 @@ $router->post('/toners/retornados/import', [TonersController::class, 'importReto
 
 $router->get('/triagem-toners', [TriagemTonersController::class, 'index']);
 $router->get('/triagem-toners/list', [TriagemTonersController::class, 'list']);
+$router->get('/triagem-toners/template', [TriagemTonersController::class, 'downloadTemplate']);
+$router->post('/triagem-toners/importar', [TriagemTonersController::class, 'importar']);
 $router->post('/triagem-toners/calcular', [TriagemTonersController::class, 'calcular']);
 $router->post('/triagem-toners/store', [TriagemTonersController::class, 'store']);
 $router->post('/triagem-toners/update', [TriagemTonersController::class, 'update']);

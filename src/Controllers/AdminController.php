@@ -59,6 +59,90 @@ class AdminController
     }
 
     /**
+     * Dashboard 2.0 com foco em Triagem de Toners
+     */
+    public function dashboard2()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        if (!\App\Services\PermissionService::hasPermission($_SESSION['user_id'], 'dashboard', 'view')) {
+            http_response_code(403);
+            echo "<h1>⛔ Acesso Negado</h1>";
+            echo "<p>Você não tem permissão para acessar o Dashboard 2.0.</p>";
+            echo "<p><a href='/inicio' style='color: #3B82F6;'>← Voltar para Início</a></p>";
+            return;
+        }
+
+        try {
+            $triagemStats = $this->getTriagemDashboard2Stats();
+
+            $title = 'Dashboard 2.0 - SGQ OTI DJ';
+            $viewFile = __DIR__ . '/../../views/admin/dashboard-2.php';
+            include __DIR__ . '/../../views/layouts/main.php';
+        } catch (\Exception $e) {
+            $triagemStats = [
+                'total_registros' => 0,
+                'media_percentual' => 0,
+                'total_estoque' => 0,
+                'valor_recuperado' => 0,
+                'por_destino' => [],
+                'ultimos_registros' => [],
+            ];
+
+            $title = 'Dashboard 2.0 - Erro';
+            $viewFile = __DIR__ . '/../../views/admin/dashboard-2.php';
+            include __DIR__ . '/../../views/layouts/main.php';
+        }
+    }
+
+    private function getTriagemDashboard2Stats(): array
+    {
+        $stats = [
+            'total_registros' => 0,
+            'media_percentual' => 0,
+            'total_estoque' => 0,
+            'valor_recuperado' => 0,
+            'por_destino' => [],
+            'ultimos_registros' => [],
+        ];
+
+        $tableExists = $this->db->query("SHOW TABLES LIKE 'triagem_toners'")->rowCount() > 0;
+        if (!$tableExists) {
+            return $stats;
+        }
+
+        $resumo = $this->db->query("SELECT COUNT(*) AS total_registros,
+                                           COALESCE(AVG(percentual_calculado), 0) AS media_percentual,
+                                           SUM(CASE WHEN destino = 'Estoque' THEN 1 ELSE 0 END) AS total_estoque,
+                                           COALESCE(SUM(valor_recuperado), 0) AS valor_recuperado
+                                    FROM triagem_toners")->fetch(\PDO::FETCH_ASSOC);
+
+        if ($resumo) {
+            $stats['total_registros'] = (int)$resumo['total_registros'];
+            $stats['media_percentual'] = (float)$resumo['media_percentual'];
+            $stats['total_estoque'] = (int)$resumo['total_estoque'];
+            $stats['valor_recuperado'] = (float)$resumo['valor_recuperado'];
+        }
+
+        $porDestino = $this->db->query("SELECT destino, COUNT(*) AS total
+                                        FROM triagem_toners
+                                        GROUP BY destino
+                                        ORDER BY total DESC")->fetchAll(\PDO::FETCH_ASSOC);
+        $stats['por_destino'] = $porDestino ?: [];
+
+        $ultimos = $this->db->query("SELECT cliente_nome, toner_modelo, percentual_calculado, destino, valor_recuperado, created_at
+                                     FROM triagem_toners
+                                     ORDER BY created_at DESC
+                                     LIMIT 10")->fetchAll(\PDO::FETCH_ASSOC);
+        $stats['ultimos_registros'] = $ultimos ?: [];
+
+        return $stats;
+    }
+
+    /**
      * Diagnóstico detalhado do Dashboard
      * NÃO altera o comportamento normal, apenas ajuda a entender erros 500.
      * Rota sugerida: /admin/dashboard/diagnostico (GET)
