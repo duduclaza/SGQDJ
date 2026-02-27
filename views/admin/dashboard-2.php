@@ -309,7 +309,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
         </div>
         <div class="flex items-center gap-2">
           <span class="kpi-badge bg-rose-400/15 text-rose-300 border border-rose-400/20">Linha</span>
-          <button class="chart-expand-btn" onclick="expandirGrafico('evolucao','Evolução Mensal de Reprovação','% de descartes por mês')" title="Expandir">
+          <button class="chart-expand-btn" onclick="expandirGrafico('evolucao','Evolução Mensal de Reprovação','% de garantias (reprovados) por mês')" title="Expandir">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
           </button>
         </div>
@@ -910,6 +910,24 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
 
     const fsCanvas = document.getElementById('chartFullscreenCanvas');
     const ctx = fsCanvas.getContext('2d');
+
+    // Preserve click behavior in fullscreen for evolução chart
+    if (chartKey === 'evolucao') {
+      clonedOptions.onClick = (evt, elements) => {
+        if (elements.length > 0) {
+          const idx = elements[0].index;
+          const mesData = evolucaoRawData[idx];
+          if (mesData && mesData.mes) {
+            window.fecharFullscreen();
+            abrirReprovados(mesData.mes);
+          }
+        }
+      };
+      clonedOptions.plugins = clonedOptions.plugins || {};
+      clonedOptions.plugins.tooltip = clonedOptions.plugins.tooltip || {};
+      clonedOptions.plugins.tooltip.footer = () => ['', 'Clique para ver detalhes'];
+    }
+
     fullscreenChart = new Chart(ctx, {
       type: srcConfig.type,
       data: clonedData,
