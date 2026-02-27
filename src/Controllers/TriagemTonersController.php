@@ -26,6 +26,8 @@ class TriagemTonersController
                     toner_modelo VARCHAR(255) NOT NULL,
                     cliente_id INT NULL,
                     cliente_nome VARCHAR(255) NULL,
+                    fornecedor_id INT NULL,
+                    fornecedor_nome VARCHAR(255) NULL,
                     filial_registro VARCHAR(150) NULL,
                     colaborador_registro VARCHAR(255) NULL,
                     codigo_requisicao VARCHAR(100) NULL,
@@ -46,6 +48,7 @@ class TriagemTonersController
                     updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
                     INDEX idx_toner_id (toner_id),
                     INDEX idx_cliente_id (cliente_id),
+                    INDEX idx_fornecedor_id (fornecedor_id),
                     INDEX idx_defeito_id (defeito_id),
                     INDEX idx_destino (destino),
                     INDEX idx_created_at (created_at),
@@ -62,6 +65,15 @@ class TriagemTonersController
             $colClienteNome = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'cliente_nome'")->fetch();
             if (!$colClienteNome) {
                 $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN cliente_nome VARCHAR(255) NULL AFTER cliente_id");
+            }
+            $colFornecedorId = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'fornecedor_id'")->fetch();
+            if (!$colFornecedorId) {
+                $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN fornecedor_id INT NULL AFTER cliente_nome");
+                $this->db->exec("ALTER TABLE triagem_toners ADD INDEX idx_fornecedor_id (fornecedor_id)");
+            }
+            $colFornecedorNome = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'fornecedor_nome'")->fetch();
+            if (!$colFornecedorNome) {
+                $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN fornecedor_nome VARCHAR(255) NULL AFTER fornecedor_id");
             }
             $colFilialRegistro = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'filial_registro'")->fetch();
             if (!$colFilialRegistro) {
@@ -456,6 +468,13 @@ class TriagemTonersController
             $defeitos = [];
         }
 
+        try {
+            $stmt = $this->db->query("SELECT id, nome FROM fornecedores ORDER BY nome ASC");
+            $fornecedores = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            $fornecedores = [];
+        }
+
         $parametros = $this->getParametros();
 
         $title    = 'Triagem de Toners - SGQ OTI DJ';
@@ -648,6 +667,7 @@ class TriagemTonersController
             $peso_ret    = isset($_POST['peso_retornado'])  && $_POST['peso_retornado'] !== '' ? (float)$_POST['peso_retornado'] : null;
             $pct_inf     = isset($_POST['percentual'])      && $_POST['percentual'] !== ''     ? (float)$_POST['percentual']     : null;
             $destino     = $_POST['destino']     ?? '';
+            $fornecedorId = isset($_POST['fornecedor_id']) && $_POST['fornecedor_id'] !== '' ? (int)$_POST['fornecedor_id'] : null;
             $codigoRequisicao = trim($_POST['codigo_requisicao'] ?? '');
             $defeitoId   = isset($_POST['defeito_id']) && $_POST['defeito_id'] !== '' ? (int)$_POST['defeito_id'] : null;
             $observacoes = $_POST['observacoes'] ?? null;
@@ -657,6 +677,25 @@ class TriagemTonersController
             if (!$toner_id || !$cliente_id || !$destino) {
                 echo json_encode(['success' => false, 'message' => 'Toner, cliente e destino são obrigatórios.']);
                 return;
+            }
+
+            $fornecedorNome = null;
+            if ($destino === 'Garantia') {
+                if (!$fornecedorId) {
+                    echo json_encode(['success' => false, 'message' => 'Selecione o fornecedor para destino Garantia.']);
+                    return;
+                }
+                $stmtFornecedor = $this->db->prepare("SELECT id, nome FROM fornecedores WHERE id = ? LIMIT 1");
+                $stmtFornecedor->execute([$fornecedorId]);
+                $fornecedor = $stmtFornecedor->fetch(PDO::FETCH_ASSOC);
+                if (!$fornecedor) {
+                    echo json_encode(['success' => false, 'message' => 'Fornecedor selecionado não encontrado.']);
+                    return;
+                }
+                $fornecedorId = (int)$fornecedor['id'];
+                $fornecedorNome = $fornecedor['nome'];
+            } else {
+                $fornecedorId = null;
             }
 
             $stmtCliente = $this->db->prepare("SELECT id, nome FROM clientes WHERE id = ?");
@@ -720,11 +759,11 @@ class TriagemTonersController
 
             $insert = $this->db->prepare("
                 INSERT INTO triagem_toners
-                    (toner_id, toner_modelo, cliente_id, cliente_nome, filial_registro, colaborador_registro, codigo_requisicao, defeito_id, defeito_nome,
+                    (toner_id, toner_modelo, cliente_id, cliente_nome, fornecedor_id, fornecedor_nome, filial_registro, colaborador_registro, codigo_requisicao, defeito_id, defeito_nome,
                      modo, peso_retornado, percentual_informado,
                      gramatura_restante, percentual_calculado, parecer, destino,
                      valor_recuperado, observacoes, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $percentualParaSalvar = $modo === 'percentual' ? $pct_inf : $percentual_calculado;
             $insert->execute([
@@ -732,6 +771,8 @@ class TriagemTonersController
                 $toner['modelo'],
                 $cliente_id,
                 $cliente['nome'],
+                $fornecedorId,
+                $fornecedorNome,
                 $filialRegistro !== '' ? $filialRegistro : null,
                 $colaboradorRegistro !== '' ? $colaboradorRegistro : null,
                 $codigoRequisicao !== '' ? $codigoRequisicao : null,
@@ -774,6 +815,7 @@ class TriagemTonersController
             $peso_ret    = isset($_POST['peso_retornado']) && $_POST['peso_retornado'] !== '' ? (float)$_POST['peso_retornado'] : null;
             $pct_inf     = isset($_POST['percentual'])     && $_POST['percentual'] !== ''     ? (float)$_POST['percentual']     : null;
             $destino     = $_POST['destino']     ?? '';
+            $fornecedorId = isset($_POST['fornecedor_id']) && $_POST['fornecedor_id'] !== '' ? (int)$_POST['fornecedor_id'] : null;
             $codigoRequisicao = trim($_POST['codigo_requisicao'] ?? '');
             $defeitoId   = isset($_POST['defeito_id']) && $_POST['defeito_id'] !== '' ? (int)$_POST['defeito_id'] : null;
             $observacoes = $_POST['observacoes'] ?? null;
@@ -783,6 +825,25 @@ class TriagemTonersController
             if (!$id || !$toner_id || !$cliente_id || !$destino) {
                 echo json_encode(['success' => false, 'message' => 'Dados incompletos.']);
                 return;
+            }
+
+            $fornecedorNome = null;
+            if ($destino === 'Garantia') {
+                if (!$fornecedorId) {
+                    echo json_encode(['success' => false, 'message' => 'Selecione o fornecedor para destino Garantia.']);
+                    return;
+                }
+                $stmtFornecedor = $this->db->prepare("SELECT id, nome FROM fornecedores WHERE id = ? LIMIT 1");
+                $stmtFornecedor->execute([$fornecedorId]);
+                $fornecedor = $stmtFornecedor->fetch(PDO::FETCH_ASSOC);
+                if (!$fornecedor) {
+                    echo json_encode(['success' => false, 'message' => 'Fornecedor selecionado não encontrado.']);
+                    return;
+                }
+                $fornecedorId = (int)$fornecedor['id'];
+                $fornecedorNome = $fornecedor['nome'];
+            } else {
+                $fornecedorId = null;
             }
 
             $stmtCliente = $this->db->prepare("SELECT id, nome FROM clientes WHERE id = ?");
@@ -842,6 +903,7 @@ class TriagemTonersController
             $upd = $this->db->prepare("
                 UPDATE triagem_toners SET
                     toner_id = ?, toner_modelo = ?, cliente_id = ?, cliente_nome = ?, codigo_requisicao = ?,
+                    fornecedor_id = ?, fornecedor_nome = ?,
                     filial_registro = COALESCE(filial_registro, ?), colaborador_registro = COALESCE(colaborador_registro, ?),
                     defeito_id = ?, defeito_nome = ?, modo = ?,
                     peso_retornado = ?, percentual_informado = ?,
@@ -853,6 +915,7 @@ class TriagemTonersController
             $percentualParaSalvar = $modo === 'percentual' ? $pct_inf : $percentual_calculado;
             $upd->execute([
                 $toner_id, $toner['modelo'], $cliente_id, $cliente['nome'], $codigoRequisicao !== '' ? $codigoRequisicao : null,
+                $fornecedorId, $fornecedorNome,
                 $filialRegistro !== '' ? $filialRegistro : null,
                 $colaboradorRegistro !== '' ? $colaboradorRegistro : null,
                 $defeitoId, $defeitoNome, $modo,
@@ -916,12 +979,12 @@ class TriagemTonersController
 
             $insert = $this->db->prepare("
                 INSERT INTO triagem_toners (
-                    toner_id, toner_modelo, cliente_id, cliente_nome, filial_registro, colaborador_registro, codigo_requisicao,
+                    toner_id, toner_modelo, cliente_id, cliente_nome, fornecedor_id, fornecedor_nome, filial_registro, colaborador_registro, codigo_requisicao,
                     defeito_id, defeito_nome, modo,
                     peso_retornado, percentual_informado, gramatura_restante,
                     percentual_calculado, parecer, destino, valor_recuperado,
                     observacoes, created_by
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             $insert->execute([
@@ -929,6 +992,8 @@ class TriagemTonersController
                 $original['toner_modelo'],
                 $clienteIdFinal,
                 $clienteNomeFinal,
+                $original['fornecedor_id'] ?? null,
+                $original['fornecedor_nome'] ?? null,
                 $original['filial_registro'] ?? ($_SESSION['user_filial'] ?? null),
                 $original['colaborador_registro'] ?? ($_SESSION['user_name'] ?? null),
                 $original['codigo_requisicao'] ?? null,
