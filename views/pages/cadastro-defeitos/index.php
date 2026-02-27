@@ -123,15 +123,25 @@ async function deleteDefeito(id) {
   try {
     const response = await fetch('/cadastro-defeitos/delete', {
       method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
       body: `id=${id}`
     });
 
-    const result = await response.json();
+    const raw = await response.text();
+    let result;
+    try {
+      result = JSON.parse(raw);
+    } catch (_) {
+      throw new Error(raw || `HTTP ${response.status}`);
+    }
+
     alert(result.message);
     if (result.success) window.location.reload();
   } catch (error) {
-    alert('Erro ao excluir defeito.');
+    alert('Erro ao excluir defeito: ' + (error.message || 'erro desconhecido'));
   }
 }
 
@@ -144,14 +154,24 @@ document.getElementById('defeitoForm').addEventListener('submit', async function
   try {
     const response = await fetch(url, {
       method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      },
       body: formData
     });
 
-    const result = await response.json();
+    const raw = await response.text();
+    let result;
+    try {
+      result = JSON.parse(raw);
+    } catch (_) {
+      throw new Error(raw || `HTTP ${response.status}`);
+    }
+
     alert(result.message);
     if (result.success) window.location.reload();
   } catch (error) {
-    alert('Erro ao salvar defeito.');
+    alert('Erro ao salvar defeito: ' + (error.message || 'erro desconhecido'));
   }
 });
 </script>
