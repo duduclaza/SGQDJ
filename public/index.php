@@ -482,6 +482,12 @@ $router->post('/api/notifications/read-all', [App\Controllers\NotificationsContr
 $router->post('/api/notifications/clear-history', [App\Controllers\NotificationsController::class , 'clearHistory']);
 $router->get('/notifications/{id}/redirect', [App\Controllers\NotificationsController::class , 'redirect']);
 
+// Chat virtual routes
+$router->get('/api/chat/contacts', [App\Controllers\ChatController::class , 'contacts']);
+$router->post('/api/chat/heartbeat', [App\Controllers\ChatController::class , 'heartbeat']);
+$router->get('/api/chat/messages/{userId}', [App\Controllers\ChatController::class , 'getMessages']);
+$router->post('/api/chat/send', [App\Controllers\ChatController::class , 'sendMessage']);
+
 // FMEA routes
 $router->get('/fmea', [App\Controllers\FMEAController::class , 'index']);
 $router->get('/fmea/list', [App\Controllers\FMEAController::class , 'list']);

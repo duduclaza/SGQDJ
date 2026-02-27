@@ -169,6 +169,277 @@ if (!function_exists('flash')) {
   <!-- Container para modais globais -->
   <div id="global-modals-container"></div>
 
+  <!-- Chat virtual global -->
+  <?php if (isset($_SESSION['user_id'])): ?>
+  <div id="chat-widget" class="chat-widget">
+    <button id="chat-toggle" class="chat-toggle" type="button">
+      <span>Chat</span>
+      <span id="chat-unread-badge" class="chat-unread-badge hidden">0</span>
+    </button>
+
+    <div id="chat-panel" class="chat-panel hidden">
+      <div class="chat-header">
+        <strong>Chat interno</strong>
+        <span class="chat-subtitle">Usuários online/offline</span>
+      </div>
+
+      <div class="chat-body">
+        <aside class="chat-contacts">
+          <input id="chat-search" type="text" placeholder="Buscar usuário..." class="chat-search-input">
+          <div id="chat-contacts-list" class="chat-contacts-list"></div>
+        </aside>
+
+        <section class="chat-conversation">
+          <div id="chat-empty" class="chat-empty">Selecione um usuário para conversar.</div>
+          <div id="chat-conversation-header" class="chat-conversation-header hidden"></div>
+          <div id="chat-messages" class="chat-messages hidden"></div>
+          <form id="chat-form" class="chat-form hidden">
+            <input id="chat-message-input" type="text" maxlength="2000" placeholder="Digite sua mensagem..." autocomplete="off">
+            <button type="submit">Enviar</button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .chat-widget { position: fixed; right: 20px; bottom: 20px; z-index: 1200; font-family: inherit; }
+    .chat-toggle { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 10px 16px; background: #0f172a; color: #fff; font-size: 14px; cursor: pointer; box-shadow: 0 8px 24px rgba(2, 6, 23, 0.28); }
+    .chat-unread-badge { min-width: 18px; height: 18px; padding: 0 6px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #ef4444; display: inline-flex; align-items: center; justify-content: center; }
+    .chat-unread-badge.hidden { display: none; }
+    .chat-panel { width: min(760px, calc(100vw - 28px)); height: 480px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; margin-top: 10px; box-shadow: 0 20px 55px rgba(15, 23, 42, 0.2); overflow: hidden; }
+    .chat-panel.hidden { display: none; }
+    .chat-header { padding: 12px 14px; border-bottom: 1px solid #e5e7eb; display: flex; flex-direction: column; background: linear-gradient(90deg, #f8fafc 0%, #eef2ff 100%); }
+    .chat-subtitle { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .chat-body { display: grid; grid-template-columns: 260px 1fr; height: calc(100% - 62px); }
+    .chat-contacts { border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; background: #f8fafc; }
+    .chat-search-input { margin: 10px; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 13px; }
+    .chat-contacts-list { overflow: auto; padding: 0 8px 10px; }
+    .chat-contact-item { width: 100%; border: 0; text-align: left; padding: 10px; border-radius: 10px; margin-bottom: 6px; background: transparent; cursor: pointer; }
+    .chat-contact-item:hover, .chat-contact-item.active { background: #e2e8f0; }
+    .chat-contact-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .chat-contact-name { font-size: 13px; color: #111827; font-weight: 600; }
+    .chat-contact-status { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #64748b; }
+    .chat-status-dot { width: 8px; height: 8px; border-radius: 999px; background: #94a3b8; }
+    .chat-status-dot.online { background: #22c55e; }
+    .chat-unread { background: #ef4444; color: #fff; border-radius: 999px; font-size: 10px; padding: 2px 6px; font-weight: 700; }
+    .chat-conversation { display: flex; flex-direction: column; min-width: 0; }
+    .chat-empty { margin: auto; color: #6b7280; font-size: 13px; }
+    .chat-conversation-header { padding: 10px 14px; border-bottom: 1px solid #e5e7eb; font-size: 13px; font-weight: 600; color: #1f2937; }
+    .chat-conversation-header.hidden { display: none; }
+    .chat-messages { flex: 1; overflow: auto; padding: 12px; background: #f8fafc; }
+    .chat-messages.hidden { display: none; }
+    .chat-message { max-width: 80%; margin-bottom: 10px; padding: 8px 10px; border-radius: 10px; font-size: 13px; line-height: 1.35; white-space: pre-wrap; word-break: break-word; }
+    .chat-message.me { margin-left: auto; background: #dbeafe; color: #1e3a8a; }
+    .chat-message.other { margin-right: auto; background: #e5e7eb; color: #111827; }
+    .chat-message-time { margin-top: 4px; font-size: 10px; opacity: 0.7; }
+    .chat-form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid #e5e7eb; }
+    .chat-form.hidden { display: none; }
+    .chat-form input { flex: 1; border: 1px solid #d1d5db; border-radius: 10px; padding: 8px 10px; font-size: 13px; }
+    .chat-form button { border: 0; background: #2563eb; color: #fff; border-radius: 10px; padding: 8px 14px; font-size: 13px; cursor: pointer; }
+    @media (max-width: 900px) {
+      .chat-panel { width: min(96vw, 560px); height: 72vh; }
+      .chat-body { grid-template-columns: 1fr; }
+      .chat-contacts { max-height: 40%; border-right: 0; border-bottom: 1px solid #e5e7eb; }
+    }
+  </style>
+
+  <script>
+    (function() {
+      const meId = <?= (int)($_SESSION['user_id'] ?? 0) ?>;
+      if (!meId) return;
+
+      let contacts = [];
+      let activeContactId = null;
+      let pollTimer = null;
+      let heartbeatTimer = null;
+
+      const ui = {};
+
+      function q(id) { return document.getElementById(id); }
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function fmtDate(iso) {
+        const d = new Date(iso.replace(' ', 'T'));
+        if (Number.isNaN(d.getTime())) return '';
+        return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      }
+
+      async function fetchJson(url, options) {
+        const response = await fetch(url, options || {});
+        return response.json();
+      }
+
+      async function heartbeat() {
+        try {
+          await fetchJson('/api/chat/heartbeat', { method: 'POST' });
+        } catch (_) {}
+      }
+
+      async function loadContacts() {
+        const searchValue = (ui.search.value || '').trim().toLowerCase();
+        try {
+          const data = await fetchJson('/api/chat/contacts');
+          if (!data.success) return;
+          contacts = data.contacts || [];
+
+          const filtered = contacts.filter(c =>
+            c.name.toLowerCase().includes(searchValue) ||
+            c.email.toLowerCase().includes(searchValue)
+          );
+
+          ui.contactsList.innerHTML = filtered.map(c => {
+            const isActive = String(c.id) === String(activeContactId);
+            const online = Number(c.is_online) === 1;
+            const unread = Number(c.unread_count || 0);
+            return `
+              <button class="chat-contact-item ${isActive ? 'active' : ''}" data-user-id="${c.id}">
+                <div class="chat-contact-top">
+                  <span class="chat-contact-name">${escapeHtml(c.name)}</span>
+                  ${unread > 0 ? `<span class="chat-unread">${unread}</span>` : ''}
+                </div>
+                <div class="chat-contact-status">
+                  <span class="chat-status-dot ${online ? 'online' : ''}"></span>
+                  ${online ? 'Online' : 'Offline'}
+                </div>
+              </button>
+            `;
+          }).join('') || '<div style="padding:10px;color:#64748b;font-size:12px;">Nenhum usuário encontrado.</div>';
+
+          const totalUnread = contacts.reduce((sum, c) => sum + Number(c.unread_count || 0), 0);
+          if (totalUnread > 0) {
+            ui.badge.textContent = totalUnread > 99 ? '99+' : String(totalUnread);
+            ui.badge.classList.remove('hidden');
+          } else {
+            ui.badge.classList.add('hidden');
+          }
+        } catch (_) {}
+      }
+
+      async function loadMessages() {
+        if (!activeContactId) return;
+        try {
+          const data = await fetchJson(`/api/chat/messages/${activeContactId}`);
+          if (!data.success) return;
+
+          const selectedContact = contacts.find(c => String(c.id) === String(activeContactId));
+          ui.empty.classList.add('hidden');
+          ui.convHeader.classList.remove('hidden');
+          ui.convHeader.textContent = selectedContact ? `${selectedContact.name} (${Number(selectedContact.is_online) === 1 ? 'Online' : 'Offline'})` : 'Conversa';
+          ui.messages.classList.remove('hidden');
+          ui.form.classList.remove('hidden');
+
+          ui.messages.innerHTML = (data.messages || []).map(m => {
+            const mine = Number(m.sender_id) === meId;
+            return `
+              <div class="chat-message ${mine ? 'me' : 'other'}">
+                <div>${escapeHtml(m.message)}</div>
+                <div class="chat-message-time">${fmtDate(m.created_at)}</div>
+              </div>
+            `;
+          }).join('');
+
+          ui.messages.scrollTop = ui.messages.scrollHeight;
+        } catch (_) {}
+      }
+
+      async function sendMessage(event) {
+        event.preventDefault();
+        if (!activeContactId) return;
+        const text = ui.messageInput.value.trim();
+        if (!text) return;
+
+        const payload = new URLSearchParams();
+        payload.set('receiver_id', activeContactId);
+        payload.set('message', text);
+
+        try {
+          const data = await fetchJson('/api/chat/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: payload.toString()
+          });
+
+          if (!data.success) {
+            alert(data.message || 'Erro ao enviar mensagem');
+            return;
+          }
+
+          ui.messageInput.value = '';
+          await loadMessages();
+          await loadContacts();
+        } catch (_) {
+          alert('Erro ao enviar mensagem');
+        }
+      }
+
+      function selectContact(contactId) {
+        activeContactId = String(contactId);
+        loadContacts().then(loadMessages);
+      }
+
+      function bindEvents() {
+        ui.toggle.addEventListener('click', async function() {
+          ui.panel.classList.toggle('hidden');
+          if (!ui.panel.classList.contains('hidden')) {
+            await loadContacts();
+            if (activeContactId) await loadMessages();
+          }
+        });
+
+        ui.search.addEventListener('input', loadContacts);
+        ui.contactsList.addEventListener('click', function(event) {
+          const btn = event.target.closest('.chat-contact-item');
+          if (!btn) return;
+          selectContact(btn.getAttribute('data-user-id'));
+        });
+
+        ui.form.addEventListener('submit', sendMessage);
+      }
+
+      async function init() {
+        ui.toggle = q('chat-toggle');
+        ui.panel = q('chat-panel');
+        ui.badge = q('chat-unread-badge');
+        ui.search = q('chat-search');
+        ui.contactsList = q('chat-contacts-list');
+        ui.empty = q('chat-empty');
+        ui.convHeader = q('chat-conversation-header');
+        ui.messages = q('chat-messages');
+        ui.form = q('chat-form');
+        ui.messageInput = q('chat-message-input');
+
+        if (!ui.toggle || !ui.panel) return;
+
+        bindEvents();
+        await heartbeat();
+        await loadContacts();
+
+        pollTimer = setInterval(async function() {
+          await loadContacts();
+          if (activeContactId) await loadMessages();
+        }, 5000);
+
+        heartbeatTimer = setInterval(heartbeat, 30000);
+
+        window.addEventListener('beforeunload', function() {
+          if (pollTimer) clearInterval(pollTimer);
+          if (heartbeatTimer) clearInterval(heartbeatTimer);
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+    })();
+  </script>
+  <?php endif; ?>
+
   <!-- Loading overlay removido - causava problemas em todos os módulos -->
 
   <script>
