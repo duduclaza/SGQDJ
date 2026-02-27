@@ -67,6 +67,14 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   .filter-input:focus { border-color: var(--dash-accent); box-shadow: 0 0 0 2px rgba(34,211,238,0.15); }
   .filter-input::placeholder { color: var(--dash-muted); }
   .filter-input option { background: #1e293b; color: var(--dash-text); }
+  .search-dropdown { position: relative; }
+  .search-dropdown .sd-list { display:none; position:absolute; top:100%; left:0; right:0; z-index:50; max-height:220px; overflow-y:auto; margin-top:4px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:#1e293b; box-shadow:0 12px 32px rgba(0,0,0,0.4); }
+  .search-dropdown.open .sd-list { display:block; }
+  .search-dropdown .sd-item { padding:7px 12px; font-size:0.82rem; color:var(--dash-text); cursor:pointer; transition:background 0.15s; }
+  .search-dropdown .sd-item:hover, .search-dropdown .sd-item.active { background:rgba(34,211,238,0.12); color:#fff; }
+  .search-dropdown .sd-empty { padding:10px 12px; font-size:0.78rem; color:var(--dash-muted); font-style:italic; }
+  .search-dropdown .sd-clear { padding:7px 12px; font-size:0.78rem; color:var(--dash-accent); cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.06); font-weight:600; }
+  .search-dropdown .sd-clear:hover { background:rgba(34,211,238,0.08); }
   .chart-wrapper { position: relative; width: 100%; }
   .chart-wrapper canvas { width: 100% !important; }
   .dash-spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--dash-muted); border-top-color: var(--dash-accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
@@ -129,13 +137,17 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       <button onclick="limparFiltros()" class="ml-auto text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors">Limpar filtros</button>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-      <div>
+      <div class="search-dropdown" id="sdModelo">
         <label class="block text-[11px] font-medium text-slate-400 mb-1">Modelo</label>
-        <select id="filtroModelo" class="filter-input"><option value="">Todos</option></select>
+        <input type="text" id="filtroModeloInput" class="filter-input" placeholder="Pesquisar modelo..." autocomplete="off">
+        <input type="hidden" id="filtroModelo">
+        <div class="sd-list" id="sdModeloList"></div>
       </div>
-      <div>
+      <div class="search-dropdown" id="sdCliente">
         <label class="block text-[11px] font-medium text-slate-400 mb-1">Cliente</label>
-        <select id="filtroCliente" class="filter-input"><option value="">Todos</option></select>
+        <input type="text" id="filtroClienteInput" class="filter-input" placeholder="Pesquisar cliente..." autocomplete="off">
+        <input type="hidden" id="filtroCliente">
+        <div class="sd-list" id="sdClienteList"></div>
       </div>
       <div>
         <label class="block text-[11px] font-medium text-slate-400 mb-1">Defeito</label>
@@ -389,10 +401,14 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   }
 
   // ===== Populate filter dropdowns =====
+  let sdData = { modelo: [], cliente: [] };
+
   function populateFilterOptions(opts) {
-    fillSelect('filtroModelo', opts.modelos || []);
-    fillSelect('filtroCliente', opts.clientes || []);
+    sdData.modelo = opts.modelos || [];
+    sdData.cliente = opts.clientes || [];
     fillSelect('filtroDefeito', opts.defeitos || []);
+    initSearchDropdown('Modelo', sdData.modelo);
+    initSearchDropdown('Cliente', sdData.cliente);
   }
   function fillSelect(id, items) {
     const sel = document.getElementById(id);
@@ -404,6 +420,52 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       sel.appendChild(opt);
     });
     sel.value = current;
+  }
+
+  // ===== Searchable Dropdown =====
+  function initSearchDropdown(name, allItems) {
+    const input = document.getElementById('filtro' + name + 'Input');
+    const hidden = document.getElementById('filtro' + name);
+    const listEl = document.getElementById('sd' + name + 'List');
+    const wrapper = document.getElementById('sd' + name);
+
+    function renderList(filter) {
+      const q = (filter || '').toLowerCase();
+      const filtered = q ? allItems.filter(i => i.toLowerCase().includes(q)) : allItems;
+      let html = '<div class="sd-clear" data-val="">Todos (limpar filtro)</div>';
+      if (filtered.length === 0) {
+        html += '<div class="sd-empty">Nenhum resultado</div>';
+      } else {
+        filtered.slice(0, 50).forEach(item => {
+          const active = item === hidden.value ? ' active' : '';
+          html += '<div class="sd-item' + active + '" data-val="' + esc(item) + '">' + esc(item) + '</div>';
+        });
+        if (filtered.length > 50) html += '<div class="sd-empty">...mais ' + (filtered.length - 50) + ' itens, refine a busca</div>';
+      }
+      listEl.innerHTML = html;
+    }
+
+    input.addEventListener('focus', () => {
+      renderList(input.value);
+      wrapper.classList.add('open');
+    });
+    input.addEventListener('input', () => {
+      renderList(input.value);
+      wrapper.classList.add('open');
+    });
+    listEl.addEventListener('click', (e) => {
+      const item = e.target.closest('[data-val]');
+      if (!item) return;
+      const val = item.getAttribute('data-val');
+      hidden.value = val;
+      input.value = val;
+      wrapper.classList.remove('open');
+      onFilterChange();
+    });
+    // Fechar ao clicar fora
+    document.addEventListener('click', (e) => {
+      if (!wrapper.contains(e.target)) wrapper.classList.remove('open');
+    });
   }
 
   // ===== Render KPIs =====
@@ -684,6 +746,8 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     ['filtroModelo','filtroCliente','filtroDefeito','filtroDestino','filtroDataInicio','filtroDataFim'].forEach(id => {
       document.getElementById(id).value = '';
     });
+    document.getElementById('filtroModeloInput').value = '';
+    document.getElementById('filtroClienteInput').value = '';
     fetchDashboard();
   };
 
@@ -764,7 +828,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
 
   // ===== Init =====
   document.addEventListener('DOMContentLoaded', () => {
-    ['filtroModelo','filtroCliente','filtroDefeito','filtroDestino','filtroDataInicio','filtroDataFim'].forEach(id => {
+    ['filtroDefeito','filtroDestino','filtroDataInicio','filtroDataFim'].forEach(id => {
       document.getElementById(id).addEventListener('change', onFilterChange);
     });
     fetchDashboard();
