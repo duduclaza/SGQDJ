@@ -24,6 +24,8 @@ class TriagemTonersController
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     toner_id INT NOT NULL,
                     toner_modelo VARCHAR(255) NOT NULL,
+                    cliente_id INT NULL,
+                    cliente_nome VARCHAR(255) NULL,
                     modo ENUM('peso','percentual') NOT NULL DEFAULT 'peso',
                     peso_retornado DECIMAL(10,2) NULL,
                     percentual_informado DECIMAL(5,2) NULL,
@@ -38,11 +40,23 @@ class TriagemTonersController
                     updated_by INT NULL,
                     updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
                     INDEX idx_toner_id (toner_id),
+                    INDEX idx_cliente_id (cliente_id),
                     INDEX idx_destino (destino),
                     INDEX idx_created_at (created_at),
                     INDEX idx_created_by (created_by)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
+
+            // Compatibilidade para bases antigas (antes de cliente_id/cliente_nome)
+            $colClienteId = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'cliente_id'")->fetch();
+            if (!$colClienteId) {
+                $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN cliente_id INT NULL AFTER toner_modelo");
+                $this->db->exec("ALTER TABLE triagem_toners ADD INDEX idx_cliente_id (cliente_id)");
+            }
+            $colClienteNome = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'cliente_nome'")->fetch();
+            if (!$colClienteNome) {
+                $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN cliente_nome VARCHAR(255) NULL AFTER cliente_id");
+            }
 
             $this->db->exec("
                 CREATE TABLE IF NOT EXISTS triagem_toners_parametros (
@@ -90,6 +104,13 @@ class TriagemTonersController
             $toners = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Exception $e) {
             $toners = [];
+        }
+
+        try {
+            $stmt = $this->db->query("SELECT id, codigo, nome FROM clientes ORDER BY nome ASC");
+            $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            $clientes = [];
         }
 
         $parametros = $this->getParametros();
@@ -256,14 +277,23 @@ class TriagemTonersController
 
         try {
             $toner_id    = (int)($_POST['toner_id'] ?? 0);
+            $cliente_id  = (int)($_POST['cliente_id'] ?? 0);
             $modo        = $_POST['modo'] ?? 'peso';
             $peso_ret    = isset($_POST['peso_retornado'])  && $_POST['peso_retornado'] !== '' ? (float)$_POST['peso_retornado'] : null;
             $pct_inf     = isset($_POST['percentual'])      && $_POST['percentual'] !== ''     ? (float)$_POST['percentual']     : null;
             $destino     = $_POST['destino']     ?? '';
             $observacoes = $_POST['observacoes'] ?? null;
 
-            if (!$toner_id || !$destino) {
-                echo json_encode(['success' => false, 'message' => 'Toner e destino são obrigatórios.']);
+            if (!$toner_id || !$cliente_id || !$destino) {
+                echo json_encode(['success' => false, 'message' => 'Toner, cliente e destino são obrigatórios.']);
+                return;
+            }
+
+            $stmtCliente = $this->db->prepare("SELECT id, nome FROM clientes WHERE id = ?");
+            $stmtCliente->execute([$cliente_id]);
+            $cliente = $stmtCliente->fetch(PDO::FETCH_ASSOC);
+            if (!$cliente) {
+                echo json_encode(['success' => false, 'message' => 'Cliente não encontrado.']);
                 return;
             }
 
@@ -308,14 +338,16 @@ class TriagemTonersController
 
             $insert = $this->db->prepare("
                 INSERT INTO triagem_toners
-                    (toner_id, toner_modelo, modo, peso_retornado, percentual_informado,
+                    (toner_id, toner_modelo, cliente_id, cliente_nome, modo, peso_retornado, percentual_informado,
                      gramatura_restante, percentual_calculado, parecer, destino,
                      valor_recuperado, observacoes, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $insert->execute([
                 $toner_id,
                 $toner['modelo'],
+                $cliente_id,
+                $cliente['nome'],
                 $modo,
                 $peso_ret,
                 $pct_inf,
@@ -348,14 +380,23 @@ class TriagemTonersController
         try {
             $id          = (int)($_POST['id'] ?? 0);
             $toner_id    = (int)($_POST['toner_id'] ?? 0);
+            $cliente_id  = (int)($_POST['cliente_id'] ?? 0);
             $modo        = $_POST['modo'] ?? 'peso';
             $peso_ret    = isset($_POST['peso_retornado']) && $_POST['peso_retornado'] !== '' ? (float)$_POST['peso_retornado'] : null;
             $pct_inf     = isset($_POST['percentual'])     && $_POST['percentual'] !== ''     ? (float)$_POST['percentual']     : null;
             $destino     = $_POST['destino']     ?? '';
             $observacoes = $_POST['observacoes'] ?? null;
 
-            if (!$id || !$toner_id || !$destino) {
+            if (!$id || !$toner_id || !$cliente_id || !$destino) {
                 echo json_encode(['success' => false, 'message' => 'Dados incompletos.']);
+                return;
+            }
+
+            $stmtCliente = $this->db->prepare("SELECT id, nome FROM clientes WHERE id = ?");
+            $stmtCliente->execute([$cliente_id]);
+            $cliente = $stmtCliente->fetch(PDO::FETCH_ASSOC);
+            if (!$cliente) {
+                echo json_encode(['success' => false, 'message' => 'Cliente não encontrado.']);
                 return;
             }
 
@@ -395,7 +436,7 @@ class TriagemTonersController
 
             $upd = $this->db->prepare("
                 UPDATE triagem_toners SET
-                    toner_id = ?, toner_modelo = ?, modo = ?,
+                    toner_id = ?, toner_modelo = ?, cliente_id = ?, cliente_nome = ?, modo = ?,
                     peso_retornado = ?, percentual_informado = ?,
                     gramatura_restante = ?, percentual_calculado = ?,
                     parecer = ?, destino = ?, valor_recuperado = ?,
@@ -403,7 +444,7 @@ class TriagemTonersController
                 WHERE id = ?
             ");
             $upd->execute([
-                $toner_id, $toner['modelo'], $modo,
+                $toner_id, $toner['modelo'], $cliente_id, $cliente['nome'], $modo,
                 $peso_ret, $pct_inf,
                 $gramatura_restante, $percentual_calculado,
                 $parecer, $destino, $valor_recuperado,

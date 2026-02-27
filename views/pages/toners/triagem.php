@@ -82,6 +82,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
         <thead class="bg-gray-50">
           <tr>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">#</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Cliente</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Modelo</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Modo</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Peso Ret. (g)</th>
@@ -95,7 +96,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
           </tr>
         </thead>
         <tbody id="grid-body" class="divide-y divide-gray-100">
-          <tr><td colspan="11" class="px-4 py-8 text-center text-gray-400">Carregando...</td></tr>
+          <tr><td colspan="12" class="px-4 py-8 text-center text-gray-400">Carregando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -119,9 +120,24 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
     <div class="px-6 py-5 space-y-5">
       <input type="hidden" id="t-id">
 
+      <!-- Seleção do Cliente -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Cliente <span class="text-red-500">*</span></label>
+        <input id="t-cliente-search" type="text" placeholder="Buscar cliente por nome/código..." oninput="filtrarSelect('t-cliente-search','t-cliente-id')"
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select id="t-cliente-id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">Selecione o cliente...</option>
+          <?php foreach (($clientes ?? []) as $c): ?>
+          <option value="<?= (int)$c['id'] ?>"><?= e(($c['codigo'] ?? '') . ' - ' . ($c['nome'] ?? '')) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
       <!-- Seleção do Toner -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Modelo do Toner <span class="text-red-500">*</span></label>
+        <input id="t-toner-search" type="text" placeholder="Buscar modelo do toner..." oninput="filtrarSelect('t-toner-search','t-toner-id')"
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
         <select id="t-toner-id" onchange="onTonerChange()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Selecione o modelo...</option>
           <?php foreach ($toners as $t): ?>
@@ -314,7 +330,7 @@ function carregarRegistros(page) {
 function renderGrid(data) {
   const tbody = document.getElementById('grid-body');
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="11" class="px-4 py-10 text-center text-gray-400 text-sm">Nenhum registro encontrado.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="12" class="px-4 py-10 text-center text-gray-400 text-sm">Nenhum registro encontrado.</td></tr>';
     return;
   }
 
@@ -346,6 +362,7 @@ function renderGrid(data) {
 
     return `<tr class="hover:bg-gray-50 transition-colors">
       <td class="px-4 py-3 text-gray-500 text-xs">${r.id}</td>
+      <td class="px-4 py-3 text-gray-700 text-xs">${r.cliente_nome || '—'}</td>
       <td class="px-4 py-3 font-medium text-gray-900 text-xs">${r.toner_modelo}</td>
       <td class="px-4 py-3">${modoBadge}</td>
       <td class="px-4 py-3 text-gray-600 text-xs">${peso}</td>
@@ -398,6 +415,7 @@ function abrirModalEditar(r) {
   resetModalTriagem();
   document.getElementById('modal-titulo').textContent = 'Editar Triagem';
   document.getElementById('t-id').value = r.id;
+  document.getElementById('t-cliente-id').value = r.cliente_id || '';
   document.getElementById('t-toner-id').value = r.toner_id;
   onTonerChange();
 
@@ -425,7 +443,10 @@ function fecharModalTriagem() {
 
 function resetModalTriagem() {
   document.getElementById('t-id').value = '';
+  document.getElementById('t-cliente-id').value = '';
+  document.getElementById('t-cliente-search').value = '';
   document.getElementById('t-toner-id').value = '';
+  document.getElementById('t-toner-search').value = '';
   document.getElementById('t-peso').value = '';
   document.getElementById('t-pct').value = '';
   document.getElementById('t-destino').value = '';
@@ -526,6 +547,7 @@ function exibirResultado(pct, gram, parecer, valor, destino) {
 
 function salvarTriagem() {
   const id       = document.getElementById('t-id').value;
+  const clienteId = document.getElementById('t-cliente-id').value;
   const tonerId  = document.getElementById('t-toner-id').value;
   const modo     = document.getElementById('modo-peso').checked ? 'peso' : 'percentual';
   const peso     = document.getElementById('t-peso').value;
@@ -533,8 +555,8 @@ function salvarTriagem() {
   const destino  = document.getElementById('t-destino').value;
   const obs      = document.getElementById('t-obs').value;
 
-  if (!tonerId || !destino) {
-    showToast('Preencha o toner e o destino.', 'error'); return;
+  if (!clienteId || !tonerId || !destino) {
+    showToast('Preencha cliente, toner e destino.', 'error'); return;
   }
   if (modo === 'peso' && !peso) {
     showToast('Informe o peso retornado.', 'error'); return;
@@ -545,6 +567,7 @@ function salvarTriagem() {
 
   const fd = new FormData();
   if (id) fd.append('id', id);
+  fd.append('cliente_id', clienteId);
   fd.append('toner_id', tonerId);
   fd.append('modo', modo);
   if (modo === 'peso') fd.append('peso_retornado', peso);
@@ -695,5 +718,19 @@ function showToast(msg, type = 'success') {
   ti.textContent = msg;
   t.classList.remove('hidden');
   setTimeout(() => t.classList.add('hidden'), 3500);
+}
+
+function filtrarSelect(inputId, selectId) {
+  const termo = (document.getElementById(inputId).value || '').toLowerCase().trim();
+  const select = document.getElementById(selectId);
+  const options = Array.from(select.options);
+
+  options.forEach((opt, idx) => {
+    if (idx === 0) {
+      opt.hidden = false;
+      return;
+    }
+    opt.hidden = termo !== '' && !opt.text.toLowerCase().includes(termo);
+  });
 }
 </script>
