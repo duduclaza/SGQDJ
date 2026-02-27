@@ -12,6 +12,7 @@ use App\Controllers\FinanceiroController;
 use App\Controllers\MasterController;
 use App\Controllers\AreaTecnicaController;
 use App\Controllers\ProfileController;
+use App\Controllers\TriagemTonersController;
 
 // ===== REGISTROS GERAIS =====
 
@@ -105,3 +106,13 @@ $router->get('/toners/defeitos', [TonersController::class , 'defeitos']);
 $router->post('/toners/defeitos/store', [TonersController::class , 'storeDefeito']);
 $router->get('/toners/defeitos/{id}/foto/{n}', [TonersController::class , 'downloadFotoDefeito']);
 $router->post('/toners/defeitos/delete', [TonersController::class , 'deleteDefeito']);
+
+// ===== TRIAGEM DE TONERS (fallback) =====
+$router->get('/triagem-toners', [TriagemTonersController::class, 'index']);
+$router->get('/triagem-toners/list', [TriagemTonersController::class, 'list']);
+$router->post('/triagem-toners/calcular', [TriagemTonersController::class, 'calcular']);
+$router->post('/triagem-toners/store', [TriagemTonersController::class, 'store']);
+$router->post('/triagem-toners/update', [TriagemTonersController::class, 'update']);
+$router->post('/triagem-toners/delete', [TriagemTonersController::class, 'delete']);
+$router->get('/triagem-toners/parametros', [TriagemTonersController::class, 'getParametrosApi']);
+$router->post('/triagem-toners/parametros/save', [TriagemTonersController::class, 'saveParametros']);
