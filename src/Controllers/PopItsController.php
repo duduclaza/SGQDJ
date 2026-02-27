@@ -970,121 +970,40 @@ class PopItsController
             // Verificar se as tabelas existem, se não, criar
             $this->criarTabelaDepartamentosSeNaoExistir();
             
-            // Verificar se é admin/super admin - ambos veem tudo
-            $isAdmin = \App\Services\PermissionService::isAdmin($user_id);
-            $isSuperAdmin = \App\Services\PermissionService::isSuperAdmin($user_id);
-            
-            if ($isAdmin || $isSuperAdmin) {
-                // Admin vê todos os registros aprovados com departamentos permitidos
-                $stmt = $this->db->prepare("
-                    SELECT 
-                        r.id,
-                        r.versao,
-                        r.nome_arquivo,
-                        r.extensao,
-                        r.tamanho_arquivo,
-                        r.publico,
-                        r.criado_em,
-                        r.aprovado_em,
-                        t.titulo,
-                        t.tipo,
-                        u.name as autor_nome,
-                        ua.name as aprovado_por_nome,
-                        GROUP_CONCAT(d.nome ORDER BY d.nome SEPARATOR ', ') as departamentos_permitidos
-                    FROM pops_its_registros r
-                    LEFT JOIN pops_its_titulos t ON r.titulo_id = t.id
-                    LEFT JOIN users u ON r.criado_por = u.id
-                    LEFT JOIN users ua ON r.aprovado_por = ua.id
-                    LEFT JOIN pops_its_registros_departamentos rd ON r.id = rd.registro_id
-                    LEFT JOIN departamentos d ON rd.departamento_id = d.id
-                    WHERE r.status = 'APROVADO'
-                    AND r.versao = (
-                        SELECT MAX(r2.versao) 
-                        FROM pops_its_registros r2 
-                        WHERE r2.titulo_id = r.titulo_id 
-                        AND r2.status = 'APROVADO'
-                    )
-                    GROUP BY r.id, r.versao, r.nome_arquivo, r.extensao, r.tamanho_arquivo, 
-                             r.publico, r.criado_em, r.aprovado_em, t.titulo, t.tipo, 
-                             u.name, ua.name
-                    ORDER BY r.aprovado_em DESC
-                ");
-                
-                $stmt->execute();
-            } else {
-                // Buscar setor e departamento do usuário para regras de visibilidade
-                $user_setor = $this->getUserSetor($user_id);
-                $user_dept_id = $this->getUserDepartmentId($user_id);
-                $user_setor = trim((string)($user_setor ?? ''));
-                error_log("VISUALIZAÇÃO POPs/ITs - Usuário $user_id -> Setor: '$user_setor' | Departamento ID: " . ($user_dept_id ?? 'NULL'));
-                
-                $stmt = $this->db->prepare("
-                    SELECT 
-                        r.id,
-                        r.versao,
-                        r.nome_arquivo,
-                        r.extensao,
-                        r.tamanho_arquivo,
-                        r.publico,
-                        r.criado_em,
-                        r.aprovado_em,
-                        t.titulo,
-                        t.tipo,
-                        u.name as autor_nome,
-                        ua.name as aprovado_por_nome,
-                        GROUP_CONCAT(d.nome ORDER BY d.nome SEPARATOR ', ') as departamentos_permitidos
-                    FROM pops_its_registros r
-                    LEFT JOIN pops_its_titulos t ON r.titulo_id = t.id
-                    LEFT JOIN users u ON r.criado_por = u.id
-                    LEFT JOIN users ua ON r.aprovado_por = ua.id
-                    LEFT JOIN pops_its_registros_departamentos rd ON r.id = rd.registro_id
-                    LEFT JOIN departamentos d ON rd.departamento_id = d.id
-                    WHERE r.status = 'APROVADO'
-                    AND r.versao = (
-                        SELECT MAX(r2.versao) 
-                        FROM pops_its_registros r2 
-                        WHERE r2.titulo_id = r.titulo_id 
-                        AND r2.status = 'APROVADO'
-                    )
-                    AND (
-                        r.publico = 1 
-                        OR r.criado_por = ?
-                        OR (
-                            ? IS NOT NULL AND EXISTS (
-                                SELECT 1 FROM pops_its_registros_departamentos rd3
-                                WHERE rd3.registro_id = r.id 
-                                AND rd3.departamento_id = ?
-                            )
-                        )
-                        OR (
-                            ? <> '' AND EXISTS (
-                            SELECT 1 FROM pops_its_registros_departamentos rd3
-                            INNER JOIN departamentos d3 ON rd3.departamento_id = d3.id
-                            WHERE rd3.registro_id = r.id 
-                            AND (
-                                LOWER(TRIM(d3.nome)) = LOWER(TRIM(?))
-                                OR d3.nome LIKE CONCAT('%', ?, '%')
-                                OR ? LIKE CONCAT('%', d3.nome, '%')
-                            )
-                            )
-                        )
-                    )
-                    GROUP BY r.id, r.versao, r.nome_arquivo, r.extensao, r.tamanho_arquivo, 
-                             r.publico, r.criado_em, r.aprovado_em, t.titulo, t.tipo, 
-                             u.name, ua.name
-                    ORDER BY r.aprovado_em DESC
-                ");
-                
-                $stmt->execute([
-                    $user_id,
-                    $user_dept_id,
-                    $user_dept_id,
-                    $user_setor,
-                    $user_setor,
-                    $user_setor,
-                    $user_setor,
-                ]);
-            }
+            $stmt = $this->db->prepare("\
+                SELECT 
+                    r.id,
+                    r.versao,
+                    r.nome_arquivo,
+                    r.extensao,
+                    r.tamanho_arquivo,
+                    r.publico,
+                    r.criado_em,
+                    r.aprovado_em,
+                    t.titulo,
+                    t.tipo,
+                    u.name as autor_nome,
+                    ua.name as aprovado_por_nome,
+                    GROUP_CONCAT(d.nome ORDER BY d.nome SEPARATOR ', ') as departamentos_permitidos
+                FROM pops_its_registros r
+                LEFT JOIN pops_its_titulos t ON r.titulo_id = t.id
+                LEFT JOIN users u ON r.criado_por = u.id
+                LEFT JOIN users ua ON r.aprovado_por = ua.id
+                LEFT JOIN pops_its_registros_departamentos rd ON r.id = rd.registro_id
+                LEFT JOIN departamentos d ON rd.departamento_id = d.id
+                WHERE r.status = 'APROVADO'
+                AND r.versao = (
+                    SELECT MAX(r2.versao)
+                    FROM pops_its_registros r2
+                    WHERE r2.titulo_id = r.titulo_id
+                    AND r2.status = 'APROVADO'
+                )
+                GROUP BY r.id, r.versao, r.nome_arquivo, r.extensao, r.tamanho_arquivo,
+                         r.publico, r.criado_em, r.aprovado_em, t.titulo, t.tipo,
+                         u.name, ua.name
+                ORDER BY r.aprovado_em DESC
+            ");
+            $stmt->execute();
             
             $registros = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             
