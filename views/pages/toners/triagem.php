@@ -95,21 +95,22 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
             <th class="px-4 py-3 text-left font-semibold text-gray-600">#</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Cliente</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Cód. Requisição</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Filial</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">Colaborador</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Defeito</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Modelo</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Modo</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Peso Ret. (g)</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">% Gramatura</th>
+            <th class="px-4 py-3 text-left font-semibold text-gray-600">% Toner</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Parecer</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Destino</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Valor Recup.</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Adicionado Por</th>
             <th class="px-4 py-3 text-left font-semibold text-gray-600">Data/Hora</th>
             <th class="px-4 py-3 text-center font-semibold text-gray-600">Ações</th>
           </tr>
         </thead>
         <tbody id="grid-body" class="divide-y divide-gray-100">
-          <tr><td colspan="14" class="px-4 py-8 text-center text-gray-400">Carregando...</td></tr>
+          <tr><td colspan="15" class="px-4 py-8 text-center text-gray-400">Carregando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -160,6 +161,19 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
     </div>
     <div class="px-6 py-5 space-y-5">
       <input type="hidden" id="t-id">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Filial (automático)</label>
+          <input id="t-filial" type="text" value="<?= e($_SESSION['user_filial'] ?? 'Não informado') ?>" readonly
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-600">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Colaborador que registrou</label>
+          <input id="t-colaborador" type="text" value="<?= e($_SESSION['user_name'] ?? 'Usuário') ?>" readonly
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-600">
+        </div>
+      </div>
 
       <!-- Seleção do Cliente -->
       <div>
@@ -353,6 +367,8 @@ const PARAMETROS_INIT = <?= json_encode($parametros) ?>;
 const CAN_EDIT   = <?= $canEdit   ? 'true' : 'false' ?>;
 const CAN_DELETE = <?= $canDelete ? 'true' : 'false' ?>;
 const IS_ADMIN   = <?= $isAdmin   ? 'true' : 'false' ?>;
+const USER_FILIAL = <?= json_encode($_SESSION['user_filial'] ?? 'Não informado') ?>;
+const USER_NAME = <?= json_encode($_SESSION['user_name'] ?? 'Usuário') ?>;
 
 // ===== ESTADO =====
 let currentPage = 1;
@@ -389,12 +405,13 @@ function carregarRegistros(page) {
 function renderGrid(data) {
   const tbody = document.getElementById('grid-body');
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="14" class="px-4 py-10 text-center text-gray-400 text-sm">Nenhum registro encontrado.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="15" class="px-4 py-10 text-center text-gray-400 text-sm">Nenhum registro encontrado.</td></tr>';
     return;
   }
 
   tbody.innerHTML = data.map(r => {
-    const pct = parseFloat(r.percentual_calculado);
+    const pct = parseFloat(r.percentual_calculado || 0);
+    const pctSalvo = parseFloat((r.percentual_informado ?? r.percentual_calculado) || 0);
     const barColor = pct <= 5 ? 'bg-red-500' : pct <= 40 ? 'bg-orange-400' : pct <= 80 ? 'bg-yellow-400' : 'bg-green-500';
     const destBadge = {
       'Descarte':    'bg-red-100 text-red-800',
@@ -424,6 +441,8 @@ function renderGrid(data) {
       <td class="px-4 py-3 text-gray-500 text-xs">${r.id}</td>
       <td class="px-4 py-3 text-gray-700 text-xs">${r.cliente_nome || '—'}</td>
       <td class="px-4 py-3 text-gray-700 text-xs">${r.codigo_requisicao || '—'}</td>
+      <td class="px-4 py-3 text-gray-700 text-xs">${r.filial_registro_nome || r.filial_registro || '—'}</td>
+      <td class="px-4 py-3 text-gray-700 text-xs">${r.colaborador_registro_nome || r.colaborador_registro || r.criado_por_nome || '—'}</td>
       <td class="px-4 py-3 text-gray-700 text-xs">${r.defeito_nome || '—'}</td>
       <td class="px-4 py-3 font-medium text-gray-900 text-xs">${r.toner_modelo}</td>
       <td class="px-4 py-3">${modoBadge}</td>
@@ -431,13 +450,12 @@ function renderGrid(data) {
       <td class="px-4 py-3">
         <div class="flex items-center gap-2">
           <div class="w-16 bg-gray-200 rounded-full h-1.5"><div class="${barColor} h-1.5 rounded-full" style="width:${pct}%"></div></div>
-          <span class="text-xs font-bold text-gray-800">${pct.toFixed(1)}%</span>
+          <span class="text-xs font-bold text-gray-800">${pctSalvo.toFixed(1)}%</span>
         </div>
       </td>
       <td class="px-4 py-3 text-xs text-gray-600 max-w-xs" title="${r.parecer || ''}">${parecerShort}</td>
       <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium ${destBadge}">${r.destino}</span></td>
       <td class="px-4 py-3 text-xs">${valor}</td>
-      <td class="px-4 py-3 text-xs text-gray-500">${r.criado_por_nome || '—'}</td>
       <td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">${dtStr}</td>
       <td class="px-4 py-3 text-center"><div class="flex justify-center gap-1">${editBtn}${dupBtn}${delBtn}</div></td>
     </tr>`;
@@ -504,21 +522,27 @@ function importarPlanilha() {
       btn.textContent = 'Importar';
 
       if (res.success) {
+        const detalhesImportados = (res.imported_details && res.imported_details.length)
+          ? `\n\nImportados:\n- ${res.imported_details.slice(0, 10).join('\n- ')}`
+          : '';
         const erros = (res.errors && res.errors.length)
           ? `\n\nErros:\n- ${res.errors.slice(0, 5).join('\n- ')}`
           : '';
         feedback.className = 'text-sm rounded-lg p-3 bg-green-50 border border-green-200 text-green-700 whitespace-pre-line';
-        feedback.textContent = `${res.message}${erros}`;
+        feedback.textContent = `${res.message}${detalhesImportados}${erros}`;
         feedback.classList.remove('hidden');
         showToast(res.message, 'success');
         carregarRegistros(1);
       } else {
+        const detalhesImportados = (res.imported_details && res.imported_details.length)
+          ? `\n\nImportados:\n- ${res.imported_details.slice(0, 10).join('\n- ')}`
+          : '';
         const erros = (res.errors && res.errors.length)
           ? `\n\nErros:\n- ${res.errors.slice(0, 8).join('\n- ')}`
           : '';
         feedback.className = 'text-sm rounded-lg p-3 bg-red-50 border border-red-200 text-red-700';
         feedback.classList.add('whitespace-pre-line');
-        feedback.textContent = `${res.message || 'Erro ao importar arquivo.'}${erros}`;
+        feedback.textContent = `${res.message || 'Erro ao importar arquivo.'}${detalhesImportados}${erros}`;
         feedback.classList.remove('hidden');
         showToast(res.message || 'Erro ao importar arquivo.', 'error');
       }
@@ -544,6 +568,8 @@ function abrirModalEditar(r) {
   resetModalTriagem();
   document.getElementById('modal-titulo').textContent = 'Editar Triagem';
   document.getElementById('t-id').value = r.id;
+  document.getElementById('t-filial').value = r.filial_registro_nome || r.filial_registro || USER_FILIAL;
+  document.getElementById('t-colaborador').value = r.colaborador_registro_nome || r.colaborador_registro || r.criado_por_nome || USER_NAME;
   document.getElementById('t-cliente-id').value = r.cliente_id || '';
   document.getElementById('t-toner-id').value = r.toner_id;
   document.getElementById('t-defeito-id').value = r.defeito_id || '';
@@ -576,6 +602,8 @@ function fecharModalTriagem() {
 
 function resetModalTriagem() {
   document.getElementById('t-id').value = '';
+  document.getElementById('t-filial').value = USER_FILIAL;
+  document.getElementById('t-colaborador').value = USER_NAME;
   document.getElementById('t-cliente-id').value = '';
   document.getElementById('t-cliente-search').value = '';
   document.getElementById('t-toner-id').value = '';

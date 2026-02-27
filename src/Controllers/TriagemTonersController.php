@@ -26,6 +26,8 @@ class TriagemTonersController
                     toner_modelo VARCHAR(255) NOT NULL,
                     cliente_id INT NULL,
                     cliente_nome VARCHAR(255) NULL,
+                    filial_registro VARCHAR(150) NULL,
+                    colaborador_registro VARCHAR(255) NULL,
                     codigo_requisicao VARCHAR(100) NULL,
                     defeito_id INT NULL,
                     defeito_nome VARCHAR(255) NULL,
@@ -60,6 +62,14 @@ class TriagemTonersController
             $colClienteNome = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'cliente_nome'")->fetch();
             if (!$colClienteNome) {
                 $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN cliente_nome VARCHAR(255) NULL AFTER cliente_id");
+            }
+            $colFilialRegistro = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'filial_registro'")->fetch();
+            if (!$colFilialRegistro) {
+                $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN filial_registro VARCHAR(150) NULL AFTER cliente_nome");
+            }
+            $colColaboradorRegistro = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'colaborador_registro'")->fetch();
+            if (!$colColaboradorRegistro) {
+                $this->db->exec("ALTER TABLE triagem_toners ADD COLUMN colaborador_registro VARCHAR(255) NULL AFTER filial_registro");
             }
             $colCodigoRequisicao = $this->db->query("SHOW COLUMNS FROM triagem_toners LIKE 'codigo_requisicao'")->fetch();
             if (!$colCodigoRequisicao) {
@@ -131,9 +141,11 @@ class TriagemTonersController
                 'Modelo Toner',
                 'Modo (peso/percentual)',
                 'Peso Retornado (g)',
-                'Percentual (%)',
+                '% Toner (%)',
                 'Destino (Descarte/Garantia/Uso Interno/Estoque)',
                 'Observações',
+                'Filial (automático no sistema)',
+                'Colaborador (automático no sistema)',
             ], ';');
 
             fputcsv($output, [
@@ -146,6 +158,8 @@ class TriagemTonersController
                 '',
                 'Estoque',
                 'Lote de teste de importação',
+                '',
+                '',
             ], ';');
 
             fclose($output);
@@ -202,6 +216,9 @@ class TriagemTonersController
 
             $imported = 0;
             $errors = [];
+            $importedDetails = [];
+            $filialRegistroSessao = trim((string)($_SESSION['user_filial'] ?? ''));
+            $colaboradorRegistroSessao = trim((string)($_SESSION['user_name'] ?? ''));
 
             foreach ($rows as $index => $row) {
                 if ($index === 0) {
@@ -330,25 +347,29 @@ class TriagemTonersController
 
                     $insert = $this->db->prepare("
                         INSERT INTO triagem_toners
-                            (toner_id, toner_modelo, cliente_id, cliente_nome, codigo_requisicao,
+                            (toner_id, toner_modelo, cliente_id, cliente_nome, filial_registro, colaborador_registro, codigo_requisicao,
                              defeito_id, defeito_nome, modo,
                              peso_retornado, percentual_informado, gramatura_restante,
                              percentual_calculado, parecer, destino, valor_recuperado,
                              observacoes, created_by)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ");
+
+                    $percentualParaSalvar = $modo === 'percentual' ? $pctNum : $percentualCalculado;
 
                     $insert->execute([
                         $toner['id'],
                         $toner['modelo'],
                         $cliente['id'],
                         $cliente['nome'],
+                        $filialRegistroSessao !== '' ? $filialRegistroSessao : null,
+                        $colaboradorRegistroSessao !== '' ? $colaboradorRegistroSessao : null,
                         $codigoRequisicao !== '' ? $codigoRequisicao : null,
                         $defeitoId,
                         $defeitoNome,
                         $modo,
                         $modo === 'peso' ? $pesoRetNum : null,
-                        $modo === 'percentual' ? $pctNum : null,
+                        $percentualParaSalvar,
                         $gramaturaRestante,
                         $percentualCalculado,
                         $parecer,
@@ -357,6 +378,15 @@ class TriagemTonersController
                         $observacoes,
                         $_SESSION['user_id'],
                     ]);
+
+                    $importedDetails[] = sprintf(
+                        'Linha %d: Cliente %s | Toner %s | Filial %s | Colaborador %s',
+                        $line,
+                        $cliente['nome'],
+                        $toner['modelo'],
+                        $filialRegistroSessao !== '' ? $filialRegistroSessao : 'Não informado',
+                        $colaboradorRegistroSessao !== '' ? $colaboradorRegistroSessao : 'Não informado'
+                    );
 
                     $imported++;
                 } catch (\Exception $e) {
@@ -374,6 +404,7 @@ class TriagemTonersController
             echo json_encode([
                 'success' => $success,
                 'imported' => $imported,
+                'imported_details' => $importedDetails,
                 'errors' => $errors,
                 'message' => $message,
             ]);
@@ -465,6 +496,8 @@ class TriagemTonersController
 
             $stmt = $this->db->prepare("
                 SELECT t.*,
+                       COALESCE(t.colaborador_registro, u.name) AS colaborador_registro_nome,
+                       COALESCE(t.filial_registro, '') AS filial_registro_nome,
                        u.name  AS criado_por_nome,
                        uu.name AS atualizado_por_nome
                 FROM triagem_toners t
@@ -587,6 +620,8 @@ class TriagemTonersController
             $codigoRequisicao = trim($_POST['codigo_requisicao'] ?? '');
             $defeitoId   = isset($_POST['defeito_id']) && $_POST['defeito_id'] !== '' ? (int)$_POST['defeito_id'] : null;
             $observacoes = $_POST['observacoes'] ?? null;
+            $filialRegistro = trim((string)($_SESSION['user_filial'] ?? ''));
+            $colaboradorRegistro = trim((string)($_SESSION['user_name'] ?? ''));
 
             if (!$toner_id || !$cliente_id || !$destino) {
                 echo json_encode(['success' => false, 'message' => 'Toner, cliente e destino são obrigatórios.']);
@@ -654,23 +689,26 @@ class TriagemTonersController
 
             $insert = $this->db->prepare("
                 INSERT INTO triagem_toners
-                    (toner_id, toner_modelo, cliente_id, cliente_nome, codigo_requisicao, defeito_id, defeito_nome,
+                    (toner_id, toner_modelo, cliente_id, cliente_nome, filial_registro, colaborador_registro, codigo_requisicao, defeito_id, defeito_nome,
                      modo, peso_retornado, percentual_informado,
                      gramatura_restante, percentual_calculado, parecer, destino,
                      valor_recuperado, observacoes, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
+            $percentualParaSalvar = $modo === 'percentual' ? $pct_inf : $percentual_calculado;
             $insert->execute([
                 $toner_id,
                 $toner['modelo'],
                 $cliente_id,
                 $cliente['nome'],
+                $filialRegistro !== '' ? $filialRegistro : null,
+                $colaboradorRegistro !== '' ? $colaboradorRegistro : null,
                 $codigoRequisicao !== '' ? $codigoRequisicao : null,
                 $defeitoId,
                 $defeitoNome,
                 $modo,
                 $peso_ret,
-                $pct_inf,
+                $percentualParaSalvar,
                 $gramatura_restante,
                 $percentual_calculado,
                 $parecer,
@@ -708,6 +746,8 @@ class TriagemTonersController
             $codigoRequisicao = trim($_POST['codigo_requisicao'] ?? '');
             $defeitoId   = isset($_POST['defeito_id']) && $_POST['defeito_id'] !== '' ? (int)$_POST['defeito_id'] : null;
             $observacoes = $_POST['observacoes'] ?? null;
+            $filialRegistro = trim((string)($_SESSION['user_filial'] ?? ''));
+            $colaboradorRegistro = trim((string)($_SESSION['user_name'] ?? ''));
 
             if (!$id || !$toner_id || !$cliente_id || !$destino) {
                 echo json_encode(['success' => false, 'message' => 'Dados incompletos.']);
@@ -771,6 +811,7 @@ class TriagemTonersController
             $upd = $this->db->prepare("
                 UPDATE triagem_toners SET
                     toner_id = ?, toner_modelo = ?, cliente_id = ?, cliente_nome = ?, codigo_requisicao = ?,
+                    filial_registro = COALESCE(filial_registro, ?), colaborador_registro = COALESCE(colaborador_registro, ?),
                     defeito_id = ?, defeito_nome = ?, modo = ?,
                     peso_retornado = ?, percentual_informado = ?,
                     gramatura_restante = ?, percentual_calculado = ?,
@@ -778,10 +819,13 @@ class TriagemTonersController
                     observacoes = ?, updated_by = ?, updated_at = NOW()
                 WHERE id = ?
             ");
+            $percentualParaSalvar = $modo === 'percentual' ? $pct_inf : $percentual_calculado;
             $upd->execute([
                 $toner_id, $toner['modelo'], $cliente_id, $cliente['nome'], $codigoRequisicao !== '' ? $codigoRequisicao : null,
+                $filialRegistro !== '' ? $filialRegistro : null,
+                $colaboradorRegistro !== '' ? $colaboradorRegistro : null,
                 $defeitoId, $defeitoNome, $modo,
-                $peso_ret, $pct_inf,
+                $peso_ret, $percentualParaSalvar,
                 $gramatura_restante, $percentual_calculado,
                 $parecer, $destino, $valor_recuperado,
                 $observacoes, $_SESSION['user_id'], $id,
@@ -826,12 +870,12 @@ class TriagemTonersController
 
             $insert = $this->db->prepare("
                 INSERT INTO triagem_toners (
-                    toner_id, toner_modelo, cliente_id, cliente_nome, codigo_requisicao,
+                    toner_id, toner_modelo, cliente_id, cliente_nome, filial_registro, colaborador_registro, codigo_requisicao,
                     defeito_id, defeito_nome, modo,
                     peso_retornado, percentual_informado, gramatura_restante,
                     percentual_calculado, parecer, destino, valor_recuperado,
                     observacoes, created_by
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             $insert->execute([
@@ -839,6 +883,8 @@ class TriagemTonersController
                 $original['toner_modelo'],
                 $original['cliente_id'],
                 $original['cliente_nome'],
+                $original['filial_registro'] ?? ($_SESSION['user_filial'] ?? null),
+                $original['colaborador_registro'] ?? ($_SESSION['user_name'] ?? null),
                 $original['codigo_requisicao'] ?? null,
                 $original['defeito_id'] ?? null,
                 $original['defeito_nome'] ?? null,
