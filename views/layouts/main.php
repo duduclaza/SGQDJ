@@ -299,6 +299,7 @@ if (!function_exists('flash')) {
       let pollTimer = null;
       let heartbeatTimer = null;
       let isChatOpen = false;
+      let isAppVisible = true;
 
       const ui = {};
 
@@ -375,6 +376,7 @@ if (!function_exists('flash')) {
       }
 
       async function startChatPolling() {
+        if (!isAppVisible) return;
         stopChatPolling();
 
         await heartbeat();
@@ -386,7 +388,7 @@ if (!function_exists('flash')) {
         }
 
         pollTimer = setInterval(async function() {
-          if (!isChatOpen) return;
+          if (!isChatOpen || !isAppVisible) return;
           await loadContacts();
           if (activeMode === 'global') {
             await loadGlobalMessages();
@@ -396,9 +398,17 @@ if (!function_exists('flash')) {
         }, 15000);
 
         heartbeatTimer = setInterval(function() {
-          if (!isChatOpen) return;
+          if (!isChatOpen || !isAppVisible) return;
           heartbeat();
         }, 120000);
+      }
+
+      function syncPollingWithVisibility() {
+        if (isChatOpen && isAppVisible) {
+          startChatPolling();
+        } else {
+          stopChatPolling();
+        }
       }
 
       async function loadContacts() {
@@ -596,11 +606,26 @@ if (!function_exists('flash')) {
       }
 
       function bindEvents() {
+        document.addEventListener('visibilitychange', function() {
+          isAppVisible = !document.hidden;
+          syncPollingWithVisibility();
+        });
+
+        window.addEventListener('blur', function() {
+          isAppVisible = false;
+          syncPollingWithVisibility();
+        });
+
+        window.addEventListener('focus', function() {
+          isAppVisible = !document.hidden;
+          syncPollingWithVisibility();
+        });
+
         ui.toggle.addEventListener('click', async function() {
           ui.panel.classList.toggle('hidden');
           if (!ui.panel.classList.contains('hidden')) {
             isChatOpen = true;
-            await startChatPolling();
+            await syncPollingWithVisibility();
           } else {
             isChatOpen = false;
             stopChatPolling();
