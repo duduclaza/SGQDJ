@@ -7,8 +7,8 @@ use App\Config\Database;
 class ChatController
 {
     private const AI_BOT_ID = -1000;
-    private const AI_BOT_NAME = 'Daniel do Suporte';
-    private const AI_BOT_EMAIL = 'daniel.suporte.ai@sgq.local';
+    private const AI_BOT_NAME = 'Eduardo do Suporte';
+    private const AI_BOT_EMAIL = 'eduardo.suporte.ai@sgq.local';
     private const AI_BOT_AVATAR_URL = '/assets/daniel-suporte.svg';
 
     private $db;
@@ -330,7 +330,7 @@ class ChatController
                 'format' => 'plain_text',
                 'version' => 1,
                 'chat_type' => 'direct',
-                'target' => 'ai_daniel',
+                'target' => 'ai_eduardo',
                 'sent_at' => date('c')
             ];
 
@@ -345,7 +345,7 @@ class ChatController
                 'format' => 'plain_text',
                 'version' => 1,
                 'chat_type' => 'direct',
-                'source' => 'ai_daniel',
+                'source' => 'ai_eduardo',
                 'sent_at' => date('c')
             ];
 
@@ -355,7 +355,7 @@ class ChatController
 
             echo json_encode([
                 'success' => true,
-                'message' => 'Mensagem enviada para Daniel do Suporte',
+                'message' => 'Mensagem enviada para Eduardo do Suporte',
                 'data' => [
                     'receiver_id' => self::AI_BOT_ID,
                     'receiver_name' => self::AI_BOT_NAME
@@ -363,14 +363,33 @@ class ChatController
             ]);
         } catch (\Throwable $e) {
             http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Erro ao conversar com Daniel do Suporte']);
+            echo json_encode(['success' => false, 'message' => 'Erro ao conversar com Eduardo do Suporte']);
         }
     }
 
     private function generateAiResponse(int $userId, string $message): string
     {
         if (!$this->isSupportedTopic($message)) {
-            return 'Oi! Eu sou o Daniel do Suporte 🙂 Posso te ajudar com impressoras, toners, notebooks, notas fiscais, cálculos fiscais e dúvidas sobre os módulos do sistema. Se quiser, me manda sua dúvida nesses temas que eu te ajudo agora.';
+            return 'Oi! Eu sou o Eduardo do Suporte 🙂 Posso te ajudar com impressoras, toners, notebooks, notas fiscais, cálculos fiscais e dúvidas sobre os módulos do sistema. Se quiser, me manda sua dúvida nesses temas que eu te ajudo agora.';
+        }
+
+        $systemLibrary = $this->loadSystemKnowledgeBase();
+        $detectedModule = $this->detectRelevantModuleFromLibrary($message, $systemLibrary);
+        $moduleContext = '';
+        if (is_array($detectedModule)) {
+            $moduleContext = 'Módulo/tela possivelmente relacionado(a): ' . $detectedModule['label'] . ' (' . $detectedModule['route'] . ").";
+        }
+
+        $webLookupContext = '';
+        if ($this->shouldRunWebLookup($message)) {
+            $webLinks = $this->searchWebLinks($message, 4);
+            if (!empty($webLinks)) {
+                $webLines = [];
+                foreach ($webLinks as $item) {
+                    $webLines[] = '- ' . $item['title'] . ' -> ' . $item['url'];
+                }
+                $webLookupContext = "Links de apoio pesquisados na web (priorize fontes oficiais):\n" . implode("\n", $webLines);
+            }
         }
 
         $geminiApiKey = trim((string)($_ENV['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY') ?: ''));
@@ -390,14 +409,22 @@ class ChatController
         $history = $this->loadAiHistory($userId);
         $historyText = $history === '' ? '(sem histórico anterior)' : $history;
 
-        $prompt = "Você é Daniel do Suporte, assistente de IA interno do sistema SGQ.\n"
+        $prompt = "Você é Eduardo do Suporte, assistente de IA interno do sistema SGQ.\n"
             . "Fale sempre em português do Brasil com tom natural, humano e descontraído, como um colega prestativo do time de suporte.\n"
             . "Seja claro e direto; use frases curtas e exemplos práticos quando ajudar.\n"
             . "Demonstre empatia e cordialidade sem exageros.\n"
+            . "Evite soar robótico: varie a forma de abertura, use linguagem natural e não repita sempre a mesma estrutura de resposta.\n"
+            . "Não use jargão técnico sem explicar de forma simples.\n"
             . "Limite estrito de escopo: impressoras, toners, notebooks, notas fiscais, cálculos fiscais e dúvidas sobre módulos do sistema.\n"
             . "Se a pergunta sair desse escopo, recuse educadamente e convide a pessoa a perguntar sobre os temas permitidos.\n"
+            . "Quando detectar a tela/módulo no contexto, cite explicitamente o nome do módulo e o caminho da rota para orientar melhor.\n"
+            . "Se o usuário pedir drivers/manuais/download, use os links fornecidos no contexto e priorize sites oficiais do fabricante.\n"
             . "Nunca invente acesso a banco de dados em tempo real. Nunca peça senha, token ou dados sensíveis.\n"
+            . "Use a biblioteca do sistema abaixo como referência principal para explicar funcionalidades e fluxos.\n"
             . "Sempre que fizer sentido, termine com uma pergunta curta para continuar o atendimento (ex.: 'quer que eu te guie no passo a passo?').\n"
+            . "Biblioteca dinâmica do sistema:\n" . $systemLibrary . "\n\n"
+            . ($moduleContext !== '' ? ($moduleContext . "\n\n") : '')
+            . ($webLookupContext !== '' ? ($webLookupContext . "\n\n") : '')
             . "Histórico recente:\n" . $historyText . "\n\n"
             . "Pergunta atual do usuário: " . $message;
 
@@ -406,7 +433,7 @@ class ChatController
             $groqPayload = [
                 'model' => $groqModel,
                 'messages' => [
-                    ['role' => 'system', 'content' => 'Você é Daniel do Suporte, assistente interno do SGQ. Responda sempre em pt-BR com tom humano, direto e colaborativo. Limite-se a: impressoras, toners, notebooks, notas fiscais, cálculos fiscais e módulos do sistema.'],
+                    ['role' => 'system', 'content' => 'Você é Eduardo do Suporte, assistente interno do SGQ. Responda sempre em pt-BR com tom humano, direto e colaborativo. Limite-se a: impressoras, toners, notebooks, notas fiscais, cálculos fiscais e módulos do sistema.'],
                     ['role' => 'user', 'content' => $prompt]
                 ],
                 'temperature' => 0.75,
@@ -432,7 +459,7 @@ class ChatController
             curl_close($ch);
 
             if ($response === false) {
-                error_log('Daniel Groq cURL: ' . $curlError);
+                error_log('Eduardo Groq cURL: ' . $curlError);
             } else {
                 $json = json_decode($response, true);
                 if ($httpCode >= 200 && $httpCode < 300) {
@@ -440,7 +467,7 @@ class ChatController
                     if ($text !== '') {
                         return $text;
                     }
-                    error_log('Daniel Groq resposta vazia: ' . $response);
+                    error_log('Eduardo Groq resposta vazia: ' . $response);
                 } else {
                     $apiError = trim((string)($json['error']['message'] ?? ''));
                     if ($httpCode === 401) {
@@ -452,7 +479,7 @@ class ChatController
                     if ($httpCode === 403) {
                         return 'A chave da Groq está sem permissão para esse modelo. Confira o GROQ_MODEL e o projeto da chave.';
                     }
-                    error_log('Daniel Groq HTTP ' . $httpCode . ': ' . ($apiError !== '' ? $apiError : 'erro desconhecido'));
+                    error_log('Eduardo Groq HTTP ' . $httpCode . ': ' . ($apiError !== '' ? $apiError : 'erro desconhecido'));
                 }
             }
         }
@@ -556,16 +583,16 @@ class ChatController
         }
 
         if ($hadQuotaError) {
-            error_log('Daniel Gemini quota/rate: ' . $lastError);
+            error_log('Eduardo Gemini quota/rate: ' . $lastError);
             return 'A API do Gemini respondeu com limite temporário (quota/rate). Tente novamente em alguns instantes.';
         }
 
         if ($hadPermissionError) {
-            error_log('Daniel Gemini permission: ' . $lastError);
+            error_log('Eduardo Gemini permission: ' . $lastError);
             return 'O projeto/chave do Gemini está sem permissão para o modelo testado. Confirme no Google Cloud se a API Generative Language está habilitada e se a chave pode usar Gemini.';
         }
 
-        error_log('Daniel Gemini falhou: ' . $lastError);
+        error_log('Eduardo Gemini falhou: ' . $lastError);
         return 'Estou enfrentando instabilidade para responder agora. Tente novamente em alguns segundos.';
     }
 
@@ -583,7 +610,7 @@ class ChatController
 
             $lines = [];
             foreach ($rows as $row) {
-                $prefix = ((int)$row['sender_id'] === self::AI_BOT_ID) ? 'Daniel' : 'Usuario';
+                $prefix = ((int)$row['sender_id'] === self::AI_BOT_ID) ? 'Eduardo' : 'Usuario';
                 $lines[] = $prefix . ': ' . trim((string)$row['message']);
             }
 
@@ -610,5 +637,318 @@ class ChatController
         }
 
         return false;
+    }
+
+    private function shouldRunWebLookup(string $message): bool
+    {
+        $normalized = $this->normalizeForLookup($message);
+        $keywords = [
+            'driver', 'drivers', 'manual', 'firmware', 'download', 'instalador',
+            'site oficial', 'fabricante', 'suporte tecnico', 'baixar'
+        ];
+
+        foreach ($keywords as $keyword) {
+            if (strpos($normalized, $this->normalizeForLookup($keyword)) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function detectRelevantModuleFromLibrary(string $message, string $systemLibrary): ?array
+    {
+        if (trim($systemLibrary) === '') {
+            return null;
+        }
+
+        preg_match_all('/^-\s+(.+?)\s+\((\/[^)]+)\)$/m', $systemLibrary, $matches, PREG_SET_ORDER);
+        if (empty($matches)) {
+            return null;
+        }
+
+        $messageNormalized = $this->normalizeForLookup($message);
+        $best = null;
+        $bestScore = 0;
+
+        foreach ($matches as $row) {
+            $label = trim((string)($row[1] ?? ''));
+            $route = trim((string)($row[2] ?? ''));
+            if ($label === '' || $route === '') {
+                continue;
+            }
+
+            $score = 0;
+            $labelNorm = $this->normalizeForLookup($label);
+            $routeNorm = $this->normalizeForLookup($route);
+
+            if ($labelNorm !== '' && strpos($messageNormalized, $labelNorm) !== false) {
+                $score += 3;
+            }
+
+            if ($routeNorm !== '' && strpos($messageNormalized, trim($routeNorm, '/')) !== false) {
+                $score += 2;
+            }
+
+            $tokens = preg_split('/\s+/', $labelNorm) ?: [];
+            foreach ($tokens as $token) {
+                if (strlen($token) < 4) {
+                    continue;
+                }
+                if (strpos($messageNormalized, $token) !== false) {
+                    $score += 1;
+                }
+            }
+
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $best = ['label' => $label, 'route' => $route];
+            }
+        }
+
+        return $bestScore > 0 ? $best : null;
+    }
+
+    private function searchWebLinks(string $query, int $limit = 4): array
+    {
+        if (!function_exists('curl_init')) {
+            return [];
+        }
+
+        $url = 'https://duckduckgo.com/html/?q=' . urlencode($query . ' driver manual download site oficial');
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 15,
+            CURLOPT_HTTPHEADER => [
+                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            ]
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($response === false || $httpCode < 200 || $httpCode >= 300) {
+            return [];
+        }
+
+        preg_match_all('/<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/is', $response, $matches, PREG_SET_ORDER);
+        if (empty($matches)) {
+            return [];
+        }
+
+        $results = [];
+        $seen = [];
+        foreach ($matches as $match) {
+            $rawHref = html_entity_decode((string)($match[1] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $title = trim(strip_tags(html_entity_decode((string)($match[2] ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+            if ($rawHref === '' || $title === '') {
+                continue;
+            }
+
+            $finalUrl = $this->extractFinalSearchUrl($rawHref);
+            if ($finalUrl === '' || isset($seen[$finalUrl])) {
+                continue;
+            }
+
+            $seen[$finalUrl] = true;
+            $results[] = ['title' => $title, 'url' => $finalUrl];
+
+            if (count($results) >= $limit) {
+                break;
+            }
+        }
+
+        return $results;
+    }
+
+    private function extractFinalSearchUrl(string $rawHref): string
+    {
+        $href = trim($rawHref);
+        if ($href === '') {
+            return '';
+        }
+
+        if (strpos($href, '/l/?') === 0 || strpos($href, 'duckduckgo.com/l/?') !== false) {
+            $parts = parse_url($href);
+            $query = [];
+            parse_str((string)($parts['query'] ?? ''), $query);
+            $uddg = trim((string)($query['uddg'] ?? ''));
+            if ($uddg !== '') {
+                $decoded = urldecode($uddg);
+                if (preg_match('/^https?:\/\//i', $decoded)) {
+                    return $decoded;
+                }
+            }
+        }
+
+        if (preg_match('/^https?:\/\//i', $href)) {
+            return $href;
+        }
+
+        return '';
+    }
+
+    private function normalizeForLookup(string $value): string
+    {
+        $text = mb_strtolower($value, 'UTF-8');
+        $text = strtr($text, [
+            'á' => 'a', 'à' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a',
+            'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e',
+            'í' => 'i', 'ì' => 'i', 'î' => 'i', 'ï' => 'i',
+            'ó' => 'o', 'ò' => 'o', 'ô' => 'o', 'õ' => 'o', 'ö' => 'o',
+            'ú' => 'u', 'ù' => 'u', 'û' => 'u', 'ü' => 'u',
+            'ç' => 'c'
+        ]);
+        $text = preg_replace('/[^a-z0-9\s\/\-]/', ' ', $text);
+        $text = preg_replace('/\s+/', ' ', (string)$text);
+        return trim((string)$text);
+    }
+
+    private function loadSystemKnowledgeBase(): string
+    {
+        $projectRoot = dirname(__DIR__, 2);
+        $cacheDir = $projectRoot . '/storage/cache';
+        $cacheFile = $cacheDir . '/eduardo-system-library.json';
+
+        $sourceFiles = $this->getSystemLibrarySourceFiles($projectRoot);
+        $latestSourceMtime = 0;
+        foreach ($sourceFiles as $file) {
+            if (is_file($file)) {
+                $mtime = (int)filemtime($file);
+                if ($mtime > $latestSourceMtime) {
+                    $latestSourceMtime = $mtime;
+                }
+            }
+        }
+
+        if (is_file($cacheFile)) {
+            $cacheMtime = (int)filemtime($cacheFile);
+            if ($cacheMtime >= $latestSourceMtime) {
+                $cached = json_decode((string)file_get_contents($cacheFile), true);
+                if (is_array($cached) && !empty($cached['content'])) {
+                    return (string)$cached['content'];
+                }
+            }
+        }
+
+        $content = $this->buildSystemKnowledgeBase($projectRoot);
+
+        if (!is_dir($cacheDir)) {
+            @mkdir($cacheDir, 0777, true);
+        }
+
+        @file_put_contents($cacheFile, json_encode([
+            'updated_at' => date('c'),
+            'content' => $content
+        ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+
+        return $content;
+    }
+
+    private function getSystemLibrarySourceFiles(string $projectRoot): array
+    {
+        $files = [
+            $projectRoot . '/views/partials/sidebar.php',
+            $projectRoot . '/public/index.php',
+            $projectRoot . '/routes/RouteServiceProvider.php'
+        ];
+
+        $controllers = glob($projectRoot . '/src/Controllers/*Controller.php') ?: [];
+        return array_merge($files, $controllers);
+    }
+
+    private function buildSystemKnowledgeBase(string $projectRoot): string
+    {
+        $modules = $this->extractSidebarModules($projectRoot . '/views/partials/sidebar.php');
+        $controllerMap = $this->extractControllerActions($projectRoot . '/src/Controllers');
+
+        $lines = [];
+        $lines[] = 'Resumo interno do SGQ para respostas do Eduardo:';
+
+        if (!empty($modules)) {
+            $lines[] = 'Módulos/menu detectados:';
+            foreach ($modules as $module) {
+                $lines[] = '- ' . $module;
+            }
+        }
+
+        if (!empty($controllerMap)) {
+            $lines[] = 'Principais controllers e ações públicas:';
+            foreach ($controllerMap as $controller => $actions) {
+                $lines[] = '- ' . $controller . ': ' . implode(', ', $actions);
+            }
+        }
+
+        if (count($lines) <= 1) {
+            $lines[] = '- Biblioteca ainda sem dados suficientes. Oriente o usuário com passos gerais e peça contexto da tela.';
+        }
+
+        return implode("\n", $lines);
+    }
+
+    private function extractSidebarModules(string $sidebarFile): array
+    {
+        if (!is_file($sidebarFile)) {
+            return [];
+        }
+
+        $html = (string)file_get_contents($sidebarFile);
+        if ($html === '') {
+            return [];
+        }
+
+        preg_match_all('/<a[^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/is', $html, $matches, PREG_SET_ORDER);
+        $modules = [];
+
+        foreach ($matches as $match) {
+            $href = trim((string)($match[1] ?? ''));
+            $labelRaw = trim(strip_tags((string)($match[2] ?? '')));
+            $label = preg_replace('/\s+/', ' ', $labelRaw);
+
+            if ($href === '' || $label === '' || strlen($label) < 2) {
+                continue;
+            }
+
+            $modules[] = $label . ' (' . $href . ')';
+        }
+
+        $modules = array_values(array_unique($modules));
+        return array_slice($modules, 0, 40);
+    }
+
+    private function extractControllerActions(string $controllersDir): array
+    {
+        if (!is_dir($controllersDir)) {
+            return [];
+        }
+
+        $files = glob($controllersDir . '/*Controller.php') ?: [];
+        $result = [];
+
+        foreach ($files as $file) {
+            $content = (string)file_get_contents($file);
+            if ($content === '') {
+                continue;
+            }
+
+            $controller = basename($file, '.php');
+            preg_match_all('/public\s+function\s+([a-zA-Z0-9_]+)\s*\(/', $content, $matches);
+            $methods = array_values(array_unique(array_filter($matches[1] ?? [], static function ($name) {
+                return !in_array($name, ['__construct'], true);
+            })));
+
+            if (empty($methods)) {
+                continue;
+            }
+
+            $result[$controller] = array_slice($methods, 0, 20);
+        }
+
+        ksort($result);
+        return $result;
     }
 }

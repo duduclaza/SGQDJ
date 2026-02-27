@@ -261,9 +261,17 @@ if (!function_exists('flash')) {
     .chat-message-row.other { justify-content: flex-start; }
     .chat-message-avatar { width: 24px; height: 24px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; background: #64748b; overflow: hidden; flex-shrink: 0; }
     .chat-message-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .chat-message { display: inline-block; width: auto; max-width: 45%; padding: 5px 8px; border-radius: 8px; font-size: 12px; line-height: 1.28; white-space: pre-wrap; word-break: break-word; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08); }
+    .chat-message { display: inline-block; width: auto; max-width: 40%; padding: 4px 7px; border-radius: 8px; font-size: 12px; line-height: 1.25; white-space: pre-wrap; word-break: break-word; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08); }
     .chat-message.me { background: #d9fdd3; color: #0f172a; }
     .chat-message.other { background: #ffffff; color: #111827; }
+    .chat-typing { display: inline-flex; align-items: center; gap: 3px; min-height: 14px; }
+    .chat-typing-dot { width: 5px; height: 5px; border-radius: 999px; background: #64748b; opacity: 0.28; animation: chatTypingBlink 1.1s infinite; }
+    .chat-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .chat-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes chatTypingBlink {
+      0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+      40% { opacity: 1; transform: translateY(-1px); }
+    }
     .chat-message-meta { margin-top: 4px; font-size: 10px; opacity: 0.8; display: inline-flex; align-items: center; gap: 4px; }
     .chat-read-status { font-size: 11px; letter-spacing: -1px; }
     .chat-read-status.sent { color: #64748b; }
@@ -300,6 +308,7 @@ if (!function_exists('flash')) {
       let heartbeatTimer = null;
       let isChatOpen = false;
       let isAppVisible = true;
+      let isAiTyping = false;
       let pollBackoffLevel = 0;
       let lastUnreadTotal = 0;
 
@@ -349,6 +358,31 @@ if (!function_exists('flash')) {
           .replace(/>/g, '&gt;')
           .replace(/\"/g, '&quot;')
           .replace(/'/g, '&#039;');
+      }
+
+      function getSelectedContact() {
+        return contacts.find(c => String(c.id) === String(activeContactId)) || null;
+      }
+
+      function isAiConversation() {
+        const selected = getSelectedContact();
+        return !!(selected && Number(selected.is_ai) === 1);
+      }
+
+      function typingIndicatorHtml(selectedContact) {
+        if (!selectedContact) return '';
+        return `
+          <div id="chat-typing-indicator" class="chat-message-row other">
+            ${avatarHtml(selectedContact.id, selectedContact.name, selectedContact.has_photo, 'chat-message-avatar', selectedContact.avatar_url)}
+            <div class="chat-message other">
+              <div class="chat-typing" aria-label="Eduardo está digitando">
+                <span class="chat-typing-dot"></span>
+                <span class="chat-typing-dot"></span>
+                <span class="chat-typing-dot"></span>
+              </div>
+            </div>
+          </div>
+        `;
       }
 
       function fmtDate(iso) {
@@ -515,7 +549,7 @@ if (!function_exists('flash')) {
           }
           if (maxId > 0) lastDirectSeenByUser[activeContactId] = Math.max(prevSeen, maxId);
 
-          const selectedContact = contacts.find(c => String(c.id) === String(activeContactId));
+          const selectedContact = getSelectedContact();
           ui.empty.classList.add('hidden');
           ui.convHeader.classList.remove('hidden');
           if (selectedContact) {
@@ -539,7 +573,7 @@ if (!function_exists('flash')) {
                 </div>
               </div>
             `;
-          }).join('');
+          }).join('') + (isAiTyping && isAiConversation() ? typingIndicatorHtml(selectedContact) : '');
 
           ui.messages.scrollTop = ui.messages.scrollHeight;
         } catch (_) {}
@@ -553,8 +587,14 @@ if (!function_exists('flash')) {
         const payload = new URLSearchParams();
         const endpoint = '/api/chat/send';
         if (!activeContactId) return;
+        const isAiChat = isAiConversation();
         payload.set('receiver_id', activeContactId);
         payload.set('message', text);
+
+        if (isAiChat) {
+          isAiTyping = true;
+          await loadMessages();
+        }
 
         try {
           const data = await fetchJson(endpoint, {
@@ -571,9 +611,12 @@ if (!function_exists('flash')) {
           ui.messageInput.value = '';
           playMessageSound('send');
           registerChatActivity();
+          isAiTyping = false;
           await loadMessages();
           await loadContacts();
         } catch (_) {
+          isAiTyping = false;
+          await loadMessages();
           alert('Erro ao enviar mensagem');
         }
       }
@@ -581,6 +624,7 @@ if (!function_exists('flash')) {
       function selectContact(contactId) {
         activeMode = 'direct';
         activeContactId = String(contactId);
+        isAiTyping = false;
         registerChatActivity();
         loadContacts().then(loadMessages);
       }
