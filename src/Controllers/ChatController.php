@@ -12,6 +12,7 @@ class ChatController
     {
         $this->db = Database::getInstance();
         $this->ensureChatTables();
+        $this->purgeOldMessages();
     }
 
     private function ensureChatTables(): void
@@ -21,17 +22,37 @@ class ChatController
             sender_id INT NOT NULL,
             receiver_id INT NOT NULL,
             message TEXT NOT NULL,
+            payload_json LONGTEXT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             read_at TIMESTAMP NULL DEFAULT NULL,
             INDEX idx_chat_pair (sender_id, receiver_id),
             INDEX idx_chat_created (created_at)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+        try {
+            $checkColumn = $this->db->query("SHOW COLUMNS FROM chat_messages LIKE 'payload_json'");
+            if (!$checkColumn || $checkColumn->rowCount() === 0) {
+                $this->db->exec("ALTER TABLE chat_messages ADD COLUMN payload_json LONGTEXT NULL AFTER message");
+            }
+        } catch (\Throwable $e) {
+            // manter compatibilidade sem interromper o chat
+        }
+
         $this->db->exec("CREATE TABLE IF NOT EXISTS chat_user_presence (
             user_id INT PRIMARY KEY,
             last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             INDEX idx_presence_last_seen (last_seen)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+
+    private function purgeOldMessages(): void
+    {
+        try {
+            $stmt = $this->db->prepare("DELETE FROM chat_messages WHERE created_at < DATE_SUB(NOW(), INTERVAL 30 DAY)");
+            $stmt->execute();
+        } catch (\Throwable $e) {
+            // não bloquear o uso do chat por falha de limpeza
+        }
     }
 
     private function requireAuthJson(): ?int
@@ -147,6 +168,7 @@ class ChatController
                     sender_id,
                     receiver_id,
                     message,
+                    payload_json,
                     created_at,
                     read_at
                 FROM chat_messages
@@ -157,10 +179,66 @@ class ChatController
             $stmt->execute([$userId, $contactId, $contactId, $userId]);
             $messages = array_reverse($stmt->fetchAll(\PDO::FETCH_ASSOC));
 
+            foreach ($messages as &$msg) {
+                if (!empty($msg['payload_json'])) {
+                    $payload = json_decode((string)$msg['payload_json'], true);
+                    if (is_array($payload) && isset($payload['text'])) {
+                        $msg['message'] = (string)$payload['text'];
+                    }
+                }
+                unset($msg['payload_json']);
+            }
+            unset($msg);
+
             echo json_encode(['success' => true, 'messages' => $messages]);
         } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Erro ao carregar mensagens']);
+        }
+    }
+
+    public function getGlobalMessages(): void
+    {
+        $userId = $this->requireAuthJson();
+        if ($userId === null) {
+            return;
+        }
+
+        try {
+            $this->touchPresence($userId);
+
+            $stmt = $this->db->prepare("SELECT
+                    m.id,
+                    m.sender_id,
+                    m.receiver_id,
+                    m.message,
+                    m.payload_json,
+                    m.created_at,
+                    m.read_at,
+                    u.name AS sender_name
+                FROM chat_messages m
+                LEFT JOIN users u ON u.id = m.sender_id
+                WHERE m.receiver_id = 0
+                ORDER BY m.id DESC
+                LIMIT 150");
+            $stmt->execute();
+            $messages = array_reverse($stmt->fetchAll(\PDO::FETCH_ASSOC));
+
+            foreach ($messages as &$msg) {
+                if (!empty($msg['payload_json'])) {
+                    $payload = json_decode((string)$msg['payload_json'], true);
+                    if (is_array($payload) && isset($payload['text'])) {
+                        $msg['message'] = (string)$payload['text'];
+                    }
+                }
+                unset($msg['payload_json']);
+            }
+            unset($msg);
+
+            echo json_encode(['success' => true, 'messages' => $messages]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Erro ao carregar mensagens da sala geral']);
         }
     }
 
@@ -195,9 +273,17 @@ class ChatController
                 return;
             }
 
-            $stmt = $this->db->prepare("INSERT INTO chat_messages (sender_id, receiver_id, message, created_at)
-                VALUES (?, ?, ?, NOW())");
-            $stmt->execute([$userId, $receiverId, $message]);
+            $payload = [
+                'text' => $message,
+                'format' => 'plain_text',
+                'version' => 1,
+                'chat_type' => 'direct',
+                'sent_at' => date('c')
+            ];
+
+            $stmt = $this->db->prepare("INSERT INTO chat_messages (sender_id, receiver_id, message, payload_json, created_at)
+                VALUES (?, ?, ?, ?, NOW())");
+            $stmt->execute([$userId, $receiverId, $message, json_encode($payload, JSON_UNESCAPED_UNICODE)]);
 
             $this->touchPresence($userId);
 
@@ -215,6 +301,59 @@ class ChatController
         } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Erro ao enviar mensagem']);
+        }
+    }
+
+    public function sendGlobalMessage(): void
+    {
+        $userId = $this->requireAuthJson();
+        if ($userId === null) {
+            return;
+        }
+
+        $message = trim((string)($_POST['message'] ?? ''));
+        if ($message === '') {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'message' => 'Mensagem é obrigatória']);
+            return;
+        }
+
+        if (mb_strlen($message) > 2000) {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'message' => 'Mensagem muito longa (máximo 2000 caracteres)']);
+            return;
+        }
+
+        try {
+            $payload = [
+                'text' => $message,
+                'format' => 'plain_text',
+                'version' => 1,
+                'chat_type' => 'global',
+                'sent_at' => date('c')
+            ];
+
+            $stmt = $this->db->prepare("INSERT INTO chat_messages (sender_id, receiver_id, message, payload_json, created_at)
+                VALUES (?, 0, ?, ?, NOW())");
+            $stmt->execute([$userId, $message, json_encode($payload, JSON_UNESCAPED_UNICODE)]);
+
+            $this->touchPresence($userId);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Mensagem enviada na sala geral',
+                'data' => [
+                    'id' => (int)$this->db->lastInsertId(),
+                    'sender_id' => $userId,
+                    'receiver_id' => 0,
+                    'sender_name' => $_SESSION['user_name'] ?? 'Você',
+                    'message' => $message,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Erro ao enviar mensagem na sala geral']);
         }
     }
 

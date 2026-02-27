@@ -180,7 +180,11 @@ if (!function_exists('flash')) {
     <div id="chat-panel" class="chat-panel hidden">
       <div class="chat-header">
         <strong>Chat interno</strong>
-        <span class="chat-subtitle">Usuários online/offline</span>
+        <span class="chat-subtitle">Usuários online/offline • chat em tempo real</span>
+      </div>
+
+      <div class="chat-retention-warning">
+        As conversas deste chat são armazenadas em JSON e apagadas automaticamente a cada 30 dias.
       </div>
 
       <div class="chat-body">
@@ -211,7 +215,8 @@ if (!function_exists('flash')) {
     .chat-panel.hidden { display: none; }
     .chat-header { padding: 12px 14px; border-bottom: 1px solid #e5e7eb; display: flex; flex-direction: column; background: linear-gradient(90deg, #f8fafc 0%, #eef2ff 100%); }
     .chat-subtitle { font-size: 12px; color: #64748b; margin-top: 2px; }
-    .chat-body { display: grid; grid-template-columns: 260px 1fr; height: calc(100% - 62px); }
+    .chat-retention-warning { padding: 8px 12px; border-bottom: 1px solid #fde68a; background: #fffbeb; color: #92400e; font-size: 12px; }
+    .chat-body { display: grid; grid-template-columns: 260px 1fr; height: calc(100% - 96px); }
     .chat-contacts { border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; background: #f8fafc; }
     .chat-search-input { margin: 10px; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 13px; }
     .chat-contacts-list { overflow: auto; padding: 0 8px 10px; }
@@ -250,6 +255,7 @@ if (!function_exists('flash')) {
       if (!meId) return;
 
       let contacts = [];
+      let activeMode = 'global';
       let activeContactId = null;
       let pollTimer = null;
       let heartbeatTimer = null;
@@ -295,12 +301,24 @@ if (!function_exists('flash')) {
             c.email.toLowerCase().includes(searchValue)
           );
 
-          ui.contactsList.innerHTML = filtered.map(c => {
+          const globalButton = `
+            <button class="chat-contact-item ${activeMode === 'global' ? 'active' : ''}" data-mode="global">
+              <div class="chat-contact-top">
+                <span class="chat-contact-name">Sala Geral</span>
+              </div>
+              <div class="chat-contact-status">
+                <span class="chat-status-dot online"></span>
+                Todos os usuários
+              </div>
+            </button>
+          `;
+
+          ui.contactsList.innerHTML = globalButton + (filtered.map(c => {
             const isActive = String(c.id) === String(activeContactId);
             const online = Number(c.is_online) === 1;
             const unread = Number(c.unread_count || 0);
             return `
-              <button class="chat-contact-item ${isActive ? 'active' : ''}" data-user-id="${c.id}">
+              <button class="chat-contact-item ${(activeMode === 'direct' && isActive) ? 'active' : ''}" data-mode="direct" data-user-id="${c.id}">
                 <div class="chat-contact-top">
                   <span class="chat-contact-name">${escapeHtml(c.name)}</span>
                   ${unread > 0 ? `<span class="chat-unread">${unread}</span>` : ''}
@@ -311,7 +329,7 @@ if (!function_exists('flash')) {
                 </div>
               </button>
             `;
-          }).join('') || '<div style="padding:10px;color:#64748b;font-size:12px;">Nenhum usuário encontrado.</div>';
+          }).join('') || '<div style="padding:10px;color:#64748b;font-size:12px;">Nenhum usuário encontrado.</div>');
 
           const totalUnread = contacts.reduce((sum, c) => sum + Number(c.unread_count || 0), 0);
           if (totalUnread > 0) {
@@ -320,6 +338,33 @@ if (!function_exists('flash')) {
           } else {
             ui.badge.classList.add('hidden');
           }
+        } catch (_) {}
+      }
+
+      async function loadGlobalMessages() {
+        try {
+          const data = await fetchJson('/api/chat/messages/global');
+          if (!data.success) return;
+
+          ui.empty.classList.add('hidden');
+          ui.convHeader.classList.remove('hidden');
+          ui.convHeader.textContent = 'Sala Geral (todos com todos)';
+          ui.messages.classList.remove('hidden');
+          ui.form.classList.remove('hidden');
+
+          ui.messages.innerHTML = (data.messages || []).map(m => {
+            const mine = Number(m.sender_id) === meId;
+            const author = mine ? 'Você' : (m.sender_name || 'Usuário');
+            return `
+              <div class="chat-message ${mine ? 'me' : 'other'}">
+                <div style="font-size:11px;font-weight:700;opacity:.85;margin-bottom:3px;">${escapeHtml(author)}</div>
+                <div>${escapeHtml(m.message)}</div>
+                <div class="chat-message-time">${fmtDate(m.created_at)}</div>
+              </div>
+            `;
+          }).join('');
+
+          ui.messages.scrollTop = ui.messages.scrollHeight;
         } catch (_) {}
       }
 
@@ -352,16 +397,22 @@ if (!function_exists('flash')) {
 
       async function sendMessage(event) {
         event.preventDefault();
-        if (!activeContactId) return;
         const text = ui.messageInput.value.trim();
         if (!text) return;
 
         const payload = new URLSearchParams();
-        payload.set('receiver_id', activeContactId);
-        payload.set('message', text);
+        let endpoint = '/api/chat/send';
+        if (activeMode === 'global') {
+          endpoint = '/api/chat/send-global';
+          payload.set('message', text);
+        } else {
+          if (!activeContactId) return;
+          payload.set('receiver_id', activeContactId);
+          payload.set('message', text);
+        }
 
         try {
-          const data = await fetchJson('/api/chat/send', {
+          const data = await fetchJson(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: payload.toString()
@@ -373,14 +424,25 @@ if (!function_exists('flash')) {
           }
 
           ui.messageInput.value = '';
-          await loadMessages();
+          if (activeMode === 'global') {
+            await loadGlobalMessages();
+          } else {
+            await loadMessages();
+          }
           await loadContacts();
         } catch (_) {
           alert('Erro ao enviar mensagem');
         }
       }
 
+      function selectGlobal() {
+        activeMode = 'global';
+        activeContactId = null;
+        loadContacts().then(loadGlobalMessages);
+      }
+
       function selectContact(contactId) {
+        activeMode = 'direct';
         activeContactId = String(contactId);
         loadContacts().then(loadMessages);
       }
@@ -390,7 +452,11 @@ if (!function_exists('flash')) {
           ui.panel.classList.toggle('hidden');
           if (!ui.panel.classList.contains('hidden')) {
             await loadContacts();
-            if (activeContactId) await loadMessages();
+            if (activeMode === 'global') {
+              await loadGlobalMessages();
+            } else if (activeContactId) {
+              await loadMessages();
+            }
           }
         });
 
@@ -398,6 +464,11 @@ if (!function_exists('flash')) {
         ui.contactsList.addEventListener('click', function(event) {
           const btn = event.target.closest('.chat-contact-item');
           if (!btn) return;
+          const mode = btn.getAttribute('data-mode');
+          if (mode === 'global') {
+            selectGlobal();
+            return;
+          }
           selectContact(btn.getAttribute('data-user-id'));
         });
 
@@ -421,10 +492,15 @@ if (!function_exists('flash')) {
         bindEvents();
         await heartbeat();
         await loadContacts();
+        await loadGlobalMessages();
 
         pollTimer = setInterval(async function() {
           await loadContacts();
-          if (activeContactId) await loadMessages();
+          if (activeMode === 'global') {
+            await loadGlobalMessages();
+          } else if (activeContactId) {
+            await loadMessages();
+          }
         }, 5000);
 
         heartbeatTimer = setInterval(heartbeat, 30000);

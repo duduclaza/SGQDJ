@@ -486,7 +486,9 @@ $router->get('/notifications/{id}/redirect', [App\Controllers\NotificationsContr
 $router->get('/api/chat/contacts', [App\Controllers\ChatController::class , 'contacts']);
 $router->post('/api/chat/heartbeat', [App\Controllers\ChatController::class , 'heartbeat']);
 $router->get('/api/chat/messages/{userId}', [App\Controllers\ChatController::class , 'getMessages']);
+$router->get('/api/chat/messages/global', [App\Controllers\ChatController::class , 'getGlobalMessages']);
 $router->post('/api/chat/send', [App\Controllers\ChatController::class , 'sendMessage']);
+$router->post('/api/chat/send-global', [App\Controllers\ChatController::class , 'sendGlobalMessage']);
 
 // FMEA routes
 $router->get('/fmea', [App\Controllers\FMEAController::class , 'index']);
