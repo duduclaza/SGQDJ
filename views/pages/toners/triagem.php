@@ -123,9 +123,9 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
       <!-- Seleção do Cliente -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Cliente <span class="text-red-500">*</span></label>
-        <input id="t-cliente-search" type="text" placeholder="Buscar cliente por nome/código..." oninput="filtrarSelect('t-cliente-search','t-cliente-id')"
+        <input id="t-cliente-search" type="text" placeholder="Digite nome/código do cliente (seleção automática)..." oninput="autoSelecionarInteligente('t-cliente-search','t-cliente-id')"
                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <select id="t-cliente-id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select id="t-cliente-id" onchange="sincronizarInputComSelect('t-cliente-id','t-cliente-search')" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Selecione o cliente...</option>
           <?php foreach (($clientes ?? []) as $c): ?>
           <option value="<?= (int)$c['id'] ?>"><?= e(($c['codigo'] ?? '') . ' - ' . ($c['nome'] ?? '')) ?></option>
@@ -136,9 +136,9 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
       <!-- Seleção do Toner -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Modelo do Toner <span class="text-red-500">*</span></label>
-        <input id="t-toner-search" type="text" placeholder="Buscar modelo do toner..." oninput="filtrarSelect('t-toner-search','t-toner-id')"
+        <input id="t-toner-search" type="text" placeholder="Digite o modelo do toner (seleção automática)..." oninput="autoSelecionarInteligente('t-toner-search','t-toner-id', 'onTonerChange')"
                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <select id="t-toner-id" onchange="onTonerChange()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select id="t-toner-id" onchange="onTonerChange(); sincronizarInputComSelect('t-toner-id','t-toner-search')" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Selecione o modelo...</option>
           <?php foreach ($toners as $t): ?>
           <option value="<?= $t['id'] ?>"
@@ -418,6 +418,8 @@ function abrirModalEditar(r) {
   document.getElementById('t-id').value = r.id;
   document.getElementById('t-cliente-id').value = r.cliente_id || '';
   document.getElementById('t-toner-id').value = r.toner_id;
+  sincronizarInputComSelect('t-cliente-id','t-cliente-search');
+  sincronizarInputComSelect('t-toner-id','t-toner-search');
   onTonerChange();
 
   const modo = r.modo;
@@ -740,17 +742,72 @@ function showToast(msg, type = 'success') {
   setTimeout(() => t.classList.add('hidden'), 3500);
 }
 
-function filtrarSelect(inputId, selectId) {
-  const termo = (document.getElementById(inputId).value || '').toLowerCase().trim();
+function normalizarTexto(texto) {
+  return (texto || '')
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function pontuarCorrespondencia(termo, candidato) {
+  if (!termo) return 0;
+  if (candidato === termo) return 1000;
+  if (candidato.startsWith(termo)) return 700 - (candidato.length - termo.length);
+
+  const idx = candidato.indexOf(termo);
+  if (idx >= 0) return 500 - idx;
+
+  const partes = termo.split(/\s+/).filter(Boolean);
+  if (partes.length > 1 && partes.every(p => candidato.includes(p))) {
+    return 350;
+  }
+
+  return -1;
+}
+
+function autoSelecionarInteligente(inputId, selectId, onChangeFnName = null) {
+  const input = document.getElementById(inputId);
   const select = document.getElementById(selectId);
+  const termo = normalizarTexto(input.value);
   const options = Array.from(select.options);
 
+  const matches = [];
   options.forEach((opt, idx) => {
     if (idx === 0) {
       opt.hidden = false;
       return;
     }
-    opt.hidden = termo !== '' && !opt.text.toLowerCase().includes(termo);
+    const candidato = normalizarTexto(opt.text);
+    const score = pontuarCorrespondencia(termo, candidato);
+    const isMatch = termo === '' || score >= 0;
+    opt.hidden = !isMatch;
+    if (isMatch && termo !== '') {
+      matches.push({ value: opt.value, score, text: opt.text });
+    }
   });
+
+  if (termo === '') {
+    return;
+  }
+
+  matches.sort((a, b) => b.score - a.score || a.text.localeCompare(b.text));
+  if (matches.length > 0) {
+    const melhor = matches[0];
+    const mudou = select.value !== melhor.value;
+    select.value = melhor.value;
+    if (mudou && onChangeFnName && typeof window[onChangeFnName] === 'function') {
+      window[onChangeFnName]();
+    }
+  }
+}
+
+function sincronizarInputComSelect(selectId, inputId) {
+  const select = document.getElementById(selectId);
+  const input = document.getElementById(inputId);
+  const opt = select.options[select.selectedIndex];
+  if (!opt || !opt.value) return;
+  input.value = opt.text;
 }
 </script>
