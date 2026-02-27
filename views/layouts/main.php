@@ -301,8 +301,11 @@ if (!function_exists('flash')) {
         return (String(name || '?').trim().charAt(0) || '?').toUpperCase();
       }
 
-      function avatarHtml(userId, name, hasPhoto, className) {
+      function avatarHtml(userId, name, hasPhoto, className, avatarUrl) {
         const cls = className || 'chat-contact-avatar';
+        if (avatarUrl) {
+          return `<span class="${cls}"><img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(name)}"></span>`;
+        }
         if (Number(hasPhoto) === 1) {
           return `<span class="${cls}"><img src="/profile/photo/${userId}" alt="${escapeHtml(name)}"></span>`;
         }
@@ -389,7 +392,7 @@ if (!function_exists('flash')) {
               <button class="chat-contact-item ${(activeMode === 'direct' && isActive) ? 'active' : ''}" data-mode="direct" data-user-id="${c.id}">
                 <div class="chat-contact-top">
                   <span class="chat-contact-person">
-                    ${avatarHtml(c.id, c.name, c.has_photo, 'chat-contact-avatar')}
+                    ${avatarHtml(c.id, c.name, c.has_photo, 'chat-contact-avatar', c.avatar_url)}
                     <span class="chat-contact-name">${escapeHtml(c.name)}</span>
                   </span>
                   ${unread > 0 ? `<span class="chat-unread">${unread}</span>` : ''}
@@ -469,7 +472,7 @@ if (!function_exists('flash')) {
           ui.empty.classList.add('hidden');
           ui.convHeader.classList.remove('hidden');
           if (selectedContact) {
-            ui.convHeader.innerHTML = `<span class="chat-conversation-title">${avatarHtml(selectedContact.id, selectedContact.name, selectedContact.has_photo, 'chat-contact-avatar')}<span>${escapeHtml(selectedContact.name)}</span></span> <span class="chat-conversation-sub">(${Number(selectedContact.is_online) === 1 ? 'Online' : 'Offline'})</span>`;
+            ui.convHeader.innerHTML = `<span class="chat-conversation-title">${avatarHtml(selectedContact.id, selectedContact.name, selectedContact.has_photo, 'chat-contact-avatar', selectedContact.avatar_url)}<span>${escapeHtml(selectedContact.name)}</span></span> <span class="chat-conversation-sub">(${Number(selectedContact.is_online) === 1 ? 'Online' : 'Offline'})</span>`;
           } else {
             ui.convHeader.textContent = 'Conversa';
           }
@@ -482,7 +485,7 @@ if (!function_exists('flash')) {
             const readLabel = mine ? `<span class="chat-read-status ${readClass}">${m.read_at ? '✓✓' : '✓'}</span>` : '';
             return `
               <div class="chat-message-row ${mine ? 'me' : 'other'}">
-                ${mine ? '' : (selectedContact ? avatarHtml(selectedContact.id, selectedContact.name, selectedContact.has_photo, 'chat-message-avatar') : '')}
+                ${mine ? '' : (selectedContact ? avatarHtml(selectedContact.id, selectedContact.name, selectedContact.has_photo, 'chat-message-avatar', selectedContact.avatar_url) : '')}
                 <div class="chat-message ${mine ? 'me' : 'other'}">
                   <div>${escapeHtml(m.message)}</div>
                   <div class="chat-message-meta">${fmtDate(m.created_at)} ${readLabel}</div>

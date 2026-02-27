@@ -6,6 +6,11 @@ use App\Config\Database;
 
 class ChatController
 {
+    private const AI_BOT_ID = -1000;
+    private const AI_BOT_NAME = 'Daniel do Suporte';
+    private const AI_BOT_EMAIL = 'daniel.suporte.ai@sgq.local';
+    private const AI_BOT_AVATAR_URL = '/assets/daniel-suporte.svg';
+
     private $db;
 
     public function __construct()
@@ -126,6 +131,28 @@ class ChatController
             $stmt->execute([$userId, $userId]);
             $contacts = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            foreach ($contacts as &$contact) {
+                $contact['is_ai'] = 0;
+                $contact['avatar_url'] = null;
+            }
+            unset($contact);
+
+            $botUnreadStmt = $this->db->prepare("SELECT COUNT(*) FROM chat_messages WHERE sender_id = ? AND receiver_id = ? AND read_at IS NULL");
+            $botUnreadStmt->execute([self::AI_BOT_ID, $userId]);
+            $botUnreadCount = (int)$botUnreadStmt->fetchColumn();
+
+            array_unshift($contacts, [
+                'id' => self::AI_BOT_ID,
+                'name' => self::AI_BOT_NAME,
+                'email' => self::AI_BOT_EMAIL,
+                'has_photo' => 1,
+                'is_online' => 1,
+                'unread_count' => $botUnreadCount,
+                'last_seen' => date('Y-m-d H:i:s'),
+                'is_ai' => 1,
+                'avatar_url' => self::AI_BOT_AVATAR_URL
+            ]);
+
             echo json_encode([
                 'success' => true,
                 'contacts' => $contacts,
@@ -148,7 +175,7 @@ class ChatController
         }
 
         $contactId = (int)$contactId;
-        if ($contactId <= 0) {
+        if ($contactId <= 0 && $contactId !== self::AI_BOT_ID) {
             http_response_code(422);
             echo json_encode(['success' => false, 'message' => 'Contato inválido']);
             return;
@@ -254,7 +281,7 @@ class ChatController
         $receiverId = (int)($_POST['receiver_id'] ?? 0);
         $message = trim((string)($_POST['message'] ?? ''));
 
-        if ($receiverId <= 0 || $message === '') {
+        if (($receiverId <= 0 && $receiverId !== self::AI_BOT_ID) || $message === '') {
             http_response_code(422);
             echo json_encode(['success' => false, 'message' => 'Destinatário e mensagem são obrigatórios']);
             return;
@@ -263,6 +290,11 @@ class ChatController
         if (mb_strlen($message) > 2000) {
             http_response_code(422);
             echo json_encode(['success' => false, 'message' => 'Mensagem muito longa (máximo 2000 caracteres)']);
+            return;
+        }
+
+        if ($receiverId === self::AI_BOT_ID) {
+            $this->sendMessageToAi($userId, $message);
             return;
         }
 
@@ -365,5 +397,162 @@ class ChatController
             VALUES (?, NOW())
             ON DUPLICATE KEY UPDATE last_seen = NOW()");
         $stmt->execute([$userId]);
+    }
+
+    private function sendMessageToAi(int $userId, string $message): void
+    {
+        try {
+            $userPayload = [
+                'text' => $message,
+                'format' => 'plain_text',
+                'version' => 1,
+                'chat_type' => 'direct',
+                'target' => 'ai_daniel',
+                'sent_at' => date('c')
+            ];
+
+            $insertUserStmt = $this->db->prepare("INSERT INTO chat_messages (sender_id, receiver_id, message, payload_json, created_at)
+                VALUES (?, ?, ?, ?, NOW())");
+            $insertUserStmt->execute([$userId, self::AI_BOT_ID, $message, json_encode($userPayload, JSON_UNESCAPED_UNICODE)]);
+
+            $aiText = $this->generateAiResponse($userId, $message);
+
+            $aiPayload = [
+                'text' => $aiText,
+                'format' => 'plain_text',
+                'version' => 1,
+                'chat_type' => 'direct',
+                'source' => 'ai_daniel',
+                'sent_at' => date('c')
+            ];
+
+            $insertAiStmt = $this->db->prepare("INSERT INTO chat_messages (sender_id, receiver_id, message, payload_json, created_at)
+                VALUES (?, ?, ?, ?, NOW())");
+            $insertAiStmt->execute([self::AI_BOT_ID, $userId, $aiText, json_encode($aiPayload, JSON_UNESCAPED_UNICODE)]);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Mensagem enviada para Daniel do Suporte',
+                'data' => [
+                    'receiver_id' => self::AI_BOT_ID,
+                    'receiver_name' => self::AI_BOT_NAME
+                ]
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Erro ao conversar com Daniel do Suporte']);
+        }
+    }
+
+    private function generateAiResponse(int $userId, string $message): string
+    {
+        if (!$this->isSupportedTopic($message)) {
+            return 'Sou o Daniel do Suporte (IA). Posso ajudar somente com: impressoras, toners, notebooks, notas fiscais, cálculos fiscais e dúvidas sobre módulos do sistema.';
+        }
+
+        $apiKey = trim((string)($_ENV['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY') ?: ''));
+        if ($apiKey === '') {
+            return 'No momento estou sem integração com a IA. O administrador precisa configurar a variável GEMINI_API_KEY no ambiente do sistema.';
+        }
+
+        if (!function_exists('curl_init')) {
+            return 'Não consegui responder agora porque o servidor está sem suporte a cURL para acessar a IA.';
+        }
+
+        $history = $this->loadAiHistory($userId);
+        $historyText = $history === '' ? '(sem histórico anterior)' : $history;
+
+        $prompt = "Você é Daniel do Suporte, assistente de IA interno do sistema SGQ.\n"
+            . "Responda sempre em português do Brasil, de forma objetiva e prática.\n"
+            . "Limite estrito de escopo: impressoras, toners, notebooks, notas fiscais, cálculos fiscais e dúvidas sobre módulos do sistema.\n"
+            . "Se a pergunta sair desse escopo, recuse educadamente e informe os temas permitidos.\n"
+            . "Nunca invente acesso a banco de dados em tempo real. Não peça senha.\n"
+            . "Histórico recente:\n" . $historyText . "\n\n"
+            . "Pergunta atual do usuário: " . $message;
+
+        $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . urlencode($apiKey);
+        $payload = [
+            'contents' => [
+                [
+                    'role' => 'user',
+                    'parts' => [
+                        ['text' => $prompt]
+                    ]
+                ]
+            ],
+            'generationConfig' => [
+                'temperature' => 0.5,
+                'maxOutputTokens' => 500
+            ]
+        ];
+
+        $ch = curl_init($endpoint);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
+            CURLOPT_TIMEOUT => 18
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($response === false || $httpCode < 200 || $httpCode >= 300) {
+            return 'Estou com instabilidade para responder agora. Tente novamente em alguns segundos.';
+        }
+
+        $json = json_decode($response, true);
+        $text = trim((string)($json['candidates'][0]['content']['parts'][0]['text'] ?? ''));
+
+        if ($text === '') {
+            return 'Não consegui montar uma resposta agora. Pode reformular sua dúvida?';
+        }
+
+        return $text;
+    }
+
+    private function loadAiHistory(int $userId): string
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT sender_id, message
+                FROM chat_messages
+                WHERE (sender_id = ? AND receiver_id = ?)
+                   OR (sender_id = ? AND receiver_id = ?)
+                ORDER BY id DESC
+                LIMIT 8");
+            $stmt->execute([$userId, self::AI_BOT_ID, self::AI_BOT_ID, $userId]);
+            $rows = array_reverse($stmt->fetchAll(\PDO::FETCH_ASSOC));
+
+            $lines = [];
+            foreach ($rows as $row) {
+                $prefix = ((int)$row['sender_id'] === self::AI_BOT_ID) ? 'Daniel' : 'Usuario';
+                $lines[] = $prefix . ': ' . trim((string)$row['message']);
+            }
+
+            return implode("\n", $lines);
+        } catch (\Throwable $e) {
+            return '';
+        }
+    }
+
+    private function isSupportedTopic(string $text): bool
+    {
+        $normalized = mb_strtolower($text, 'UTF-8');
+        $keywords = [
+            'impressora', 'toner', 'notebook', 'nf', 'nota fiscal', 'fiscal',
+            'icms', 'ipi', 'pis', 'cofins', 'tribut', 'módulo', 'modulo',
+            'sgq', 'sistema', 'retornado', 'garantia', 'cadastro', 'perfil',
+            'relatório', 'relatorio', 'departamento', 'filial'
+        ];
+
+        foreach ($keywords as $keyword) {
+            if (strpos($normalized, $keyword) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
