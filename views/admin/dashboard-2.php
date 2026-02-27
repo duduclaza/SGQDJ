@@ -25,7 +25,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-    <a href="/dashboard-2?modulo=triagem" class="group bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md hover:border-cyan-300 transition-all">
+    <a href="/dashboard-2/triagem" class="group bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md hover:border-cyan-300 transition-all">
       <div class="flex items-start justify-between">
         <div>
           <h2 class="text-base font-semibold text-gray-900">Triagem de Toners</h2>

@@ -111,6 +111,15 @@ class AdminController
         }
     }
 
+    /**
+     * Dashboard 2.0 - Página individual da Triagem de Toners
+     */
+    public function dashboard2Triagem()
+    {
+        $_GET['modulo'] = 'triagem';
+        $this->dashboard2();
+    }
+
     private function getTriagemDashboard2Stats(): array
     {
         $stats = [

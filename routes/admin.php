@@ -49,6 +49,7 @@ $router->get('/dashboard', function() {
 
 // Dashboard 2.0
 $router->get('/dashboard-2', [AdminController::class, 'dashboard2']);
+$router->get('/dashboard-2/triagem', [AdminController::class, 'dashboard2Triagem']);
 
 // Admin (alias para dashboard)
 $router->get('/admin', function() {

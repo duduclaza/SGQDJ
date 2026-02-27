@@ -103,6 +103,7 @@ $router->get('/profile', [ProfileController::class , 'index']);
 
 // Dashboard 2.0
 $router->get('/dashboard-2', [App\Controllers\AdminController::class, 'dashboard2']);
+$router->get('/dashboard-2/triagem', [App\Controllers\AdminController::class, 'dashboard2Triagem']);
 
 // Cadastro de Defeitos (fallback)
 $router->get('/cadastro-defeitos', [CadastroDefeitosController::class, 'index']);
