@@ -36,6 +36,12 @@ class PermissionService
         if ($module === 'triagem_toners') {
             return true;
         }
+
+        // Liberação global da visualização de POPs e ITs para todos os usuários
+        // (ações de edição/aprovação continuam controladas por permissões específicas)
+        if ($module === 'pops_its_visualizacao' && $action === 'view') {
+            return true;
+        }
         
         // Load user permissions if not already loaded
         if (!isset(self::$userPermissions[$userId])) {
