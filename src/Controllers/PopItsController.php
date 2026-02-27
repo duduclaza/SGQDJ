@@ -26,7 +26,7 @@ class PopItsController
             $canViewCadastroTitulos = \App\Services\PermissionService::hasPermission($user_id, 'pops_its_cadastro_titulos', 'view');
             $canViewMeusRegistros = \App\Services\PermissionService::hasPermission($user_id, 'pops_its_meus_registros', 'view');
             $canViewPendenteAprovacao = $isAdmin || $isSuperAdmin || \App\Services\PermissionService::hasPermission($user_id, 'pops_its_pendente_aprovacao', 'view');
-            $canViewVisualizacao = \App\Services\PermissionService::hasPermission($user_id, 'pops_its_visualizacao', 'view');
+            $canViewVisualizacao = true; // Todos os usuários logados podem ver POPs e ITs aprovados
             $canViewLogsVisualizacao = $isAdmin || $isSuperAdmin; // Admin ou super admin podem ver logs
             
             // Carregar departamentos para o formulário
@@ -970,61 +970,84 @@ class PopItsController
             // Verificar se as tabelas existem, se não, criar
             $this->criarTabelaDepartamentosSeNaoExistir();
             
-            $stmt = $this->db->prepare("\
-                SELECT 
-                    r.id,
-                    r.versao,
-                    r.nome_arquivo,
-                    r.extensao,
-                    r.tamanho_arquivo,
-                    r.publico,
-                    r.criado_em,
-                    r.aprovado_em,
-                    t.titulo,
-                    t.tipo,
-                    u.name as autor_nome,
-                    ua.name as aprovado_por_nome,
-                    GROUP_CONCAT(d.nome ORDER BY d.nome SEPARATOR ', ') as departamentos_permitidos
-                FROM pops_its_registros r
-                LEFT JOIN pops_its_titulos t ON r.titulo_id = t.id
-                LEFT JOIN users u ON r.criado_por = u.id
-                LEFT JOIN users ua ON r.aprovado_por = ua.id
-                LEFT JOIN pops_its_registros_departamentos rd ON r.id = rd.registro_id
-                LEFT JOIN departamentos d ON rd.departamento_id = d.id
-                WHERE r.status = 'APROVADO'
-                AND r.versao = (
-                    SELECT MAX(r2.versao)
-                    FROM pops_its_registros r2
-                    WHERE r2.titulo_id = r.titulo_id
-                    AND r2.status = 'APROVADO'
-                )
-                GROUP BY r.id, r.versao, r.nome_arquivo, r.extensao, r.tamanho_arquivo,
-                         r.publico, r.criado_em, r.aprovado_em, t.titulo, t.tipo,
-                         u.name, ua.name
-                ORDER BY r.aprovado_em DESC
-            ");
-            $stmt->execute();
+            // Verificar se é admin/super admin - vê todos os aprovados
+            $isAdmin = \App\Services\PermissionService::isAdmin($user_id);
+            $isSuperAdmin = \App\Services\PermissionService::isSuperAdmin($user_id);
+            
+            if ($isAdmin || $isSuperAdmin) {
+                // Admin/Super Admin vê TODOS os registros aprovados
+                $stmt = $this->db->prepare("
+                    SELECT 
+                        r.id, r.versao, r.nome_arquivo, r.extensao, r.tamanho_arquivo,
+                        r.publico, r.criado_em, r.aprovado_em,
+                        t.titulo, t.tipo,
+                        u.name as autor_nome,
+                        ua.name as aprovado_por_nome,
+                        GROUP_CONCAT(d.nome ORDER BY d.nome SEPARATOR ', ') as departamentos_permitidos
+                    FROM pops_its_registros r
+                    LEFT JOIN pops_its_titulos t ON r.titulo_id = t.id
+                    LEFT JOIN users u ON r.criado_por = u.id
+                    LEFT JOIN users ua ON r.aprovado_por = ua.id
+                    LEFT JOIN pops_its_registros_departamentos rd ON r.id = rd.registro_id
+                    LEFT JOIN departamentos d ON rd.departamento_id = d.id
+                    WHERE r.status = 'APROVADO'
+                    AND r.versao = (
+                        SELECT MAX(r2.versao)
+                        FROM pops_its_registros r2
+                        WHERE r2.titulo_id = r.titulo_id
+                        AND r2.status = 'APROVADO'
+                    )
+                    GROUP BY r.id, r.versao, r.nome_arquivo, r.extensao, r.tamanho_arquivo,
+                             r.publico, r.criado_em, r.aprovado_em, t.titulo, t.tipo,
+                             u.name, ua.name
+                    ORDER BY r.aprovado_em DESC
+                ");
+                $stmt->execute();
+            } else {
+                // Usuário comum: vê PÚBLICOS + RESTRITOS do seu departamento
+                $user_dept_id = $this->getUserDepartmentId($user_id);
+                error_log("POPS VISUALIZACAO - user_id=$user_id dept_id=" . ($user_dept_id ?? 'NULL'));
+                
+                $stmt = $this->db->prepare("
+                    SELECT 
+                        r.id, r.versao, r.nome_arquivo, r.extensao, r.tamanho_arquivo,
+                        r.publico, r.criado_em, r.aprovado_em,
+                        t.titulo, t.tipo,
+                        u.name as autor_nome,
+                        ua.name as aprovado_por_nome,
+                        GROUP_CONCAT(d.nome ORDER BY d.nome SEPARATOR ', ') as departamentos_permitidos
+                    FROM pops_its_registros r
+                    LEFT JOIN pops_its_titulos t ON r.titulo_id = t.id
+                    LEFT JOIN users u ON r.criado_por = u.id
+                    LEFT JOIN users ua ON r.aprovado_por = ua.id
+                    LEFT JOIN pops_its_registros_departamentos rd ON r.id = rd.registro_id
+                    LEFT JOIN departamentos d ON rd.departamento_id = d.id
+                    WHERE r.status = 'APROVADO'
+                    AND r.versao = (
+                        SELECT MAX(r2.versao)
+                        FROM pops_its_registros r2
+                        WHERE r2.titulo_id = r.titulo_id
+                        AND r2.status = 'APROVADO'
+                    )
+                    AND (
+                        r.publico = 1
+                        OR r.criado_por = ?
+                        OR EXISTS (
+                            SELECT 1 FROM pops_its_registros_departamentos rd2
+                            WHERE rd2.registro_id = r.id
+                            AND rd2.departamento_id = ?
+                        )
+                    )
+                    GROUP BY r.id, r.versao, r.nome_arquivo, r.extensao, r.tamanho_arquivo,
+                             r.publico, r.criado_em, r.aprovado_em, t.titulo, t.tipo,
+                             u.name, ua.name
+                    ORDER BY r.aprovado_em DESC
+                ");
+                $stmt->execute([$user_id, $user_dept_id]);
+            }
             
             $registros = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-            
-            // Debug: Log para verificar dados
-            error_log("VISUALIZAÇÃO - Total registros: " . count($registros));
-            foreach ($registros as $reg) {
-                error_log("REGISTRO: {$reg['titulo']} - Público: {$reg['publico']} - Departamentos: " . ($reg['departamentos_permitidos'] ?? 'NULL'));
-                
-                // Debug adicional: verificar se existem departamentos na tabela de relacionamento
-                if (!$reg['publico'] && empty($reg['departamentos_permitidos'])) {
-                    $debugStmt = $this->db->prepare("
-                        SELECT rd.registro_id, rd.departamento_id, d.nome 
-                        FROM pops_its_registros_departamentos rd 
-                        LEFT JOIN departamentos d ON rd.departamento_id = d.id 
-                        WHERE rd.registro_id = ?
-                    ");
-                    $debugStmt->execute([$reg['id']]);
-                    $depts = $debugStmt->fetchAll(\PDO::FETCH_ASSOC);
-                    error_log("DEBUG DEPARTAMENTOS para registro {$reg['id']}: " . json_encode($depts));
-                }
-            }
+            error_log("POPS VISUALIZACAO - Total registros retornados: " . count($registros));
             
             echo json_encode(['success' => true, 'data' => $registros]);
             
@@ -1047,11 +1070,12 @@ class PopItsController
             $user_id = $_SESSION['user_id'];
             $registro_id = (int)$id;
             
-            // Verificar se é admin - admin vê tudo
+            // Verificar se é admin/super admin - vê tudo
             $isAdmin = \App\Services\PermissionService::isAdmin($user_id);
+            $isSuperAdmin = \App\Services\PermissionService::isSuperAdmin($user_id);
             
-            if ($isAdmin) {
-                // Admin vê todos os registros aprovados
+            if ($isAdmin || $isSuperAdmin) {
+                // Admin/Super Admin vê todos os registros aprovados
                 $stmt = $this->db->prepare("
                     SELECT r.*, t.titulo 
                     FROM pops_its_registros r
@@ -1060,23 +1084,26 @@ class PopItsController
                 ");
                 $stmt->execute([$registro_id]);
             } else {
-                // Usuário comum - controle de acesso
+                // Usuário comum - regra: público=todos, restrito=só departamentos vinculados
                 $user_dept_id = $this->getUserDepartmentId($user_id);
                 
                 $stmt = $this->db->prepare("
-                    SELECT r.*, t.titulo 
+                    SELECT DISTINCT r.*, t.titulo 
                     FROM pops_its_registros r
                     LEFT JOIN pops_its_titulos t ON r.titulo_id = t.id
-                    LEFT JOIN pops_its_registros_departamentos rd ON r.id = rd.registro_id
                     WHERE r.id = ? 
                     AND r.status = 'APROVADO'
                     AND (
                         r.publico = 1 
-                        OR rd.departamento_id = ?
                         OR r.criado_por = ?
+                        OR EXISTS (
+                            SELECT 1 FROM pops_its_registros_departamentos rd2
+                            WHERE rd2.registro_id = r.id 
+                            AND rd2.departamento_id = ?
+                        )
                     )
                 ");
-                $stmt->execute([$registro_id, $user_dept_id, $user_id]);
+                $stmt->execute([$registro_id, $user_id, $user_dept_id]);
             }
             
             $registro = $stmt->fetch(\PDO::FETCH_ASSOC);

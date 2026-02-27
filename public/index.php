@@ -708,6 +708,9 @@ try {
     $isPublicAuthRoute = (
         $currentRoute === '/' || // Rota raiz tem lógica própria de redirecionamento
         $currentRoute === '/inicio' || // Página inicial acessível a todos os logados
+        $currentRoute === '/pops-e-its' || // POPs e ITs - visualização acessível a todos os logados
+        $currentRoute === '/pops-its/visualizacao/list' || // Listagem POPs aprovados - acessível a todos
+        strpos($currentRoute, '/pops-its/visualizar/') === 0 || // Visualizar arquivo POP/IT
         strpos($currentRoute, '/login') === 0 ||
         strpos($currentRoute, '/auth/') === 0 ||
         strpos($currentRoute, '/register') === 0 ||
