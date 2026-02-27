@@ -120,6 +120,189 @@ class AdminController
         $this->dashboard2();
     }
 
+    /**
+     * API JSON: Dados completos do Dashboard de Triagem com filtros dinâmicos
+     * GET /dashboard-2/triagem/data?modelo=&cliente=&defeito=&data_inicio=&data_fim=
+     */
+    public function dashboard2TriagemData()
+    {
+        if (ob_get_level()) ob_clean();
+        header('Content-Type: application/json; charset=utf-8');
+
+        if (!isset($_SESSION['user_id']) || !\App\Services\PermissionService::hasPermission($_SESSION['user_id'], 'dashboard', 'view')) {
+            echo json_encode(['success' => false, 'message' => 'Sem permissão']);
+            return;
+        }
+
+        try {
+            $tableExists = $this->db->query("SHOW TABLES LIKE 'triagem_toners'")->rowCount() > 0;
+            if (!$tableExists) {
+                echo json_encode(['success' => true, 'kpis' => [], 'charts' => []]);
+                return;
+            }
+
+            // --- Build dynamic WHERE ---
+            $where = '1=1';
+            $params = [];
+
+            if (!empty($_GET['modelo'])) {
+                $where .= ' AND t.toner_modelo LIKE ?';
+                $params[] = '%' . trim($_GET['modelo']) . '%';
+            }
+            if (!empty($_GET['cliente'])) {
+                $where .= ' AND t.cliente_nome LIKE ?';
+                $params[] = '%' . trim($_GET['cliente']) . '%';
+            }
+            if (!empty($_GET['defeito'])) {
+                $where .= ' AND t.defeito_nome LIKE ?';
+                $params[] = '%' . trim($_GET['defeito']) . '%';
+            }
+            if (!empty($_GET['destino'])) {
+                $where .= ' AND t.destino = ?';
+                $params[] = trim($_GET['destino']);
+            }
+            if (!empty($_GET['data_inicio'])) {
+                $where .= ' AND DATE(t.created_at) >= ?';
+                $params[] = $_GET['data_inicio'];
+            }
+            if (!empty($_GET['data_fim'])) {
+                $where .= ' AND DATE(t.created_at) <= ?';
+                $params[] = $_GET['data_fim'];
+            }
+
+            // --- KPIs ---
+            $kpiSql = "SELECT
+                COUNT(*) AS total_registros,
+                COALESCE(AVG(t.percentual_calculado), 0) AS media_percentual,
+                SUM(CASE WHEN t.destino = 'Estoque' THEN 1 ELSE 0 END) AS total_estoque,
+                COALESCE(SUM(t.valor_recuperado), 0) AS valor_recuperado,
+                SUM(CASE WHEN t.destino = 'Descarte' THEN 1 ELSE 0 END) AS total_descarte,
+                SUM(CASE WHEN t.destino = 'Garantia' THEN 1 ELSE 0 END) AS total_garantia
+                FROM triagem_toners t WHERE {$where}";
+            $stmt = $this->db->prepare($kpiSql);
+            $stmt->execute($params);
+            $kpis = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            // --- Chart 1: Top modelos por volume (barras verticais desc) ---
+            $chart1Sql = "SELECT t.toner_modelo AS label, COUNT(*) AS total
+                          FROM triagem_toners t WHERE {$where}
+                          GROUP BY t.toner_modelo ORDER BY total DESC LIMIT 15";
+            $stmt = $this->db->prepare($chart1Sql);
+            $stmt->execute($params);
+            $chart1 = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // --- Chart 2: Pareto de defeitos ---
+            $chart2Sql = "SELECT COALESCE(NULLIF(t.defeito_nome,''), 'Não informado') AS label, COUNT(*) AS total
+                          FROM triagem_toners t WHERE {$where}
+                          GROUP BY label ORDER BY total DESC LIMIT 15";
+            $stmt = $this->db->prepare($chart2Sql);
+            $stmt->execute($params);
+            $chart2Raw = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $grandTotal2 = array_sum(array_column($chart2Raw, 'total'));
+            $acumulado = 0;
+            $chart2 = [];
+            foreach ($chart2Raw as $row) {
+                $pctIndividual = $grandTotal2 > 0 ? round(((int)$row['total'] / $grandTotal2) * 100, 2) : 0;
+                $acumulado += $pctIndividual;
+                $chart2[] = [
+                    'label' => $row['label'],
+                    'total' => (int)$row['total'],
+                    'pct' => $pctIndividual,
+                    'pct_acumulado' => round($acumulado, 2),
+                ];
+            }
+
+            // --- Chart 3: Faixas de percentual de retorno ---
+            $chart3Sql = "SELECT
+                SUM(CASE WHEN t.percentual_calculado >= 0  AND t.percentual_calculado < 5   THEN 1 ELSE 0 END) AS faixa_0_5,
+                SUM(CASE WHEN t.percentual_calculado >= 5  AND t.percentual_calculado < 39  THEN 1 ELSE 0 END) AS faixa_5_39,
+                SUM(CASE WHEN t.percentual_calculado >= 39 AND t.percentual_calculado < 89  THEN 1 ELSE 0 END) AS faixa_39_89,
+                SUM(CASE WHEN t.percentual_calculado >= 89 AND t.percentual_calculado <= 100 THEN 1 ELSE 0 END) AS faixa_89_100
+                FROM triagem_toners t WHERE {$where}";
+            $stmt = $this->db->prepare($chart3Sql);
+            $stmt->execute($params);
+            $faixas = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $chart3 = [
+                ['label' => '0% – 5%',   'total' => (int)($faixas['faixa_0_5'] ?? 0)],
+                ['label' => '5% – 39%',  'total' => (int)($faixas['faixa_5_39'] ?? 0)],
+                ['label' => '39% – 89%', 'total' => (int)($faixas['faixa_39_89'] ?? 0)],
+                ['label' => '89% – 100%','total' => (int)($faixas['faixa_89_100'] ?? 0)],
+            ];
+
+            // --- Chart 4: Evolução mensal de reprovação (destino=Descarte) ---
+            $chart4Sql = "SELECT
+                DATE_FORMAT(t.created_at, '%Y-%m') AS mes,
+                COUNT(*) AS total_avaliados,
+                SUM(CASE WHEN t.destino = 'Descarte' THEN 1 ELSE 0 END) AS total_reprovados
+                FROM triagem_toners t WHERE {$where}
+                GROUP BY mes ORDER BY mes ASC";
+            $stmt = $this->db->prepare($chart4Sql);
+            $stmt->execute($params);
+            $chart4Raw = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $chart4 = [];
+            foreach ($chart4Raw as $row) {
+                $pctReprova = (int)$row['total_avaliados'] > 0
+                    ? round(((int)$row['total_reprovados'] / (int)$row['total_avaliados']) * 100, 2)
+                    : 0;
+                $chart4[] = [
+                    'mes' => $row['mes'],
+                    'total_avaliados' => (int)$row['total_avaliados'],
+                    'total_reprovados' => (int)$row['total_reprovados'],
+                    'pct_reprovacao' => $pctReprova,
+                ];
+            }
+
+            // --- Distribuição por destino (donut) ---
+            $destinoSql = "SELECT t.destino AS label, COUNT(*) AS total
+                           FROM triagem_toners t WHERE {$where}
+                           GROUP BY t.destino ORDER BY total DESC";
+            $stmt = $this->db->prepare($destinoSql);
+            $stmt->execute($params);
+            $porDestino = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // --- Últimas triagens ---
+            $ultimosSql = "SELECT t.cliente_nome, t.toner_modelo, t.percentual_calculado, t.destino, t.valor_recuperado, t.created_at
+                           FROM triagem_toners t WHERE {$where}
+                           ORDER BY t.created_at DESC LIMIT 10";
+            $stmt = $this->db->prepare($ultimosSql);
+            $stmt->execute($params);
+            $ultimos = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // --- Options para filtros ---
+            $modelos = $this->db->query("SELECT DISTINCT toner_modelo FROM triagem_toners ORDER BY toner_modelo")->fetchAll(\PDO::FETCH_COLUMN);
+            $clientes = $this->db->query("SELECT DISTINCT cliente_nome FROM triagem_toners WHERE cliente_nome IS NOT NULL AND cliente_nome != '' ORDER BY cliente_nome")->fetchAll(\PDO::FETCH_COLUMN);
+            $defeitos = $this->db->query("SELECT DISTINCT defeito_nome FROM triagem_toners WHERE defeito_nome IS NOT NULL AND defeito_nome != '' ORDER BY defeito_nome")->fetchAll(\PDO::FETCH_COLUMN);
+
+            echo json_encode([
+                'success' => true,
+                'kpis' => [
+                    'total_registros' => (int)($kpis['total_registros'] ?? 0),
+                    'media_percentual' => round((float)($kpis['media_percentual'] ?? 0), 2),
+                    'total_estoque' => (int)($kpis['total_estoque'] ?? 0),
+                    'valor_recuperado' => round((float)($kpis['valor_recuperado'] ?? 0), 2),
+                    'total_descarte' => (int)($kpis['total_descarte'] ?? 0),
+                    'total_garantia' => (int)($kpis['total_garantia'] ?? 0),
+                ],
+                'charts' => [
+                    'modelos' => $chart1,
+                    'defeitos_pareto' => $chart2,
+                    'faixas_percentual' => $chart3,
+                    'evolucao_mensal' => $chart4,
+                    'por_destino' => $porDestino,
+                ],
+                'ultimos_registros' => $ultimos,
+                'filter_options' => [
+                    'modelos' => $modelos ?: [],
+                    'clientes' => $clientes ?: [],
+                    'defeitos' => $defeitos ?: [],
+                ],
+            ]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Erro: ' . $e->getMessage()]);
+        }
+    }
+
     private function getTriagemDashboard2Stats(): array
     {
         $stats = [
