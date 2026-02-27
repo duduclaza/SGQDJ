@@ -1005,8 +1005,25 @@ class PopItsController
                 $stmt->execute();
             } else {
                 // Usuário comum: vê PÚBLICOS + RESTRITOS do seu departamento
-                $user_dept_id = $this->getUserDepartmentId($user_id);
-                error_log("POPS VISUALIZACAO - user_id=$user_id dept_id=" . ($user_dept_id ?? 'NULL'));
+                $user_dept_ids = $this->getUserDepartmentIds($user_id);
+                error_log("POPS VISUALIZACAO - user_id=$user_id dept_ids=" . json_encode($user_dept_ids));
+
+                $deptPlaceholders = '';
+                $params = [$user_id];
+                if (!empty($user_dept_ids)) {
+                    $deptPlaceholders = implode(',', array_fill(0, count($user_dept_ids), '?'));
+                    $params = array_merge($params, $user_dept_ids);
+                }
+
+                $departmentFilterSql = '';
+                if ($deptPlaceholders !== '') {
+                    $departmentFilterSql = "
+                        OR EXISTS (
+                            SELECT 1 FROM pops_its_registros_departamentos rd2
+                            WHERE rd2.registro_id = r.id
+                            AND rd2.departamento_id IN ($deptPlaceholders)
+                        )";
+                }
                 
                 $stmt = $this->db->prepare("
                     SELECT 
@@ -1032,18 +1049,14 @@ class PopItsController
                     AND (
                         r.publico = 1
                         OR r.criado_por = ?
-                        OR EXISTS (
-                            SELECT 1 FROM pops_its_registros_departamentos rd2
-                            WHERE rd2.registro_id = r.id
-                            AND rd2.departamento_id = ?
-                        )
+                        $departmentFilterSql
                     )
                     GROUP BY r.id, r.versao, r.nome_arquivo, r.extensao, r.tamanho_arquivo,
                              r.publico, r.criado_em, r.aprovado_em, t.titulo, t.tipo,
                              u.name, ua.name
                     ORDER BY r.aprovado_em DESC
                 ");
-                $stmt->execute([$user_id, $user_dept_id]);
+                $stmt->execute($params);
             }
             
             $registros = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -1085,7 +1098,24 @@ class PopItsController
                 $stmt->execute([$registro_id]);
             } else {
                 // Usuário comum - regra: público=todos, restrito=só departamentos vinculados
-                $user_dept_id = $this->getUserDepartmentId($user_id);
+                $user_dept_ids = $this->getUserDepartmentIds($user_id);
+
+                $deptPlaceholders = '';
+                $params = [$registro_id, $user_id];
+                if (!empty($user_dept_ids)) {
+                    $deptPlaceholders = implode(',', array_fill(0, count($user_dept_ids), '?'));
+                    $params = array_merge($params, $user_dept_ids);
+                }
+
+                $departmentFilterSql = '';
+                if ($deptPlaceholders !== '') {
+                    $departmentFilterSql = "
+                        OR EXISTS (
+                            SELECT 1 FROM pops_its_registros_departamentos rd2
+                            WHERE rd2.registro_id = r.id
+                            AND rd2.departamento_id IN ($deptPlaceholders)
+                        )";
+                }
                 
                 $stmt = $this->db->prepare("
                     SELECT DISTINCT r.*, t.titulo 
@@ -1096,14 +1126,10 @@ class PopItsController
                     AND (
                         r.publico = 1 
                         OR r.criado_por = ?
-                        OR EXISTS (
-                            SELECT 1 FROM pops_its_registros_departamentos rd2
-                            WHERE rd2.registro_id = r.id 
-                            AND rd2.departamento_id = ?
-                        )
+                        $departmentFilterSql
                     )
                 ");
-                $stmt->execute([$registro_id, $user_id, $user_dept_id]);
+                $stmt->execute($params);
             }
             
             $registro = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -1279,47 +1305,79 @@ class PopItsController
         }
     }
 
-    // Método auxiliar para obter departamento do usuário (MÉTODO ANTIGO)
-    private function getUserDepartmentId($user_id)
+    // Método auxiliar para obter departamentos do usuário com matching flexível
+    private function getUserDepartmentIds($user_id)
     {
         try {
-            // Buscar o setor do usuário e encontrar o departamento correspondente
-            // Usando comparação case-insensitive e flexível
-            $stmt = $this->db->prepare("
-                SELECT u.setor, u.name, d.id as departamento_id 
-                FROM users u 
-                LEFT JOIN departamentos d ON (
-                    LOWER(TRIM(u.setor)) = LOWER(TRIM(d.nome))
-                    OR d.nome LIKE CONCAT('%', u.setor, '%')
-                    OR u.setor LIKE CONCAT('%', d.nome, '%')
-                )
-                WHERE u.id = ?
-            ");
-            $stmt->execute([$user_id]);
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-            
-            $dept_id = $result['departamento_id'] ?? null;
-            $setor = $result['setor'] ?? 'N/A';
-            error_log("SETOR DO USUÁRIO: {$result['name']} (ID: $user_id) -> Setor: '$setor' -> Departamento ID: $dept_id");
-            
-            // Debug adicional: verificar se o departamento existe
-            if (!$dept_id && $setor !== 'N/A') {
-                $stmt2 = $this->db->prepare("SELECT id, nome FROM departamentos WHERE nome = ?");
-                $stmt2->execute([$setor]);
-                $dept_result = $stmt2->fetch(\PDO::FETCH_ASSOC);
-                error_log("BUSCA DEPARTAMENTO '$setor': " . json_encode($dept_result));
-                
-                // Se encontrou o departamento, retornar o ID
-                if ($dept_result) {
-                    $dept_id = $dept_result['id'];
-                    error_log("DEPARTAMENTO ENCONTRADO: '$setor' -> ID: $dept_id");
+            $stmtUser = $this->db->prepare("SELECT name, setor FROM users WHERE id = ?");
+            $stmtUser->execute([$user_id]);
+            $user = $stmtUser->fetch(\PDO::FETCH_ASSOC);
+            if (!$user) {
+                return [];
+            }
+
+            $setorRaw = trim((string)($user['setor'] ?? ''));
+            if ($setorRaw === '') {
+                error_log("SETOR DO USUÁRIO: {$user['name']} (ID: $user_id) -> setor vazio");
+                return [];
+            }
+
+            $parts = preg_split('/[,;\|\/]+/', $setorRaw) ?: [];
+            $parts[] = $setorRaw;
+            $setores = [];
+            foreach ($parts as $part) {
+                $part = trim((string)$part);
+                if ($part !== '') {
+                    $setores[$part] = true;
                 }
             }
-            
-            return $dept_id;
+
+            $normalize = static function (string $value): string {
+                $value = mb_strtolower(trim($value), 'UTF-8');
+                $map = [
+                    'á' => 'a', 'à' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a',
+                    'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e',
+                    'í' => 'i', 'ì' => 'i', 'î' => 'i', 'ï' => 'i',
+                    'ó' => 'o', 'ò' => 'o', 'ô' => 'o', 'õ' => 'o', 'ö' => 'o',
+                    'ú' => 'u', 'ù' => 'u', 'û' => 'u', 'ü' => 'u',
+                    'ç' => 'c'
+                ];
+                $value = strtr($value, $map);
+                $value = preg_replace('/\s+/', ' ', $value);
+                return (string)$value;
+            };
+
+            $normalizedSetores = array_map($normalize, array_keys($setores));
+
+            $stmtDept = $this->db->query("SELECT id, nome FROM departamentos");
+            $departamentos = $stmtDept->fetchAll(\PDO::FETCH_ASSOC);
+
+            $ids = [];
+            foreach ($departamentos as $departamento) {
+                $deptName = $normalize((string)($departamento['nome'] ?? ''));
+                if ($deptName === '') {
+                    continue;
+                }
+
+                foreach ($normalizedSetores as $setor) {
+                    if ($setor === '') {
+                        continue;
+                    }
+
+                    if ($deptName === $setor || strpos($deptName, $setor) !== false || strpos($setor, $deptName) !== false) {
+                        $ids[(int)$departamento['id']] = true;
+                        break;
+                    }
+                }
+            }
+
+            $departmentIds = array_keys($ids);
+            error_log("SETOR DO USUÁRIO: {$user['name']} (ID: $user_id) -> Setor: '$setorRaw' -> Departamento IDs: " . json_encode($departmentIds));
+
+            return $departmentIds;
         } catch (\Exception $e) {
             error_log("Erro ao obter departamento do usuário: " . $e->getMessage());
-            return null;
+            return [];
         }
     }
 

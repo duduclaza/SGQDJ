@@ -298,6 +298,7 @@ if (!function_exists('flash')) {
       const lastDirectSeenByUser = {};
       let pollTimer = null;
       let heartbeatTimer = null;
+      let isChatOpen = false;
 
       const ui = {};
 
@@ -360,6 +361,44 @@ if (!function_exists('flash')) {
         try {
           await fetchJson('/api/chat/heartbeat', { method: 'POST' });
         } catch (_) {}
+      }
+
+      function stopChatPolling() {
+        if (pollTimer) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+        }
+        if (heartbeatTimer) {
+          clearInterval(heartbeatTimer);
+          heartbeatTimer = null;
+        }
+      }
+
+      async function startChatPolling() {
+        stopChatPolling();
+
+        await heartbeat();
+        await loadContacts();
+        if (activeMode === 'global') {
+          await loadGlobalMessages();
+        } else if (activeContactId) {
+          await loadMessages();
+        }
+
+        pollTimer = setInterval(async function() {
+          if (!isChatOpen) return;
+          await loadContacts();
+          if (activeMode === 'global') {
+            await loadGlobalMessages();
+          } else if (activeContactId) {
+            await loadMessages();
+          }
+        }, 15000);
+
+        heartbeatTimer = setInterval(function() {
+          if (!isChatOpen) return;
+          heartbeat();
+        }, 120000);
       }
 
       async function loadContacts() {
@@ -560,12 +599,11 @@ if (!function_exists('flash')) {
         ui.toggle.addEventListener('click', async function() {
           ui.panel.classList.toggle('hidden');
           if (!ui.panel.classList.contains('hidden')) {
-            await loadContacts();
-            if (activeMode === 'global') {
-              await loadGlobalMessages();
-            } else if (activeContactId) {
-              await loadMessages();
-            }
+            isChatOpen = true;
+            await startChatPolling();
+          } else {
+            isChatOpen = false;
+            stopChatPolling();
           }
         });
 
@@ -620,24 +658,10 @@ if (!function_exists('flash')) {
         if (!ui.toggle || !ui.panel) return;
 
         bindEvents();
-        await heartbeat();
         await loadContacts();
-        await loadGlobalMessages();
-
-        pollTimer = setInterval(async function() {
-          await loadContacts();
-          if (activeMode === 'global') {
-            await loadGlobalMessages();
-          } else if (activeContactId) {
-            await loadMessages();
-          }
-        }, 5000);
-
-        heartbeatTimer = setInterval(heartbeat, 30000);
 
         window.addEventListener('beforeunload', function() {
-          if (pollTimer) clearInterval(pollTimer);
-          if (heartbeatTimer) clearInterval(heartbeatTimer);
+          stopChatPolling();
         });
       }
 

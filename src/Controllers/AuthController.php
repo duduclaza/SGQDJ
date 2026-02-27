@@ -114,7 +114,17 @@ class AuthController
                 echo json_encode(['success' => false, 'message' => 'Email ou senha incorretos']);
             }
         } catch (\Exception $e) {
-            error_log('Authenticate error: ' . $e->getMessage());
+            $errorMessage = $e->getMessage();
+            error_log('Authenticate error: ' . $errorMessage);
+
+            if (stripos($errorMessage, 'max_connections_per_hour') !== false || stripos($errorMessage, '[1226]') !== false) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'O banco atingiu o limite temporário de conexões por hora. Tente novamente em alguns minutos.'
+                ]);
+                return;
+            }
+
             echo json_encode(['success' => false, 'message' => 'Erro interno do servidor']);
         }
     }
