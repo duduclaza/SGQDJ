@@ -970,10 +970,11 @@ class PopItsController
             // Verificar se as tabelas existem, se não, criar
             $this->criarTabelaDepartamentosSeNaoExistir();
             
-            // Verificar se é admin - admin vê tudo
+            // Verificar se é admin/super admin - ambos veem tudo
             $isAdmin = \App\Services\PermissionService::isAdmin($user_id);
+            $isSuperAdmin = \App\Services\PermissionService::isSuperAdmin($user_id);
             
-            if ($isAdmin) {
+            if ($isAdmin || $isSuperAdmin) {
                 // Admin vê todos os registros aprovados com departamentos permitidos
                 $stmt = $this->db->prepare("
                     SELECT 
@@ -1011,9 +1012,11 @@ class PopItsController
                 
                 $stmt->execute();
             } else {
-                // NOVA LÓGICA: Buscar setor do usuário diretamente
+                // Buscar setor e departamento do usuário para regras de visibilidade
                 $user_setor = $this->getUserSetor($user_id);
-                error_log("NOVA LÓGICA - Usuário $user_id -> Setor: '$user_setor'");
+                $user_dept_id = $this->getUserDepartmentId($user_id);
+                $user_setor = trim((string)($user_setor ?? ''));
+                error_log("VISUALIZAÇÃO POPs/ITs - Usuário $user_id -> Setor: '$user_setor' | Departamento ID: " . ($user_dept_id ?? 'NULL'));
                 
                 $stmt = $this->db->prepare("
                     SELECT 
@@ -1046,7 +1049,15 @@ class PopItsController
                     AND (
                         r.publico = 1 
                         OR r.criado_por = ?
-                        OR EXISTS (
+                        OR (
+                            ? IS NOT NULL AND EXISTS (
+                                SELECT 1 FROM pops_its_registros_departamentos rd3
+                                WHERE rd3.registro_id = r.id 
+                                AND rd3.departamento_id = ?
+                            )
+                        )
+                        OR (
+                            ? <> '' AND EXISTS (
                             SELECT 1 FROM pops_its_registros_departamentos rd3
                             INNER JOIN departamentos d3 ON rd3.departamento_id = d3.id
                             WHERE rd3.registro_id = r.id 
@@ -1054,6 +1065,7 @@ class PopItsController
                                 LOWER(TRIM(d3.nome)) = LOWER(TRIM(?))
                                 OR d3.nome LIKE CONCAT('%', ?, '%')
                                 OR ? LIKE CONCAT('%', d3.nome, '%')
+                            )
                             )
                         )
                     )
@@ -1063,32 +1075,15 @@ class PopItsController
                     ORDER BY r.aprovado_em DESC
                 ");
                 
-                error_log("NOVA QUERY PARAMS: user_id=$user_id, user_setor='$user_setor'");
-                
-                // Debug: testar se o registro 4 tem acesso para o setor RH
-                if ($user_setor) {
-                    $debug_stmt = $this->db->prepare("
-                        SELECT r.id, r.publico, r.criado_por, t.titulo,
-                               EXISTS (
-                                   SELECT 1 FROM pops_its_registros_departamentos rd3
-                                   INNER JOIN departamentos d3 ON rd3.departamento_id = d3.id
-                                   WHERE rd3.registro_id = r.id 
-                                   AND (
-                                       LOWER(TRIM(d3.nome)) = LOWER(TRIM(?))
-                                       OR d3.nome LIKE CONCAT('%', ?, '%')
-                                       OR ? LIKE CONCAT('%', d3.nome, '%')
-                                   )
-                               ) as tem_acesso_setor
-                        FROM pops_its_registros r
-                        LEFT JOIN pops_its_titulos t ON r.titulo_id = t.id
-                        WHERE r.status = 'APROVADO' AND r.id = 4
-                    ");
-                    $debug_stmt->execute([$user_setor, $user_setor, $user_setor]);
-                    $debug_result = $debug_stmt->fetch(\PDO::FETCH_ASSOC);
-                    error_log("DEBUG REGISTRO 4 - NOVA LÓGICA: " . json_encode($debug_result));
-                }
-                
-                $stmt->execute([$user_id, $user_setor, $user_setor, $user_setor]);
+                $stmt->execute([
+                    $user_id,
+                    $user_dept_id,
+                    $user_dept_id,
+                    $user_setor,
+                    $user_setor,
+                    $user_setor,
+                    $user_setor,
+                ]);
             }
             
             $registros = $stmt->fetchAll(\PDO::FETCH_ASSOC);
