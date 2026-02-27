@@ -457,6 +457,73 @@ class TriagemTonersController
         }
     }
 
+    // Duplicar registro
+    public function duplicate(): void
+    {
+        ob_clean();
+        header('Content-Type: application/json');
+
+        if (!PermissionService::hasPermission($_SESSION['user_id'], 'triagem_toners', 'edit')) {
+            echo json_encode(['success' => false, 'message' => 'Sem permissão para duplicar.']);
+            return;
+        }
+
+        try {
+            $id = (int)($_POST['id'] ?? 0);
+            if (!$id) {
+                echo json_encode(['success' => false, 'message' => 'ID inválido.']);
+                return;
+            }
+
+            $stmt = $this->db->prepare("SELECT * FROM triagem_toners WHERE id = ?");
+            $stmt->execute([$id]);
+            $original = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$original) {
+                echo json_encode(['success' => false, 'message' => 'Registro não encontrado.']);
+                return;
+            }
+
+            $observacoes = $original['observacoes'] ?? '';
+            $prefixoDuplicado = "[Duplicado do registro #{$id}]";
+            $observacoes = trim($prefixoDuplicado . ' ' . $observacoes);
+
+            $insert = $this->db->prepare("
+                INSERT INTO triagem_toners (
+                    toner_id, toner_modelo, cliente_id, cliente_nome, modo,
+                    peso_retornado, percentual_informado, gramatura_restante,
+                    percentual_calculado, parecer, destino, valor_recuperado,
+                    observacoes, created_by
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            $insert->execute([
+                $original['toner_id'],
+                $original['toner_modelo'],
+                $original['cliente_id'],
+                $original['cliente_nome'],
+                $original['modo'],
+                $original['peso_retornado'],
+                $original['percentual_informado'],
+                $original['gramatura_restante'],
+                $original['percentual_calculado'],
+                $original['parecer'],
+                $original['destino'],
+                $original['valor_recuperado'],
+                $observacoes,
+                $_SESSION['user_id'],
+            ]);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Registro duplicado com sucesso!',
+                'id' => $this->db->lastInsertId(),
+            ]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
     // Excluir registro
     public function delete(): void
     {

@@ -216,6 +216,7 @@ $router->get('/triagem-toners/list', [App\Controllers\TriagemTonersController::c
 $router->post('/triagem-toners/calcular', [App\Controllers\TriagemTonersController::class, 'calcular']);
 $router->post('/triagem-toners/store', [App\Controllers\TriagemTonersController::class, 'store']);
 $router->post('/triagem-toners/update', [App\Controllers\TriagemTonersController::class, 'update']);
+$router->post('/triagem-toners/duplicate', [App\Controllers\TriagemTonersController::class, 'duplicate']);
 $router->post('/triagem-toners/delete', [App\Controllers\TriagemTonersController::class, 'delete']);
 $router->get('/triagem-toners/parametros', [App\Controllers\TriagemTonersController::class, 'getParametrosApi']);
 $router->post('/triagem-toners/parametros/save', [App\Controllers\TriagemTonersController::class, 'saveParametros']);
