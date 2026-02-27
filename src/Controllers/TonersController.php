@@ -950,11 +950,11 @@ class TonersController
             // Add BOM for UTF-8 (helps with Excel encoding)
             fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            // CSV Headers (in Portuguese)
+            // CSV Headers
             $headers = [
                 'Modelo',
-                'CÃ³digo Cliente',
-                'UsuÃ¡rio',
+                'Código Cliente',
+                'Usuário',
                 'Filial',
                 'Modo',
                 'Peso Retornado (g)',
@@ -962,27 +962,31 @@ class TonersController
                 'Quantidade',
                 'Destino',
                 'Valor Calculado (R$)',
-                'ObservaÃ§Ã£o',
-                'Data Registro'
+                'Observação',
+                'Data'
             ];
-
             fputcsv($output, $headers, ';');
 
             // Add data rows
             foreach ($retornados as $retornado) {
+                $dataExport = $retornado['data_registro'] ?? null;
+                if (empty($dataExport) && !empty($retornado['created_at'])) {
+                    $dataExport = $retornado['created_at'];
+                }
+
                 $row = [
-                    $retornado['modelo'],
-                    $retornado['codigo_cliente'],
-                    $retornado['usuario'],
-                    $retornado['filial'],
-                    $retornado['modo'],
-                    $retornado['peso_retornado'] ? number_format($retornado['peso_retornado'], 2, ',', '.') : '',
-                    $retornado['percentual_chip'] ? number_format($retornado['percentual_chip'], 2, ',', '.') : '',
+                    $retornado['modelo'] ?? '',
+                    $retornado['codigo_cliente'] ?? '',
+                    $retornado['usuario'] ?? '',
+                    $retornado['filial'] ?? '',
+                    $retornado['modo'] ?? '',
+                    !empty($retornado['peso_retornado']) ? number_format((float)$retornado['peso_retornado'], 2, ',', '.') : '',
+                    !empty($retornado['percentual_chip']) ? number_format((float)$retornado['percentual_chip'], 2, ',', '.') : '',
                     $retornado['quantidade'] ?? '1',
-                    ucfirst(str_replace('_', ' ', $retornado['destino'])),
-                    $retornado['valor_calculado'] ? 'R$ ' . number_format($retornado['valor_calculado'], 2, ',', '.') : '',
+                    !empty($retornado['destino']) ? ucfirst(str_replace('_', ' ', (string)$retornado['destino'])) : '',
+                    !empty($retornado['valor_calculado']) ? 'R$ ' . number_format((float)$retornado['valor_calculado'], 2, ',', '.') : '',
                     $retornado['observacao'] ?? '',
-                    date('d/m/Y H:i', strtotime($retornado['data_registro']))
+                    $dataExport ? date('d/m/Y H:i', strtotime((string)$dataExport)) : ''
                 ];
 
                 fputcsv($output, $row, ';');
