@@ -238,8 +238,8 @@ class TriagemTonersController
                         $observacoes   = $row[7] ?? null;
                     }
 
-                    if ($codigoCliente === '' || $modeloToner === '' || $destinoRaw === '') {
-                        $errors[] = "Linha {$line}: Código Cliente, Modelo e Destino são obrigatórios.";
+                    // Legado: ignorar linhas sem chaves mínimas em vez de quebrar importação
+                    if ($codigoCliente === '' || $modeloToner === '') {
                         continue;
                     }
 
@@ -257,18 +257,29 @@ class TriagemTonersController
                         continue;
                     }
 
-                    $modo = in_array($modoRaw, ['percentual', 'pct', '%']) ? 'percentual' : 'peso';
-
                     $pesoRetNum = ($pesoRet === '') ? null : (float)str_replace(',', '.', $pesoRet);
                     $pctNum     = ($pctRaw === '')  ? null : (float)str_replace(',', '.', $pctRaw);
 
-                    if ($modo === 'peso' && ($pesoRetNum === null || $pesoRetNum < 0)) {
-                        $errors[] = "Linha {$line}: Peso Retornado inválido para modo peso.";
-                        continue;
+                    // Legado: aceitar lacunas de modo/peso/percentual com fallback automático
+                    $modoRawNorm = strtolower(trim((string)$modoRaw));
+                    if (in_array($modoRawNorm, ['percentual', 'pct', '%']) && $pctNum !== null) {
+                        $modo = 'percentual';
+                    } elseif ($modoRawNorm === 'peso' && $pesoRetNum !== null) {
+                        $modo = 'peso';
+                    } elseif ($pctNum !== null) {
+                        $modo = 'percentual';
+                    } elseif ($pesoRetNum !== null) {
+                        $modo = 'peso';
+                    } else {
+                        $modo = 'percentual';
+                        $pctNum = 0.0;
                     }
-                    if ($modo === 'percentual' && ($pctNum === null || $pctNum < 0)) {
-                        $errors[] = "Linha {$line}: Percentual inválido para modo percentual.";
-                        continue;
+
+                    if ($pesoRetNum !== null && $pesoRetNum < 0) {
+                        $pesoRetNum = 0.0;
+                    }
+                    if ($pctNum !== null && $pctNum < 0) {
+                        $pctNum = 0.0;
                     }
 
                     $gramaturaToner = (float)($toner['gramatura'] ?: ((float)$toner['peso_cheio'] - (float)$toner['peso_vazio']));
@@ -289,8 +300,7 @@ class TriagemTonersController
 
                     $destino = $this->normalizeDestino($destinoRaw);
                     if ($destino === null) {
-                        $errors[] = "Linha {$line}: Destino '{$destinoRaw}' inválido.";
-                        continue;
+                        $destino = 'Descarte';
                     }
 
                     $defeitoId = null;
