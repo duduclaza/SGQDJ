@@ -56,7 +56,11 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
   <!-- Filtros -->
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div class="sm:col-span-2 lg:col-span-2">
+        <label class="block text-xs font-medium text-gray-700 mb-1">Busca Inteligente</label>
+        <input id="f-search" type="text" placeholder="Modelo, cliente, colaborador ou cód. requisição..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
       <div>
         <label class="block text-xs font-medium text-gray-700 mb-1">Modelo do Toner</label>
         <input id="f-modelo" type="text" placeholder="Buscar modelo..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -130,8 +134,13 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
     <input type="hidden" id="duplicate-id">
 
+    <label class="block text-sm font-medium text-gray-700 mb-1">Buscar cliente</label>
+    <input id="duplicate-cliente-search" type="text" placeholder="Digite nome/código do cliente..."
+           oninput="autoSelecionarInteligente('duplicate-cliente-search','duplicate-cliente-id')"
+           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
     <label class="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
-    <select id="duplicate-cliente-id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <select id="duplicate-cliente-id" onchange="sincronizarInputComSelect('duplicate-cliente-id','duplicate-cliente-search')" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
       <option value="">Selecione o cliente...</option>
       <?php foreach (($clientes ?? []) as $c): ?>
       <option value="<?= (int)$c['id'] ?>"><?= e(($c['codigo'] ?? '') . ' - ' . ($c['nome'] ?? '')) ?></option>
@@ -397,9 +406,36 @@ const USER_NAME = <?= json_encode($_SESSION['user_name'] ?? 'Usuário') ?>;
 let currentPage = 1;
 let calcDebounce = null;
 let lastCalcResult = null;
+let filtrosDebounce = null;
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('f-search');
+  const modeloInput = document.getElementById('f-modelo');
+  const destinoSelect = document.getElementById('f-destino');
+  const dataInicioInput = document.getElementById('f-data-inicio');
+  const dataFimInput = document.getElementById('f-data-fim');
+
+  const filtrarComDebounce = () => {
+    clearTimeout(filtrosDebounce);
+    filtrosDebounce = setTimeout(() => carregarRegistros(1), 350);
+  };
+
+  [searchInput, modeloInput].forEach((el) => {
+    el.addEventListener('input', filtrarComDebounce);
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        clearTimeout(filtrosDebounce);
+        carregarRegistros(1);
+      }
+    });
+  });
+
+  [destinoSelect, dataInicioInput, dataFimInput].forEach((el) => {
+    el.addEventListener('change', filtrarComDebounce);
+  });
+
   carregarRegistros(1);
 });
 
@@ -409,6 +445,7 @@ function carregarRegistros(page) {
   const params = new URLSearchParams({
     page,
     per_page: 15,
+    search:       document.getElementById('f-search').value,
     toner_modelo: document.getElementById('f-modelo').value,
     destino:      document.getElementById('f-destino').value,
     data_inicio:  document.getElementById('f-data-inicio').value,
@@ -504,7 +541,7 @@ function renderPaginacao(pag) {
 }
 
 function limparFiltros() {
-  ['f-modelo','f-data-inicio','f-data-fim'].forEach(id => document.getElementById(id).value = '');
+  ['f-search','f-modelo','f-data-inicio','f-data-fim'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-destino').value = '';
   carregarRegistros(1);
 }
@@ -810,9 +847,7 @@ function confirmarDelete() {
 }
 
 function duplicarRegistro(id, clienteIdAtual = 0) {
-  if (!confirm('Deseja duplicar este registro de triagem?')) return;
-
-  if (confirm('Deseja trocar o cliente na duplicação?')) {
+  if (confirm('Deseja trocar o cliente na duplicação?\n\nOK = Sim | Cancelar = Não')) {
     abrirModalDuplicateCliente(id, clienteIdAtual);
     return;
   }
@@ -823,10 +858,13 @@ function duplicarRegistro(id, clienteIdAtual = 0) {
 function abrirModalDuplicateCliente(id, clienteIdAtual = 0) {
   document.getElementById('duplicate-id').value = id;
   document.getElementById('duplicate-cliente-id').value = clienteIdAtual || '';
+  sincronizarInputComSelect('duplicate-cliente-id', 'duplicate-cliente-search');
   document.getElementById('modal-duplicate-cliente').classList.remove('hidden');
 }
 
 function fecharModalDuplicateCliente() {
+  document.getElementById('duplicate-cliente-search').value = '';
+  document.getElementById('duplicate-cliente-id').value = '';
   document.getElementById('modal-duplicate-cliente').classList.add('hidden');
 }
 

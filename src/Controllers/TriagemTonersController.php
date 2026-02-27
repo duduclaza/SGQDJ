@@ -486,6 +486,26 @@ class TriagemTonersController
                 $where .= " AND t.toner_modelo LIKE ?";
                 $params[] = '%' . $_GET['toner_modelo'] . '%';
             }
+            if (!empty($_GET['search'])) {
+                $search = '%' . trim((string)$_GET['search']) . '%';
+                $where .= " AND (
+                    t.toner_modelo LIKE ?
+                    OR t.cliente_nome LIKE ?
+                    OR t.codigo_requisicao LIKE ?
+                    OR t.colaborador_registro LIKE ?
+                    OR EXISTS (
+                        SELECT 1
+                        FROM users u_search
+                        WHERE u_search.id = t.created_by
+                          AND u_search.name LIKE ?
+                    )
+                )";
+                $params[] = $search;
+                $params[] = $search;
+                $params[] = $search;
+                $params[] = $search;
+                $params[] = $search;
+            }
             if (!empty($_GET['destino'])) {
                 $where .= " AND t.destino = ?";
                 $params[] = $_GET['destino'];
