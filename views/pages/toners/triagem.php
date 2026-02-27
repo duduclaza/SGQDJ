@@ -122,6 +122,29 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
   </div>
 </div>
 
+<!-- ========== MODAL: DUPLICAR COM OUTRO CLIENTE ========== -->
+<div id="modal-duplicate-cliente" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+    <h3 class="text-lg font-bold text-gray-900 mb-2">Duplicar com outro cliente</h3>
+    <p class="text-sm text-gray-500 mb-4">Selecione o cliente para o novo registro duplicado.</p>
+
+    <input type="hidden" id="duplicate-id">
+
+    <label class="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
+    <select id="duplicate-cliente-id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <option value="">Selecione o cliente...</option>
+      <?php foreach (($clientes ?? []) as $c): ?>
+      <option value="<?= (int)$c['id'] ?>"><?= e(($c['codigo'] ?? '') . ' - ' . ($c['nome'] ?? '')) ?></option>
+      <?php endforeach; ?>
+    </select>
+
+    <div class="flex justify-end gap-2 mt-5">
+      <button type="button" onclick="fecharModalDuplicateCliente()" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Cancelar</button>
+      <button type="button" onclick="confirmarDuplicacaoComCliente()" class="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">Duplicar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ========== MODAL: IMPORTAÇÃO ========== -->
 <div id="modal-importacao" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
@@ -436,7 +459,7 @@ function renderGrid(data) {
     const parecerShort = r.parecer ? (r.parecer.length > 60 ? r.parecer.substring(0,60) + '...' : r.parecer) : '—';
 
     const editBtn  = CAN_EDIT   ? `<button onclick='abrirModalEditar(${JSON.stringify(r)})' class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>` : '';
-    const dupBtn   = CAN_EDIT   ? `<button onclick="duplicarRegistro(${r.id})" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Duplicar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V4a1 1 0 011-1h11a1 1 0 011 1v11a1 1 0 01-1 1h-3m-9 4H4a1 1 0 01-1-1V8a1 1 0 011-1h11a1 1 0 011 1v11a1 1 0 01-1 1z"/></svg></button>` : '';
+    const dupBtn   = CAN_EDIT   ? `<button onclick="duplicarRegistro(${r.id}, ${r.cliente_id || 0})" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Duplicar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V4a1 1 0 011-1h11a1 1 0 011 1v11a1 1 0 01-1 1h-3m-9 4H4a1 1 0 01-1-1V8a1 1 0 011-1h11a1 1 0 011 1v11a1 1 0 01-1 1z"/></svg></button>` : '';
     const delBtn   = CAN_DELETE ? `<button onclick="abrirModalDelete(${r.id})" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : '';
 
     return `<tr class="hover:bg-gray-50 transition-colors">
@@ -786,11 +809,48 @@ function confirmarDelete() {
     });
 }
 
-function duplicarRegistro(id) {
+function duplicarRegistro(id, clienteIdAtual = 0) {
   if (!confirm('Deseja duplicar este registro de triagem?')) return;
 
+  if (confirm('Deseja trocar o cliente na duplicação?')) {
+    abrirModalDuplicateCliente(id, clienteIdAtual);
+    return;
+  }
+
+  executarDuplicacao(id, null);
+}
+
+function abrirModalDuplicateCliente(id, clienteIdAtual = 0) {
+  document.getElementById('duplicate-id').value = id;
+  document.getElementById('duplicate-cliente-id').value = clienteIdAtual || '';
+  document.getElementById('modal-duplicate-cliente').classList.remove('hidden');
+}
+
+function fecharModalDuplicateCliente() {
+  document.getElementById('modal-duplicate-cliente').classList.add('hidden');
+}
+
+function confirmarDuplicacaoComCliente() {
+  const id = parseInt(document.getElementById('duplicate-id').value || '0', 10);
+  const clienteId = parseInt(document.getElementById('duplicate-cliente-id').value || '0', 10);
+  if (!id) {
+    showToast('Registro inválido para duplicação.', 'error');
+    return;
+  }
+  if (!clienteId) {
+    showToast('Selecione o cliente para duplicar.', 'error');
+    return;
+  }
+  fecharModalDuplicateCliente();
+  executarDuplicacao(id, clienteId);
+}
+
+function executarDuplicacao(id, clienteId = null) {
   const fd = new FormData();
   fd.append('id', id);
+  if (clienteId) {
+    fd.append('cliente_id', clienteId);
+  }
 
   fetch('/triagem-toners/duplicate', { method: 'POST', body: fd, credentials: 'same-origin' })
     .then(r => r.json())

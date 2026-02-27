@@ -861,6 +861,7 @@ class TriagemTonersController
 
         try {
             $id = (int)($_POST['id'] ?? 0);
+            $novoClienteId = isset($_POST['cliente_id']) && $_POST['cliente_id'] !== '' ? (int)$_POST['cliente_id'] : null;
             if (!$id) {
                 echo json_encode(['success' => false, 'message' => 'ID inválido.']);
                 return;
@@ -879,6 +880,20 @@ class TriagemTonersController
             $prefixoDuplicado = "[Duplicado do registro #{$id}]";
             $observacoes = trim($prefixoDuplicado . ' ' . $observacoes);
 
+            $clienteIdFinal = (int)($original['cliente_id'] ?? 0);
+            $clienteNomeFinal = $original['cliente_nome'] ?? null;
+            if ($novoClienteId !== null) {
+                $stmtCliente = $this->db->prepare("SELECT id, nome FROM clientes WHERE id = ? LIMIT 1");
+                $stmtCliente->execute([$novoClienteId]);
+                $cliente = $stmtCliente->fetch(PDO::FETCH_ASSOC);
+                if (!$cliente) {
+                    echo json_encode(['success' => false, 'message' => 'Cliente selecionado para duplicação não foi encontrado.']);
+                    return;
+                }
+                $clienteIdFinal = (int)$cliente['id'];
+                $clienteNomeFinal = $cliente['nome'];
+            }
+
             $insert = $this->db->prepare("
                 INSERT INTO triagem_toners (
                     toner_id, toner_modelo, cliente_id, cliente_nome, filial_registro, colaborador_registro, codigo_requisicao,
@@ -892,8 +907,8 @@ class TriagemTonersController
             $insert->execute([
                 $original['toner_id'],
                 $original['toner_modelo'],
-                $original['cliente_id'],
-                $original['cliente_nome'],
+                $clienteIdFinal,
+                $clienteNomeFinal,
                 $original['filial_registro'] ?? ($_SESSION['user_filial'] ?? null),
                 $original['colaborador_registro'] ?? ($_SESSION['user_name'] ?? null),
                 $original['codigo_requisicao'] ?? null,
