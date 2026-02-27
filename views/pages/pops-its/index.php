@@ -526,15 +526,16 @@ document.addEventListener('DOMContentLoaded', function() {
         firstTab.click();
     }
     
-    // Carregar dados da primeira aba ativa imediatamente (após um pequeno delay para garantir que a aba foi ativada)
+    // Carregar dados da primeira aba ativa imediatamente
     setTimeout(() => {
         const activeTab = document.querySelector('.tab-button.active');
         if (activeTab) {
             const tabId = activeTab.id.replace('tab-', '');
             console.log('🎯 Aba ativa detectada:', tabId);
             if (tabId === 'cadastro') {
-                console.log('📋 Carregando títulos da aba ativa...');
                 loadTitulos();
+            } else if (tabId === 'visualizacao') {
+                loadVisualizacao();
             }
         }
     }, 100);
@@ -552,14 +553,15 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         const cadastroContent = document.getElementById('content-cadastro');
         const registrosContent = document.getElementById('content-registros');
+        const vizContent = document.getElementById('content-visualizacao');
         
         if (cadastroContent && !cadastroContent.classList.contains('hidden')) {
-            console.log('🔄 Fallback: Carregando títulos...');
             loadTitulos();
         } else if (registrosContent && !registrosContent.classList.contains('hidden')) {
-            console.log('🔄 Fallback: Carregando registros...');
             loadMeusRegistros();
             loadTitulosDropdown();
+        } else if (vizContent && !vizContent.classList.contains('hidden')) {
+            loadVisualizacao();
         }
     }, 500);
 });
