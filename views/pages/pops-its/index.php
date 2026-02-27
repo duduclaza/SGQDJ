@@ -43,7 +43,8 @@ if (!isset($_SESSION['user_id'])) {
 
                 <!-- Aba 4: Visualização -->
                 <?php if ($canViewVisualizacao): ?>
-                <button id="tab-visualizacao" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                <?php $vizIsFirst = !$canViewCadastroTitulos && !$canViewMeusRegistros && !$canViewPendenteAprovacao; ?>
+                <button id="tab-visualizacao" class="tab-button <?php echo $vizIsFirst ? 'active border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'; ?> whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
                     Visualização
                 </button>
                 <?php endif; ?>
@@ -348,7 +349,8 @@ if (!isset($_SESSION['user_id'])) {
 
             <!-- ABA 4: VISUALIZAÇÃO -->
             <?php if ($canViewVisualizacao): ?>
-            <div id="content-visualizacao" class="tab-content hidden">
+            <?php $vizIsFirst = !$canViewCadastroTitulos && !$canViewMeusRegistros && !$canViewPendenteAprovacao; ?>
+            <div id="content-visualizacao" class="tab-content <?php echo $vizIsFirst ? '' : 'hidden'; ?>">
                 <div class="bg-white shadow rounded-lg">
                     <div class="px-6 py-4 border-b border-gray-200">
                         <div class="flex items-center justify-between">
