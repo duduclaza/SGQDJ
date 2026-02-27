@@ -56,14 +56,15 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
   <!-- Filtros -->
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="sm:col-span-2 lg:col-span-2">
         <label class="block text-xs font-medium text-gray-700 mb-1">Busca Inteligente</label>
-        <input id="f-search" type="text" placeholder="Modelo, cliente, colaborador ou cód. requisição..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Modelo do Toner</label>
-        <input id="f-modelo" type="text" placeholder="Buscar modelo..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </span>
+          <input id="f-search" type="text" placeholder="Modelo, cliente, colaborador ou cód. requisição..." class="w-full border border-gray-300 rounded-xl pl-9 pr-3 py-2.5 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+        </div>
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-700 mb-1">Destino</label>
@@ -411,7 +412,6 @@ let filtrosDebounce = null;
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('f-search');
-  const modeloInput = document.getElementById('f-modelo');
   const destinoSelect = document.getElementById('f-destino');
   const dataInicioInput = document.getElementById('f-data-inicio');
   const dataFimInput = document.getElementById('f-data-fim');
@@ -421,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
     filtrosDebounce = setTimeout(() => carregarRegistros(1), 350);
   };
 
-  [searchInput, modeloInput].forEach((el) => {
+  [searchInput].forEach((el) => {
     el.addEventListener('input', filtrarComDebounce);
     el.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -446,7 +446,6 @@ function carregarRegistros(page) {
     page,
     per_page: 15,
     search:       document.getElementById('f-search').value,
-    toner_modelo: document.getElementById('f-modelo').value,
     destino:      document.getElementById('f-destino').value,
     data_inicio:  document.getElementById('f-data-inicio').value,
     data_fim:     document.getElementById('f-data-fim').value,
@@ -541,7 +540,7 @@ function renderPaginacao(pag) {
 }
 
 function limparFiltros() {
-  ['f-search','f-modelo','f-data-inicio','f-data-fim'].forEach(id => document.getElementById(id).value = '');
+  ['f-search','f-data-inicio','f-data-fim'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-destino').value = '';
   carregarRegistros(1);
 }
