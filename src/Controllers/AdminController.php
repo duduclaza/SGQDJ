@@ -161,6 +161,10 @@ class AdminController
                 $where .= ' AND t.destino = ?';
                 $params[] = trim($_GET['destino']);
             }
+            if (!empty($_GET['filial'])) {
+                $where .= ' AND COALESCE(t.filial_registro, \'\') LIKE ?';
+                $params[] = '%' . trim($_GET['filial']) . '%';
+            }
 
             $dataInicio = !empty($_GET['data_inicio']) ? trim((string)$_GET['data_inicio']) : null;
             $dataFim = !empty($_GET['data_fim']) ? trim((string)$_GET['data_fim']) : null;
@@ -291,6 +295,7 @@ class AdminController
             $modelos = $this->db->query("SELECT DISTINCT toner_modelo FROM triagem_toners ORDER BY toner_modelo")->fetchAll(\PDO::FETCH_COLUMN);
             $clientes = $this->db->query("SELECT DISTINCT cliente_nome FROM triagem_toners WHERE cliente_nome IS NOT NULL AND cliente_nome != '' ORDER BY cliente_nome")->fetchAll(\PDO::FETCH_COLUMN);
             $defeitos = $this->db->query("SELECT DISTINCT defeito_nome FROM triagem_toners WHERE defeito_nome IS NOT NULL AND defeito_nome != '' ORDER BY defeito_nome")->fetchAll(\PDO::FETCH_COLUMN);
+            $filiais = $this->db->query("SELECT DISTINCT filial_registro FROM triagem_toners WHERE filial_registro IS NOT NULL AND filial_registro != '' ORDER BY filial_registro")->fetchAll(\PDO::FETCH_COLUMN);
 
             echo json_encode([
                 'success' => true,
@@ -314,6 +319,7 @@ class AdminController
                     'modelos' => $modelos ?: [],
                     'clientes' => $clientes ?: [],
                     'defeitos' => $defeitos ?: [],
+                    'filiais' => $filiais ?: [],
                 ],
             ]);
         } catch (\Exception $e) {

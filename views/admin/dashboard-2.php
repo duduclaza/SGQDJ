@@ -154,6 +154,9 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           <span class="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse"></span> Live Dashboard
         </span>
         <span id="dashLoading" class="dash-spinner hidden"></span>
+        <select id="filtroFilialHeader" class="ml-2 rounded-lg border border-slate-600/60 bg-slate-800/90 text-slate-200 text-xs px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 min-w-[160px]">
+          <option value="">Todas as Filiais</option>
+        </select>
       </div>
       <h1 class="text-2xl font-bold text-white tracking-tight">Triagem de Toners</h1>
       <p class="text-sm text-slate-400 mt-1">Painel analítico de performance, volume e qualidade</p>
@@ -400,6 +403,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       cliente:     document.getElementById('filtroCliente').value,
       defeito:     document.getElementById('filtroDefeito').value,
       destino:     document.getElementById('filtroDestino').value,
+      filial:      document.getElementById('filtroFilialHeader').value,
       data_inicio: document.getElementById('filtroDataInicio').value,
       data_fim:    document.getElementById('filtroDataFim').value,
     };
@@ -441,6 +445,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     sdData.modelo = opts.modelos || [];
     sdData.cliente = opts.clientes || [];
     fillSelect('filtroDefeito', opts.defeitos || []);
+    fillSelectFilial('filtroFilialHeader', opts.filiais || []);
     initSearchDropdown('Modelo', sdData.modelo);
     initSearchDropdown('Cliente', sdData.cliente);
   }
@@ -448,6 +453,17 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     const sel = document.getElementById(id);
     const current = sel.value;
     sel.innerHTML = '<option value="">Todos</option>';
+    items.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item; opt.textContent = item;
+      sel.appendChild(opt);
+    });
+    sel.value = current;
+  }
+  function fillSelectFilial(id, items) {
+    const sel = document.getElementById(id);
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Todas as Filiais</option>';
     items.forEach(item => {
       const opt = document.createElement('option');
       opt.value = item; opt.textContent = item;
@@ -850,7 +866,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     debounceTimer = setTimeout(fetchDashboard, 350);
   }
   window.limparFiltros = function() {
-    ['filtroModelo','filtroCliente','filtroDefeito','filtroDestino','filtroDataInicio','filtroDataFim'].forEach(id => {
+    ['filtroModelo','filtroCliente','filtroDefeito','filtroDestino','filtroDataInicio','filtroDataFim','filtroFilialHeader'].forEach(id => {
       document.getElementById(id).value = '';
     });
     document.getElementById('filtroModeloInput').value = '';
@@ -968,7 +984,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       }
     });
 
-    ['filtroDefeito','filtroDestino','filtroDataInicio','filtroDataFim'].forEach(id => {
+    ['filtroDefeito','filtroDestino','filtroDataInicio','filtroDataFim','filtroFilialHeader'].forEach(id => {
       document.getElementById(id).addEventListener('change', onFilterChange);
     });
     ['filtroDataInicio','filtroDataFim'].forEach(id => {
