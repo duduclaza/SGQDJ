@@ -28,6 +28,19 @@ class PermissionMiddleware
         '/toners/defeitos/delete' => 'toners_defeitos',
         '/toners/defeitos/{id}/foto/{n}' => 'toners_defeitos',
 
+        // Triagem de Toners
+        '/triagem-toners' => 'triagem_toners',
+        '/triagem-toners/list' => 'triagem_toners',
+        '/triagem-toners/template' => 'triagem_toners',
+        '/triagem-toners/importar' => 'triagem_toners',
+        '/triagem-toners/calcular' => 'triagem_toners',
+        '/triagem-toners/store' => 'triagem_toners',
+        '/triagem-toners/update' => 'triagem_toners',
+        '/triagem-toners/duplicate' => 'triagem_toners',
+        '/triagem-toners/delete' => 'triagem_toners',
+        '/triagem-toners/parametros' => 'triagem_toners',
+        '/triagem-toners/parametros/save' => 'triagem_toners',
+
         // Atendimento - Calculadora de Envio
         '/atendimento/calculadora-toners' => 'calculadora_toners',
         '/atendimento/calculadora-toners/buscar' => 'calculadora_toners',

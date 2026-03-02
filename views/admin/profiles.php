@@ -287,6 +287,7 @@ const modulesByCategory = {
     { key: 'toners_cadastro', name: 'Cadastro de Toners 💧' },
     { key: 'cadastro_maquinas', name: 'Cadastro de Máquinas 🖨️' },
     { key: 'cadastro_pecas', name: 'Cadastro de Peças 🔧' },
+    { key: 'cadastro_defeitos', name: 'Cadastro de Defeitos 🧩' },
     { key: 'registros_fornecedores', name: 'Cadastro de Fornecedores 🏭' },
     { key: 'cadastro_contratos', name: 'Cadastro de Contratos 📄' },
     { key: 'cadastro_clientes', name: 'Cadastro de Clientes 👥' },
@@ -294,6 +295,7 @@ const modulesByCategory = {
     { key: 'registros_departamentos', name: 'Departamentos 🏛️' }
   ],
   'Qualidade': [
+    { key: 'triagem_toners', name: 'Triagem de Toners 🔍' },
     { key: 'toners_retornados', name: 'Registro de Retornados 📋' },
     { key: 'toners_defeitos', name: 'Toners com Defeito 🔴' },
     { key: 'amostragens_2', name: 'Amostragens 2.0 🔬' },
