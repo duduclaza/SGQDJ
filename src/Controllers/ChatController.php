@@ -325,8 +325,11 @@ class ChatController
     private function sendMessageToAi(int $userId, string $message): void
     {
         try {
+            error_log("Eduardo sendMessageToAi: userId={$userId}, message=" . substr($message, 0, 200));
+
             $ticketData = $this->parseSupportTicketCommand($message);
             $triagemQuery = $this->parseTriagemClienteCommand($message);
+            error_log("Eduardo parse: ticket=" . ($ticketData ? 'yes' : 'no') . ", triagem=" . ($triagemQuery ? json_encode($triagemQuery) : 'no'));
             $displayUserMessage = $message;
             if (is_array($ticketData)) {
                 $displayUserMessage = 'Abrir chamado - Módulo: ' . $ticketData['module'] . ' | Problema: ' . $ticketData['problem'];
@@ -715,28 +718,66 @@ class ChatController
         }
 
         try {
-            $codigo = $query['cliente_codigo'];
+            $codigo = trim($query['cliente_codigo']);
             $dias = $query['dias'];
-            $dataLimite = date('Y-m-d', strtotime("-{$dias} days"));
+            $dataLimite = date('Y-m-d 00:00:00', strtotime("-{$dias} days"));
 
-            $stmt = $this->db->prepare("
+            $like = '%' . $codigo . '%';
+
+            // Debug: contar total de registros na tabela
+            $totalCheck = $this->db->query("SELECT COUNT(*) FROM triagem_toners")->fetchColumn();
+            error_log("Eduardo triagem: total registros na tabela = {$totalCheck}");
+
+            $baseSelect = "
                 SELECT t.toner_modelo, t.cliente_nome, t.filial_registro, t.colaborador_registro,
                        t.codigo_requisicao, t.defeito_nome, t.fornecedor_nome,
                        t.modo, t.peso_retornado, t.percentual_calculado, t.gramatura_restante,
                        t.parecer, t.destino, COALESCE(t.valor_recuperado, 0) AS valor_recuperado,
                        t.observacoes, t.created_at
                 FROM triagem_toners t
-                WHERE (t.cliente_nome LIKE ? OR t.codigo_requisicao LIKE ? OR CAST(t.cliente_id AS CHAR) = ?)
-                  AND t.created_at >= ?
-                ORDER BY t.created_at DESC
-                LIMIT 50
-            ");
-            $like = '%' . $codigo . '%';
-            $stmt->execute([$like, $like, $codigo, $dataLimite]);
+            ";
+
+            $searchWhere = "
+                WHERE (
+                    t.cliente_nome LIKE ?
+                    OR t.codigo_requisicao LIKE ?
+                    OR t.fornecedor_nome LIKE ?
+                    OR t.toner_modelo LIKE ?
+                    OR t.filial_registro LIKE ?
+                    OR t.colaborador_registro LIKE ?
+                    OR t.defeito_nome LIKE ?
+                    OR CAST(t.cliente_id AS CHAR) LIKE ?
+                    OR CAST(t.id AS CHAR) = ?
+                )
+            ";
+
+            // Tentar com filtro de data
+            $stmt = $this->db->prepare($baseSelect . $searchWhere . " AND t.created_at >= ? ORDER BY t.created_at DESC LIMIT 50");
+            $stmt->execute([$like, $like, $like, $like, $like, $like, $like, $like, $codigo, $dataLimite]);
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            error_log("Eduardo triagem query: termo='{$codigo}', dias={$dias}, dataLimite={$dataLimite}, resultados=" . count($rows));
+
+            // Se não encontrou com data, tentar sem filtro de data
             if (empty($rows)) {
-                return '__TRIAGEM_RESULT__|0|Nenhum registro de triagem encontrado para "' . $codigo . '" nos últimos ' . $dias . ' dias.';
+                error_log("Eduardo triagem: tentando sem filtro de data...");
+                $stmt2 = $this->db->prepare($baseSelect . $searchWhere . " ORDER BY t.created_at DESC LIMIT 50");
+                $stmt2->execute([$like, $like, $like, $like, $like, $like, $like, $like, $codigo]);
+                $rows = $stmt2->fetchAll(\PDO::FETCH_ASSOC);
+                error_log("Eduardo triagem sem data: resultados=" . count($rows));
+
+                if (!empty($rows)) {
+                    $dias = 'todos (sem limite de data)';
+                }
+            }
+
+            if (empty($rows)) {
+                // Debug: mostrar amostra dos nomes de clientes existentes
+                $sampleStmt = $this->db->query("SELECT DISTINCT cliente_nome FROM triagem_toners WHERE cliente_nome IS NOT NULL AND cliente_nome != '' LIMIT 10");
+                $samples = $sampleStmt->fetchAll(\PDO::FETCH_COLUMN);
+                error_log("Eduardo triagem: clientes na tabela = " . implode(', ', $samples));
+
+                return '__TRIAGEM_RESULT__|0|Nenhum registro de triagem encontrado para "' . $codigo . '".' . "\n\nDica: tente digitar parte do nome do cliente, modelo do toner, filial ou código de requisição.";
             }
 
             $clienteNome = $rows[0]['cliente_nome'] ?? $codigo;
