@@ -248,10 +248,13 @@ if (!function_exists('flash')) {
     .chat-unread { background: #ef4444; color: #fff; border-radius: 999px; font-size: 10px; padding: 2px 6px; font-weight: 700; }
     .chat-conversation { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
     .chat-empty { margin: auto; color: #6b7280; font-size: 13px; }
-    .chat-conversation-header { padding: 10px 14px; border-bottom: 1px solid #d4d4d8; font-size: 13px; font-weight: 600; color: #1f2937; background: #f0f2f5; }
+    .chat-conversation-header { padding: 10px 14px; border-bottom: 1px solid #d4d4d8; font-size: 13px; font-weight: 600; color: #1f2937; background: #f0f2f5; display: flex; align-items: center; justify-content: space-between; }
     .chat-conversation-header.hidden { display: none; }
     .chat-conversation-title { display: inline-flex; align-items: center; gap: 8px; }
     .chat-conversation-sub { color: #64748b; font-weight: 500; font-size: 11px; }
+    .chat-clear-btn { border: 1px solid #e2e8f0; background: #fff; color: #64748b; border-radius: 6px; padding: 4px 8px; font-size: 10px; cursor: pointer; white-space: nowrap; }
+    .chat-clear-btn:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+    .chat-beta-notice { padding: 5px 12px; background: #eff6ff; border-bottom: 1px solid #bfdbfe; color: #1e40af; font-size: 11px; text-align: center; font-weight: 500; }
     .chat-messages { flex: 1; min-height: 0; overflow: auto; padding: 12px; background:
       radial-gradient(circle at 25px 25px, rgba(255,255,255,0.28) 2px, transparent 0) 0 0/50px 50px,
       linear-gradient(#e7ddd4, #efeae2); }
@@ -673,14 +676,22 @@ if (!function_exists('flash')) {
           ui.empty.classList.add('hidden');
           ui.convHeader.classList.remove('hidden');
           if (selectedContact) {
-            ui.convHeader.innerHTML = `<span class="chat-conversation-title">${avatarHtml(selectedContact.id, selectedContact.name, selectedContact.has_photo, 'chat-contact-avatar', selectedContact.avatar_url)}<span>${escapeHtml(selectedContact.name)}</span></span> <span class="chat-conversation-sub">(${Number(selectedContact.is_online) === 1 ? 'Online' : 'Offline'})</span>`;
+            const clearBtn = `<button type="button" class="chat-clear-btn" id="chat-clear-history-btn" title="Limpar histórico">🗑️ Limpar</button>`;
+            ui.convHeader.innerHTML = `<span class="chat-conversation-title">${avatarHtml(selectedContact.id, selectedContact.name, selectedContact.has_photo, 'chat-contact-avatar', selectedContact.avatar_url)}<span>${escapeHtml(selectedContact.name)}</span></span> <span class="chat-conversation-sub">(${Number(selectedContact.is_online) === 1 ? 'Online' : 'Offline'})</span>${clearBtn}`;
           } else {
             ui.convHeader.textContent = 'Conversa';
           }
+
+          // Beta notice para Eduardo
+          let betaHtml = '';
+          if (isAiConversation()) {
+            betaHtml = '<div class="chat-beta-notice">⚠️ Eduardo está em fase de testes. Algumas respostas podem não ser 100% precisas.</div>';
+          }
+
           ui.messages.classList.remove('hidden');
           ui.form.classList.remove('hidden');
 
-          ui.messages.innerHTML = messages.map(m => {
+          ui.messages.innerHTML = betaHtml + messages.map(m => {
             const mine = Number(m.sender_id) === meId;
             const readClass = m.read_at ? 'read' : 'sent';
             const readLabel = mine ? `<span class="chat-read-status ${readClass}">${m.read_at ? '✓✓' : '✓'}</span>` : '';
@@ -805,6 +816,29 @@ if (!function_exists('flash')) {
         await loadContacts();
       }
 
+      async function clearChatHistory() {
+        if (!activeContactId) return;
+        if (!confirm('Tem certeza que deseja limpar todo o histórico desta conversa?')) return;
+
+        try {
+          const payload = new URLSearchParams();
+          payload.set('contact_id', activeContactId);
+          const data = await fetchJson('/api/chat/clear-history', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: payload.toString()
+          });
+          if (data.success) {
+            await loadMessages();
+            await loadContacts();
+          } else {
+            alert(data.message || 'Erro ao limpar histórico');
+          }
+        } catch (_) {
+          alert('Erro ao limpar histórico');
+        }
+      }
+
       function selectContact(contactId) {
         activeMode = 'direct';
         activeContactId = String(contactId);
@@ -870,6 +904,13 @@ if (!function_exists('flash')) {
             if (event.target !== ui.emojiToggle && !ui.emojiPicker.contains(event.target)) {
               ui.emojiPicker.classList.add('hidden');
             }
+          }
+        });
+
+        ui.convHeader.addEventListener('click', function(event) {
+          const clearBtn = event.target.closest('#chat-clear-history-btn');
+          if (clearBtn) {
+            clearChatHistory();
           }
         });
 

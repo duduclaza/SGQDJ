@@ -236,6 +236,36 @@ class ChatController
         echo json_encode(['success' => false, 'message' => 'Sala geral desativada. Use conversas privadas.']);
     }
 
+    public function clearHistory(): void
+    {
+        $userId = $this->requireAuthJson();
+        if ($userId === null) {
+            return;
+        }
+
+        $contactId = (int)($_POST['contact_id'] ?? 0);
+        if ($contactId === 0) {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'message' => 'Contato inválido']);
+            return;
+        }
+
+        try {
+            $stmt = $this->db->prepare("
+                DELETE FROM chat_messages
+                WHERE (sender_id = ? AND receiver_id = ?)
+                   OR (sender_id = ? AND receiver_id = ?)
+            ");
+            $stmt->execute([$userId, $contactId, $contactId, $userId]);
+            $deleted = $stmt->rowCount();
+
+            echo json_encode(['success' => true, 'message' => "Histórico limpo ({$deleted} mensagens removidas)"]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Erro ao limpar histórico']);
+        }
+    }
+
     public function sendMessage(): void
     {
         $userId = $this->requireAuthJson();

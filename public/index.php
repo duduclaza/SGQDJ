@@ -490,6 +490,7 @@ $router->get('/api/chat/messages/{userId}', [App\Controllers\ChatController::cla
 $router->get('/api/chat/messages/global', [App\Controllers\ChatController::class , 'getGlobalMessages']);
 $router->post('/api/chat/send', [App\Controllers\ChatController::class , 'sendMessage']);
 $router->post('/api/chat/send-global', [App\Controllers\ChatController::class , 'sendGlobalMessage']);
+$router->post('/api/chat/clear-history', [App\Controllers\ChatController::class , 'clearHistory']);
 
 // FMEA routes
 $router->get('/fmea', [App\Controllers\FMEAController::class , 'index']);
