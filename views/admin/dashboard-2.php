@@ -275,11 +275,11 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       <div class="flex items-center justify-between mb-4">
         <div>
           <h3 class="text-sm font-semibold text-white">Pareto de Defeitos</h3>
-          <p class="text-xs text-slate-400 mt-0.5">Contagem + % acumulado</p>
+          <p class="text-xs text-slate-400 mt-0.5">Contagem</p>
         </div>
         <div class="flex items-center gap-2">
           <span class="kpi-badge bg-indigo-400/15 text-indigo-300 border border-indigo-400/20">Pareto</span>
-          <button class="chart-expand-btn" onclick="expandirGrafico('pareto','Pareto de Defeitos','Contagem + % acumulado')" title="Expandir">
+          <button class="chart-expand-btn" onclick="expandirGrafico('pareto','Pareto de Defeitos','Contagem')" title="Expandir">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
           </button>
         </div>
@@ -605,10 +605,10 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
         scales: {
           x: { grid: {display:false}, ticks: {maxRotation:45, minRotation:30} },
           y: { position:'left', grid:{color:'rgba(255,255,255,0.04)'}, ticks:{precision:0}, title:{display:true, text:'Qtd', color:'#818cf8'} },
-          y1: { position:'right', min:0, max:100, grid:{display:false}, ticks:{callback:v=>v+'%'}, title:{display:true, text:'% Acum.', color:'#fbbf24'} },
+          y1: { display:false, position:'right', min:0, max:100, grid:{display:false}, ticks:{callback:v=>v+'%'}, title:{display:true, text:'% Acum.', color:'#fbbf24'} },
         },
         plugins: {
-          legend: { display: true, position: 'top', labels: {boxWidth:12, padding:16} },
+          legend: { display: true, position: 'top', labels: {boxWidth:12, padding:16, filter: (item) => item.text === 'Quantidade'} },
           tooltip: {
             callbacks: {
               label: ctx => ctx.dataset.type === 'line'
