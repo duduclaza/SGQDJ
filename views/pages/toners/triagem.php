@@ -56,7 +56,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
   <!-- Filtros -->
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
       <div class="sm:col-span-2 lg:col-span-2">
         <label class="block text-xs font-medium text-gray-700 mb-1">Busca Inteligente</label>
         <div class="relative">
@@ -71,6 +71,30 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
         <input id="f-filial" type="text" placeholder="Ex.: Matriz" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Modelo</label>
+        <input id="f-modelo" type="text" placeholder="Ex.: HP CF280A" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Cliente</label>
+        <input id="f-cliente" type="text" placeholder="Nome ou código" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Colaborador</label>
+        <input id="f-colaborador" type="text" placeholder="Nome" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Defeito</label>
+        <input id="f-defeito" type="text" placeholder="Descrição" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Fornecedor</label>
+        <input id="f-fornecedor" type="text" placeholder="Fornecedor" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Cód. Requisição</label>
+        <input id="f-codigo-req" type="text" placeholder="REQ-2026..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
         <label class="block text-xs font-medium text-gray-700 mb-1">Destino</label>
         <select id="f-destino" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Todos</option>
@@ -79,6 +103,22 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
           <option value="Uso Interno">Uso Interno</option>
           <option value="Estoque">Estoque</option>
         </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Modo</label>
+        <select id="f-modo" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">Todos</option>
+          <option value="peso">Peso</option>
+          <option value="percentual">% Direto</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">% Mín.</label>
+        <input id="f-percentual-min" type="number" min="0" max="100" step="0.01" placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">% Máx.</label>
+        <input id="f-percentual-max" type="number" min="0" max="100" step="0.01" placeholder="100" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-700 mb-1">Data Início</label>
@@ -90,6 +130,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
       </div>
     </div>
     <div class="flex justify-end mt-3 gap-2">
+      <button onclick="abrirModalColunas()" class="px-4 py-2 text-sm text-indigo-700 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors">Colunas</button>
       <button onclick="limparFiltros()" class="px-4 py-2 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Limpar</button>
       <button onclick="carregarRegistros(1)" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">Filtrar</button>
     </div>
@@ -100,24 +141,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200 text-sm">
         <thead class="bg-gray-50">
-          <tr>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">#</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Cliente</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Cód. Requisição</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Filial</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Colaborador</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Defeito</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Fornecedor</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Modelo</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Modo</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Peso Ret. (g)</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">% Toner</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Parecer</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Destino</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Valor Recup.</th>
-            <th class="px-4 py-3 text-left font-semibold text-gray-600">Data/Hora</th>
-            <th class="px-4 py-3 text-center font-semibold text-gray-600">Ações</th>
-          </tr>
+          <tr id="grid-head"></tr>
         </thead>
         <tbody id="grid-body" class="divide-y divide-gray-100">
           <tr><td colspan="16" class="px-4 py-8 text-center text-gray-400">Carregando...</td></tr>
@@ -128,6 +152,28 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
     <div class="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50">
       <span id="pag-info" class="text-sm text-gray-500"></span>
       <div class="flex gap-1" id="pag-buttons"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: PERSONALIZAR COLUNAS ========== -->
+<div id="modal-colunas" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+      <div>
+        <h2 class="text-lg font-bold text-gray-900">Personalizar colunas</h2>
+        <p class="text-xs text-gray-500 mt-0.5">Escolha quais colunas exibir e ajuste a ordem.</p>
+      </div>
+      <button onclick="fecharModalColunas()" class="text-gray-400 hover:text-gray-600">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="px-6 py-4">
+      <div id="colunas-lista" class="space-y-2 max-h-80 overflow-y-auto"></div>
+    </div>
+    <div class="flex justify-end gap-2 px-6 py-4 border-t border-gray-200 bg-gray-50">
+      <button onclick="resetColunasPadrao()" class="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100">Padrão</button>
+      <button onclick="salvarPreferenciasColunas()" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg">Salvar</button>
     </div>
   </div>
 </div>
@@ -482,11 +528,167 @@ let currentPage = 1;
 let calcDebounce = null;
 let lastCalcResult = null;
 let filtrosDebounce = null;
+let lastGridData = [];
+
+const GRID_COLUMNS_STORAGE_KEY = 'triagem_toners_grid_columns_v1';
+const GRID_COLUMNS_DEFAULT = [
+  { key: 'id', label: '#', visible: true, locked: true, align: 'left' },
+  { key: 'cliente', label: 'Cliente', visible: true },
+  { key: 'codigo_requisicao', label: 'Cód. Requisição', visible: true },
+  { key: 'filial', label: 'Filial', visible: true },
+  { key: 'colaborador', label: 'Colaborador', visible: true },
+  { key: 'defeito', label: 'Defeito', visible: true },
+  { key: 'fornecedor', label: 'Fornecedor', visible: true },
+  { key: 'modelo', label: 'Modelo', visible: true },
+  { key: 'modo', label: 'Modo', visible: true },
+  { key: 'peso', label: 'Peso Ret. (g)', visible: true },
+  { key: 'percentual', label: '% Toner', visible: true },
+  { key: 'parecer', label: 'Parecer', visible: true },
+  { key: 'destino', label: 'Destino', visible: true },
+  { key: 'valor', label: 'Valor Recup.', visible: true },
+  { key: 'datahora', label: 'Data/Hora', visible: true },
+  { key: 'acoes', label: 'Ações', visible: true, locked: true, align: 'center' },
+];
+let gridColumns = [];
+
+function cloneDefaultColumns() {
+  return GRID_COLUMNS_DEFAULT.map(c => ({ ...c }));
+}
+
+function loadColumnPreferences() {
+  const defaults = cloneDefaultColumns();
+  try {
+    const savedRaw = localStorage.getItem(GRID_COLUMNS_STORAGE_KEY);
+    if (!savedRaw) {
+      gridColumns = defaults;
+      return;
+    }
+
+    const saved = JSON.parse(savedRaw);
+    if (!Array.isArray(saved) || saved.length === 0) {
+      gridColumns = defaults;
+      return;
+    }
+
+    const defaultsByKey = new Map(defaults.map(c => [c.key, c]));
+    const merged = [];
+
+    saved.forEach((item) => {
+      const base = defaultsByKey.get(item.key);
+      if (!base) return;
+      merged.push({ ...base, visible: base.locked ? true : !!item.visible });
+      defaultsByKey.delete(item.key);
+    });
+
+    defaultsByKey.forEach((value) => merged.push({ ...value }));
+    gridColumns = merged;
+  } catch (_) {
+    gridColumns = defaults;
+  }
+}
+
+function getActiveColumns() {
+  return gridColumns.filter(c => c.locked || c.visible);
+}
+
+function renderGridHeader() {
+  const head = document.getElementById('grid-head');
+  if (!head) return;
+
+  head.innerHTML = getActiveColumns().map((col) => {
+    const alignClass = col.align === 'center' ? 'text-center' : 'text-left';
+    return `<th class="px-4 py-3 ${alignClass} font-semibold text-gray-600">${col.label}</th>`;
+  }).join('');
+}
+
+function saveColumnPreferences() {
+  const data = gridColumns.map(({ key, visible }) => ({ key, visible: !!visible }));
+  localStorage.setItem(GRID_COLUMNS_STORAGE_KEY, JSON.stringify(data));
+}
+
+function moveColumn(key, direction) {
+  const index = gridColumns.findIndex(c => c.key === key);
+  if (index < 0) return;
+  const targetIndex = index + direction;
+  if (targetIndex < 0 || targetIndex >= gridColumns.length) return;
+  const current = gridColumns[index];
+  const target = gridColumns[targetIndex];
+  if (current.locked || target.locked) return;
+  [gridColumns[index], gridColumns[targetIndex]] = [gridColumns[targetIndex], gridColumns[index]];
+  renderColunasLista();
+}
+
+function renderColunasLista() {
+  const lista = document.getElementById('colunas-lista');
+  if (!lista) return;
+
+  lista.innerHTML = gridColumns.map((col, index) => {
+    const canMoveUp = !col.locked && index > 0 && !gridColumns[index - 1]?.locked;
+    const canMoveDown = !col.locked && index < gridColumns.length - 1 && !gridColumns[index + 1]?.locked;
+
+    return `<div class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 px-3 py-2">
+      <label class="flex items-center gap-3 text-sm text-gray-700">
+        <input
+          type="checkbox"
+          ${col.visible || col.locked ? 'checked' : ''}
+          ${col.locked ? 'disabled' : ''}
+          onchange="toggleColunaVisivel('${col.key}', this.checked)"
+          class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        >
+        <span>${col.label}${col.locked ? ' <span class="text-xs text-gray-400">(fixa)</span>' : ''}</span>
+      </label>
+      <div class="flex items-center gap-1">
+        <button
+          type="button"
+          onclick="moveColumn('${col.key}', -1)"
+          ${canMoveUp ? '' : 'disabled'}
+          class="px-2 py-1 text-xs rounded border ${canMoveUp ? 'border-gray-300 text-gray-700 hover:bg-gray-100' : 'border-gray-200 text-gray-300 cursor-not-allowed'}"
+          title="Mover para cima"
+        >↑</button>
+        <button
+          type="button"
+          onclick="moveColumn('${col.key}', 1)"
+          ${canMoveDown ? '' : 'disabled'}
+          class="px-2 py-1 text-xs rounded border ${canMoveDown ? 'border-gray-300 text-gray-700 hover:bg-gray-100' : 'border-gray-200 text-gray-300 cursor-not-allowed'}"
+          title="Mover para baixo"
+        >↓</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleColunaVisivel(key, checked) {
+  gridColumns = gridColumns.map((col) => {
+    if (col.key !== key || col.locked) return col;
+    return { ...col, visible: checked };
+  });
+}
+
+function abrirModalColunas() {
+  renderColunasLista();
+  document.getElementById('modal-colunas').classList.remove('hidden');
+}
+
+function fecharModalColunas() {
+  document.getElementById('modal-colunas').classList.add('hidden');
+}
+
+function resetColunasPadrao() {
+  gridColumns = cloneDefaultColumns();
+  renderColunasLista();
+}
+
+function salvarPreferenciasColunas() {
+  saveColumnPreferences();
+  renderGridHeader();
+  renderGrid(lastGridData);
+  fecharModalColunas();
+}
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', () => {
   // Move modals to <body> to avoid fixed-position issues inside transformed containers
-  ['modal-triagem', 'modal-delete', 'modal-importacao', 'modal-params', 'modal-duplicate-cliente'].forEach(id => {
+  ['modal-triagem', 'modal-delete', 'modal-importacao', 'modal-params', 'modal-duplicate-cliente', 'modal-colunas'].forEach(id => {
     const el = document.getElementById(id);
     if (el && el.parentElement !== document.body) {
       document.body.appendChild(el);
@@ -495,7 +697,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const searchInput = document.getElementById('f-search');
   const filialInput = document.getElementById('f-filial');
+  const modeloInput = document.getElementById('f-modelo');
+  const clienteInput = document.getElementById('f-cliente');
+  const colaboradorInput = document.getElementById('f-colaborador');
+  const defeitoInput = document.getElementById('f-defeito');
+  const fornecedorInput = document.getElementById('f-fornecedor');
+  const codigoReqInput = document.getElementById('f-codigo-req');
   const destinoSelect = document.getElementById('f-destino');
+  const modoSelect = document.getElementById('f-modo');
+  const percentualMinInput = document.getElementById('f-percentual-min');
+  const percentualMaxInput = document.getElementById('f-percentual-max');
   const dataInicioInput = document.getElementById('f-data-inicio');
   const dataFimInput = document.getElementById('f-data-fim');
 
@@ -504,7 +715,7 @@ document.addEventListener('DOMContentLoaded', () => {
     filtrosDebounce = setTimeout(() => carregarRegistros(1), 350);
   };
 
-  [searchInput, filialInput].forEach((el) => {
+  [searchInput, filialInput, modeloInput, clienteInput, colaboradorInput, defeitoInput, fornecedorInput, codigoReqInput].forEach((el) => {
     el.addEventListener('input', filtrarComDebounce);
     el.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -515,9 +726,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  [destinoSelect, dataInicioInput, dataFimInput].forEach((el) => {
+  [destinoSelect, modoSelect, percentualMinInput, percentualMaxInput, dataInicioInput, dataFimInput].forEach((el) => {
     el.addEventListener('change', filtrarComDebounce);
   });
+
+  loadColumnPreferences();
+  renderGridHeader();
 
   carregarRegistros(1);
 });
@@ -530,7 +744,16 @@ function carregarRegistros(page) {
     per_page: 15,
     search:       document.getElementById('f-search').value,
     filial:       document.getElementById('f-filial').value,
+    modelo:       document.getElementById('f-modelo').value,
+    cliente:      document.getElementById('f-cliente').value,
+    colaborador:  document.getElementById('f-colaborador').value,
+    defeito:      document.getElementById('f-defeito').value,
+    fornecedor:   document.getElementById('f-fornecedor').value,
+    codigo_requisicao: document.getElementById('f-codigo-req').value,
     destino:      document.getElementById('f-destino').value,
+    modo:         document.getElementById('f-modo').value,
+    percentual_min: document.getElementById('f-percentual-min').value,
+    percentual_max: document.getElementById('f-percentual-max').value,
     data_inicio:  document.getElementById('f-data-inicio').value,
     data_fim:     document.getElementById('f-data-fim').value,
   });
@@ -539,6 +762,7 @@ function carregarRegistros(page) {
     .then(r => r.json())
     .then(res => {
       if (!res.success) { showToast(res.message, 'error'); return; }
+      lastGridData = Array.isArray(res.data) ? res.data : [];
       renderGrid(res.data);
       renderPaginacao(res.pagination);
     })
@@ -547,8 +771,9 @@ function carregarRegistros(page) {
 
 function renderGrid(data) {
   const tbody = document.getElementById('grid-body');
+  const activeCols = getActiveColumns();
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="16" class="px-4 py-10 text-center text-gray-400 text-sm">Nenhum registro encontrado.</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="${Math.max(activeCols.length, 1)}" class="px-4 py-10 text-center text-gray-400 text-sm">Nenhum registro encontrado.</td></tr>`;
     return;
   }
 
@@ -582,30 +807,37 @@ function renderGrid(data) {
     const dupBtn   = CAN_EDIT   ? `<button onclick="duplicarRegistro(${r.id}, ${r.cliente_id || 0})" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Duplicar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V4a1 1 0 011-1h11a1 1 0 011 1v11a1 1 0 01-1 1h-3m-9 4H4a1 1 0 01-1-1V8a1 1 0 011-1h11a1 1 0 011 1v11a1 1 0 01-1 1z"/></svg></button>` : '';
     const delBtn   = CAN_DELETE ? `<button onclick="abrirModalDelete(${r.id})" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : '';
 
-    return `<tr class="hover:bg-gray-50 transition-colors">
-      <td class="px-4 py-3 text-gray-500 text-xs">${r.id}</td>
-      <td class="px-4 py-3 text-gray-700 text-xs">${r.cliente_nome || '—'}</td>
-      <td class="px-4 py-3 text-gray-700 text-xs">${r.codigo_requisicao || '—'}</td>
-      <td class="px-4 py-3 text-gray-700 text-xs">${r.filial_registro_nome || r.filial_registro || '—'}</td>
-      <td class="px-4 py-3 text-gray-700 text-xs">${r.colaborador_registro_nome || r.colaborador_registro || r.criado_por_nome || '—'}</td>
-      <td class="px-4 py-3 text-gray-700 text-xs">${r.defeito_nome || '—'}</td>
-      <td class="px-4 py-3 text-gray-700 text-xs">${r.fornecedor_nome || '—'}</td>
-      <td class="px-4 py-3 font-medium text-gray-900 text-xs">${r.toner_modelo}</td>
-      <td class="px-4 py-3">${modoBadge}</td>
-      <td class="px-4 py-3 text-gray-600 text-xs">${peso}</td>
-      <td class="px-4 py-3">
-        <div class="flex items-center gap-2">
-          <div class="w-16 bg-gray-200 rounded-full h-1.5"><div class="${barColor} h-1.5 rounded-full" style="width:${pct}%"></div></div>
-          <span class="text-xs font-bold text-gray-800">${pctSalvo.toFixed(1)}%</span>
-        </div>
-      </td>
-      <td class="px-4 py-3 text-xs text-gray-600 max-w-xs" title="${r.parecer || ''}">${parecerShort}</td>
-      <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium ${destBadge}">${r.destino}</span></td>
-      <td class="px-4 py-3 text-xs">${valor}</td>
-      <td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">${dtStr}</td>
-      <td class="px-4 py-3 text-center"><div class="flex justify-center gap-1">${editBtn}${dupBtn}${delBtn}</div></td>
-    </tr>`;
+    const cellByColumn = {
+      id: `<td class="px-4 py-3 text-gray-500 text-xs">${r.id}</td>`,
+      cliente: `<td class="px-4 py-3 text-gray-700 text-xs">${escapeHtml(r.cliente_nome || '—')}</td>`,
+      codigo_requisicao: `<td class="px-4 py-3 text-gray-700 text-xs">${escapeHtml(r.codigo_requisicao || '—')}</td>`,
+      filial: `<td class="px-4 py-3 text-gray-700 text-xs">${escapeHtml(r.filial_registro_nome || r.filial_registro || '—')}</td>`,
+      colaborador: `<td class="px-4 py-3 text-gray-700 text-xs">${escapeHtml(r.colaborador_registro_nome || r.colaborador_registro || r.criado_por_nome || '—')}</td>`,
+      defeito: `<td class="px-4 py-3 text-gray-700 text-xs">${escapeHtml(r.defeito_nome || '—')}</td>`,
+      fornecedor: `<td class="px-4 py-3 text-gray-700 text-xs">${escapeHtml(r.fornecedor_nome || '—')}</td>`,
+      modelo: `<td class="px-4 py-3 font-medium text-gray-900 text-xs">${escapeHtml(r.toner_modelo || '—')}</td>`,
+      modo: `<td class="px-4 py-3">${modoBadge}</td>`,
+      peso: `<td class="px-4 py-3 text-gray-600 text-xs">${peso}</td>`,
+      percentual: `<td class="px-4 py-3"><div class="flex items-center gap-2"><div class="w-16 bg-gray-200 rounded-full h-1.5"><div class="${barColor} h-1.5 rounded-full" style="width:${pct}%"></div></div><span class="text-xs font-bold text-gray-800">${pctSalvo.toFixed(1)}%</span></div></td>`,
+      parecer: `<td class="px-4 py-3 text-xs text-gray-600 max-w-xs" title="${escapeHtml(r.parecer || '')}">${escapeHtml(parecerShort)}</td>`,
+      destino: `<td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium ${destBadge}">${escapeHtml(r.destino || '—')}</span></td>`,
+      valor: `<td class="px-4 py-3 text-xs">${valor}</td>`,
+      datahora: `<td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">${dtStr}</td>`,
+      acoes: `<td class="px-4 py-3 text-center"><div class="flex justify-center gap-1">${editBtn}${dupBtn}${delBtn}</div></td>`,
+    };
+
+    const rowCells = activeCols.map((col) => cellByColumn[col.key] || '<td class="px-4 py-3 text-xs text-gray-400">—</td>').join('');
+    return `<tr class="hover:bg-gray-50 transition-colors">${rowCells}</tr>`;
   }).join('');
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function renderPaginacao(pag) {
@@ -625,8 +857,12 @@ function renderPaginacao(pag) {
 }
 
 function limparFiltros() {
-  ['f-search','f-filial','f-data-inicio','f-data-fim'].forEach(id => document.getElementById(id).value = '');
+  ['f-search', 'f-filial', 'f-modelo', 'f-cliente', 'f-colaborador', 'f-defeito', 'f-fornecedor', 'f-codigo-req', 'f-percentual-min', 'f-percentual-max', 'f-data-inicio', 'f-data-fim'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
   document.getElementById('f-destino').value = '';
+  document.getElementById('f-modo').value = '';
   carregarRegistros(1);
 }
 

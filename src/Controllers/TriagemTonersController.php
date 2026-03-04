@@ -560,27 +560,37 @@ class TriagemTonersController
 
             if (!empty($_GET['toner_modelo'])) {
                 $where .= " AND t.toner_modelo LIKE ?";
-                $params[] = '%' . $_GET['toner_modelo'] . '%';
+                $params[] = '%' . trim((string)$_GET['toner_modelo']) . '%';
             }
-            if (!empty($_GET['search'])) {
-                $search = '%' . trim((string)$_GET['search']) . '%';
-                $where .= " AND (
-                    t.toner_modelo LIKE ?
-                    OR t.cliente_nome LIKE ?
-                    OR t.codigo_requisicao LIKE ?
-                    OR t.colaborador_registro LIKE ?
-                    OR EXISTS (
-                        SELECT 1
-                        FROM users u_search
-                        WHERE u_search.id = t.created_by
-                          AND u_search.name LIKE ?
-                    )
-                )";
-                $params[] = $search;
-                $params[] = $search;
-                $params[] = $search;
-                $params[] = $search;
-                $params[] = $search;
+            if (!empty($_GET['modelo'])) {
+                $where .= " AND t.toner_modelo LIKE ?";
+                $params[] = '%' . trim((string)$_GET['modelo']) . '%';
+            }
+            if (!empty($_GET['cliente'])) {
+                $where .= " AND (t.cliente_nome LIKE ? OR CAST(t.cliente_id AS CHAR) LIKE ?)";
+                $clienteFiltro = '%' . trim((string)$_GET['cliente']) . '%';
+                $params[] = $clienteFiltro;
+                $params[] = $clienteFiltro;
+            }
+            if (!empty($_GET['codigo_requisicao'])) {
+                $where .= " AND t.codigo_requisicao LIKE ?";
+                $params[] = '%' . trim((string)$_GET['codigo_requisicao']) . '%';
+            }
+            if (!empty($_GET['colaborador'])) {
+                $where .= " AND t.colaborador_registro LIKE ?";
+                $params[] = '%' . trim((string)$_GET['colaborador']) . '%';
+            }
+            if (!empty($_GET['defeito'])) {
+                $where .= " AND t.defeito_nome LIKE ?";
+                $params[] = '%' . trim((string)$_GET['defeito']) . '%';
+            }
+            if (!empty($_GET['fornecedor'])) {
+                $where .= " AND t.fornecedor_nome LIKE ?";
+                $params[] = '%' . trim((string)$_GET['fornecedor']) . '%';
+            }
+            if (!empty($_GET['modo'])) {
+                $where .= " AND t.modo = ?";
+                $params[] = trim((string)$_GET['modo']);
             }
             if (!empty($_GET['filial'])) {
                 $where .= " AND COALESCE(t.filial_registro, '') LIKE ?";
@@ -590,6 +600,14 @@ class TriagemTonersController
                 $where .= " AND t.destino = ?";
                 $params[] = $_GET['destino'];
             }
+            if (isset($_GET['percentual_min']) && $_GET['percentual_min'] !== '') {
+                $where .= " AND COALESCE(t.percentual_calculado, 0) >= ?";
+                $params[] = (float)$_GET['percentual_min'];
+            }
+            if (isset($_GET['percentual_max']) && $_GET['percentual_max'] !== '') {
+                $where .= " AND COALESCE(t.percentual_calculado, 0) <= ?";
+                $params[] = (float)$_GET['percentual_max'];
+            }
             if (!empty($_GET['data_inicio'])) {
                 $where .= " AND DATE(t.created_at) >= ?";
                 $params[] = $_GET['data_inicio'];
@@ -597,6 +615,60 @@ class TriagemTonersController
             if (!empty($_GET['data_fim'])) {
                 $where .= " AND DATE(t.created_at) <= ?";
                 $params[] = $_GET['data_fim'];
+            }
+
+            if (!empty($_GET['search'])) {
+                $rawSearch = trim((string)$_GET['search']);
+                $tokens = preg_split('/\s+/', $rawSearch) ?: [];
+                $tokens = array_values(array_filter($tokens, static fn($t) => $t !== ''));
+
+                foreach ($tokens as $token) {
+                    $search = '%' . $token . '%';
+                    $where .= " AND (
+                        CAST(t.id AS CHAR) LIKE ?
+                        OR CAST(t.cliente_id AS CHAR) LIKE ?
+                        OR t.cliente_nome LIKE ?
+                        OR t.codigo_requisicao LIKE ?
+                        OR t.filial_registro LIKE ?
+                        OR t.colaborador_registro LIKE ?
+                        OR t.defeito_nome LIKE ?
+                        OR t.fornecedor_nome LIKE ?
+                        OR t.toner_modelo LIKE ?
+                        OR t.modo LIKE ?
+                        OR CAST(t.peso_retornado AS CHAR) LIKE ?
+                        OR CAST(t.percentual_informado AS CHAR) LIKE ?
+                        OR CAST(t.percentual_calculado AS CHAR) LIKE ?
+                        OR t.parecer LIKE ?
+                        OR t.destino LIKE ?
+                        OR CAST(t.valor_recuperado AS CHAR) LIKE ?
+                        OR CAST(t.created_at AS CHAR) LIKE ?
+                        OR EXISTS (
+                            SELECT 1
+                            FROM users u_search
+                            WHERE u_search.id = t.created_by
+                              AND u_search.name LIKE ?
+                        )
+                    )";
+
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                    $params[] = $search;
+                }
             }
 
             $countStmt = $this->db->prepare("SELECT COUNT(*) FROM triagem_toners t $where");

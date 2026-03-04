@@ -364,6 +364,30 @@ const modulesByCategory = {
 // Flatten modules for legacy support in some functions
 const modules = Object.values(modulesByCategory).flat();
 
+const requiredQualityModules = [
+  { key: 'precificacao_coleta_descartes', name: 'Precificação de Coleta 💰' }
+];
+
+function ensureRequiredModules() {
+  if (!Array.isArray(modulesByCategory['Qualidade'])) {
+    modulesByCategory['Qualidade'] = [];
+  }
+
+  const existing = new Set(
+    Object.values(modulesByCategory)
+      .flat()
+      .map(m => m.key)
+  );
+
+  requiredQualityModules.forEach((module) => {
+    if (!existing.has(module.key)) {
+      modulesByCategory['Qualidade'].push(module);
+    }
+  });
+}
+
+ensureRequiredModules();
+
 // Email do usuário logado (Master User pode editar tudo)
 const currentUserEmail = '<?= $_SESSION['user_email'] ?? '' ?>';
 const isMasterUser = currentUserEmail.toLowerCase() === 'du.claza@gmail.com';
