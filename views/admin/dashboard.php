@@ -1,4 +1,4 @@
-<?php if (isset($error)): ?>
+﻿<?php if (isset($error)): ?>
   <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
     <?= e($error) ?>
   </div>
@@ -2071,20 +2071,7 @@ function updateRankingClientesChart(data) {
           }
         },
         datalabels: {
-          display: true,
-          anchor: 'end',
-          align: 'end',
-          color: '#6366f1',
-          font: {
-            size: 11,
-            weight: 'bold'
-          },
-          formatter: function(value) {
-            return value;
-          },
-          padding: {
-            left: 4
-          }
+          display: false
         }
       },
       scales: {
@@ -2277,13 +2264,7 @@ function updateRetornadosClientesChartData(data) {
           }
         },
         datalabels: {
-          display: true,
-          anchor: 'end',
-          align: 'end',
-          color: '#0d9488',
-          font: { size: 11, weight: 'bold' },
-          formatter: function(value) { return value; },
-          padding: { left: 4 }
+          display: false
         }
       },
       scales: {
@@ -2459,20 +2440,7 @@ function criarGraficoRankingExpandido() {
           }
         },
         datalabels: {
-          display: true,
-          anchor: 'end',
-          align: 'end',
-          color: '#fde047',
-          font: {
-            size: 14,
-            weight: 'bold'
-          },
-          formatter: function(value) {
-            return value;
-          },
-          padding: {
-            left: 6
-          }
+          display: false
         }
       },
       scales: {
