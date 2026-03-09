@@ -275,20 +275,9 @@
         </div>
     </div>
 
-    <!-- Funil por Departamento -->
-    <div class="mb-4">
-        <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-xs font-semibold text-slate-500 mr-1">🏭 FUNIL:</span>
-            <button class="funil-pill active" data-dept-id="" onclick="selecionarFunil('', this)">Todos</button>
-            <?php foreach ($departamentos as $dept): ?>
-            <button class="funil-pill" data-dept-id="<?= $dept['id'] ?>" onclick="selecionarFunil('<?= $dept['id'] ?>', this)">
-                <?= e($dept['nome']) ?>
-            </button>
-            <?php endforeach; ?>
-        </div>
-    </div>
 
     <!-- Scrollbar superior -->
+
     <div class="kanban-scroll-top" id="kanbanScrollTop"><div id="kanbanScrollTopInner" style="height:1px"></div></div>
 
     <!-- Kanban Board (horizontal scroll) -->
