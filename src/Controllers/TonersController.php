@@ -1607,6 +1607,7 @@ class TonersController
                     td.foto2_nome,
                     td.foto3_nome,
                     td.devolutiva_descricao,
+                    td.devolutiva_resultado,
                     td.devolutiva_at,
                     td.devolutiva_uid,
                     td.created_at,
@@ -1967,6 +1968,9 @@ class TonersController
         try {
             $id = (int)($_POST['defeito_id'] ?? 0);
             $descricao = trim($_POST['devolutiva_descricao'] ?? '');
+            $resultado_raw = trim($_POST['devolutiva_resultado'] ?? '');
+            $allowedResultados = ['DEFEITO_PROCEDENTE', 'TONER_SEM_DEFEITO'];
+            $resultado = in_array($resultado_raw, $allowedResultados) ? $resultado_raw : null;
             
             if ($id <= 0) {
                 echo json_encode(['success' => false, 'message' => 'ID inválido.']);
@@ -1998,10 +2002,11 @@ class TonersController
             // Update Query Dinâmica
             $sql = "UPDATE toners_defeitos SET 
                     devolutiva_descricao = ?, 
+                    devolutiva_resultado = ?,
                     devolutiva_at = NOW(),
                     devolutiva_uid = ?";
             
-            $params = [$descricao, $_SESSION['user_id'] ?? 0];
+            $params = [$descricao, $resultado, $_SESSION['user_id'] ?? 0];
             
             for ($i = 1; $i <= 3; $i++) {
                 if ($fotos[$i] !== null) {
