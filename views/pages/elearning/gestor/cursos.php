@@ -83,7 +83,7 @@
           <textarea name="descricao" id="cursoDescricao" rows="4" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Resumo objetivo do conteúdo, público-alvo e resultado esperado."></textarea>
         </div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label class="block text-xs font-semibold tracking-wide text-gray-500 uppercase mb-2">Carga horária (min)</label>
           <input type="number" name="carga_horaria" id="cursoCarga" min="0" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="0">
@@ -94,6 +94,15 @@
             <option value="rascunho">Rascunho</option>
             <option value="ativo">Ativo</option>
             <option value="inativo">Inativo</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold tracking-wide text-gray-500 uppercase mb-2">Departamento (categoria)</label>
+          <select name="departamento_id" id="cursoDepartamento" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            <option value="">Selecione</option>
+            <?php foreach ($departamentos ?? [] as $d): ?>
+            <option value="<?= (int)$d['id'] ?>"><?= htmlspecialchars($d['nome']) ?></option>
+            <?php endforeach; ?>
           </select>
         </div>
       </div>
