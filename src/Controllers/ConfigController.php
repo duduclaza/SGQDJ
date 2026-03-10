@@ -209,6 +209,8 @@ class ConfigController
             $modules = [
                 // Operacionais/Qualidade
                 'dashboard','toners_cadastro','toners_retornados','amostragens','homologacoes','garantias','controle_descartes','auditorias','femea','fluxogramas','melhoria_continua','controle_rc',
+                // eLearning
+                'elearning_gestor','elearning_colaborador',
                 // POPs e ITs (granular - 4 abas separadas)
                 'pops_its_cadastro_titulos',    // Aba 1: Cadastro de Títulos
                 'pops_its_meus_registros',      // Aba 2: Meus Registros  

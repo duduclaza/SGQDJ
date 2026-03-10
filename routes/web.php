@@ -105,3 +105,33 @@ $router->get('/toners/defeitos', [TonersController::class , 'defeitos']);
 $router->post('/toners/defeitos/store', [TonersController::class , 'storeDefeito']);
 $router->get('/toners/defeitos/{id}/foto/{n}', [TonersController::class , 'downloadFotoDefeito']);
 $router->post('/toners/defeitos/delete', [TonersController::class , 'deleteDefeito']);
+
+// ===== eLEARNING GESTOR =====
+$router->get('/elearning/gestor', [App\Controllers\ELearningGestorController::class, 'dashboard']);
+$router->get('/elearning/gestor/cursos', [App\Controllers\ELearningGestorController::class, 'cursos']);
+$router->post('/elearning/gestor/cursos/store', [App\Controllers\ELearningGestorController::class, 'storeCurso']);
+$router->post('/elearning/gestor/cursos/update', [App\Controllers\ELearningGestorController::class, 'updateCurso']);
+$router->post('/elearning/gestor/cursos/delete', [App\Controllers\ELearningGestorController::class, 'deleteCurso']);
+$router->get('/elearning/gestor/cursos/{id}/aulas', [App\Controllers\ELearningGestorController::class, 'aulas']);
+$router->post('/elearning/gestor/aulas/store', [App\Controllers\ELearningGestorController::class, 'storeAula']);
+$router->post('/elearning/gestor/aulas/delete', [App\Controllers\ELearningGestorController::class, 'deleteAula']);
+$router->post('/elearning/gestor/materiais/upload', [App\Controllers\ELearningGestorController::class, 'uploadMaterial']);
+$router->post('/elearning/gestor/materiais/delete', [App\Controllers\ELearningGestorController::class, 'deleteMaterial']);
+$router->get('/elearning/gestor/cursos/{id}/provas', [App\Controllers\ELearningGestorController::class, 'provas']);
+$router->post('/elearning/gestor/provas/store', [App\Controllers\ELearningGestorController::class, 'storeProva']);
+$router->post('/elearning/gestor/questoes/store', [App\Controllers\ELearningGestorController::class, 'storeQuestao']);
+$router->get('/elearning/gestor/cursos/{id}/matriculas', [App\Controllers\ELearningGestorController::class, 'matriculas']);
+$router->post('/elearning/gestor/matriculas/store', [App\Controllers\ELearningGestorController::class, 'matricularColaborador']);
+$router->get('/elearning/gestor/cursos/{id}/progresso', [App\Controllers\ELearningGestorController::class, 'progressoDashboard']);
+$router->post('/elearning/gestor/certificados/emitir', [App\Controllers\ELearningGestorController::class, 'emitirCertificado']);
+
+// ===== eLEARNING COLABORADOR =====
+$router->get('/elearning/colaborador', [App\Controllers\ELearningColaboradorController::class, 'meusCursos']);
+$router->get('/elearning/colaborador/cursos/{id}', [App\Controllers\ELearningColaboradorController::class, 'verCurso']);
+$router->get('/elearning/colaborador/materiais/{id}/assistir', [App\Controllers\ELearningColaboradorController::class, 'assistirAula']);
+$router->post('/elearning/colaborador/progresso/registrar', [App\Controllers\ELearningColaboradorController::class, 'registrarProgresso']);
+$router->get('/elearning/colaborador/provas/{id}/fazer', [App\Controllers\ELearningColaboradorController::class, 'fazerProva']);
+$router->post('/elearning/colaborador/provas/submeter', [App\Controllers\ELearningColaboradorController::class, 'submeterProva']);
+$router->get('/elearning/colaborador/provas/resultado/{id}', [App\Controllers\ELearningColaboradorController::class, 'resultadoProva']);
+$router->get('/elearning/colaborador/certificados', [App\Controllers\ELearningColaboradorController::class, 'meusCertificados']);
+$router->get('/elearning/colaborador/certificados/{codigo}', [App\Controllers\ELearningColaboradorController::class, 'downloadCertificado']);
