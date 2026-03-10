@@ -41,9 +41,13 @@ class GarantiasController
     public function requisicao()
     {
         try {
-            // Buscar departamentos para checkboxes de notificação
+            // Buscar departamentos para checkboxes de notificação (apenas setores relevantes)
             try {
-                $stmt = $this->db->query("SELECT id, nome FROM departamentos ORDER BY nome ASC");
+                $stmt = $this->db->query("
+                    SELECT id, nome FROM departamentos 
+                    WHERE nome IN ('Qualidade', 'Logística', 'Logistica', 'Área Técnica', 'Area Tecnica')
+                    ORDER BY FIELD(nome, 'Qualidade', 'Logística', 'Logistica', 'Área Técnica', 'Area Tecnica')
+                ");
                 $departamentos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
             } catch (\Exception $e) {
                 $departamentos_lista = [];
