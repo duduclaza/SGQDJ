@@ -1956,20 +1956,57 @@ async function moverParaEtapaAnterior(homologacaoId, statusAtual) {
     await mudarStatus(homologacaoId, statusAnterior, '⬅️');
 }
 
-// Função para mudar status
-async function mudarStatus(homologacaoId, novoStatus, direcao) {
-    const confirmar = confirm(`${direcao} Deseja mover para "${statusNames[novoStatus]}"?`);
-    if (!confirmar) return;
-    
+// Mini-modal de Observações para mudança de etapa
+function abrirModalObservacao(homologacaoId, novoStatus, direcao) {
+    // Remover modal anterior se existir
+    const existente = document.getElementById('modalObsEtapa');
+    if (existente) existente.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'modalObsEtapa';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:16px;';
+
+    const statusLabel = statusNames[novoStatus] || novoStatus;
+    overlay.innerHTML = `
+        <div style="background:#fff;border-radius:12px;padding:24px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
+            <h3 style="font-size:18px;font-weight:700;color:#1e293b;margin:0 0 6px">${direcao} Mover Etapa</h3>
+            <p style="font-size:13px;color:#475569;margin:0 0 16px">Mover para: <strong style="color:#2563eb">${statusLabel}</strong></p>
+            <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px">Observações <span style="color:#94a3b8;font-weight:400">(opcional)</span></label>
+            <textarea id="obsEtapaTexto" rows="3" placeholder="Descreva o motivo da mudança de etapa..." style="width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+            <div style="display:flex;gap:10px;margin-top:16px">
+                <button id="btnConfirmarEtapa" style="flex:1;padding:10px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+                    ✅ Confirmar
+                </button>
+                <button onclick="document.getElementById('modalObsEtapa').remove()" style="padding:10px 20px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Fechar ao clicar fora
+    overlay.addEventListener('click', () => overlay.remove());
+
+    document.body.appendChild(overlay);
+    setTimeout(() => document.getElementById('obsEtapaTexto')?.focus(), 100);
+
+    // Botão confirmar
+    document.getElementById('btnConfirmarEtapa').addEventListener('click', async () => {
+        const observacao = document.getElementById('obsEtapaTexto')?.value.trim() || '';
+        overlay.remove();
+        await executarMudancaStatus(homologacaoId, novoStatus, observacao);
+    });
+}
+
+// Mudar status com observação
+async function executarMudancaStatus(homologacaoId, novoStatus, observacao) {
     try {
         const response = await fetch(`/homologacoes/${homologacaoId}/status`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: novoStatus })
+            body: JSON.stringify({ status: novoStatus, observacao: observacao })
         });
-        
         const result = await response.json();
-        
         if (result.success) {
             alert('✅ Status atualizado com sucesso!');
             location.reload();
@@ -1980,6 +2017,11 @@ async function mudarStatus(homologacaoId, novoStatus, direcao) {
         console.error('Erro ao mudar status:', error);
         alert('❌ Erro ao atualizar status');
     }
+}
+
+// Função para mudar status (chamada pelas setas)
+function mudarStatus(homologacaoId, novoStatus, direcao) {
+    abrirModalObservacao(homologacaoId, novoStatus, direcao);
 }
 
 // ==================== DRAG & DROP ====================
@@ -2055,23 +2097,19 @@ function handleDrop(e) {
         const statusAtual = draggedCard.getAttribute('data-status');
         
         if (novoStatus && homologacaoId && novoStatus !== statusAtual) {
-            // Confirmar mudança
-            const confirmar = confirm(`Mover para "${statusNames[novoStatus]}"?`);
-            if (confirmar) {
-                atualizarStatusViaApi(homologacaoId, novoStatus);
-            }
+            abrirModalObservacao(homologacaoId, novoStatus, '↔️');
         }
     }
     
     return false;
 }
 
-async function atualizarStatusViaApi(homologacaoId, novoStatus) {
+async function atualizarStatusViaApi(homologacaoId, novoStatus, observacao) {
     try {
         const response = await fetch(`/homologacoes/${homologacaoId}/status`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: novoStatus })
+            body: JSON.stringify({ status: novoStatus, observacao: observacao || '' })
         });
         
         const result = await response.json();

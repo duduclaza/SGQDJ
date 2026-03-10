@@ -595,7 +595,8 @@ class HomologacoesKanbanController
             $json = file_get_contents('php://input');
             $data = json_decode($json, true);
             
-            $novoStatus = $data['status'] ?? '';
+            $novoStatus    = $data['status'] ?? '';
+            $observacao    = trim($data['observacao'] ?? '');
 
             if (!$homologacaoId || !$novoStatus) {
                 echo json_encode(['success' => false, 'message' => 'Dados inválidos']);
@@ -642,7 +643,7 @@ class HomologacoesKanbanController
                 $statusAnterior,
                 $novoStatus,
                 $this->getUsuarioIdLog(),
-                'Status alterado via navegação rápida'
+                $observacao ?: "Status alterado de {$statusAnterior} para {$novoStatus}"
             ]);
 
             $this->db->commit();
