@@ -1992,7 +1992,7 @@ class TonersController
             $id = (int)($_POST['defeito_id'] ?? 0);
             $descricao = trim($_POST['devolutiva_descricao'] ?? '');
             $resultado_raw = trim($_POST['devolutiva_resultado'] ?? '');
-            $allowedResultados = ['DEFEITO_PROCEDENTE', 'TONER_SEM_DEFEITO'];
+            $allowedResultados = ['DEFEITO_PROCEDENTE', 'TONER_SEM_DEFEITO', 'TONER_NAO_RETORNOU'];
             $resultado = in_array($resultado_raw, $allowedResultados) ? $resultado_raw : null;
             
             if ($id <= 0) {
