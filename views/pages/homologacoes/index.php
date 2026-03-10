@@ -1229,11 +1229,86 @@ function renderDetails(data) {
                     <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Atualizar Status</button>
                 </form>
             </div>
-        </div>
     `;
-    
+
+    // ===== TIMELINE DE OBSERVAÇÕES =====
+    const statusIcons = {
+        'aguardando_recebimento': '📦',
+        'recebido': '✅',
+        'em_analise': '🔍',
+        'em_homologacao': '🧪',
+        'aprovado': '✔️',
+        'reprovado': '❌'
+    };
+    const statusColors = {
+        'aguardando_recebimento': '#ca8a04',
+        'recebido': '#1d4ed8',
+        'em_analise': '#c2410c',
+        'em_homologacao': '#7c3aed',
+        'aprovado': '#16a34a',
+        'reprovado': '#dc2626'
+    };
+
+    const historico = data.historico || [];
+    // Inverter para mostrar do mais antigo ao mais recente
+    const historicoOrdenado = [...historico].reverse();
+
+    let timelineHtml = '';
+    if (historicoOrdenado.length > 0) {
+        const itens = historicoOrdenado.map((reg, idx) => {
+            const etapa = reg.status_novo || reg.status_anterior || '';
+            const icon = statusIcons[etapa] || '🔵';
+            const color = statusColors[etapa] || '#64748b';
+            const label = statusLabels[etapa] || etapa;
+            const obs = (reg.observacao || '').trim();
+            const usuario = reg.usuario_nome || 'Sistema';
+            const dataHora = reg.created_at
+                ? new Date(reg.created_at).toLocaleString('pt-BR')
+                : '';
+
+            return `
+                <div style="display:flex;gap:0;align-items:stretch;">
+                    <!-- Linha vertical + bolinha -->
+                    <div style="display:flex;flex-direction:column;align-items:center;width:32px;flex-shrink:0;">
+                        <div style="width:28px;height:28px;border-radius:50%;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">${icon}</div>
+                        ${idx < historicoOrdenado.length - 1
+                            ? `<div style="width:2px;background:#e2e8f0;flex:1;margin:2px 0 0;"></div>`
+                            : ''}
+                    </div>
+                    <!-- Conteúdo -->
+                    <div style="flex:1;padding:0 0 18px 12px;">
+                        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px;">
+                            <span style="font-size:13px;font-weight:700;color:${color};">${label}</span>
+                            <span style="font-size:10px;color:#94a3b8;">• ${dataHora}</span>
+                        </div>
+                        <div style="font-size:12px;color:#475569;margin-bottom:4px;">
+                            👤 <strong>${usuario}</strong>
+                        </div>
+                        ${obs
+                            ? `<div style="background:#f8fafc;border-left:3px solid ${color};border-radius:0 6px 6px 0;padding:8px 10px;font-size:12px;color:#334155;margin-top:4px;">${obs.replace(/\n/g,'<br>')}</div>`
+                            : `<div style="font-size:11px;color:#cbd5e1;font-style:italic;">Sem observação</div>`
+                        }
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        timelineHtml = `
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;">
+                <h3 style="font-size:14px;font-weight:700;color:#1e293b;margin:0 0 14px;display:flex;align-items:center;gap:6px;">
+                    📝 Observações por Etapa
+                </h3>
+                ${itens}
+            </div>
+        `;
+    }
+
+    // Fechar o wrapper space-y-4 e o container externo após a timeline
+    html += timelineHtml + '</div></div>';
+
+    // Renderizar o HTML completo no modal
     document.getElementById('cardDetailsContent').innerHTML = html;
-    
+
     // Se tem checklist_id e não está em homologação, carregar respostas
     if (h.checklist_id && h.status !== 'em_homologacao') {
         carregarRespostasChecklist(h.id, h.checklist_id);
