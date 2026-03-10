@@ -59,7 +59,7 @@
 
 <!-- Modal Curso -->
 <div id="modalCurso" class="hidden fixed inset-0 bg-black/50 z-50 p-4 sm:p-6 overflow-y-auto" onclick="if(event.target===this) fecharModalCurso()">
-  <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-gray-100 w-full max-w-3xl mx-auto my-4 sm:my-10 min-h-[calc(100vh-8rem)] max-h-[calc(100vh-2rem)] flex flex-col">
+  <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-gray-100 w-full max-w-3xl mx-auto my-4 sm:my-10 min-h-[calc(100vh-8rem)] max-h-[calc(100vh-2rem)] flex flex-col relative">
     <div class="px-5 sm:px-7 pt-5 sm:pt-6 pb-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white">
       <div class="flex items-start justify-between gap-4">
         <div>
@@ -98,7 +98,7 @@
         </div>
         <div>
           <label class="block text-xs font-semibold tracking-wide text-gray-500 uppercase mb-2">Departamento (categoria)</label>
-          <select name="departamento_id" id="cursoDepartamento" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+          <select name="departamento_id" id="cursoDepartamento" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" onchange="carregarThumbnailsExemplos()">
             <option value="">Selecione</option>
             <?php foreach ($departamentos ?? [] as $d): ?>
             <option value="<?= (int)$d['id'] ?>"><?= htmlspecialchars($d['nome']) ?></option>
@@ -108,10 +108,29 @@
       </div>
       <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50/70 p-4">
         <label class="block text-xs font-semibold tracking-wide text-gray-500 uppercase mb-2">Thumbnail (opcional, max 10MB)</label>
-        <input type="file" name="thumbnail" accept="image/*" class="w-full text-sm block file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-blue-700">
-        <p class="text-xs text-gray-500 mt-2">Formato recomendado: 1280x720 px para melhor visualização.</p>
+        
+        <!-- Abas: Exemplos / Upload -->
+        <div class="flex gap-2 mb-3">
+          <button type="button" onclick="mostrarAbaThumbnail('exemplos')" id="abaExemplos" class="px-3 py-1 text-xs font-medium rounded bg-blue-600 text-white">Exemplos</button>
+          <button type="button" onclick="mostrarAbaThumbnail('upload')" id="abaUpload" class="px-3 py-1 text-xs font-medium rounded bg-gray-200 text-gray-700">Upload</button>
+        </div>
+
+        <!-- Aba Exemplos -->
+        <div id="thumbnailExemplos" class="space-y-3">
+          <div id="galeriaThumbnails" class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            <!-- Exemplos serão carregados via JS -->
+            <div class="text-xs text-gray-500 col-span-full">Selecione um departamento para ver os exemplos.</div>
+          </div>
+          <input type="hidden" name="thumbnail_url" id="thumbnailUrl">
+        </div>
+
+        <!-- Aba Upload -->
+        <div id="thumbnailUpload" class="hidden">
+          <input type="file" name="thumbnail" accept="image/*" class="w-full text-sm block file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-blue-700">
+          <p class="text-xs text-gray-500 mt-2">Formato recomendado: 1280x720 px para melhor visualização.</p>
+        </div>
       </div>
-      <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-100 sticky bottom-0 bg-white/95 backdrop-blur pb-1">
+      <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-100 bg-white/95 backdrop-blur pb-1">
         <button type="button" onclick="fecharModalCurso()" class="w-full sm:w-auto px-4 py-2.5 text-sm font-medium border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition">Cancelar</button>
         <button type="button" onclick="salvarCurso()" class="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-sm hover:shadow-md transition">Salvar Curso</button>
       </div>
@@ -126,6 +145,96 @@ function handleCursoModalEsc(event) {
   }
 }
 
+function mostrarAbaThumbnail(aba) {
+  const exemplos = document.getElementById('thumbnailExemplos');
+  const upload = document.getElementById('thumbnailUpload');
+  const abaExemplos = document.getElementById('abaExemplos');
+  const abaUpload = document.getElementById('abaUpload');
+
+  if (aba === 'exemplos') {
+    exemplos.classList.remove('hidden');
+    upload.classList.add('hidden');
+    abaExemplos.className = 'px-3 py-1 text-xs font-medium rounded bg-blue-600 text-white';
+    abaUpload.className = 'px-3 py-1 text-xs font-medium rounded bg-gray-200 text-gray-700';
+  } else {
+    exemplos.classList.add('hidden');
+    upload.classList.remove('hidden');
+    abaExemplos.className = 'px-3 py-1 text-xs font-medium rounded bg-gray-200 text-gray-700';
+    abaUpload.className = 'px-3 py-1 text-xs font-medium rounded bg-blue-600 text-white';
+  }
+}
+
+function carregarThumbnailsExemplos() {
+  const deptId = document.getElementById('cursoDepartamento').value;
+  const galeria = document.getElementById('galeriaThumbnails');
+  const hiddenInput = document.getElementById('thumbnailUrl');
+
+  // Limpa seleção anterior
+  hiddenInput.value = '';
+  
+  // Thumbnails de exemplo por departamento
+  const exemplosPorDepartamento = {
+    1: [ // Exemplo: ID 1 = Qualidade
+      'https://via.placeholder.com/1280x720/3B82F6/FFFFFF?text=Qualidade+1',
+      'https://via.placeholder.com/1280x720/10B981/FFFFFF?text=Qualidade+2',
+      'https://via.placeholder.com/1280x720/8B5CF6/FFFFFF?text=Qualidade+3'
+    ],
+    2: [ // Exemplo: ID 2 = TI
+      'https://via.placeholder.com/1280x720/06B6D4/FFFFFF?text=TI+1',
+      'https://via.placeholder.com/1280x720/F59E0B/FFFFFF?text=TI+2',
+      'https://via.placeholder.com/1280x720/EF4444/FFFFFF?text=TI+3'
+    ],
+    3: [ // Exemplo: ID 3 = RH
+      'https://via.placeholder.com/1280x720/EC4899/FFFFFF?text=RH+1',
+      'https://via.placeholder.com/1280x720/84CC16/FFFFFF?text=RH+2',
+      'https://via.placeholder.com/1280x720/6366F1/FFFFFF?text=RH+3'
+    ]
+    // Adicione mais IDs de departamentos conforme necessário
+  };
+
+  const exemplos = exemplosPorDepartamento[deptId] || [];
+
+  if (exemplos.length === 0) {
+    galeria.innerHTML = '<div class="text-xs text-gray-500 col-span-full">Nenhum exemplo para este departamento. Use a aba Upload.</div>';
+    return;
+  }
+
+  galeria.innerHTML = exemplos.map((url, idx) => `
+    <div class="relative group cursor-pointer border-2 rounded-lg overflow-hidden transition hover:border-blue-500 ${idx === 0 ? 'border-blue-500' : 'border-gray-200'}"
+         onclick="selecionarThumbnail('${url}', this)">
+      <img src="${url}" alt="Exemplo ${idx + 1}" class="w-full h-20 object-cover">
+      <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition flex items-center justify-center">
+        <div class="w-6 h-6 rounded-full bg-white ${idx === 0 ? '' : 'opacity-0 group-hover:opacity-100'} transition flex items-center justify-center">
+          <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Seleciona o primeiro por padrão
+  if (exemplos.length > 0) {
+    selecionarThumbnail(exemplos[0], galeria.firstElementChild);
+  }
+}
+
+function selecionarThumbnail(url, element) {
+  // Remove seleção anterior
+  document.querySelectorAll('#galeriaThumbnails > div').forEach(el => {
+    el.classList.remove('border-blue-500');
+    el.classList.add('border-gray-200');
+    el.querySelector('div > div').classList.add('opacity-0', 'group-hover:opacity-100');
+    el.querySelector('div > div').classList.remove('');
+  });
+
+  // Adiciona seleção atual
+  element.classList.remove('border-gray-200');
+  element.classList.add('border-blue-500');
+  element.querySelector('div > div').classList.remove('opacity-0', 'group-hover:opacity-100');
+
+  // Define valor no campo hidden
+  document.getElementById('thumbnailUrl').value = url;
+}
+
 function abrirNovoCurso() {
   document.getElementById('modalCursoTitle').textContent = 'Novo Curso';
   document.getElementById('formCurso').reset();
@@ -133,6 +242,8 @@ function abrirNovoCurso() {
   document.getElementById('modalCurso').classList.remove('hidden');
   document.body.classList.add('overflow-hidden');
   document.addEventListener('keydown', handleCursoModalEsc);
+  // Inicia aba Exemplos
+  mostrarAbaThumbnail('exemplos');
 }
 
 function fecharModalCurso() {
@@ -148,9 +259,12 @@ function editarCurso(c) {
   document.getElementById('cursoDescricao').value = c.descricao || '';
   document.getElementById('cursoCarga').value = c.carga_horaria || 0;
   document.getElementById('cursoStatus').value = c.status;
+  document.getElementById('cursoDepartamento').value = c.departamento_id || '';
   document.getElementById('modalCurso').classList.remove('hidden');
   document.body.classList.add('overflow-hidden');
   document.addEventListener('keydown', handleCursoModalEsc);
+  // Carrega exemplos ao editar
+  carregarThumbnailsExemplos();
 }
 
 async function salvarCurso() {
