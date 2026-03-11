@@ -111,7 +111,7 @@
           <!-- Lista de materiais existentes -->
           <?php if (!empty($a['materiais'])): ?>
           <h4 class="text-sm font-bold text-gray-700 mb-3">📋 Materiais desta aula (<?= count($a['materiais']) ?>)</h4>
-          <div class="space-y-2 mb-5">
+          <div class="space-y-2 mb-5 max-h-[300px] overflow-y-auto pr-1">
             <?php
               $tipoIcons = ['video'=>'🎬','pdf'=>'📄','imagem'=>'🖼️','slide'=>'📊','texto'=>'📝'];
               $tipoLabels = ['video'=>'Vídeo','pdf'=>'PDF','imagem'=>'Imagem','slide'=>'Slide','texto'=>'Texto'];
