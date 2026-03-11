@@ -7,7 +7,7 @@
   .el-form-panel { max-height: 0; overflow: hidden; transition: max-height .5s cubic-bezier(.4,0,.2,1), opacity .3s; opacity: 0; }
   .el-form-panel.open { max-height: 600px; opacity: 1; }
   .el-upload-panel { max-height: 0; overflow: hidden; transition: max-height .4s ease, opacity .3s; opacity: 0; }
-  .el-upload-panel.open { max-height: 500px; opacity: 1; }
+  .el-upload-panel.open { max-height: 2000px; opacity: 1; }
   .el-card { transition: transform .2s, box-shadow .2s; }
   .el-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
 </style>
