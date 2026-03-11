@@ -104,10 +104,56 @@
         </div>
       </div>
 
-      <!-- Inline Upload Panel -->
+      <!-- Inline Upload Panel (materials list + add form) -->
       <div id="upload_<?= (int)$a['id'] ?>" class="el-upload-panel">
-        <div class="border-t border-gray-100 bg-purple-50/50 p-5">
-          <h4 class="text-sm font-bold text-gray-800 mb-3">📎 Enviar Material — <?= htmlspecialchars($a['titulo']) ?></h4>
+        <div class="border-t border-gray-100 bg-gray-50/70 p-5">
+
+          <!-- Lista de materiais existentes -->
+          <?php if (!empty($a['materiais'])): ?>
+          <h4 class="text-sm font-bold text-gray-700 mb-3">📋 Materiais desta aula (<?= count($a['materiais']) ?>)</h4>
+          <div class="space-y-2 mb-5">
+            <?php
+              $tipoIcons = ['video'=>'🎬','pdf'=>'📄','imagem'=>'🖼️','slide'=>'📊','texto'=>'📝'];
+              $tipoLabels = ['video'=>'Vídeo','pdf'=>'PDF','imagem'=>'Imagem','slide'=>'Slide','texto'=>'Texto'];
+            ?>
+            <?php foreach ($a['materiais'] as $mat): ?>
+            <div class="flex items-center justify-between bg-white rounded-xl px-4 py-3 border border-gray-100 shadow-sm group hover:border-purple-200 transition">
+              <div class="flex items-center gap-3 min-w-0 flex-1">
+                <span class="text-lg flex-shrink-0"><?= $tipoIcons[$mat['tipo']] ?? '📎' ?></span>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-800 truncate"><?= htmlspecialchars($mat['titulo']) ?></p>
+                  <div class="flex items-center gap-2 text-[11px] text-gray-400 mt-0.5">
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-medium"><?= $tipoLabels[$mat['tipo']] ?? $mat['tipo'] ?></span>
+                    <?php if ($mat['tipo'] === 'texto'): ?>
+                      <span class="truncate max-w-[200px]" title="<?= htmlspecialchars($mat['conteudo_texto'] ?? '') ?>"><?= htmlspecialchars(mb_substr($mat['conteudo_texto'] ?? '', 0, 60)) ?><?= mb_strlen($mat['conteudo_texto'] ?? '') > 60 ? '…' : '' ?></span>
+                    <?php elseif ($mat['tamanho_bytes']): ?>
+                      <span><?= number_format($mat['tamanho_bytes'] / 1024, 0) ?> KB</span>
+                    <?php endif; ?>
+                    <span><?= date('d/m/Y H:i', strtotime($mat['criado_em'])) ?></span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 flex-shrink-0 ml-3">
+                <?php if ($mat['tipo'] !== 'texto' && !empty($mat['arquivo_path'])): ?>
+                <a href="<?= htmlspecialchars($mat['arquivo_path']) ?>" target="_blank"
+                   class="text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-lg transition opacity-0 group-hover:opacity-100">
+                  👁 Ver
+                </a>
+                <?php endif; ?>
+                <?php if ($canDelete): ?>
+                <button onclick="excluirMaterial(<?= (int)$mat['id'] ?>, '<?= htmlspecialchars(addslashes($mat['titulo'])) ?>')"
+                  class="text-xs text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded-lg transition opacity-0 group-hover:opacity-100">
+                  🗑
+                </button>
+                <?php endif; ?>
+              </div>
+            </div>
+            <?php endforeach; ?>
+          </div>
+          <?php endif; ?>
+
+          <!-- Formulário para adicionar novo material -->
+          <h4 class="text-sm font-bold text-gray-800 mb-3">➕ Adicionar Material — <?= htmlspecialchars($a['titulo']) ?></h4>
           <form id="formUpload_<?= (int)$a['id'] ?>" class="space-y-3">
             <input type="hidden" name="id_aula" value="<?= (int)$a['id'] ?>">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -190,6 +236,17 @@ async function excluirAula(id, titulo) {
   const fd = new FormData(); fd.append('id', id);
   try {
     const res = await fetch('/elearning/gestor/aulas/delete', { method:'POST', body:fd });
+    const d = await res.json();
+    if (d.success) { showToast(d.message,'success'); setTimeout(()=>location.reload(),800); }
+    else showToast('Erro: '+d.message,'error');
+  } catch(e) { showToast('Erro de conexão','error'); }
+}
+
+async function excluirMaterial(id, titulo) {
+  if (!confirm(`Excluir o material "${titulo}"?`)) return;
+  const fd = new FormData(); fd.append('id', id);
+  try {
+    const res = await fetch('/elearning/gestor/materiais/delete', { method:'POST', body:fd });
     const d = await res.json();
     if (d.success) { showToast(d.message,'success'); setTimeout(()=>location.reload(),800); }
     else showToast('Erro: '+d.message,'error');

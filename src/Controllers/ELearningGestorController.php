@@ -223,6 +223,23 @@ class ELearningGestorController
             if (!$curso) { http_response_code(404); echo 'Curso não encontrado.'; exit; }
             $st2 = $this->db->prepare("SELECT a.*, COUNT(m.id) AS total_materiais FROM elearning_aulas a LEFT JOIN elearning_materiais m ON m.id_aula=a.id WHERE a.id_curso=? GROUP BY a.id ORDER BY a.ordem");
             $st2->execute([$cursoId]); $aulas = $st2->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Buscar materiais de todas as aulas deste curso
+            $aulaIds = array_column($aulas, 'id');
+            $materiais = [];
+            if (!empty($aulaIds)) {
+                $placeholders = implode(',', array_fill(0, count($aulaIds), '?'));
+                $stm = $this->db->prepare("SELECT id, id_aula, tipo, titulo, arquivo_path, conteudo_texto, tamanho_bytes, ordem, criado_em FROM elearning_materiais WHERE id_aula IN ($placeholders) ORDER BY ordem, criado_em");
+                $stm->execute($aulaIds);
+                foreach ($stm->fetchAll(\PDO::FETCH_ASSOC) as $mat) {
+                    $materiais[$mat['id_aula']][] = $mat;
+                }
+            }
+            // Anexar materiais às aulas
+            foreach ($aulas as &$aula) {
+                $aula['materiais'] = $materiais[$aula['id']] ?? [];
+            }
+            unset($aula);
         } catch (\PDOException $e) { $aulas = []; }
         $this->render('elearning/gestor/aulas', ['title' => 'Aulas — '.($curso['titulo'] ?? ''), 'curso' => $curso, 'aulas' => $aulas,'canEdit' => $this->canEdit(),'canDelete' => $this->canDelete()]);
     }
