@@ -102,7 +102,11 @@ class ELearningGestorController
         $status = in_array($_POST['status'] ?? '', ['ativo','inativo','rascunho']) ? $_POST['status'] : 'rascunho';
         $uid    = (int)($_SESSION['user_id'] ?? 0);
         $thumb  = null;
-        if (!empty($_FILES['thumbnail']['tmp_name'])) {
+        // Prioridade: URL da biblioteca > upload de arquivo
+        $thumbUrl = trim($_POST['thumbnail_url'] ?? '');
+        if ($thumbUrl && filter_var($thumbUrl, FILTER_VALIDATE_URL)) {
+            $thumb = $thumbUrl;
+        } elseif (!empty($_FILES['thumbnail']['tmp_name'])) {
             $ext = strtolower(pathinfo($_FILES['thumbnail']['name'], PATHINFO_EXTENSION));
             if (in_array($ext, ['jpg','jpeg','png','webp']) && $_FILES['thumbnail']['size'] <= 10*1024*1024) {
                 $dir = __DIR__ . '/../../../uploads/elearning/thumbnails/';
@@ -128,9 +132,29 @@ class ELearningGestorController
         $desc   = trim($_POST['descricao'] ?? '');
         $ch     = max(0, (int)($_POST['carga_horaria'] ?? 0));
         $status = in_array($_POST['status'] ?? '', ['ativo','inativo','rascunho']) ? $_POST['status'] : 'rascunho';
+        // Thumbnail: URL da biblioteca > upload de arquivo
+        $thumbUrl = trim($_POST['thumbnail_url'] ?? '');
+        $thumb = null;
+        if ($thumbUrl && filter_var($thumbUrl, FILTER_VALIDATE_URL)) {
+            $thumb = $thumbUrl;
+        } elseif (!empty($_FILES['thumbnail']['tmp_name'])) {
+            $ext = strtolower(pathinfo($_FILES['thumbnail']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg','jpeg','png','webp']) && $_FILES['thumbnail']['size'] <= 10*1024*1024) {
+                $dir = __DIR__ . '/../../../uploads/elearning/thumbnails/';
+                if (!is_dir($dir)) mkdir($dir, 0755, true);
+                $fn = uniqid('thumb_') . '.' . $ext;
+                if (move_uploaded_file($_FILES['thumbnail']['tmp_name'], $dir . $fn))
+                    $thumb = '/uploads/elearning/thumbnails/' . $fn;
+            }
+        }
         try {
-            $this->db->prepare("UPDATE elearning_cursos SET titulo=?,descricao=?,status=?,carga_horaria=? WHERE id=?")
-                ->execute([$titulo, $desc, $status, $ch, $id]);
+            if ($thumb) {
+                $this->db->prepare("UPDATE elearning_cursos SET titulo=?,descricao=?,status=?,carga_horaria=?,thumbnail=? WHERE id=?")
+                    ->execute([$titulo, $desc, $status, $ch, $thumb, $id]);
+            } else {
+                $this->db->prepare("UPDATE elearning_cursos SET titulo=?,descricao=?,status=?,carga_horaria=? WHERE id=?")
+                    ->execute([$titulo, $desc, $status, $ch, $id]);
+            }
             $this->json(['success' => true, 'message' => 'Curso atualizado!']);
         } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
     }
