@@ -376,6 +376,16 @@ class AdminController
             $stmt->execute($params);
             $chart5 = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            // --- Chart 6: Triagens Feitas por mês ---
+            $chart6Sql = "SELECT
+                DATE_FORMAT(t.created_at, '%Y-%m') AS mes,
+                COUNT(*) AS total
+                FROM triagem_toners t WHERE {$where}
+                GROUP BY mes ORDER BY mes ASC";
+            $stmt = $this->db->prepare($chart6Sql);
+            $stmt->execute($params);
+            $chart6 = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
             // --- Distribuição por destino (donut) ---
             $destinoSql = "SELECT t.destino AS label, COUNT(*) AS total
                            FROM triagem_toners t WHERE {$where}
@@ -417,6 +427,7 @@ class AdminController
                     'faixas_percentual' => $chart3,
                     'evolucao_mensal' => $chart4,
                     'valor_recuperado_mes' => $chart5,
+                    'triagens_mensal' => $chart6,
                     'por_destino' => $porDestino,
                 ],
                 'ultimos_registros' => $ultimos,

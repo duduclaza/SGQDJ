@@ -341,12 +341,29 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       </div>
       <div class="chart-wrapper" style="height:320px"><canvas id="chartValorMes"></canvas></div>
     </div>
+
+    <!-- Chart 6: Triagens Feitas por mês -->
+    <div class="dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.41s">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-semibold text-white">Triagens Feitas por mês</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Volume total de triagens realizadas mensalmente</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="kpi-badge bg-blue-400/15 text-blue-300 border border-blue-400/20">Barras</span>
+          <button class="chart-expand-btn" onclick="expandirGrafico('triagens_mes','Triagens Feitas por mês','Volume total de triagens realizadas mensalmente')" title="Expandir">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="chart-wrapper" style="height:320px"><canvas id="chartTriagensMes"></canvas></div>
+    </div>
   </div>
 
   <!-- Bottom: Destino Distribution + Recent Records -->
   <div class="grid grid-cols-1 xl:grid-cols-5 gap-5 mb-6">
     <!-- Donut Destino -->
-    <div class="xl:col-span-2 dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.41s">
+    <div class="xl:col-span-2 dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.44s">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-sm font-semibold text-white">Distribuição por Destino</h3>
         <button class="chart-expand-btn" onclick="expandirGrafico('destino','Distribuição por Destino','Proporção de cada destino')" title="Expandir">
@@ -358,7 +375,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     </div>
 
     <!-- Triagens -->
-    <div class="xl:col-span-3 dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.44s">
+    <div class="xl:col-span-3 dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.47s">
       <h3 class="text-sm font-semibold text-white mb-4">Triagens</h3>
       <div class="overflow-auto rounded-xl border border-white/5" style="max-height:380px">
         <table class="w-full dash-table">
@@ -443,6 +460,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       renderChartFaixas(json.charts.faixas_percentual || []);
       renderChartEvolucao(json.charts.evolucao_mensal || []);
       renderChartValorMes(json.charts.valor_recuperado_mes || []);
+      renderChartTriagensMes(json.charts.triagens_mensal || []);
       renderChartDestino(json.charts.por_destino || []);
       renderTable(json.ultimos_registros || []);
 
@@ -804,6 +822,50 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           tooltip: {
             callbacks: {
               label: ctx => `  ${fmtBRL(ctx.parsed.y)}`
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ===== Chart 6: Triagens Feitas por mês (bar) =====
+  function renderChartTriagensMes(data) {
+    resetChart('triagens_mes');
+    const ctx = document.getElementById('chartTriagensMes').getContext('2d');
+    const labels = data.map(d => {
+      const [y,m] = d.mes.split('-');
+      const meses = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      return meses[parseInt(m)] + '/' + y.substring(2);
+    });
+    chartInstances['triagens_mes'] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Total Triagens',
+          data: data.map(d => parseInt(d.total)),
+          backgroundColor: 'rgba(96,165,250,0.6)',
+          borderColor: '#60a5fa',
+          borderWidth: 1.5,
+          borderRadius: 6,
+          maxBarThickness: 45,
+        }]
+      },
+      options: {
+        scales: {
+          x: { grid:{display:false} },
+          y: { 
+            beginAtZero: true,
+            grid:{color:'rgba(255,255,255,0.04)'}, 
+            ticks:{ precision: 0 },
+            title:{display:true, text:'Quantidade', color:'#60a5fa'} 
+          },
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: ctx => `  ${ctx.parsed.y} triagens`
             }
           }
         }
