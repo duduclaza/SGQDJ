@@ -36,29 +36,49 @@ class ELearningColaboradorController
         exit;
     }
 
-    // ---------- MEUS CURSOS ----------
+    // ---------- CATÁLOGO DE CURSOS ----------
     public function meusCursos(): void
     {
         $this->requireColaborador();
         $uid = (int)($_SESSION['user_id'] ?? 0);
         try {
+            // Buscar TODOS os cursos ativos (catálogo), com status de matrícula do usuário
             $st = $this->db->prepare("
                 SELECT c.id, c.titulo, c.descricao, c.thumbnail, c.carga_horaria, c.status,
-                       m.progresso_pct, m.status AS matricula_status, m.concluido_em,
+                       m.id AS matricula_id, m.progresso_pct, m.status AS matricula_status, m.concluido_em,
                        u.name AS gestor_nome,
                        COUNT(DISTINCT a.id) AS total_aulas
-                FROM elearning_matriculas m
-                JOIN elearning_cursos c ON c.id = m.id_curso
+                FROM elearning_cursos c
                 JOIN users u ON u.id = c.id_gestor
                 LEFT JOIN elearning_aulas a ON a.id_curso = c.id
-                WHERE m.id_usuario = ? AND c.status = 'ativo'
-                GROUP BY c.id, m.progresso_pct, m.status, m.concluido_em, u.name
-                ORDER BY m.data_matricula DESC
+                LEFT JOIN elearning_matriculas m ON m.id_curso = c.id AND m.id_usuario = ?
+                WHERE c.status = 'ativo'
+                GROUP BY c.id, m.id, m.progresso_pct, m.status, m.concluido_em, u.name
+                ORDER BY c.criado_em DESC
             ");
             $st->execute([$uid]);
             $cursos = $st->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) { $cursos = []; }
-        $this->render('elearning/colaborador/meus_cursos', ['title' => 'Meus Cursos — eLearning', 'cursos' => $cursos]);
+        $this->render('elearning/colaborador/meus_cursos', ['title' => 'Catálogo de Cursos — eLearning', 'cursos' => $cursos]);
+    }
+
+    // ---------- AUTO-MATRÍCULA ----------
+    public function matricularSe(): void
+    {
+        $this->requireColaborador();
+        $uid = (int)($_SESSION['user_id'] ?? 0);
+        $cursoId = (int)($_POST['curso_id'] ?? 0);
+        if (!$cursoId) $this->json(['success' => false, 'message' => 'ID do curso inválido.']);
+        try {
+            // Verificar se o curso está ativo
+            $stC = $this->db->prepare("SELECT id FROM elearning_cursos WHERE id=? AND status='ativo'");
+            $stC->execute([$cursoId]); 
+            if (!$stC->fetch()) $this->json(['success' => false, 'message' => 'Curso não disponível.']);
+            
+            $this->db->prepare("INSERT IGNORE INTO elearning_matriculas (id_usuario, id_curso, data_matricula, status, progresso_pct) VALUES (?,?,NOW(),'em_andamento',0)")
+                ->execute([$uid, $cursoId]);
+            $this->json(['success' => true, 'message' => 'Matrícula realizada com sucesso!']);
+        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
     }
 
     // ---------- DETALHE DO CURSO ----------

@@ -165,6 +165,7 @@ $router->post('/elearning/gestor/certificados/emitir',       [ELearningGestorCon
 
 // ===== eLEARNING COLABORADOR =====
 $router->get('/elearning/colaborador',                           [ELearningColaboradorController::class, 'meusCursos']);
+$router->post('/elearning/colaborador/matricular',               [ELearningColaboradorController::class, 'matricularSe']);
 $router->get('/elearning/colaborador/cursos/{id}',               [ELearningColaboradorController::class, 'verCurso']);
 $router->get('/elearning/colaborador/materiais/{id}/assistir',   [ELearningColaboradorController::class, 'assistirAula']);
 $router->post('/elearning/colaborador/progresso/registrar',      [ELearningColaboradorController::class, 'registrarProgresso']);
@@ -173,4 +174,5 @@ $router->post('/elearning/colaborador/provas/submeter',          [ELearningColab
 $router->get('/elearning/colaborador/provas/resultado/{id}',     [ELearningColaboradorController::class, 'resultadoProva']);
 $router->get('/elearning/colaborador/certificados',              [ELearningColaboradorController::class, 'meusCertificados']);
 $router->get('/elearning/colaborador/certificados/{codigo}',     [ELearningColaboradorController::class, 'downloadCertificado']);
+
 

@@ -1,47 +1,71 @@
 <?php
 // views/pages/elearning/gestor/progresso.php
 ?>
-<div class="space-y-6">
-  <div>
-    <a href="/elearning/gestor/cursos" class="text-blue-600 hover:underline text-sm">← Cursos</a>
-    <h1 class="text-2xl font-bold text-gray-900 mt-1">📊 Progresso — <?= htmlspecialchars($curso['titulo'] ?? '') ?></h1>
+<style>
+  .el-fade-in { animation: elFadeIn .4s ease; }
+  @keyframes elFadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+</style>
+
+<div class="space-y-6 el-fade-in">
+
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-teal-600 to-emerald-600 rounded-2xl p-6 text-white shadow-lg">
+    <a href="/elearning/gestor/cursos" class="text-teal-200 hover:text-white text-sm transition">← Voltar aos Cursos</a>
+    <h1 class="text-2xl font-bold mt-2 flex items-center gap-2">
+      <span>📊</span> Progresso — <?= htmlspecialchars($curso['titulo'] ?? '') ?>
+    </h1>
+    <p class="text-teal-100 text-sm mt-1"><?= count($progresso) ?> colaborador(es) matriculado(s)</p>
   </div>
 
-  <div class="bg-white rounded-xl shadow overflow-hidden">
-    <table class="min-w-full divide-y divide-gray-200 text-sm">
-      <thead class="bg-gray-50">
-        <tr>
-          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Colaborador</th>
-          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Progresso</th>
-          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Conclusão</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-100">
-        <?php if (empty($progresso)): ?>
-        <tr><td colspan="4" class="px-6 py-8 text-center text-gray-400">Nenhum progresso registrado.</td></tr>
-        <?php else: ?>
-        <?php foreach ($progresso as $p): ?>
-        <?php $pct = (float)$p['progresso_pct']; ?>
-        <tr class="hover:bg-gray-50">
-          <td class="px-4 py-3 font-medium text-gray-900"><?= htmlspecialchars($p['usuario_nome']) ?></td>
-          <td class="px-4 py-3">
-            <div class="flex items-center gap-3">
-              <div class="flex-1 bg-gray-200 rounded-full h-2">
-                <div class="h-2 rounded-full <?= $pct >= 100 ? 'bg-green-500' : ($pct > 50 ? 'bg-blue-500' : 'bg-yellow-400') ?>" style="width: <?= $pct ?>%"></div>
+  <!-- Progress Table -->
+  <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gradient-to-r from-gray-50 to-white">
+          <tr>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Colaborador</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Progresso</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Conclusão</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <?php if (empty($progresso)): ?>
+          <tr><td colspan="4" class="px-6 py-10 text-center text-gray-400">
+            <div class="text-4xl mb-2">📊</div>Nenhum progresso registrado
+          </td></tr>
+          <?php else: ?>
+          <?php foreach ($progresso as $p): ?>
+          <?php $pct = (float)$p['progresso_pct']; ?>
+          <tr class="hover:bg-gray-50/50 transition">
+            <td class="px-5 py-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-bold text-xs">
+                  <?= mb_strtoupper(mb_substr($p['usuario_nome'] ?? '', 0, 1)) ?>
+                </div>
+                <span class="font-semibold text-gray-900 text-sm"><?= htmlspecialchars($p['usuario_nome']) ?></span>
               </div>
-              <span class="text-xs text-gray-600 w-12 text-right"><?= number_format($pct,1) ?>%</span>
-            </div>
-          </td>
-          <td class="px-4 py-3">
-            <?php $sc = ['em_andamento'=>'blue','concluido'=>'green','reprovado'=>'red'][$p['status']] ?? 'gray'; ?>
-            <span class="px-2 py-0.5 rounded text-xs bg-<?= $sc ?>-100 text-<?= $sc ?>-800 font-semibold"><?= strtoupper(str_replace('_',' ',$p['status'])) ?></span>
-          </td>
-          <td class="px-4 py-3 text-gray-600 text-xs"><?= $p['concluido_em'] ? date('d/m/Y', strtotime($p['concluido_em'])) : '—' ?></td>
-        </tr>
-        <?php endforeach; ?>
-        <?php endif; ?>
-      </tbody>
-    </table>
+            </td>
+            <td class="px-5 py-3">
+              <div class="flex items-center gap-2">
+                <div class="flex-1 bg-gray-200 rounded-full h-2 max-w-[140px]">
+                  <div class="h-2 rounded-full transition-all <?= $pct >= 100 ? 'bg-green-500' : ($pct > 50 ? 'bg-blue-500' : 'bg-yellow-400') ?>" style="width: <?= $pct ?>%"></div>
+                </div>
+                <span class="text-xs font-medium text-gray-500 w-12 text-right"><?= number_format($pct, 1) ?>%</span>
+              </div>
+            </td>
+            <td class="px-5 py-3">
+              <?php $sc = ['em_andamento'=>'blue','concluido'=>'green','reprovado'=>'red'][$p['status']] ?? 'gray'; ?>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-<?= $sc ?>-100 text-<?= $sc ?>-700">
+                <?= strtoupper(str_replace('_',' ',$p['status'])) ?>
+              </span>
+            </td>
+            <td class="px-5 py-3 text-gray-600 text-xs"><?= $p['concluido_em'] ? date('d/m/Y', strtotime($p['concluido_em'])) : '—' ?></td>
+          </tr>
+          <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

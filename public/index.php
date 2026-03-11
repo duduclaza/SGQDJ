@@ -472,6 +472,7 @@ $router->post('/elearning/gestor/certificados/emitir', [App\Controllers\ELearnin
 
 // ===== eLEARNING COLABORADOR =====
 $router->get('/elearning/colaborador', [App\Controllers\ELearningColaboradorController::class, 'meusCursos']);
+$router->post('/elearning/colaborador/matricular', [App\Controllers\ELearningColaboradorController::class, 'matricularSe']);
 $router->get('/elearning/colaborador/cursos/{id}', [App\Controllers\ELearningColaboradorController::class, 'verCurso']);
 $router->get('/elearning/colaborador/materiais/{id}/assistir', [App\Controllers\ELearningColaboradorController::class, 'assistirAula']);
 $router->post('/elearning/colaborador/progresso/registrar', [App\Controllers\ELearningColaboradorController::class, 'registrarProgresso']);
@@ -480,6 +481,7 @@ $router->post('/elearning/colaborador/provas/submeter', [App\Controllers\ELearni
 $router->get('/elearning/colaborador/provas/resultado/{id}', [App\Controllers\ELearningColaboradorController::class, 'resultadoProva']);
 $router->get('/elearning/colaborador/certificados', [App\Controllers\ELearningColaboradorController::class, 'meusCertificados']);
 $router->get('/elearning/colaborador/certificados/{codigo}', [App\Controllers\ELearningColaboradorController::class, 'downloadCertificado']);
+
 
 // Melhoria Continua routes - DESABILITADO (usar Melhoria Contínua 2.0)
 // $router->get('/melhoria-continua/solicitacoes', [App\Controllers\MelhoriaContinuaController::class, 'index']);

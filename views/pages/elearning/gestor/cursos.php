@@ -1,273 +1,305 @@
 <?php
 // views/pages/elearning/gestor/cursos.php
 ?>
-<div class="space-y-6">
-  <div class="flex justify-between items-center">
-    <h1 class="text-2xl font-bold text-gray-900">📚 Cursos — eLearning Gestor</h1>
-    <?php if ($canEdit): ?>
-    <button onclick="abrirNovoCurso()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">+ Novo Curso</button>
-    <?php endif; ?>
-  </div>
+<style>
+  .el-fade-in { animation: elFadeIn .4s ease; }
+  @keyframes elFadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+  .el-card { transition: transform .2s, box-shadow .2s; }
+  .el-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,.12); }
+  .el-gradient-header { background: linear-gradient(135deg, #1e40af 0%, #6366f1 50%, #8b5cf6 100%); }
+  .el-form-panel { max-height: 0; overflow: hidden; transition: max-height .5s cubic-bezier(.4,0,.2,1), opacity .3s; opacity: 0; }
+  .el-form-panel.open { max-height: 900px; opacity: 1; }
+  .el-badge { font-size: .65rem; letter-spacing: .05em; }
+  .el-stat-card { backdrop-filter: blur(10px); background: rgba(255,255,255,.85); border: 1px solid rgba(255,255,255,.5); }
+  .el-thumb { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); }
+  .el-search:focus { box-shadow: 0 0 0 3px rgba(99,102,241,.2); }
+</style>
 
-  <div class="bg-white rounded-xl shadow overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200 text-sm">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Curso</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">CH (min)</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aulas</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Matrículas</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          <?php if (empty($cursos)): ?>
-          <tr><td colspan="6" class="px-6 py-8 text-center text-gray-400">Nenhum curso cadastrado.</td></tr>
-          <?php else: ?>
-          <?php foreach ($cursos as $c): ?>
-          <tr class="hover:bg-gray-50">
-            <td class="px-4 py-3 font-medium text-gray-900"><?= htmlspecialchars($c['titulo']) ?></td>
-            <td class="px-4 py-3">
-              <?php $sc = ['ativo'=>'green','rascunho'=>'yellow','inativo'=>'gray'][$c['status']] ?? 'gray'; ?>
-              <span class="px-2 py-0.5 rounded text-xs bg-<?= $sc ?>-100 text-<?= $sc ?>-800 font-semibold"><?= strtoupper($c['status']) ?></span>
-            </td>
-            <td class="px-4 py-3 text-gray-600"><?= (int)$c['carga_horaria'] ?></td>
-            <td class="px-4 py-3 text-gray-600"><?= (int)($c['total_aulas'] ?? 0) ?></td>
-            <td class="px-4 py-3 text-gray-600"><?= (int)($c['total_matriculas'] ?? 0) ?></td>
-            <td class="px-4 py-3 flex gap-2 flex-wrap">
-              <a href="/elearning/gestor/cursos/<?= (int)$c['id'] ?>/aulas" class="text-xs text-blue-600 hover:underline">Aulas</a>
-              <a href="/elearning/gestor/cursos/<?= (int)$c['id'] ?>/provas" class="text-xs text-purple-600 hover:underline">Provas</a>
-              <a href="/elearning/gestor/cursos/<?= (int)$c['id'] ?>/matriculas" class="text-xs text-green-600 hover:underline">Matrículas</a>
-              <a href="/elearning/gestor/cursos/<?= (int)$c['id'] ?>/progresso" class="text-xs text-teal-600 hover:underline">Progresso</a>
-              <?php if ($canEdit): ?>
-              <button onclick='editarCurso(<?= json_encode($c) ?>)' class="text-xs text-orange-600 hover:underline">Editar</button>
-              <?php endif; ?>
-              <?php if ($canDelete): ?>
-              <button onclick='excluirCurso(<?= (int)$c['id'] ?>, "<?= htmlspecialchars(addslashes($c['titulo'])) ?>")' class="text-xs text-red-600 hover:underline">Excluir</button>
-              <?php endif; ?>
-            </td>
-          </tr>
-          <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
+<div class="space-y-6 el-fade-in">
+
+  <!-- Header -->
+  <div class="el-gradient-header rounded-2xl p-6 sm:p-8 text-white shadow-lg">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
+          <span class="text-3xl">📚</span> Cursos — eLearning
+        </h1>
+        <p class="text-blue-100 text-sm mt-1">Gerencie todos os cursos da plataforma</p>
+      </div>
+      <?php if ($canEdit): ?>
+      <button onclick="toggleFormPanel()" id="btnNovoCurso" class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition border border-white/30 shadow-sm">
+        <svg class="w-5 h-5 transition-transform" id="iconPlus" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <span id="btnNovoCursoText">Novo Curso</span>
+      </button>
+      <?php endif; ?>
     </div>
   </div>
-</div>
 
-<!-- Modal Curso -->
-<div id="modalCurso" class="hidden fixed inset-0 bg-black/50 z-50 p-4 sm:p-6 overflow-y-auto" onclick="if(event.target===this) fecharModalCurso()">
-  <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-gray-100 w-full max-w-3xl mx-auto my-4 sm:my-10 min-h-[calc(100vh-8rem)] max-h-[calc(100vh-2rem)] flex flex-col relative">
-    <div class="px-5 sm:px-7 pt-5 sm:pt-6 pb-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h2 id="modalCursoTitle" class="text-xl font-semibold tracking-tight text-gray-900">Novo Curso</h2>
-          <p class="text-sm text-gray-500 mt-1">Preencha os campos abaixo para publicar o curso com qualidade.</p>
-        </div>
-        <button type="button" onclick="fecharModalCurso()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition" aria-label="Fechar modal">
-          <span class="text-lg leading-none">&times;</span>
-        </button>
+  <!-- Inline Form Panel -->
+  <?php if ($canEdit): ?>
+  <div id="formPanel" class="el-form-panel">
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-gray-100">
+        <h2 id="formPanelTitle" class="text-lg font-bold text-gray-900">Criar Novo Curso</h2>
+        <p class="text-xs text-gray-500 mt-0.5">Preencha as informações do curso abaixo</p>
       </div>
-    </div>
-    <form id="formCurso" class="px-5 sm:px-7 py-5 space-y-5 overflow-y-auto flex-1">
-      <input type="hidden" name="id" id="cursoId">
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold tracking-wide text-gray-500 uppercase mb-2">Título do curso *</label>
-          <input type="text" name="titulo" id="cursoTitulo" required class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Ex.: Treinamento de Segurança Operacional">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold tracking-wide text-gray-500 uppercase mb-2">Descrição</label>
-          <textarea name="descricao" id="cursoDescricao" rows="4" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Resumo objetivo do conteúdo, público-alvo e resultado esperado."></textarea>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-xs font-semibold tracking-wide text-gray-500 uppercase mb-2">Carga horária (min)</label>
-          <input type="number" name="carga_horaria" id="cursoCarga" min="0" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="0">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold tracking-wide text-gray-500 uppercase mb-2">Status</label>
-          <select name="status" id="cursoStatus" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-            <option value="rascunho">Rascunho</option>
-            <option value="ativo">Ativo</option>
-            <option value="inativo">Inativo</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold tracking-wide text-gray-500 uppercase mb-2">Departamento (categoria)</label>
-          <select name="departamento_id" id="cursoDepartamento" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" onchange="carregarThumbnailsExemplos()">
-            <option value="">Selecione</option>
-            <?php foreach ($departamentos ?? [] as $d): ?>
-            <option value="<?= (int)$d['id'] ?>"><?= htmlspecialchars($d['nome']) ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-      </div>
-      <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50/70 p-4">
-        <label class="block text-xs font-semibold tracking-wide text-gray-500 uppercase mb-2">Thumbnail (opcional, max 10MB)</label>
-        
-        <!-- Abas: Exemplos / Upload -->
-        <div class="flex gap-2 mb-3">
-          <button type="button" onclick="mostrarAbaThumbnail('exemplos')" id="abaExemplos" class="px-3 py-1 text-xs font-medium rounded bg-blue-600 text-white">Exemplos</button>
-          <button type="button" onclick="mostrarAbaThumbnail('upload')" id="abaUpload" class="px-3 py-1 text-xs font-medium rounded bg-gray-200 text-gray-700">Upload</button>
-        </div>
+      <form id="formCurso" class="p-6 space-y-5">
+        <input type="hidden" name="id" id="cursoId">
 
-        <!-- Aba Exemplos -->
-        <div id="thumbnailExemplos" class="space-y-3">
-          <div id="galeriaThumbnails" class="grid grid-cols-3 sm:grid-cols-4 gap-2">
-            <!-- Exemplos serão carregados via JS -->
-            <div class="text-xs text-gray-500 col-span-full">Selecione um departamento para ver os exemplos.</div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <!-- Título -->
+          <div class="lg:col-span-2">
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Título do Curso *</label>
+            <input type="text" name="titulo" id="cursoTitulo" required
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-gray-50/50"
+              placeholder="Ex.: Eletrocardiograma — Fundamentos">
           </div>
-          <input type="hidden" name="thumbnail_url" id="thumbnailUrl">
+
+          <!-- Descrição -->
+          <div class="lg:col-span-2">
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Descrição</label>
+            <textarea name="descricao" id="cursoDescricao" rows="3"
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-gray-50/50"
+              placeholder="Resumo do conteúdo, público-alvo e resultado esperado."></textarea>
+          </div>
+
+          <!-- Carga Horária -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Carga Horária (min)</label>
+            <input type="number" name="carga_horaria" id="cursoCarga" min="0"
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-gray-50/50"
+              placeholder="0">
+          </div>
+
+          <!-- Status -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Status</label>
+            <select name="status" id="cursoStatus"
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-gray-50/50">
+              <option value="rascunho">📝 Rascunho</option>
+              <option value="ativo">✅ Ativo</option>
+              <option value="inativo">⏸ Inativo</option>
+            </select>
+          </div>
         </div>
 
-        <!-- Aba Upload -->
-        <div id="thumbnailUpload" class="hidden">
-          <input type="file" name="thumbnail" accept="image/*" class="w-full text-sm block file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-blue-700">
-          <p class="text-xs text-gray-500 mt-2">Formato recomendado: 1280x720 px para melhor visualização.</p>
+        <!-- Thumbnail -->
+        <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50/50 p-4">
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Thumbnail (opcional, max 10MB)</label>
+          <input type="file" name="thumbnail" accept="image/*"
+            class="w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-indigo-700 file:cursor-pointer file:transition">
+          <p class="text-xs text-gray-400 mt-1.5">Formato recomendado: 1280×720px • JPG, PNG ou WebP</p>
+        </div>
+
+        <!-- Ações -->
+        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+          <button type="button" onclick="cancelarForm()"
+            class="w-full sm:w-auto px-5 py-2.5 text-sm font-medium border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition">
+            Cancelar
+          </button>
+          <button type="button" onclick="salvarCurso()" id="btnSalvar"
+            class="w-full sm:w-auto px-6 py-2.5 text-sm font-bold bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl hover:from-indigo-700 hover:to-blue-700 shadow-md hover:shadow-lg transition">
+            💾 Salvar Curso
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <!-- Search Bar -->
+  <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+    <div class="flex-1 relative">
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" id="searchCursos" onkeyup="filtrarCursos()" placeholder="Buscar cursos..."
+        class="el-search w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+    </div>
+    <div class="flex gap-2">
+      <select id="filterStatus" onchange="filtrarCursos()" class="border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:ring-2 focus:ring-indigo-500 transition">
+        <option value="">Todos os status</option>
+        <option value="ativo">✅ Ativo</option>
+        <option value="rascunho">📝 Rascunho</option>
+        <option value="inativo">⏸ Inativo</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <?php
+      $totalAtivos = 0; $totalRascunho = 0; $totalInativos = 0;
+      foreach ($cursos as $c) {
+        if ($c['status'] === 'ativo') $totalAtivos++;
+        elseif ($c['status'] === 'rascunho') $totalRascunho++;
+        else $totalInativos++;
+      }
+    ?>
+    <div class="el-stat-card rounded-xl p-4 text-center">
+      <div class="text-2xl font-bold text-indigo-600"><?= count($cursos) ?></div>
+      <div class="text-xs text-gray-500 mt-0.5">Total</div>
+    </div>
+    <div class="el-stat-card rounded-xl p-4 text-center">
+      <div class="text-2xl font-bold text-green-600"><?= $totalAtivos ?></div>
+      <div class="text-xs text-gray-500 mt-0.5">Ativos</div>
+    </div>
+    <div class="el-stat-card rounded-xl p-4 text-center">
+      <div class="text-2xl font-bold text-yellow-600"><?= $totalRascunho ?></div>
+      <div class="text-xs text-gray-500 mt-0.5">Rascunhos</div>
+    </div>
+    <div class="el-stat-card rounded-xl p-4 text-center">
+      <div class="text-2xl font-bold text-gray-500"><?= $totalInativos ?></div>
+      <div class="text-xs text-gray-500 mt-0.5">Inativos</div>
+    </div>
+  </div>
+
+  <!-- Course Grid -->
+  <?php if (empty($cursos)): ?>
+  <div class="bg-white rounded-2xl shadow p-12 text-center">
+    <div class="text-5xl mb-4">📚</div>
+    <h3 class="text-lg font-semibold text-gray-700 mb-1">Nenhum curso cadastrado</h3>
+    <p class="text-sm text-gray-400">Clique em "Novo Curso" para começar!</p>
+  </div>
+  <?php else: ?>
+  <div id="cursosGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <?php foreach ($cursos as $c): ?>
+    <?php
+      $statusConfig = [
+        'ativo'    => ['bg' => 'bg-green-100', 'text' => 'text-green-700', 'icon' => '✅'],
+        'rascunho' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-700', 'icon' => '📝'],
+        'inativo'  => ['bg' => 'bg-gray-100', 'text' => 'text-gray-600', 'icon' => '⏸'],
+      ];
+      $sc = $statusConfig[$c['status']] ?? $statusConfig['inativo'];
+    ?>
+    <div class="el-card curso-card bg-white rounded-2xl shadow-md overflow-hidden flex flex-col border border-gray-100"
+         data-titulo="<?= htmlspecialchars(mb_strtolower($c['titulo'])) ?>"
+         data-status="<?= htmlspecialchars($c['status']) ?>">
+
+      <!-- Thumbnail -->
+      <?php if (!empty($c['thumbnail'])): ?>
+      <div class="h-40 overflow-hidden">
+        <img src="<?= htmlspecialchars($c['thumbnail']) ?>" alt="<?= htmlspecialchars($c['titulo']) ?>"
+          class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+      </div>
+      <?php else: ?>
+      <div class="el-thumb h-40 flex items-center justify-center">
+        <span class="text-5xl text-white/80">🎓</span>
+      </div>
+      <?php endif; ?>
+
+      <!-- Content -->
+      <div class="p-5 flex flex-col flex-1">
+        <div class="flex items-start justify-between gap-2 mb-2">
+          <h3 class="font-bold text-gray-900 text-sm leading-tight line-clamp-2"><?= htmlspecialchars($c['titulo']) ?></h3>
+          <span class="el-badge flex-shrink-0 px-2 py-0.5 rounded-full font-bold <?= $sc['bg'] ?> <?= $sc['text'] ?>">
+            <?= $sc['icon'] ?> <?= strtoupper($c['status']) ?>
+          </span>
+        </div>
+
+        <?php if ($c['descricao']): ?>
+        <p class="text-xs text-gray-500 mb-3 line-clamp-2"><?= htmlspecialchars($c['descricao']) ?></p>
+        <?php endif; ?>
+
+        <!-- Stats row -->
+        <div class="flex items-center gap-3 text-xs text-gray-400 mt-auto pt-3 border-t border-gray-100">
+          <span class="flex items-center gap-1" title="Carga Horária">⏱ <?= (int)$c['carga_horaria'] ?> min</span>
+          <span class="flex items-center gap-1" title="Aulas">📖 <?= (int)($c['total_aulas'] ?? 0) ?></span>
+          <span class="flex items-center gap-1" title="Matrículas">👥 <?= (int)($c['total_matriculas'] ?? 0) ?></span>
+        </div>
+
+        <!-- Gestor -->
+        <div class="text-xs text-gray-400 mt-2">
+          por <span class="font-medium text-gray-500"><?= htmlspecialchars($c['gestor_nome'] ?? 'N/A') ?></span>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-gray-100">
+          <a href="/elearning/gestor/cursos/<?= (int)$c['id'] ?>/aulas"
+            class="text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition">
+            📖 Aulas
+          </a>
+          <a href="/elearning/gestor/cursos/<?= (int)$c['id'] ?>/provas"
+            class="text-xs font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-lg transition">
+            📝 Provas
+          </a>
+          <a href="/elearning/gestor/cursos/<?= (int)$c['id'] ?>/matriculas"
+            class="text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 px-2.5 py-1 rounded-lg transition">
+            👥 Matrículas
+          </a>
+          <a href="/elearning/gestor/cursos/<?= (int)$c['id'] ?>/progresso"
+            class="text-xs font-medium text-teal-600 bg-teal-50 hover:bg-teal-100 px-2.5 py-1 rounded-lg transition">
+            📊 Progresso
+          </a>
+          <?php if ($canEdit): ?>
+          <button onclick='editarCurso(<?= json_encode($c) ?>)'
+            class="text-xs font-medium text-orange-600 bg-orange-50 hover:bg-orange-100 px-2.5 py-1 rounded-lg transition ml-auto">
+            ✏️ Editar
+          </button>
+          <?php endif; ?>
+          <?php if ($canDelete): ?>
+          <button onclick='excluirCurso(<?= (int)$c["id"] ?>, "<?= htmlspecialchars(addslashes($c["titulo"])) ?>")'
+            class="text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-lg transition">
+            🗑 Excluir
+          </button>
+          <?php endif; ?>
         </div>
       </div>
-      <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-100 bg-white/95 backdrop-blur pb-1">
-        <button type="button" onclick="fecharModalCurso()" class="w-full sm:w-auto px-4 py-2.5 text-sm font-medium border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition">Cancelar</button>
-        <button type="button" onclick="salvarCurso()" class="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-sm hover:shadow-md transition">Salvar Curso</button>
-      </div>
-    </form>
+    </div>
+    <?php endforeach; ?>
   </div>
+  <?php endif; ?>
 </div>
 
 <script>
-function handleCursoModalEsc(event) {
-  if (event.key === 'Escape') {
-    fecharModalCurso();
-  }
-}
-
-function mostrarAbaThumbnail(aba) {
-  const exemplos = document.getElementById('thumbnailExemplos');
-  const upload = document.getElementById('thumbnailUpload');
-  const abaExemplos = document.getElementById('abaExemplos');
-  const abaUpload = document.getElementById('abaUpload');
-
-  if (aba === 'exemplos') {
-    exemplos.classList.remove('hidden');
-    upload.classList.add('hidden');
-    abaExemplos.className = 'px-3 py-1 text-xs font-medium rounded bg-blue-600 text-white';
-    abaUpload.className = 'px-3 py-1 text-xs font-medium rounded bg-gray-200 text-gray-700';
+// Inline form toggle
+function toggleFormPanel() {
+  const panel = document.getElementById('formPanel');
+  const icon = document.getElementById('iconPlus');
+  const txt = document.getElementById('btnNovoCursoText');
+  if (panel.classList.contains('open')) {
+    cancelarForm();
   } else {
-    exemplos.classList.add('hidden');
-    upload.classList.remove('hidden');
-    abaExemplos.className = 'px-3 py-1 text-xs font-medium rounded bg-gray-200 text-gray-700';
-    abaUpload.className = 'px-3 py-1 text-xs font-medium rounded bg-blue-600 text-white';
+    panel.classList.add('open');
+    icon.style.transform = 'rotate(45deg)';
+    txt.textContent = 'Fechar';
+    document.getElementById('formPanelTitle').textContent = 'Criar Novo Curso';
+    document.getElementById('formCurso').reset();
+    document.getElementById('cursoId').value = '';
   }
 }
 
-function carregarThumbnailsExemplos() {
-  const deptId = document.getElementById('cursoDepartamento').value;
-  const galeria = document.getElementById('galeriaThumbnails');
-  const hiddenInput = document.getElementById('thumbnailUrl');
-
-  // Limpa seleção anterior
-  hiddenInput.value = '';
-  
-  // Thumbnails de exemplo por departamento
-  const exemplosPorDepartamento = {
-    1: [ // Exemplo: ID 1 = Qualidade
-      'https://via.placeholder.com/1280x720/3B82F6/FFFFFF?text=Qualidade+1',
-      'https://via.placeholder.com/1280x720/10B981/FFFFFF?text=Qualidade+2',
-      'https://via.placeholder.com/1280x720/8B5CF6/FFFFFF?text=Qualidade+3'
-    ],
-    2: [ // Exemplo: ID 2 = TI
-      'https://via.placeholder.com/1280x720/06B6D4/FFFFFF?text=TI+1',
-      'https://via.placeholder.com/1280x720/F59E0B/FFFFFF?text=TI+2',
-      'https://via.placeholder.com/1280x720/EF4444/FFFFFF?text=TI+3'
-    ],
-    3: [ // Exemplo: ID 3 = RH
-      'https://via.placeholder.com/1280x720/EC4899/FFFFFF?text=RH+1',
-      'https://via.placeholder.com/1280x720/84CC16/FFFFFF?text=RH+2',
-      'https://via.placeholder.com/1280x720/6366F1/FFFFFF?text=RH+3'
-    ]
-    // Adicione mais IDs de departamentos conforme necessário
-  };
-
-  const exemplos = exemplosPorDepartamento[deptId] || [];
-
-  if (exemplos.length === 0) {
-    galeria.innerHTML = '<div class="text-xs text-gray-500 col-span-full">Nenhum exemplo para este departamento. Use a aba Upload.</div>';
-    return;
-  }
-
-  galeria.innerHTML = exemplos.map((url, idx) => `
-    <div class="relative group cursor-pointer border-2 rounded-lg overflow-hidden transition hover:border-blue-500 ${idx === 0 ? 'border-blue-500' : 'border-gray-200'}"
-         onclick="selecionarThumbnail('${url}', this)">
-      <img src="${url}" alt="Exemplo ${idx + 1}" class="w-full h-20 object-cover">
-      <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition flex items-center justify-center">
-        <div class="w-6 h-6 rounded-full bg-white ${idx === 0 ? '' : 'opacity-0 group-hover:opacity-100'} transition flex items-center justify-center">
-          <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-        </div>
-      </div>
-    </div>
-  `).join('');
-
-  // Seleciona o primeiro por padrão
-  if (exemplos.length > 0) {
-    selecionarThumbnail(exemplos[0], galeria.firstElementChild);
-  }
-}
-
-function selecionarThumbnail(url, element) {
-  // Remove seleção anterior
-  document.querySelectorAll('#galeriaThumbnails > div').forEach(el => {
-    el.classList.remove('border-blue-500');
-    el.classList.add('border-gray-200');
-    el.querySelector('div > div').classList.add('opacity-0', 'group-hover:opacity-100');
-    el.querySelector('div > div').classList.remove('');
-  });
-
-  // Adiciona seleção atual
-  element.classList.remove('border-gray-200');
-  element.classList.add('border-blue-500');
-  element.querySelector('div > div').classList.remove('opacity-0', 'group-hover:opacity-100');
-
-  // Define valor no campo hidden
-  document.getElementById('thumbnailUrl').value = url;
-}
-
-function abrirNovoCurso() {
-  document.getElementById('modalCursoTitle').textContent = 'Novo Curso';
+function cancelarForm() {
+  const panel = document.getElementById('formPanel');
+  const icon = document.getElementById('iconPlus');
+  const txt = document.getElementById('btnNovoCursoText');
+  panel.classList.remove('open');
+  icon.style.transform = 'rotate(0)';
+  txt.textContent = 'Novo Curso';
   document.getElementById('formCurso').reset();
   document.getElementById('cursoId').value = '';
-  document.getElementById('modalCurso').classList.remove('hidden');
-  document.body.classList.add('overflow-hidden');
-  document.addEventListener('keydown', handleCursoModalEsc);
-  // Inicia aba Exemplos
-  mostrarAbaThumbnail('exemplos');
-}
-
-function fecharModalCurso() {
-  document.getElementById('modalCurso').classList.add('hidden');
-  document.body.classList.remove('overflow-hidden');
-  document.removeEventListener('keydown', handleCursoModalEsc);
 }
 
 function editarCurso(c) {
-  document.getElementById('modalCursoTitle').textContent = 'Editar Curso';
+  const panel = document.getElementById('formPanel');
+  const icon = document.getElementById('iconPlus');
+  const txt = document.getElementById('btnNovoCursoText');
+
+  document.getElementById('formPanelTitle').textContent = 'Editar Curso: ' + c.titulo;
   document.getElementById('cursoId').value = c.id;
   document.getElementById('cursoTitulo').value = c.titulo;
   document.getElementById('cursoDescricao').value = c.descricao || '';
   document.getElementById('cursoCarga').value = c.carga_horaria || 0;
   document.getElementById('cursoStatus').value = c.status;
-  document.getElementById('cursoDepartamento').value = c.departamento_id || '';
-  document.getElementById('modalCurso').classList.remove('hidden');
-  document.body.classList.add('overflow-hidden');
-  document.addEventListener('keydown', handleCursoModalEsc);
-  // Carrega exemplos ao editar
-  carregarThumbnailsExemplos();
+
+  panel.classList.add('open');
+  icon.style.transform = 'rotate(45deg)';
+  txt.textContent = 'Fechar';
+
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function salvarCurso() {
+  const btn = document.getElementById('btnSalvar');
+  btn.disabled = true; btn.innerHTML = '⏳ Salvando...';
   const form = document.getElementById('formCurso');
   const formData = new FormData(form);
   const id = document.getElementById('cursoId').value;
@@ -275,16 +307,44 @@ async function salvarCurso() {
   try {
     const res = await fetch(url, { method: 'POST', body: formData });
     const data = await res.json();
-    if (data.success) { alert(data.message); location.reload(); }
-    else alert('Erro: ' + data.message);
-  } catch(e) { alert('Erro de conexão'); }
+    if (data.success) { showToast(data.message, 'success'); setTimeout(() => location.reload(), 800); }
+    else showToast('Erro: ' + data.message, 'error');
+  } catch(e) { showToast('Erro de conexão', 'error'); }
+  finally { btn.disabled = false; btn.innerHTML = '💾 Salvar Curso'; }
 }
 
 async function excluirCurso(id, titulo) {
-  if (!confirm(`Excluir o curso "${titulo}"? Esta ação não pode ser desfeita.`)) return;
+  if (!confirm(`Excluir o curso "${titulo}"?\nEsta ação não pode ser desfeita.`)) return;
   const fd = new FormData(); fd.append('id', id);
-  const res = await fetch('/elearning/gestor/cursos/delete', { method: 'POST', body: fd });
-  const d = await res.json();
-  if (d.success) { alert(d.message); location.reload(); } else alert('Erro: ' + d.message);
+  try {
+    const res = await fetch('/elearning/gestor/cursos/delete', { method: 'POST', body: fd });
+    const d = await res.json();
+    if (d.success) { showToast(d.message, 'success'); setTimeout(() => location.reload(), 800); }
+    else showToast('Erro: ' + d.message, 'error');
+  } catch(e) { showToast('Erro de conexão', 'error'); }
+}
+
+// Search & Filter
+function filtrarCursos() {
+  const search = document.getElementById('searchCursos').value.toLowerCase();
+  const status = document.getElementById('filterStatus').value;
+  document.querySelectorAll('.curso-card').forEach(card => {
+    const matchTitulo = card.dataset.titulo.includes(search);
+    const matchStatus = !status || card.dataset.status === status;
+    card.style.display = (matchTitulo && matchStatus) ? '' : 'none';
+  });
+}
+
+// Toast notification
+function showToast(msg, type) {
+  const existing = document.getElementById('elToast');
+  if (existing) existing.remove();
+  const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-indigo-600' };
+  const div = document.createElement('div');
+  div.id = 'elToast';
+  div.className = `fixed bottom-6 right-6 z-[100] ${colors[type] || colors.info} text-white px-5 py-3 rounded-xl shadow-2xl text-sm font-medium el-fade-in`;
+  div.textContent = msg;
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 3500);
 }
 </script>
