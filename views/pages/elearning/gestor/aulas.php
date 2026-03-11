@@ -75,7 +75,7 @@
         <div class="flex items-start justify-between">
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-sm flex-shrink-0">
-              <?= (int)($a['ordem']) + 1 ?>
+              <?= $idx + 1 ?>
             </div>
             <div>
               <h3 class="font-bold text-gray-900"><?= htmlspecialchars($a['titulo']) ?></h3>
@@ -117,19 +117,26 @@
               </div>
               <div>
                 <label class="block text-xs font-semibold text-gray-500 mb-1">Tipo *</label>
-                <select name="tipo" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-purple-500 transition">
+                <select name="tipo" onchange="toggleTipoMaterial(<?= (int)$a['id'] ?>, this.value)" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-purple-500 transition">
                   <option value="video">🎬 Vídeo (20MB)</option>
                   <option value="pdf">📄 PDF (20MB)</option>
                   <option value="imagem">🖼️ Imagem (10MB)</option>
                   <option value="slide">📊 Slide (20MB)</option>
+                  <option value="texto">📝 Texto</option>
                 </select>
               </div>
-              <div>
+              <div id="fileField_<?= (int)$a['id'] ?>">
                 <label class="block text-xs font-semibold text-gray-500 mb-1">Arquivo *</label>
-                <input type="file" name="arquivo" required class="w-full text-sm file:mr-2 file:rounded-lg file:border-0 file:bg-purple-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-purple-700 file:cursor-pointer">
+                <input type="file" name="arquivo" class="w-full text-sm file:mr-2 file:rounded-lg file:border-0 file:bg-purple-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-purple-700 file:cursor-pointer">
               </div>
             </div>
-            <div class="flex justify-end gap-2">
+            <!-- Textarea para tipo texto (hidden por padrão) -->
+            <div id="textoField_<?= (int)$a['id'] ?>" style="display:none;" class="mt-3">
+              <label class="block text-xs font-semibold text-gray-500 mb-1">Conteúdo do Texto *</label>
+              <textarea name="conteudo_texto" rows="6" placeholder="Digite o conteúdo do material aqui... Suporta texto longo, instruções, orientações, etc."
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-purple-500 transition resize-y"></textarea>
+            </div>
+            <div class="flex justify-end gap-2 mt-3">
               <button type="button" onclick="toggleUpload(<?= (int)$a['id'] ?>)" class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">Cancelar</button>
               <button type="button" onclick="enviarMaterial(<?= (int)$a['id'] ?>)" class="px-4 py-1.5 text-sm font-bold bg-purple-600 text-white rounded-lg hover:bg-purple-700 shadow transition">📤 Enviar</button>
             </div>
@@ -197,5 +204,23 @@ async function enviarMaterial(aulaId) {
     if (d.success) { showToast('Material enviado!','success'); setTimeout(()=>location.reload(),800); }
     else showToast('Erro: '+d.message,'error');
   } catch(e) { showToast('Erro de conexão','error'); }
+}
+
+function toggleTipoMaterial(aulaId, tipo) {
+  const fileField = document.getElementById('fileField_' + aulaId);
+  const textoField = document.getElementById('textoField_' + aulaId);
+  if (tipo === 'texto') {
+    fileField.style.display = 'none';
+    textoField.style.display = '';
+    // Limpar file input para não enviar arquivo junto com texto
+    const fi = fileField.querySelector('input[type="file"]');
+    if (fi) fi.value = '';
+  } else {
+    fileField.style.display = '';
+    textoField.style.display = 'none';
+    // Limpar textarea
+    const ta = textoField.querySelector('textarea');
+    if (ta) ta.value = '';
+  }
 }
 </script>

@@ -257,8 +257,24 @@ class ELearningGestorController
         $this->requireGestor();
         if (!$this->canEdit()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
         $aulaId = (int)($_POST['id_aula'] ?? 0); $tipo = $_POST['tipo'] ?? ''; $titulo = trim($_POST['titulo'] ?? '');
-        if (!$aulaId || !in_array($tipo, ['video','pdf','imagem','slide']) || !$titulo || empty($_FILES['arquivo']['tmp_name']))
-            $this->json(['success' => false, 'message' => 'Dados ou arquivo inválido.']);
+        if (!$aulaId || !in_array($tipo, ['video','pdf','imagem','slide','texto']) || !$titulo)
+            $this->json(['success' => false, 'message' => 'Dados inválidos.']);
+
+        // Tipo TEXTO — salvar conteúdo diretamente, sem arquivo
+        if ($tipo === 'texto') {
+            $conteudo = trim($_POST['conteudo_texto'] ?? '');
+            if (!$conteudo) $this->json(['success' => false, 'message' => 'Conteúdo do texto é obrigatório.']);
+            try {
+                $this->db->prepare("INSERT INTO elearning_materiais (id_aula,tipo,titulo,arquivo_path,conteudo_texto,tamanho_bytes,ordem,criado_em) VALUES (?,?,?,NULL,?,?,?,NOW())")
+                    ->execute([$aulaId, $tipo, $titulo, $conteudo, strlen($conteudo), (int)($_POST['ordem'] ?? 0)]);
+                $this->json(['success' => true, 'message' => 'Material de texto salvo!']);
+            } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
+            return;
+        }
+
+        // Tipos com arquivo (video, pdf, imagem, slide)
+        if (empty($_FILES['arquivo']['tmp_name']))
+            $this->json(['success' => false, 'message' => 'Arquivo obrigatório para este tipo.']);
         $limites = ['video' => 20,'pdf' => 20,'imagem' => 10,'slide' => 20];
         $exts    = ['video' => ['mp4','avi','mov','webm'],'pdf' => ['pdf'],'imagem' => ['jpg','jpeg','png','gif','webp'],'slide' => ['pptx','ppt','pdf']];
         $ext = strtolower(pathinfo($_FILES['arquivo']['name'], PATHINFO_EXTENSION));
