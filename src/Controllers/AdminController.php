@@ -371,7 +371,7 @@ class AdminController
                 DATE_FORMAT(t.created_at, '%Y-%m') AS mes,
                 COALESCE(SUM(t.valor_recuperado), 0) AS total,
                 COUNT(*) AS qtd_triagens
-                FROM triagem_toners t WHERE {$where}
+                FROM triagem_toners t WHERE {$where} AND t.destino = 'Estoque'
                 GROUP BY mes ORDER BY mes ASC";
             $stmt = $this->db->prepare($chart5Sql);
             $stmt->execute($params);
