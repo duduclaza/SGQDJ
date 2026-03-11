@@ -331,6 +331,68 @@ class ELearningGestorController
         } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
     }
 
+    public function updateMaterial(): void
+    {
+        $this->requireGestor();
+        if (!$this->canEdit()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
+        $id = (int)($_POST['id'] ?? 0);
+        $titulo = trim($_POST['titulo'] ?? '');
+        if (!$id || !$titulo) $this->json(['success' => false, 'message' => 'Dados inválidos.']);
+
+        try {
+            // Buscar material atual
+            $st = $this->db->prepare("SELECT * FROM elearning_materiais WHERE id=?");
+            $st->execute([$id]);
+            $mat = $st->fetch(\PDO::FETCH_ASSOC);
+            if (!$mat) $this->json(['success' => false, 'message' => 'Material não encontrado.']);
+
+            if ($mat['tipo'] === 'texto') {
+                // Atualizar título e conteúdo do texto
+                $conteudo = trim($_POST['conteudo_texto'] ?? '');
+                if (!$conteudo) $this->json(['success' => false, 'message' => 'Conteúdo do texto é obrigatório.']);
+                $this->db->prepare("UPDATE elearning_materiais SET titulo=?, conteudo_texto=?, tamanho_bytes=? WHERE id=?")
+                    ->execute([$titulo, $conteudo, strlen($conteudo), $id]);
+            } else {
+                // Atualizar título (e opcionalmente o arquivo)
+                if (!empty($_FILES['arquivo']['tmp_name']) && $_FILES['arquivo']['error'] === UPLOAD_ERR_OK) {
+                    $tipo = $mat['tipo'];
+                    $limites = ['video' => 20,'pdf' => 20,'imagem' => 10,'slide' => 20];
+                    $exts = ['video' => ['mp4','avi','mov','webm'],'pdf' => ['pdf'],'imagem' => ['jpg','jpeg','png','gif','webp'],'slide' => ['pptx','ppt','pdf']];
+                    $ext = strtolower(pathinfo($_FILES['arquivo']['name'], PATHINFO_EXTENSION));
+                    if ($_FILES['arquivo']['size'] > ($limites[$tipo] ?? 20) * 1024 * 1024)
+                        $this->json(['success' => false, 'message' => "Arquivo excede limite."]);
+                    if (!in_array($ext, $exts[$tipo] ?? []))
+                        $this->json(['success' => false, 'message' => "Extensão não permitida."]);
+
+                    // Buscar id_curso via aula
+                    $sta = $this->db->prepare("SELECT id_curso FROM elearning_aulas WHERE id=?");
+                    $sta->execute([$mat['id_aula']]);
+                    $aula = $sta->fetch(\PDO::FETCH_ASSOC);
+                    $cid = $aula['id_curso'] ?? 0;
+                    $sub = $tipo === 'slide' ? 'slides' : $tipo . 's';
+                    $dir = __DIR__ . "/../../../uploads/elearning/cursos/{$cid}/{$sub}/";
+                    if (!is_dir($dir)) mkdir($dir, 0755, true);
+                    $fn = uniqid($tipo . '_') . '.' . $ext;
+                    if (!move_uploaded_file($_FILES['arquivo']['tmp_name'], $dir . $fn))
+                        $this->json(['success' => false, 'message' => 'Falha ao salvar arquivo.']);
+
+                    // Excluir arquivo antigo
+                    if (!empty($mat['arquivo_path'])) {
+                        $old = __DIR__ . '/../../../' . ltrim($mat['arquivo_path'], '/');
+                        if (file_exists($old)) @unlink($old);
+                    }
+                    $path = "/uploads/elearning/cursos/{$cid}/{$sub}/{$fn}";
+                    $this->db->prepare("UPDATE elearning_materiais SET titulo=?, arquivo_path=?, tamanho_bytes=? WHERE id=?")
+                        ->execute([$titulo, $path, $_FILES['arquivo']['size'], $id]);
+                } else {
+                    // Só atualizar título
+                    $this->db->prepare("UPDATE elearning_materiais SET titulo=? WHERE id=?")->execute([$titulo, $id]);
+                }
+            }
+            $this->json(['success' => true, 'message' => 'Material atualizado!']);
+        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
+    }
+
     // ---------- PROVAS ----------
     public function provas(int $cursoId): void
     {

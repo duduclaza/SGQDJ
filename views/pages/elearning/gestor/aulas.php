@@ -140,6 +140,12 @@
                   👁 Ver
                 </a>
                 <?php endif; ?>
+                <?php if ($canEdit): ?>
+                <button onclick='editarMaterial(<?= (int)$a["id"] ?>, <?= json_encode(["id"=>(int)$mat["id"],"titulo"=>$mat["titulo"],"tipo"=>$mat["tipo"],"conteudo_texto"=>$mat["conteudo_texto"]??""]) ?>)'
+                  class="text-xs text-amber-600 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded-lg transition opacity-0 group-hover:opacity-100">
+                  ✏️
+                </button>
+                <?php endif; ?>
                 <?php if ($canDelete): ?>
                 <button onclick="excluirMaterial(<?= (int)$mat['id'] ?>, '<?= htmlspecialchars(addslashes($mat['titulo'])) ?>')"
                   class="text-xs text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded-lg transition opacity-0 group-hover:opacity-100">
@@ -151,6 +157,30 @@
             <?php endforeach; ?>
           </div>
           <?php endif; ?>
+
+          <!-- Formulário de edição de material (hidden) -->
+          <div id="editMatPanel_<?= (int)$a['id'] ?>" style="display:none;" class="mb-5 bg-amber-50/70 rounded-xl p-4 border border-amber-200">
+            <h4 class="text-sm font-bold text-amber-800 mb-3">✏️ Editar Material</h4>
+            <form id="formEditMat_<?= (int)$a['id'] ?>" class="space-y-3">
+              <input type="hidden" name="id" id="editMatId_<?= (int)$a['id'] ?>">
+              <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Título *</label>
+                <input type="text" name="titulo" id="editMatTitulo_<?= (int)$a['id'] ?>" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-amber-400 transition">
+              </div>
+              <div id="editMatTextoField_<?= (int)$a['id'] ?>" style="display:none;">
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Conteúdo do Texto *</label>
+                <textarea name="conteudo_texto" id="editMatConteudo_<?= (int)$a['id'] ?>" rows="6" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-amber-400 transition resize-y"></textarea>
+              </div>
+              <div id="editMatFileField_<?= (int)$a['id'] ?>" style="display:none;">
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Novo Arquivo (opcional — deixe vazio para manter o atual)</label>
+                <input type="file" name="arquivo" class="w-full text-sm file:mr-2 file:rounded-lg file:border-0 file:bg-amber-500 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-amber-600 file:cursor-pointer">
+              </div>
+              <div class="flex justify-end gap-2">
+                <button type="button" onclick="cancelarEdicao(<?= (int)$a['id'] ?>)" class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">Cancelar</button>
+                <button type="button" onclick="salvarEdicaoMaterial(<?= (int)$a['id'] ?>)" class="px-4 py-1.5 text-sm font-bold bg-amber-500 text-white rounded-lg hover:bg-amber-600 shadow transition">💾 Salvar</button>
+              </div>
+            </form>
+          </div>
 
           <!-- Formulário para adicionar novo material -->
           <h4 class="text-sm font-bold text-gray-800 mb-3">➕ Adicionar Material — <?= htmlspecialchars($a['titulo']) ?></h4>
@@ -247,6 +277,45 @@ async function excluirMaterial(id, titulo) {
   const fd = new FormData(); fd.append('id', id);
   try {
     const res = await fetch('/elearning/gestor/materiais/delete', { method:'POST', body:fd });
+    const d = await res.json();
+    if (d.success) { showToast(d.message,'success'); setTimeout(()=>location.reload(),800); }
+    else showToast('Erro: '+d.message,'error');
+  } catch(e) { showToast('Erro de conexão','error'); }
+}
+
+function editarMaterial(aulaId, mat) {
+  // Abrir o painel da aula se não estiver aberto
+  const panel = document.getElementById('upload_' + aulaId);
+  if (!panel.classList.contains('open')) panel.classList.add('open');
+  // Mostrar formulário de edição
+  const editPanel = document.getElementById('editMatPanel_' + aulaId);
+  editPanel.style.display = '';
+  // Preencher campos
+  document.getElementById('editMatId_' + aulaId).value = mat.id;
+  document.getElementById('editMatTitulo_' + aulaId).value = mat.titulo;
+  // Mostrar campo correto: texto ou arquivo
+  const textoField = document.getElementById('editMatTextoField_' + aulaId);
+  const fileField = document.getElementById('editMatFileField_' + aulaId);
+  if (mat.tipo === 'texto') {
+    textoField.style.display = '';
+    fileField.style.display = 'none';
+    document.getElementById('editMatConteudo_' + aulaId).value = mat.conteudo_texto || '';
+  } else {
+    textoField.style.display = 'none';
+    fileField.style.display = '';
+  }
+  // Scroll suave até o edit panel
+  editPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function cancelarEdicao(aulaId) {
+  document.getElementById('editMatPanel_' + aulaId).style.display = 'none';
+}
+
+async function salvarEdicaoMaterial(aulaId) {
+  const fd = new FormData(document.getElementById('formEditMat_' + aulaId));
+  try {
+    const res = await fetch('/elearning/gestor/materiais/update', { method:'POST', body:fd });
     const d = await res.json();
     if (d.success) { showToast(d.message,'success'); setTimeout(()=>location.reload(),800); }
     else showToast('Erro: '+d.message,'error');

@@ -156,6 +156,7 @@ $router->post('/elearning/gestor/aulas/store',               [ELearningGestorCon
 $router->post('/elearning/gestor/aulas/delete',              [ELearningGestorController::class, 'deleteAula']);
 $router->post('/elearning/gestor/materiais/upload',          [ELearningGestorController::class, 'uploadMaterial']);
 $router->post('/elearning/gestor/materiais/delete',          [ELearningGestorController::class, 'deleteMaterial']);
+$router->post('/elearning/gestor/materiais/update',          [ELearningGestorController::class, 'updateMaterial']);
 $router->get('/elearning/gestor/cursos/{id}/provas',         [ELearningGestorController::class, 'provas']);
 $router->post('/elearning/gestor/provas/store',              [ELearningGestorController::class, 'storeProva']);
 $router->post('/elearning/gestor/questoes/store',            [ELearningGestorController::class, 'storeQuestao']);
