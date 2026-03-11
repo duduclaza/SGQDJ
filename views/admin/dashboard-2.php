@@ -798,10 +798,8 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
         labels,
         datasets: [{
           label: 'Valor Recuperado',
-          data: data.map(d => ({
-            y: parseFloat(d.total),
-            qtd_triagens: parseInt(d.qtd_triagens || 0)
-          })),
+          data: data.map(d => parseFloat(d.total)),
+          triagens: data.map(d => parseInt(d.qtd_triagens || 0)),
           backgroundColor: 'rgba(52,211,153,0.6)',
           borderColor: '#34d399',
           borderWidth: 1.5,
@@ -825,10 +823,11 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           tooltip: {
             callbacks: {
               label: ctx => {
-                const item = ctx.raw;
-                const parts = [`  Valor: ${fmtBRL(item.y)}`];
-                if (item && item.qtd_triagens !== undefined) {
-                  parts.push(`  Triagens: ${item.qtd_triagens}`);
+                const val = ctx.parsed.y;
+                const qtd = ctx.dataset.triagens ? ctx.dataset.triagens[ctx.dataIndex] : 0;
+                const parts = [`  Valor: ${fmtBRL(val)}`];
+                if (qtd > 0 || ctx.dataset.triagens) {
+                  parts.push(`  Triagens: ${qtd}`);
                 }
                 return parts;
               }
@@ -1106,10 +1105,11 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       clonedOptions.plugins.tooltip = clonedOptions.plugins.tooltip || {};
       clonedOptions.plugins.tooltip.callbacks = {
         label: ctx => {
-          const item = ctx.raw;
-          const parts = [`  Valor: ${fmtBRL(item.y)}`];
-          if (item && item.qtd_triagens !== undefined) {
-            parts.push(`  Triagens: ${item.qtd_triagens}`);
+          const val = ctx.parsed.y;
+          const qtd = ctx.dataset.triagens ? ctx.dataset.triagens[ctx.dataIndex] : 0;
+          const parts = [`  Valor: ${fmtBRL(val)}`];
+          if (qtd > 0 || ctx.dataset.triagens) {
+            parts.push(`  Triagens: ${qtd}`);
           }
           return parts;
         }
