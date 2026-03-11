@@ -798,7 +798,10 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
         labels,
         datasets: [{
           label: 'Valor Recuperado',
-          data: data.map(d => parseFloat(d.total)),
+          data: data.map(d => ({
+            y: parseFloat(d.total),
+            qtd_triagens: parseInt(d.qtd_triagens || 0)
+          })),
           backgroundColor: 'rgba(52,211,153,0.6)',
           borderColor: '#34d399',
           borderWidth: 1.5,
@@ -821,7 +824,14 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
         plugins: {
           tooltip: {
             callbacks: {
-              label: ctx => `  ${fmtBRL(ctx.parsed.y)}`
+              label: ctx => {
+                const item = ctx.raw;
+                const parts = [`  Valor: ${fmtBRL(item.y)}`];
+                if (item && item.qtd_triagens !== undefined) {
+                  parts.push(`  Triagens: ${item.qtd_triagens}`);
+                }
+                return parts;
+              }
             }
           }
         }
@@ -1088,8 +1098,22 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
         }
       };
       clonedOptions.plugins = clonedOptions.plugins || {};
-      clonedOptions.plugins.tooltip = clonedOptions.plugins.tooltip || {};
       clonedOptions.plugins.tooltip.footer = () => ['', 'Clique para ver detalhes'];
+    }
+
+    if (chartKey === 'valor_mes') {
+      clonedOptions.plugins = clonedOptions.plugins || {};
+      clonedOptions.plugins.tooltip = clonedOptions.plugins.tooltip || {};
+      clonedOptions.plugins.tooltip.callbacks = {
+        label: ctx => {
+          const item = ctx.raw;
+          const parts = [`  Valor: ${fmtBRL(item.y)}`];
+          if (item && item.qtd_triagens !== undefined) {
+            parts.push(`  Triagens: ${item.qtd_triagens}`);
+          }
+          return parts;
+        }
+      };
     }
 
     fullscreenChart = new Chart(ctx, {

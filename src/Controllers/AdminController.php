@@ -369,7 +369,8 @@ class AdminController
             // --- Chart 5: Valor Recuperado por mês ---
             $chart5Sql = "SELECT
                 DATE_FORMAT(t.created_at, '%Y-%m') AS mes,
-                COALESCE(SUM(t.valor_recuperado), 0) AS total
+                COALESCE(SUM(t.valor_recuperado), 0) AS total,
+                COUNT(*) AS qtd_triagens
                 FROM triagem_toners t WHERE {$where}
                 GROUP BY mes ORDER BY mes ASC";
             $stmt = $this->db->prepare($chart5Sql);
