@@ -309,21 +309,24 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       <div class="chart-wrapper flex justify-center" style="height:320px"><canvas id="chartFaixas"></canvas></div>
     </div>
 
-    <!-- Chart 4: Evolução Mensal -->
-    <div class="dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.35s">
+      <div class="chart-wrapper" style="height:320px"><canvas id="chartEvolucao"></canvas></div>
+    </div>
+
+    <!-- Chart 5: Valor Recuperado por mês -->
+    <div class="dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.38s">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 class="text-sm font-semibold text-white">Evolução Mensal de Reprovação</h3>
-          <p class="text-xs text-slate-400 mt-0.5">% de garantias (reprovados) por mês · clique no ponto para detalhes</p>
+          <h3 class="text-sm font-semibold text-white">Valor Recuperado por mês</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Total de valor em R$ recuperado (Estoque) por mês</p>
         </div>
         <div class="flex items-center gap-2">
-          <span class="kpi-badge bg-rose-400/15 text-rose-300 border border-rose-400/20">Linha</span>
-          <button class="chart-expand-btn" onclick="expandirGrafico('evolucao','Evolução Mensal de Reprovação','% de garantias (reprovados) por mês')" title="Expandir">
+          <span class="kpi-badge bg-emerald-400/15 text-emerald-300 border border-emerald-400/20">Barras</span>
+          <button class="chart-expand-btn" onclick="expandirGrafico('valor_mes','Valor Recuperado por mês','Total de valor em R$ recuperado (Estoque) por mês')" title="Expandir">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
           </button>
         </div>
       </div>
-      <div class="chart-wrapper" style="height:320px"><canvas id="chartEvolucao"></canvas></div>
+      <div class="chart-wrapper" style="height:320px"><canvas id="chartValorMes"></canvas></div>
     </div>
   </div>
 
@@ -426,6 +429,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       renderChartPareto(json.charts.defeitos_pareto || []);
       renderChartFaixas(json.charts.faixas_percentual || []);
       renderChartEvolucao(json.charts.evolucao_mensal || []);
+      renderChartValorMes(json.charts.valor_recuperado_mes || []);
       renderChartDestino(json.charts.por_destino || []);
       renderTable(json.ultimos_registros || []);
 
@@ -742,6 +746,52 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
                 : `  ${ctx.parsed.y} avaliados`
             },
             footer: () => ['', 'Clique para ver detalhes']
+          }
+        }
+      }
+    });
+  }
+
+  // ===== Chart 5: Valor Recuperado por mês (bar) =====
+  function renderChartValorMes(data) {
+    resetChart('valor_mes');
+    const ctx = document.getElementById('chartValorMes').getContext('2d');
+    const labels = data.map(d => {
+      const [y,m] = d.mes.split('-');
+      const meses = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      return meses[parseInt(m)] + '/' + y.substring(2);
+    });
+    chartInstances['valor_mes'] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Valor Recuperado',
+          data: data.map(d => parseFloat(d.total)),
+          backgroundColor: 'rgba(52,211,153,0.6)',
+          borderColor: '#34d399',
+          borderWidth: 1.5,
+          borderRadius: 6,
+          maxBarThickness: 45,
+        }]
+      },
+      options: {
+        scales: {
+          x: { grid:{display:false} },
+          y: { 
+            beginAtZero: true,
+            grid:{color:'rgba(255,255,255,0.04)'}, 
+            ticks:{
+              callback: v => 'R$ ' + fmt(v, 0)
+            },
+            title:{display:true, text:'Valor (R$)', color:'#34d399'} 
+          },
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: ctx => `  ${fmtBRL(ctx.parsed.y)}`
+            }
           }
         }
       }

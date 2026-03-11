@@ -366,6 +366,16 @@ class AdminController
                 ];
             }
 
+            // --- Chart 5: Valor Recuperado por mês ---
+            $chart5Sql = "SELECT
+                DATE_FORMAT(t.created_at, '%Y-%m') AS mes,
+                COALESCE(SUM(t.valor_recuperado), 0) AS total
+                FROM triagem_toners t WHERE {$where}
+                GROUP BY mes ORDER BY mes ASC";
+            $stmt = $this->db->prepare($chart5Sql);
+            $stmt->execute($params);
+            $chart5 = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
             // --- Distribuição por destino (donut) ---
             $destinoSql = "SELECT t.destino AS label, COUNT(*) AS total
                            FROM triagem_toners t WHERE {$where}
@@ -406,6 +416,7 @@ class AdminController
                     'defeitos_pareto' => $chart2,
                     'faixas_percentual' => $chart3,
                     'evolucao_mensal' => $chart4,
+                    'valor_recuperado_mes' => $chart5,
                     'por_destino' => $porDestino,
                 ],
                 'ultimos_registros' => $ultimos,
