@@ -83,10 +83,16 @@ class ELearningColaboradorController
     }
 
     // ---------- DETALHE DO CURSO ----------
-    public function verCurso(int $cursoId): void
+    public function verCurso($cursoId): void
     {
         $this->requireColaborador();
         $uid = (int)($_SESSION['user_id'] ?? 0);
+        $cursoId = (int)$cursoId;
+        
+        if (!$cursoId) { 
+            header('Location: /elearning/colaborador'); exit;
+        }
+
         try {
             // Verificar matrícula
             $stM = $this->db->prepare("SELECT * FROM elearning_matriculas WHERE id_usuario=? AND id_curso=?");
@@ -97,10 +103,22 @@ class ELearningColaboradorController
             $stC->execute([$cursoId]); $curso = $stC->fetch(\PDO::FETCH_ASSOC);
             if (!$curso) { http_response_code(404); echo 'Curso não encontrado.'; exit; }
 
-            $stA = $this->db->prepare("SELECT a.*, COUNT(m.id) AS total_materiais FROM elearning_aulas a LEFT JOIN elearning_materiais m ON m.id_aula=a.id WHERE a.id_curso=? GROUP BY a.id ORDER BY a.ordem");
+            // Buscar aulas
+            $stA = $this->db->prepare("SELECT * FROM elearning_aulas WHERE id_curso=? ORDER BY ordem");
             $stA->execute([$cursoId]); $aulas = $stA->fetchAll(\PDO::FETCH_ASSOC);
 
-            // Progresso por material
+            // Buscar materiais (todos do curso)
+            $stMatAll = $this->db->prepare("SELECT m.* FROM elearning_materiais m JOIN elearning_aulas a ON a.id=m.id_aula WHERE a.id_curso=? ORDER BY m.ordem");
+            $stMatAll->execute([$cursoId]);
+            $materiaisRaw = $stMatAll->fetchAll(\PDO::FETCH_ASSOC);
+            
+            // Agrupar materiais por aula e marcar vistos
+            $materiaisByAula = [];
+            foreach ($materiaisRaw as $m) {
+                $materiaisByAula[$m['id_aula']][] = $m;
+            }
+
+            // Progresso por material do usuário logado
             $stP = $this->db->prepare("SELECT id_material, visualizado FROM elearning_progresso WHERE id_usuario=?");
             $stP->execute([$uid]); $progressoRaw = $stP->fetchAll(\PDO::FETCH_ASSOC);
             $progresso = [];
@@ -114,38 +132,49 @@ class ELearningColaboradorController
             $stCert = $this->db->prepare("SELECT * FROM elearning_certificados WHERE id_usuario=? AND id_curso=?");
             $stCert->execute([$uid, $cursoId]); $certificado = $stCert->fetch(\PDO::FETCH_ASSOC);
 
-        } catch (\PDOException $e) { $aulas = []; $provas = []; $certificado = null; $progresso = []; }
+        } catch (\PDOException $e) { $aulas = []; $provas = []; $certificado = null; $progresso = []; $materiaisByAula = []; }
+
         $this->render('elearning/colaborador/curso_detalhe', [
             'title' => $curso['titulo'] ?? 'Curso',
-            'curso' => $curso, 'aulas' => $aulas, 'provas' => $provas,
-            'progresso' => $progresso, 'certificado' => $certificado, 'matricula' => $matricula,
+            'curso' => $curso, 
+            'aulas' => $aulas, 
+            'materiaisByAula' => $materiaisByAula,
+            'provas' => $provas,
+            'progresso' => $progresso, 
+            'certificado' => $certificado, 
+            'matricula' => $matricula,
         ]);
     }
 
-    // ---------- ASSISTIR AULA (servir arquivo com validação de sessão) ----------
-    public function assistirAula(int $materialId): void
+    // ---------- ASSISTIR AULA (detalhes do material) ----------
+    public function assistirAula($materialId): void
     {
         $this->requireColaborador();
         $uid = (int)($_SESSION['user_id'] ?? 0);
+        $materialId = (int)$materialId;
+        if (!$materialId) { $this->json(['success' => false, 'message' => 'ID inválido.']); }
+
         try {
             $stMat = $this->db->prepare("SELECT m.*, a.id_curso FROM elearning_materiais m JOIN elearning_aulas a ON a.id=m.id_aula WHERE m.id=?");
             $stMat->execute([$materialId]); $mat = $stMat->fetch(\PDO::FETCH_ASSOC);
-            if (!$mat) { http_response_code(404); echo 'Material não encontrado.'; exit; }
+            if (!$mat) { $this->json(['success' => false, 'message' => 'Material não encontrado.']); return; }
+            
             // verifica matrícula
             $stMatr = $this->db->prepare("SELECT id FROM elearning_matriculas WHERE id_usuario=? AND id_curso=?");
             $stMatr->execute([$uid, $mat['id_curso']]); $matr = $stMatr->fetch();
-            if (!$matr) { http_response_code(403); echo 'Acesso negado.'; exit; }
+            if (!$matr) { $this->json(['success' => false, 'message' => 'Acesso negado.']); return; }
 
             // Marcar início do progresso
             $this->db->prepare("INSERT INTO elearning_progresso (id_usuario,id_material,data_inicio) VALUES (?,?,NOW()) ON DUPLICATE KEY UPDATE data_inicio=COALESCE(data_inicio,NOW())")
                 ->execute([$uid, $materialId]);
 
-            // Retornar URL para exibição (não faz readfile, retorna JSON com path)
+            // Se for material tipo 'texto', já retornar o conteúdo
             $this->json([
                 'success' => true,
                 'titulo'  => $mat['titulo'],
                 'tipo'    => $mat['tipo'],
                 'path'    => $mat['arquivo_path'],
+                'texto'   => $mat['conteudo_texto'], 
             ]);
         } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
     }

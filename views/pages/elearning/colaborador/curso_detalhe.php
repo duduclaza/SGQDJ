@@ -56,7 +56,7 @@
     </div>
     <?php else: ?>
     <?php foreach ($aulas as $idx => $a):
-      $aulaProgresso = false; // simplified — materials panel loaded via JS
+      $mats = $materiaisByAula[$a['id']] ?? [];
     ?>
     <div class="border-b border-gray-50 last:border-0">
       <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50/50 transition cursor-pointer" onclick="toggleMateriais(<?= (int)$a['id'] ?>, this)">
@@ -69,7 +69,7 @@
             <?php if ($a['descricao']): ?>
             <p class="text-xs text-gray-400 mt-0.5"><?= htmlspecialchars($a['descricao']) ?></p>
             <?php endif; ?>
-            <div class="text-xs text-gray-400 mt-1">📎 <?= (int)($a['total_materiais'] ?? 0) ?> material(is)</div>
+            <div class="text-xs text-gray-400 mt-1">📎 <?= count($mats) ?> material(is)</div>
           </div>
         </div>
         <svg class="w-5 h-5 text-gray-400 transition-transform mat-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -77,13 +77,63 @@
         </svg>
       </div>
       <div id="materiais_<?= (int)$a['id'] ?>" class="el-mat-panel">
-        <div class="px-6 pb-4 pl-16 space-y-2" id="matContent_<?= (int)$a['id'] ?>">
-          <div class="text-xs text-gray-400 py-4 text-center">Carregando materiais...</div>
+        <div class="px-6 pb-4 pl-16 space-y-2">
+          <?php if (empty($mats)): ?>
+            <div class="text-xs text-gray-400 py-3 italic">Nenhum material nesta aula.</div>
+          <?php else: ?>
+            <?php foreach ($mats as $m): 
+              $visto = !empty($progresso[$m['id']]);
+              $icones = ['video' => '🎬', 'pdf' => '📄', 'imagem' => '🖼️', 'slide' => '📊', 'texto' => '📝'];
+            ?>
+              <div class="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm border border-gray-100 group hover:border-indigo-200 transition">
+                <div class="w-8 h-8 <?= $visto ? 'bg-green-100 text-green-600' : 'bg-indigo-100 text-indigo-600' ?> rounded-lg flex items-center justify-center text-lg shadow-sm">
+                  <?= $visto ? '✅' : ($icones[$m['tipo']] ?? '📁') ?>
+                </div>
+                <div class="flex-1">
+                  <div class="text-sm font-semibold text-gray-900"><?= htmlspecialchars($m['titulo']) ?></div>
+                  <div class="text-[10px] text-gray-400 uppercase font-bold tracking-wider"><?= $m['tipo'] ?></div>
+                </div>
+                
+                <?php if ($m['tipo'] === 'texto'): ?>
+                <button onclick="abrirTexto(<?= (int)$m['id'] ?>)"
+                  class="text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition">
+                  Ler Conteúdo →
+                </button>
+                <?php else: ?>
+                <a href="<?= htmlspecialchars($m['arquivo_path']) ?>" target="_blank" onclick="marcarVisto(<?= (int)$m['id'] ?>)"
+                  class="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
+                  Abrir Material →
+                </a>
+                <?php endif; ?>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
         </div>
       </div>
     </div>
     <?php endforeach; ?>
     <?php endif; ?>
+  </div>
+
+  <!-- Modal para Material de Texto -->
+  <div id="modalTexto" class="fixed inset-0 z-[150] hidden">
+    <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="fecharTexto()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden el-fade-in">
+        <div class="p-5 border-b flex items-center justify-between bg-gray-50">
+          <h3 id="modalTextoTitulo" class="font-bold text-gray-900">Conteúdo do Material</h3>
+          <button onclick="fecharTexto()" class="text-gray-400 hover:text-gray-600 transition">
+             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="modalTextoCorpo" class="p-8 overflow-y-auto text-gray-700 leading-relaxed whitespace-pre-wrap"></div>
+        <div class="p-5 border-t bg-gray-50 text-right">
+          <button onclick="fecharTexto()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-xl font-bold shadow-md transition">
+            Entendido
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Exams -->
@@ -132,54 +182,48 @@
 </div>
 
 <script>
-let loadedMateriais = {};
-
-async function toggleMateriais(aulaId, headerEl) {
+function toggleMateriais(aulaId, headerEl) {
   const panel = document.getElementById('materiais_' + aulaId);
   const chevron = headerEl.querySelector('.mat-chevron');
   
   if (panel.classList.contains('open')) {
     panel.classList.remove('open');
     chevron.style.transform = 'rotate(0)';
-    return;
+  } else {
+    panel.classList.add('open');
+    chevron.style.transform = 'rotate(180deg)';
   }
+}
 
-  chevron.style.transform = 'rotate(180deg)';
-  panel.classList.add('open');
-
-  if (loadedMateriais[aulaId]) return;
-  loadedMateriais[aulaId] = true;
-
-  const contentDiv = document.getElementById('matContent_' + aulaId);
+async function abrirTexto(materialId) {
   try {
-    const res = await fetch('/elearning/colaborador/materiais/' + aulaId + '/assistir');
+    const res = await fetch('/elearning/colaborador/materiais/' + materialId + '/assistir');
     const d = await res.json();
     if (d.success) {
-      const icones = { video: '🎬', pdf: '📄', imagem: '🖼️', slide: '📊' };
-      contentDiv.innerHTML = `
-        <div class="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm border border-gray-100">
-          <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-lg">${icones[d.tipo] || '📁'}</div>
-          <div class="flex-1">
-            <div class="text-sm font-semibold text-gray-900">${d.titulo}</div>
-            <div class="text-xs text-gray-400">${d.tipo}</div>
-          </div>
-          <a href="${d.path}" target="_blank" onclick="marcarVisto(${aulaId})"
-            class="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
-            Abrir →
-          </a>
-        </div>`;
-    } else {
-      contentDiv.innerHTML = '<div class="text-xs text-gray-400 py-2">Nenhum material encontrado.</div>';
+      document.getElementById('modalTextoTitulo').textContent = d.titulo;
+      document.getElementById('modalTextoCorpo').textContent = d.texto;
+      document.getElementById('modalTexto').classList.remove('hidden');
+      marcarVisto(materialId);
     }
-  } catch(e) {
-    contentDiv.innerHTML = '<div class="text-xs text-red-400 py-2">Erro ao carregar materiais.</div>';
-  }
+  } catch(e) { console.error(e); }
+}
+
+function fecharTexto() {
+  document.getElementById('modalTexto').classList.add('hidden');
 }
 
 function marcarVisto(materialId) {
   const fd = new FormData();
   fd.append('id_material', materialId);
   fd.append('pct', 100);
-  fetch('/elearning/colaborador/progresso/registrar', { method: 'POST', body: fd });
+  fetch('/elearning/colaborador/progresso/registrar', { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(d => {
+       if (d.success && d.pct >= 90) {
+         // Optionally reload to update progress percentage in UI
+         // location.reload(); 
+       }
+    });
 }
 </script>
+
