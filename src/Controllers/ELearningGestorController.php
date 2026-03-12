@@ -495,4 +495,61 @@ class ELearningGestorController
             $this->json(['success' => true, 'message' => 'Certificado emitido!', 'codigo' => $codigo]);
         } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
     }
+
+    // ---------- DIPLOMAS ----------
+    public function diplomaConfig(): void
+    {
+        $this->requireGestor();
+        if (!$this->canDelete()) { // Somente admins (seguindo a lógica que admins podem excluir)
+            echo "Acesso negado."; exit;
+        }
+        try {
+            $st = $this->db->prepare("SELECT * FROM elearning_config_diploma WHERE id = 1");
+            $st->execute();
+            $config = $st->fetch(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) { $config = null; }
+
+        $this->render('elearning/gestor/diploma_config', [
+            'title' => 'Configurar Diploma',
+            'config' => $config
+        ]);
+    }
+
+    public function saveDiplomaConfig(): void
+    {
+        $this->requireGestor();
+        if (!$this->canDelete()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
+        
+        $layout = (int)($_POST['layout_ativo'] ?? 1);
+        $assinatura = trim($_POST['assinatura_texto'] ?? 'Diretoria SGQDJ');
+        
+        try {
+            if (!empty($_FILES['logo']['tmp_name']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
+                $type = $_FILES['logo']['type'];
+                $blob = file_get_contents($_FILES['logo']['tmp_name']);
+                $this->db->prepare("UPDATE elearning_config_diploma SET logo_diploma = ?, logo_tipo = ?, layout_ativo = ?, assinatura_texto = ? WHERE id = 1")
+                    ->execute([$blob, $type, $layout, $assinatura]);
+            } else {
+                $this->db->prepare("UPDATE elearning_config_diploma SET layout_ativo = ?, assinatura_texto = ? WHERE id = 1")
+                    ->execute([$layout, $assinatura]);
+            }
+            $this->json(['success' => true, 'message' => 'Configuração salva!']);
+        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
+    }
+
+    public function diplomaLogo(): void
+    {
+        try {
+            $st = $this->db->prepare("SELECT logo_diploma, logo_tipo FROM elearning_config_diploma WHERE id = 1");
+            $st->execute();
+            $row = $st->fetch(\PDO::FETCH_ASSOC);
+            if (!$row || !$row['logo_diploma']) {
+                http_response_code(404); exit;
+            }
+            header('Content-Type: ' . $row['logo_tipo']);
+            header('Content-Length: ' . strlen($row['logo_diploma']));
+            echo $row['logo_diploma'];
+            exit;
+        } catch (\PDOException $e) { http_response_code(500); exit; }
+    }
 }

@@ -115,6 +115,11 @@ $router->post('/elearning/gestor/cursos/delete', [App\Controllers\ELearningGesto
 $router->get('/elearning/gestor/cursos/{id}/aulas', [App\Controllers\ELearningGestorController::class, 'aulas']);
 $router->post('/elearning/gestor/aulas/store', [App\Controllers\ELearningGestorController::class, 'storeAula']);
 $router->post('/elearning/gestor/aulas/delete', [App\Controllers\ELearningGestorController::class, 'deleteAula']);
+$router->post('/elearning/gestor/provas/delete', [App\Controllers\ELearningGestorController::class, 'deleteProva']);
+
+$router->get('/elearning/gestor/diploma/config', [App\Controllers\ELearningGestorController::class, 'diplomaConfig']);
+$router->post('/elearning/gestor/diploma/save', [App\Controllers\ELearningGestorController::class, 'saveDiplomaConfig']);
+$router->get('/elearning/gestor/diploma/logo', [App\Controllers\ELearningGestorController::class, 'diplomaLogo']);
 $router->post('/elearning/gestor/materiais/upload', [App\Controllers\ELearningGestorController::class, 'uploadMaterial']);
 $router->post('/elearning/gestor/materiais/delete', [App\Controllers\ELearningGestorController::class, 'deleteMaterial']);
 $router->post('/elearning/gestor/materiais/update', [App\Controllers\ELearningGestorController::class, 'updateMaterial']);
