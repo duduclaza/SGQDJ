@@ -28,7 +28,7 @@ class GoogleDriveService
     }
 
     /**
-     * Upload a file to Google Drive using resumable upload
+     * Upload a file to Google Drive
      * 
      * @param string $filePath Local path to the file
      * @param string $fileName Name of the file on Drive
@@ -42,47 +42,22 @@ class GoogleDriveService
             'parents' => $this->folderId ? [$this->folderId] : []
         ]);
 
-        $this->client->setDefer(true);
-        $request = $this->service->files->create($fileMetadata, [
+        $content = file_get_contents($filePath);
+
+        $file = $this->service->files->create($fileMetadata, [
+            'data' => $content,
             'mimeType' => $mimeType,
-            'uploadType' => 'resumable',
+            'uploadType' => 'multipart',
             'fields' => 'id'
         ]);
 
-        $chunkSizeBytes = 1 * 1024 * 1024; // 1MB chunks
-        $media = new \Google\Http\MediaFileUpload(
-            $this->client,
-            $request,
-            $mimeType,
-            null,
-            true,
-            $chunkSizeBytes
-        );
-        $media->setFileSize(filesize($filePath));
+        // Make the file readable by anyone with the link (for streaming)
+        $this->service->permissions->create($file->id, new \Google\Service\Drive\Permission([
+            'type' => 'anyone',
+            'role' => 'reader'
+        ]));
 
-        $status = false;
-        $handle = fopen($filePath, "rb");
-        while (!$status && !feof($handle)) {
-            $chunk = fread($handle, $chunkSizeBytes);
-            $status = $media->nextChunk($chunk);
-        }
-        fclose($handle);
-        $this->client->setDefer(false);
-
-        if ($status->id) {
-            // Make the file readable by anyone with the link (for streaming)
-            try {
-                $this->service->permissions->create($status->id, new \Google\Service\Drive\Permission([
-                    'type' => 'anyone',
-                    'role' => 'reader'
-                ]));
-            } catch (\Exception $e) {
-                error_log("GoogleDriveService: Error setting permissions for file {$status->id}: " . $e->getMessage());
-            }
-            return $status->id;
-        }
-
-        throw new \Exception("Failed to upload file to Google Drive.");
+        return $file->id;
     }
 
     /**

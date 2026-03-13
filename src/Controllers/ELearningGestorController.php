@@ -278,9 +278,6 @@ class ELearningGestorController
         if (!$aulaId || !in_array($tipo, ['video','pdf','imagem','slide','texto']) || !$titulo)
             $this->json(['success' => false, 'message' => 'Dados inválidos.']);
 
-        // Aumentar tempo de execução para uploads grandes
-        set_time_limit(300);
-
         // Tipo TEXTO — salvar conteúdo diretamente, sem arquivo
         if ($tipo === 'texto') {
             $conteudo = trim($_POST['conteudo_texto'] ?? '');
@@ -294,35 +291,24 @@ class ELearningGestorController
         }
 
         // Tipos com arquivo (video, pdf, imagem, slide)
-        if (empty($_FILES['arquivo']['tmp_name'])) {
-            $err = $_FILES['arquivo']['error'] ?? UPLOAD_ERR_NO_FILE;
-            $msg = 'Arquivo obrigatório.';
-            if ($err === UPLOAD_ERR_INI_SIZE) $msg = 'O arquivo excede o limite definido no servidor (php.ini).';
-            if ($err === UPLOAD_ERR_FORM_SIZE) $msg = 'O arquivo excede o limite do formulário.';
-            if ($err === UPLOAD_ERR_PARTIAL) $msg = 'O upload foi feito apenas parcialmente.';
-            $this->json(['success' => false, 'message' => $msg]);
-        }
-
-        $limites = ['video' => 100,'pdf' => 20,'imagem' => 10,'slide' => 20];
+        if (empty($_FILES['arquivo']['tmp_name']))
+            $this->json(['success' => false, 'message' => 'Arquivo obrigatório para este tipo.']);
+        $limites = ['video' => 20,'pdf' => 20,'imagem' => 10,'slide' => 20];
         $exts    = ['video' => ['mp4','avi','mov','webm'],'pdf' => ['pdf'],'imagem' => ['jpg','jpeg','png','gif','webp'],'slide' => ['pptx','ppt','pdf']];
         $ext = strtolower(pathinfo($_FILES['arquivo']['name'], PATHINFO_EXTENSION));
-        
         if ($_FILES['arquivo']['size'] > $limites[$tipo] * 1024 * 1024)
             $this->json(['success' => false, 'message' => "Arquivo excede {$limites[$tipo]}MB."]);
-        
         if (!in_array($ext, $exts[$tipo]))
-            $this->json(['success' => false, 'message' => "Extensão .$ext não permitida para $tipo."]);
-
+            $this->json(['success' => false, 'message' => "Extensão não permitida para $tipo."]);
         try {
             $st = $this->db->prepare("SELECT id_curso FROM elearning_aulas WHERE id=?"); $st->execute([$aulaId]);
             $aula = $st->fetch(\PDO::FETCH_ASSOC);
             if (!$aula) $this->json(['success' => false, 'message' => 'Aula não encontrada.']);
             $cid = $aula['id_curso'];
             
-            // Variáveis de retorno
+            // --- GOOGLE DRIVE STORAGE ---
             $driveId = null;
             $storageType = 'local';
-            $path = null;
             $driveFolder = $_ENV['GOOGLE_DRIVE_FOLDER_ID'] ?? null;
 
             if ($driveFolder) {
@@ -332,9 +318,9 @@ class ELearningGestorController
                     $storageType = 'google_drive';
                     $path = $driveService->getStreamLink($driveId);
                 } catch (\Exception $e) {
-                    error_log("ELearningGestorController: Erro no Google Drive: " . $e->getMessage());
-                    // Fallback to local
-                    $storageType = 'local';
+                    // Fallback to local if Drive fails? Or error out?
+                    // $this->json(['success' => false, 'message' => 'Erro Google Drive: ' . $e->getMessage()]);
+                    // For now, let's fallback to local to be safe, or just continue.
                 }
             }
 
@@ -343,9 +329,8 @@ class ELearningGestorController
                 $dir = __DIR__ . "/../../public/uploads/elearning/cursos/{$cid}/{$sub}/";
                 if (!is_dir($dir)) mkdir($dir, 0755, true);
                 $fn = uniqid($tipo . '_') . '.' . $ext;
-                if (!move_uploaded_file($_FILES['arquivo']['tmp_name'], $dir . $fn)) {
-                    throw new \Exception('Falha ao salvar arquivo localmente.');
-                }
+                if (!move_uploaded_file($_FILES['arquivo']['tmp_name'], $dir . $fn))
+                    $this->json(['success' => false, 'message' => 'Falha ao salvar arquivo.']);
                 $path = "/uploads/elearning/cursos/{$cid}/{$sub}/{$fn}";
             }
 
@@ -353,10 +338,7 @@ class ELearningGestorController
                 ->execute([$aulaId, $tipo, $titulo, $path, $driveId, $storageType, $_FILES['arquivo']['size'], (int)($_POST['ordem'] ?? 0)]);
             
             $this->json(['success' => true, 'message' => 'Material enviado!', 'path' => $path]);
-        } catch (\Exception $e) { 
-            error_log("ELearningGestorController: " . $e->getMessage());
-            $this->json(['success' => false, 'message' => $e->getMessage()]); 
-        }
+        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
     }
 
     public function deleteMaterial(): void
@@ -389,8 +371,6 @@ class ELearningGestorController
         $titulo = trim($_POST['titulo'] ?? '');
         if (!$id || !$titulo) $this->json(['success' => false, 'message' => 'Dados inválidos.']);
 
-        set_time_limit(300);
-
         try {
             // Buscar material atual
             $st = $this->db->prepare("SELECT * FROM elearning_materiais WHERE id=?");
@@ -408,15 +388,13 @@ class ELearningGestorController
                 // Atualizar título (e opcionalmente o arquivo)
                 if (!empty($_FILES['arquivo']['tmp_name']) && $_FILES['arquivo']['error'] === UPLOAD_ERR_OK) {
                     $tipo = $mat['tipo'];
-                    $limites = ['video' => 100,'pdf' => 20,'imagem' => 10,'slide' => 20];
+                    $limites = ['video' => 20,'pdf' => 20,'imagem' => 10,'slide' => 20];
                     $exts = ['video' => ['mp4','avi','mov','webm'],'pdf' => ['pdf'],'imagem' => ['jpg','jpeg','png','gif','webp'],'slide' => ['pptx','ppt','pdf']];
                     $ext = strtolower(pathinfo($_FILES['arquivo']['name'], PATHINFO_EXTENSION));
-                    
                     if ($_FILES['arquivo']['size'] > ($limites[$tipo] ?? 20) * 1024 * 1024)
-                        $this->json(['success' => false, 'message' => "Arquivo excede limite de {$limites[$tipo]}MB."]);
-                    
+                        $this->json(['success' => false, 'message' => "Arquivo excede limite."]);
                     if (!in_array($ext, $exts[$tipo] ?? []))
-                        $this->json(['success' => false, 'message' => "Extensão .$ext não permitida para $tipo."]);
+                        $this->json(['success' => false, 'message' => "Extensão não permitida."]);
 
                     // Buscar id_curso via aula
                     $sta = $this->db->prepare("SELECT id_curso FROM elearning_aulas WHERE id=?");
@@ -426,7 +404,6 @@ class ELearningGestorController
 
                     $driveId = null;
                     $storageType = 'local';
-                    $path = null;
                     $driveFolder = $_ENV['GOOGLE_DRIVE_FOLDER_ID'] ?? null;
 
                     if ($driveFolder) {
@@ -440,10 +417,7 @@ class ELearningGestorController
                             if ($mat['storage_type'] === 'google_drive' && !empty($mat['drive_id'])) {
                                 $driveService->deleteFile($mat['drive_id']);
                             }
-                        } catch (\Exception $e) {
-                            error_log("ELearningGestorController (Update): Erro no Google Drive: " . $e->getMessage());
-                            $storageType = 'local';
-                        }
+                        } catch (\Exception $e) {}
                     }
 
                     if ($storageType === 'local') {
@@ -452,8 +426,7 @@ class ELearningGestorController
                         if (!is_dir($dir)) mkdir($dir, 0755, true);
                         $fn = uniqid($tipo . '_') . '.' . $ext;
                         if (!move_uploaded_file($_FILES['arquivo']['tmp_name'], $dir . $fn))
-                            throw new \Exception('Falha ao salvar arquivo localmente.');
-                        
+                            $this->json(['success' => false, 'message' => 'Falha ao salvar arquivo.']);
                         $path = "/uploads/elearning/cursos/{$cid}/{$sub}/{$fn}";
 
                         // Excluir arquivo local antigo
@@ -471,10 +444,7 @@ class ELearningGestorController
                 }
             }
             $this->json(['success' => true, 'message' => 'Material atualizado!']);
-        } catch (\Exception $e) { 
-            error_log("ELearningGestorController (Update): " . $e->getMessage());
-            $this->json(['success' => false, 'message' => $e->getMessage()]); 
-        }
+        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
     }
 
     // ---------- PROVAS ----------
