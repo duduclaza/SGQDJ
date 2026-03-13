@@ -194,7 +194,7 @@
               <div>
                 <label class="block text-xs font-semibold text-gray-500 mb-1">Tipo *</label>
                 <select name="tipo" onchange="toggleTipoMaterial(<?= (int)$a['id'] ?>, this.value)" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-purple-500 transition">
-                  <option value="video">🎬 Vídeo (20MB)</option>
+                  <option value="video">🎬 Vídeo (100MB)</option>
                   <option value="pdf">📄 PDF (20MB)</option>
                   <option value="imagem">🖼️ Imagem (10MB)</option>
                   <option value="slide">📊 Slide (20MB)</option>
