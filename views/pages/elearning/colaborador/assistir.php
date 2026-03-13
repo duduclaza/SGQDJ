@@ -2,18 +2,30 @@
     <div class="flex-1 relative">
         <?php if ($material['tipo'] === 'video'): ?>
             <div class="w-full h-full flex items-center justify-center bg-black">
-                <video id="videoPlayer" class="max-h-full w-full" controls controlsList="nodownload" oncontextmenu="return false;">
-                    <source src="<?= $material['arquivo_path'] ?>" type="video/mp4">
-                    Seu navegador não suporta vídeos.
-                </video>
+                <?php if ($material['storage_type'] === 'google_drive'): ?>
+                    <iframe src="https://drive.google.com/file/d/<?= $material['drive_id'] ?>/preview" class="w-full h-full" allow="autoplay"></iframe>
+                <?php else: ?>
+                    <video id="videoPlayer" class="max-h-full w-full" controls controlsList="nodownload" oncontextmenu="return false;">
+                        <source src="<?= $material['arquivo_path'] ?>" type="video/mp4">
+                        Seu navegador não suporta vídeos.
+                    </video>
+                <?php endif; ?>
             </div>
         <?php elseif ($material['tipo'] === 'pdf'): ?>
             <div class="w-full h-full bg-gray-800">
-                <iframe src="<?= $material['arquivo_path'] ?>#toolbar=0" class="w-full h-full" frameborder="0"></iframe>
+                <?php if ($material['storage_type'] === 'google_drive'): ?>
+                    <iframe src="https://drive.google.com/file/d/<?= $material['drive_id'] ?>/preview" class="w-full h-full" frameborder="0"></iframe>
+                <?php else: ?>
+                    <iframe src="<?= $material['arquivo_path'] ?>#toolbar=0" class="w-full h-full" frameborder="0"></iframe>
+                <?php endif; ?>
             </div>
         <?php elseif ($material['tipo'] === 'imagem'): ?>
             <div class="w-full h-full flex items-center justify-center bg-gray-900 p-4">
-                <img src="<?= $material['arquivo_path'] ?>" class="max-h-full max-w-full object-contain shadow-2xl" alt="<?= $material['titulo'] ?>">
+                <?php if ($material['storage_type'] === 'google_drive'): ?>
+                    <img src="https://lh3.googleusercontent.com/d/<?= $material['drive_id'] ?>" class="max-h-full max-w-full object-contain shadow-2xl" alt="<?= $material['titulo'] ?>">
+                <?php else: ?>
+                    <img src="<?= $material['arquivo_path'] ?>" class="max-h-full max-w-full object-contain shadow-2xl" alt="<?= $material['titulo'] ?>">
+                <?php endif; ?>
             </div>
         <?php else: ?>
             <div class="w-full h-full bg-white overflow-y-auto p-8 sm:p-12">

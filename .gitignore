@@ -51,6 +51,8 @@ Thumbs.db
 /temp/*
 *.tmp
 
+# Google Drive Credentials
+/storage/google/credentials.json
+
 # Permitir vendor/ e composer.lock para deploy
 # !vendor/
-# !composer.lock

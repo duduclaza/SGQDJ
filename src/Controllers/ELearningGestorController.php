@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Config\Database;
 use App\Controllers\AuthController;
 use App\Services\PermissionService;
+use App\Services\GoogleDriveService;
 
 class ELearningGestorController
 {
@@ -304,15 +305,38 @@ class ELearningGestorController
             $aula = $st->fetch(\PDO::FETCH_ASSOC);
             if (!$aula) $this->json(['success' => false, 'message' => 'Aula não encontrada.']);
             $cid = $aula['id_curso'];
-            $sub = $tipo === 'slide' ? 'slides' : $tipo . 's';
-            $dir = __DIR__ . "/../../public/uploads/elearning/cursos/{$cid}/{$sub}/";
-            if (!is_dir($dir)) mkdir($dir, 0755, true);
-            $fn = uniqid($tipo . '_') . '.' . $ext;
-            if (!move_uploaded_file($_FILES['arquivo']['tmp_name'], $dir . $fn))
-                $this->json(['success' => false, 'message' => 'Falha ao salvar arquivo.']);
-            $path = "/uploads/elearning/cursos/{$cid}/{$sub}/{$fn}";
-            $this->db->prepare("INSERT INTO elearning_materiais (id_aula,tipo,titulo,arquivo_path,tamanho_bytes,ordem,criado_em) VALUES (?,?,?,?,?,?,NOW())")
-                ->execute([$aulaId, $tipo, $titulo, $path, $_FILES['arquivo']['size'], (int)($_POST['ordem'] ?? 0)]);
+            
+            // --- GOOGLE DRIVE STORAGE ---
+            $driveId = null;
+            $storageType = 'local';
+            $driveFolder = $_ENV['GOOGLE_DRIVE_FOLDER_ID'] ?? null;
+
+            if ($driveFolder) {
+                try {
+                    $driveService = new GoogleDriveService();
+                    $driveId = $driveService->uploadFile($_FILES['arquivo']['tmp_name'], $titulo . '.' . $ext, $_FILES['arquivo']['type']);
+                    $storageType = 'google_drive';
+                    $path = $driveService->getStreamLink($driveId);
+                } catch (\Exception $e) {
+                    // Fallback to local if Drive fails? Or error out?
+                    // $this->json(['success' => false, 'message' => 'Erro Google Drive: ' . $e->getMessage()]);
+                    // For now, let's fallback to local to be safe, or just continue.
+                }
+            }
+
+            if ($storageType === 'local') {
+                $sub = $tipo === 'slide' ? 'slides' : $tipo . 's';
+                $dir = __DIR__ . "/../../public/uploads/elearning/cursos/{$cid}/{$sub}/";
+                if (!is_dir($dir)) mkdir($dir, 0755, true);
+                $fn = uniqid($tipo . '_') . '.' . $ext;
+                if (!move_uploaded_file($_FILES['arquivo']['tmp_name'], $dir . $fn))
+                    $this->json(['success' => false, 'message' => 'Falha ao salvar arquivo.']);
+                $path = "/uploads/elearning/cursos/{$cid}/{$sub}/{$fn}";
+            }
+
+            $this->db->prepare("INSERT INTO elearning_materiais (id_aula,tipo,titulo,arquivo_path,drive_id,storage_type,tamanho_bytes,ordem,criado_em) VALUES (?,?,?,?,?,?,?,?,NOW())")
+                ->execute([$aulaId, $tipo, $titulo, $path, $driveId, $storageType, $_FILES['arquivo']['size'], (int)($_POST['ordem'] ?? 0)]);
+            
             $this->json(['success' => true, 'message' => 'Material enviado!', 'path' => $path]);
         } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
     }
@@ -323,9 +347,17 @@ class ELearningGestorController
         if (!$this->canDelete()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
         $id = (int)($_POST['id'] ?? 0); if (!$id) $this->json(['success' => false, 'message' => 'ID inválido.']);
         try {
-            $st = $this->db->prepare("SELECT arquivo_path FROM elearning_materiais WHERE id=?"); $st->execute([$id]);
+            $st = $this->db->prepare("SELECT arquivo_path, drive_id, storage_type FROM elearning_materiais WHERE id=?"); $st->execute([$id]);
             $m = $st->fetch(\PDO::FETCH_ASSOC);
-            if ($m && !empty($m['arquivo_path'])) { $full = __DIR__ . '/../../public' . $m['arquivo_path']; if (file_exists($full)) @unlink($full); }
+            if ($m && $m['storage_type'] === 'google_drive' && !empty($m['drive_id'])) {
+                try {
+                    $driveService = new GoogleDriveService();
+                    $driveService->deleteFile($m['drive_id']);
+                } catch (\Exception $e) {}
+            } else if ($m && !empty($m['arquivo_path'])) { 
+                $full = __DIR__ . '/../../public' . $m['arquivo_path']; 
+                if (file_exists($full)) @unlink($full); 
+            }
             $this->db->prepare("DELETE FROM elearning_materiais WHERE id=?")->execute([$id]);
             $this->json(['success' => true, 'message' => 'Material excluído!']);
         } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
@@ -369,21 +401,43 @@ class ELearningGestorController
                     $sta->execute([$mat['id_aula']]);
                     $aula = $sta->fetch(\PDO::FETCH_ASSOC);
                     $cid = $aula['id_curso'] ?? 0;
-                    $sub = $tipo === 'slide' ? 'slides' : $tipo . 's';
-                    $dir = __DIR__ . "/../../public/uploads/elearning/cursos/{$cid}/{$sub}/";
-                    if (!is_dir($dir)) mkdir($dir, 0755, true);
-                    $fn = uniqid($tipo . '_') . '.' . $ext;
-                    if (!move_uploaded_file($_FILES['arquivo']['tmp_name'], $dir . $fn))
-                        $this->json(['success' => false, 'message' => 'Falha ao salvar arquivo.']);
 
-                    // Excluir arquivo antigo
-                    if (!empty($mat['arquivo_path'])) {
-                        $old = __DIR__ . '/../../../' . ltrim($mat['arquivo_path'], '/');
-                        if (file_exists($old)) @unlink($old);
+                    $driveId = null;
+                    $storageType = 'local';
+                    $driveFolder = $_ENV['GOOGLE_DRIVE_FOLDER_ID'] ?? null;
+
+                    if ($driveFolder) {
+                        try {
+                            $driveService = new GoogleDriveService();
+                            $driveId = $driveService->uploadFile($_FILES['arquivo']['tmp_name'], $titulo . '.' . $ext, $_FILES['arquivo']['type']);
+                            $storageType = 'google_drive';
+                            $path = $driveService->getStreamLink($driveId);
+
+                            // Delete old Drive file if exists
+                            if ($mat['storage_type'] === 'google_drive' && !empty($mat['drive_id'])) {
+                                $driveService->deleteFile($mat['drive_id']);
+                            }
+                        } catch (\Exception $e) {}
                     }
-                    $path = "/uploads/elearning/cursos/{$cid}/{$sub}/{$fn}";
-                    $this->db->prepare("UPDATE elearning_materiais SET titulo=?, arquivo_path=?, tamanho_bytes=? WHERE id=?")
-                        ->execute([$titulo, $path, $_FILES['arquivo']['size'], $id]);
+
+                    if ($storageType === 'local') {
+                        $sub = $tipo === 'slide' ? 'slides' : $tipo . 's';
+                        $dir = __DIR__ . "/../../public/uploads/elearning/cursos/{$cid}/{$sub}/";
+                        if (!is_dir($dir)) mkdir($dir, 0755, true);
+                        $fn = uniqid($tipo . '_') . '.' . $ext;
+                        if (!move_uploaded_file($_FILES['arquivo']['tmp_name'], $dir . $fn))
+                            $this->json(['success' => false, 'message' => 'Falha ao salvar arquivo.']);
+                        $path = "/uploads/elearning/cursos/{$cid}/{$sub}/{$fn}";
+
+                        // Excluir arquivo local antigo
+                        if ($mat['storage_type'] === 'local' && !empty($mat['arquivo_path'])) {
+                            $old = __DIR__ . '/../../public' . $mat['arquivo_path'];
+                            if (file_exists($old)) @unlink($old);
+                        }
+                    }
+
+                    $this->db->prepare("UPDATE elearning_materiais SET titulo=?, arquivo_path=?, drive_id=?, storage_type=?, tamanho_bytes=? WHERE id=?")
+                        ->execute([$titulo, $path, $driveId, $storageType, $_FILES['arquivo']['size'], $id]);
                 } else {
                     // Só atualizar título
                     $this->db->prepare("UPDATE elearning_materiais SET titulo=? WHERE id=?")->execute([$titulo, $id]);
