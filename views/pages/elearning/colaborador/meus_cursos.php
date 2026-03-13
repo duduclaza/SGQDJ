@@ -17,7 +17,7 @@
             <?php foreach ($emAndamento as $c): 
                 $pct = (float)($c['progresso_pct'] ?? 0);
             ?>
-            <a href="/elearning/colaborador/cursos/<?= (int)$c['id'] ?>" class="group bg-white rounded-3xl border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300 flex">
+            <a href="/elearning/colaborador/cursos/<?= (int)$c['id'] ?>/continuar" class="group bg-white rounded-3xl border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300 flex">
                 <div class="w-32 sm:w-40 h-auto shrink-0 bg-slate-100 border-r border-slate-100 overflow-hidden">
                     <?php if ($c['has_thumbnail']): ?>
                         <img src="/elearning/gestor/cursos/thumbnail?id=<?= (int)$c['id'] ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
@@ -117,7 +117,7 @@
                         </div>
 
                         <?php if ($matriculado): ?>
-                            <a href="/elearning/colaborador/cursos/<?= (int)$c['id'] ?>" class="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-2xl text-xs font-black sm:hover:bg-blue-600 sm:hover:text-white transition-all">
+                            <a href="/elearning/colaborador/cursos/<?= (int)$c['id'] ?>/continuar" class="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-2xl text-xs font-black sm:hover:bg-blue-600 sm:hover:text-white transition-all">
                                 CONTINUAR
                             </a>
                         <?php else: ?>
@@ -188,7 +188,7 @@
             if (data.success) {
                 showToast('Inscrição realizada! Bons estudos.', 'success');
                 if (data.redirect_url) {
-                    setTimeout(() => window.location.href = data.redirect_url, 1000);
+                    setTimeout(() => window.location.href = data.redirect_url + '/continuar', 1000);
                 } else {
                     setTimeout(() => location.reload(), 1000);
                 }

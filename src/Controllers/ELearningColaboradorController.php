@@ -159,6 +159,60 @@ class ELearningColaboradorController
         ]);
     }
 
+    // ---------- CONTINUAR/INICIAR CURSO (Smart Redirect) ----------
+    public function continuar($cursoId): void
+    {
+        $this->requireColaborador();
+        $uid = (int)($_SESSION['user_id'] ?? 0);
+        $cursoId = (int)$cursoId;
+
+        try {
+            // 1. Verificar matrícula
+            $stM = $this->db->prepare("SELECT id FROM elearning_matriculas WHERE id_usuario=? AND id_curso=?");
+            $stM->execute([$uid, $cursoId]);
+            if (!$stM->fetch()) { header('Location: /elearning/colaborador'); exit; }
+
+            // 2. Tentar encontrar o primeiro material NÃO visualizado
+            $stNext = $this->db->prepare("
+                SELECT m.id 
+                FROM elearning_materiais m 
+                JOIN elearning_aulas a ON a.id = m.id_aula 
+                LEFT JOIN elearning_progresso p ON p.id_material = m.id AND p.id_usuario = ?
+                WHERE a.id_curso = ? AND (p.visualizado IS NULL OR p.visualizado = 0)
+                ORDER BY a.ordem ASC, m.ordem ASC 
+                LIMIT 1
+            ");
+            $stNext->execute([$uid, $cursoId]);
+            $next = $stNext->fetch(\PDO::FETCH_ASSOC);
+
+            if ($next) {
+                header("Location: /elearning/colaborador/materiais/{$next['id']}/assistir");
+                exit;
+            }
+
+            // 3. Se todos visualizados, pegar o primeiríssimo ou ir pra página do curso
+            $stFirst = $this->db->prepare("
+                SELECT m.id 
+                FROM elearning_materiais m 
+                JOIN elearning_aulas a ON a.id = m.id_aula 
+                WHERE a.id_curso = ?
+                ORDER BY a.ordem ASC, m.ordem ASC 
+                LIMIT 1
+            ");
+            $stFirst->execute([$cursoId]);
+            $first = $stFirst->fetch(\PDO::FETCH_ASSOC);
+
+            if ($first) {
+                header("Location: /elearning/colaborador/materiais/{$first['id']}/assistir");
+            } else {
+                header("Location: /elearning/colaborador/cursos/{$cursoId}");
+            }
+            exit;
+        } catch (\Exception $e) {
+            header('Location: /elearning/colaborador'); exit;
+        }
+    }
+
     // ---------- ASSISTIR AULA (detalhes do material) ----------
     public function assistirAula($materialId): void
     {
@@ -268,6 +322,20 @@ class ELearningColaboradorController
             $stPr = $this->db->prepare("SELECT p.*, c.titulo AS titulo_curso FROM elearning_provas p JOIN elearning_cursos c ON c.id=p.id_curso WHERE p.id=? AND p.ativa=1");
             $stPr->execute([$provaId]); $prova = $stPr->fetch(\PDO::FETCH_ASSOC);
             if (!$prova) { http_response_code(404); echo 'Prova não encontrada.'; exit; }
+
+            // --- RESTRIÇÃO: Verificar se concluiu todos os materiais do curso ---
+            $stCheck = $this->db->prepare("
+                SELECT 
+                    (SELECT COUNT(*) FROM elearning_materiais m JOIN elearning_aulas a ON a.id = m.id_aula WHERE a.id_curso = ?) as total,
+                    (SELECT COUNT(*) FROM elearning_progresso pg JOIN elearning_materiais m ON m.id = pg.id_material JOIN elearning_aulas a ON a.id = m.id_aula WHERE a.id_curso = ? AND pg.id_usuario = ? AND pg.visualizado = 1) as concluidos
+            ");
+            $stCheck->execute([$prova['id_curso'], $prova['id_curso'], $uid]);
+            $resCheck = $stCheck->fetch(\PDO::FETCH_ASSOC);
+            
+            if ($resCheck['concluidos'] < $resCheck['total']) {
+                echo "<script>alert('Você precisa concluir todos os materiais do curso antes de realizar a prova.'); window.history.back();</script>";
+                exit;
+            }
 
             // Verificar tentativas
             $stT = $this->db->prepare("SELECT COUNT(*) FROM elearning_tentativas WHERE id_usuario=? AND id_prova=?");

@@ -109,11 +109,26 @@
                             </div>
                         </div>
                         
+                        <?php 
+                        // Calcular se pode fazer a prova (todos materiais vistos)
+                        $totalMateriais = 0;
+                        foreach($materiaisByAula as $ma) $totalMateriais += count($ma);
+                        $totalVistos = count(array_filter($progresso, fn($v) => $v == 1));
+                        $tudoVisto = $totalVistos >= $totalMateriais && $totalMateriais > 0;
+                        ?>
+
                         <?php if (!$bloqueado): ?>
-                        <a href="/elearning/colaborador/provas/<?= (int)$p['id'] ?>/fazer" 
-                           class="px-8 py-4 bg-white text-indigo-700 rounded-2xl text-sm font-black hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/10">
-                            INICIAR AVALIAÇÃO
-                        </a>
+                            <?php if ($tudoVisto): ?>
+                                <a href="/elearning/colaborador/provas/<?= (int)$p['id'] ?>/fazer" 
+                                   class="px-8 py-4 bg-white text-indigo-700 rounded-2xl text-sm font-black hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/10">
+                                    INICIAR AVALIAÇÃO
+                                </a>
+                            <?php else: ?>
+                                <button onclick="alert('Você precisa concluir todos os <?= $totalMateriais ?> materiais do curso antes de realizar a prova. (Concluídos: <?= $totalVistos ?>)')"
+                                   class="px-8 py-4 bg-white/20 text-white/80 border border-white/30 rounded-2xl text-sm font-black cursor-not-allowed">
+                                    🔒 CONCLUA O CURSO PRIMEIRO
+                                </button>
+                            <?php endif; ?>
                         <?php else: ?>
                         <div class="px-8 py-4 bg-white/10 border border-white/20 text-white/60 rounded-2xl text-sm font-black cursor-not-allowed">
                             TENTATIVAS ESGOTADAS

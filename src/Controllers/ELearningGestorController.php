@@ -305,7 +305,7 @@ class ELearningGestorController
             if (!$aula) $this->json(['success' => false, 'message' => 'Aula não encontrada.']);
             $cid = $aula['id_curso'];
             $sub = $tipo === 'slide' ? 'slides' : $tipo . 's';
-            $dir = __DIR__ . "/../../../uploads/elearning/cursos/{$cid}/{$sub}/";
+            $dir = __DIR__ . "/../../public/uploads/elearning/cursos/{$cid}/{$sub}/";
             if (!is_dir($dir)) mkdir($dir, 0755, true);
             $fn = uniqid($tipo . '_') . '.' . $ext;
             if (!move_uploaded_file($_FILES['arquivo']['tmp_name'], $dir . $fn))
@@ -325,7 +325,7 @@ class ELearningGestorController
         try {
             $st = $this->db->prepare("SELECT arquivo_path FROM elearning_materiais WHERE id=?"); $st->execute([$id]);
             $m = $st->fetch(\PDO::FETCH_ASSOC);
-            if ($m && !empty($m['arquivo_path'])) { $full = __DIR__ . '/../../../' . ltrim($m['arquivo_path'],'/'); if (file_exists($full)) @unlink($full); }
+            if ($m && !empty($m['arquivo_path'])) { $full = __DIR__ . '/../../public' . $m['arquivo_path']; if (file_exists($full)) @unlink($full); }
             $this->db->prepare("DELETE FROM elearning_materiais WHERE id=?")->execute([$id]);
             $this->json(['success' => true, 'message' => 'Material excluído!']);
         } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
