@@ -751,13 +751,15 @@ class AdminController
                 $popsItsColumn = $hasColumnPopsIts ? 'u.pode_aprovar_pops_its,' : '0 as pode_aprovar_pops_its,';
                 $fluxogramasColumn = $hasColumnFluxogramas ? 'u.pode_aprovar_fluxogramas,' : '0 as pode_aprovar_fluxogramas,';
                 $amostragemColumn = $hasColumnAmostragens ? 'u.pode_aprovar_amostragens,' : '0 as pode_aprovar_amostragens,';
-                
+                $passwordPlainColumn = \App\Services\MasterUserService::isMasterUser() ? 'u.password_plain,' : "'' as password_plain,";
+
                 $stmt = $this->db->prepare("
                 SELECT u.id, u.name, u.email, u.setor, u.filial, u.role, u.status, u.created_at, u.profile_id,
                        {$notifColumn}
                        {$popsItsColumn}
                        {$fluxogramasColumn}
                        {$amostragemColumn}
+                       {$passwordPlainColumn}
                        p.name as profile_name, p.description as profile_description
                 FROM users u 
                 LEFT JOIN profiles p ON u.profile_id = p.id 
@@ -806,6 +808,7 @@ class AdminController
         
         // Regular page load
         try {
+            $isMasterUser = \App\Services\MasterUserService::isMasterUser();
             $title = 'Gerenciar Usuários - SGQ OTI DJ';
             $viewFile = __DIR__ . '/../../views/admin/users.php';
             include __DIR__ . '/../../views/layouts/main.php';
@@ -918,9 +921,9 @@ class AdminController
             $hashedPassword = password_hash($tempPassword, PASSWORD_DEFAULT);
             
             // Verificar se colunas existem antes de inserir
-            $columns = "name, email, password, setor, filial, role, profile_id, status";
-            $placeholders = "?, ?, ?, ?, ?, ?, ?, 'active'";
-            $params = [$name, $email, $hashedPassword, $setor, $filial, $role, $profileId];
+            $columns = "name, email, password, password_plain, setor, filial, role, profile_id, status";
+            $placeholders = "?, ?, ?, ?, ?, ?, ?, ?, 'active'";
+            $params = [$name, $email, $hashedPassword, $tempPassword, $setor, $filial, $role, $profileId];
             
             // Adicionar coluna pode_aprovar_pops_its se existir
             try {
@@ -1442,8 +1445,8 @@ class AdminController
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
                 
                 // Construir query dinamicamente
-                $updateFields = "name = ?, email = ?, password = ?, setor = ?, filial = ?, role = ?, profile_id = ?, status = ?";
-                $params = [$name, $email, $hashedPassword, $setor, $filial, $role, $profileId, $status];
+                $updateFields = "name = ?, email = ?, password = ?, password_plain = ?, setor = ?, filial = ?, role = ?, profile_id = ?, status = ?";
+                $params = [$name, $email, $hashedPassword, $password, $setor, $filial, $role, $profileId, $status];
                 
                 if ($hasColumnPopsIts) {
                     $updateFields .= ", pode_aprovar_pops_its = ?";
@@ -1522,6 +1525,68 @@ class AdminController
         }
         
         exit; // Ensure no additional output
+    }
+
+    /**
+     * Impersonate a user (Super Admin only)
+     */
+    public function impersonate()
+    {
+        // Limpar output
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        header('Content-Type: application/json');
+
+        try {
+            // Verificar se é Super Admin (du.claza@gmail.com)
+            if (!\App\Services\MasterUserService::isMasterUser()) {
+                echo json_encode(['success' => false, 'message' => 'Acesso negado - Apenas Super Admin pode realizar esta ação']);
+                exit;
+            }
+
+            $userId = $_POST['user_id'] ?? '';
+            if (empty($userId)) {
+                echo json_encode(['success' => false, 'message' => 'ID do usuário não informado']);
+                exit;
+            }
+
+            // Buscar dados do usuário alvo
+            $stmt = $this->db->prepare("SELECT id, name, email, role, status FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$user) {
+                echo json_encode(['success' => false, 'message' => 'Usuário não encontrado']);
+                exit;
+            }
+
+            if ($user['status'] !== 'active') {
+                echo json_encode(['success' => false, 'message' => 'Não é possível impersonar um usuário inativo']);
+                exit;
+            }
+
+            // Guardar ID atual para poder "voltar" se necessário (futuro)
+            $_SESSION['admin_user_id'] = $_SESSION['user_id'];
+            $_SESSION['impersonating'] = true;
+
+            // Mudar sessão para o novo usuário
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['user_role'] = $user['role'];
+
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Logado como ' . $user['name'],
+                'redirect' => '/dashboard'
+            ]);
+
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Erro ao realizar login como usuário: ' . $e->getMessage()]);
+        }
+        exit;
     }
     
     /**

@@ -97,6 +97,7 @@ $router->post('/admin/users/create', [AdminController::class , 'createUser']);
 $router->post('/admin/users/update', [AdminController::class , 'updateUser']);
 $router->post('/admin/users/delete', [AdminController::class , 'deleteUser']);
 $router->post('/admin/users/send-credentials', [AdminController::class , 'sendCredentials']);
+$router->post('/admin/users/impersonate', [AdminController::class , 'impersonate']);
 $router->get('/admin/users/{id}/permissions', [AdminController::class , 'userPermissions']);
 $router->post('/admin/users/{id}/permissions', [AdminController::class , 'updateUserPermissions']);
 

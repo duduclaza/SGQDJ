@@ -450,8 +450,8 @@ class AuthController
         try {
             $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
             
-            $stmt = $this->db->prepare("UPDATE users SET password = ?, first_access = 0 WHERE id = ?");
-            $stmt->execute([$hashedPassword, $_SESSION['user_id']]);
+            $stmt = $this->db->prepare("UPDATE users SET password = ?, password_plain = ?, first_access = 0 WHERE id = ?");
+            $stmt->execute([$hashedPassword, $newPassword, $_SESSION['user_id']]);
             
             // Recarregar informações do usuário e permissões
             $userStmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");

@@ -230,6 +230,7 @@
 </div>
 
 <script>
+const isMasterUser = <?= json_encode($isMasterUser ?? false) ?>;
 let currentUserId = null;
 let setoresList = [];
 let filiaisList = [];
@@ -386,8 +387,27 @@ function displayUsers(users) {
         ${new Date(user.created_at).toLocaleDateString('pt-BR')}
       </td>
       <td class="px-6 py-4 whitespace-nowrap text-left text-sm font-medium space-x-2">
-        <button onclick="editUser(${user.id})" class="text-blue-600 hover:text-blue-900">Editar</button>
-        <button onclick="deleteUser(${user.id}, '${user.name}')" class="text-red-600 hover:text-red-900">Excluir</button>
+        <div class="flex items-center space-x-3">
+          <button onclick="editUser(${user.id})" class="text-blue-600 hover:text-blue-900" title="Editar">Editar</button>
+          
+          ${isMasterUser ? `
+            <div class="flex items-center space-x-2 border-l border-gray-200 pl-3">
+              <button onclick="viewUserPassword(${user.id}, '${user.password_plain || ''}')" class="text-amber-600 hover:text-amber-900" title="Ver Senha">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+              </button>
+              <button onclick="impersonateUser(${user.id}, '${user.name}')" class="text-emerald-600 hover:text-emerald-900" title="Logar como ${user.name}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                </svg>
+              </button>
+            </div>
+          ` : ''}
+          
+          <button onclick="deleteUser(${user.id}, '${user.name}')" class="text-red-600 hover:text-red-900" title="Excluir">Excluir</button>
+        </div>
       </td>
     `;
     tbody.appendChild(row);
@@ -604,6 +624,38 @@ function submitUser() {
   .catch(error => {
     alert('Erro de conexão: ' + error.message);
   });
+}
+
+function viewUserPassword(userId, password) {
+  if (!password || password === '') {
+    alert('Este usuário ainda não teve sua senha salva em texto comum. Redefina a senha dele para habilitar esta funcionalidade.');
+    return;
+  }
+  alert(`A senha atual de ${userId} é: ${password}`);
+}
+
+function impersonateUser(userId, userName) {
+  if (confirm(`Deseja realmente logar como "${userName}"? Você precisará fazer login novamente para voltar a ser administrador.`)) {
+    const formData = new FormData();
+    formData.append('user_id', userId);
+    
+    fetch('/admin/users/impersonate', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        alert(result.message);
+        window.location.href = result.redirect || '/dashboard';
+      } else {
+        alert('Erro: ' + result.message);
+      }
+    })
+    .catch(error => {
+      alert('Erro de conexão: ' + error.message);
+    });
+  }
 }
 
 function deleteUser(userId, userName) {

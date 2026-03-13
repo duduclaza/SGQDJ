@@ -152,31 +152,59 @@ class ELearningColaboradorController
         $this->requireColaborador();
         $uid = (int)($_SESSION['user_id'] ?? 0);
         $materialId = (int)$materialId;
-        if (!$materialId) { $this->json(['success' => false, 'message' => 'ID inválido.']); }
+        if (!$materialId) { die('ID inválido.'); }
 
         try {
+            // 1. Buscar o material atual e o curso
             $stMat = $this->db->prepare("SELECT m.*, a.id_curso FROM elearning_materiais m JOIN elearning_aulas a ON a.id=m.id_aula WHERE m.id=?");
-            $stMat->execute([$materialId]); $mat = $stMat->fetch(\PDO::FETCH_ASSOC);
-            if (!$mat) { $this->json(['success' => false, 'message' => 'Material não encontrado.']); return; }
+            $stMat->execute([$materialId]); $material = $stMat->fetch(\PDO::FETCH_ASSOC);
+            if (!$material) { die('Material não encontrado.'); }
             
-            // verifica matrícula
-            $stMatr = $this->db->prepare("SELECT id FROM elearning_matriculas WHERE id_usuario=? AND id_curso=?");
-            $stMatr->execute([$uid, $mat['id_curso']]); $matr = $stMatr->fetch();
-            if (!$matr) { $this->json(['success' => false, 'message' => 'Acesso negado.']); return; }
+            $cursoId = $material['id_curso'];
 
-            // Marcar início do progresso
+            // 2. Buscar o curso
+            $stC = $this->db->prepare("SELECT * FROM elearning_cursos WHERE id=?");
+            $stC->execute([$cursoId]); $curso = $stC->fetch(\PDO::FETCH_ASSOC);
+
+            // 3. Buscar matrícula e progresso do usuário
+            $stMatr = $this->db->prepare("SELECT * FROM elearning_matriculas WHERE id_usuario=? AND id_curso=?");
+            $stMatr->execute([$uid, $cursoId]); $matricula = $stMatr->fetch(\PDO::FETCH_ASSOC);
+            if (!$matricula) { die('Acesso negado - Não matriculado.'); }
+
+            // 4. Buscar progresso do material atual
+            $stProg = $this->db->prepare("SELECT * FROM elearning_progresso WHERE id_usuario=? AND id_material=?");
+            $stProg->execute([$uid, $materialId]);
+            $material['progresso'] = $stProg->fetch(\PDO::FETCH_ASSOC);
+
+            // 5. Buscar todas as aulas e materiais do curso para o menu lateral
+            $stAulas = $this->db->prepare("SELECT * FROM elearning_aulas WHERE id_curso=? ORDER BY ordem ASC");
+            $stAulas->execute([$cursoId]);
+            $aulas = $stAulas->fetchAll(\PDO::FETCH_ASSOC);
+
+            foreach ($aulas as &$aula) {
+                $stMats = $this->db->prepare("
+                    SELECT m.*, p.visualizado, p.pct_assistido 
+                    FROM elearning_materiais m 
+                    LEFT JOIN elearning_progresso p ON p.id_material = m.id AND p.id_usuario = ?
+                    WHERE m.id_aula = ? 
+                    ORDER BY m.ordem ASC
+                ");
+                $stMats->execute([$uid, $aula['id']]);
+                $aula['materiais'] = $stMats->fetchAll(\PDO::FETCH_ASSOC);
+            }
+
+            // Marcar início do progresso do material atual
             $this->db->prepare("INSERT INTO elearning_progresso (id_usuario,id_material,data_inicio) VALUES (?,?,NOW()) ON DUPLICATE KEY UPDATE data_inicio=COALESCE(data_inicio,NOW())")
                 ->execute([$uid, $materialId]);
 
-            // Se for material tipo 'texto', já retornar o conteúdo
-            $this->json([
-                'success' => true,
-                'titulo'  => $mat['titulo'],
-                'tipo'    => $mat['tipo'],
-                'path'    => $mat['arquivo_path'],
-                'texto'   => $mat['conteudo_texto'], 
-            ]);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
+            // Renderizar usando o layout dedicado sem sidebar
+            $title = $material['titulo'] . ' - ' . $curso['titulo'];
+            $viewFile = __DIR__ . '/../../views/pages/elearning/colaborador/assistir.php';
+            include __DIR__ . '/../../views/layouts/elearning_player.php';
+
+        } catch (\Exception $e) {
+            die('Erro ao carregar aula: ' . $e->getMessage());
+        }
     }
 
     // ---------- REGISTRAR PROGRESSO ----------

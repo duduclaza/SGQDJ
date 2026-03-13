@@ -95,12 +95,12 @@
                 </div>
                 
                 <?php if ($m['tipo'] === 'texto'): ?>
-                <button onclick="abrirTexto(<?= (int)$m['id'] ?>)"
+                <a href="/elearning/colaborador/materiais/<?= (int)$m['id'] ?>/assistir" target="_blank"
                   class="text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition">
                   Ler Conteúdo →
-                </button>
+                </a>
                 <?php else: ?>
-                <a href="<?= htmlspecialchars($m['arquivo_path']) ?>" target="_blank" onclick="marcarVisto(<?= (int)$m['id'] ?>)"
+                <a href="/elearning/colaborador/materiais/<?= (int)$m['id'] ?>/assistir" target="_blank"
                   class="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
                   Abrir Material →
                 </a>

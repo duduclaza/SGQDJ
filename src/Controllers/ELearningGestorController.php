@@ -370,7 +370,7 @@ class ELearningGestorController
                     $aula = $sta->fetch(\PDO::FETCH_ASSOC);
                     $cid = $aula['id_curso'] ?? 0;
                     $sub = $tipo === 'slide' ? 'slides' : $tipo . 's';
-                    $dir = __DIR__ . "/../../../uploads/elearning/cursos/{$cid}/{$sub}/";
+                    $dir = __DIR__ . "/../../public/uploads/elearning/cursos/{$cid}/{$sub}/";
                     if (!is_dir($dir)) mkdir($dir, 0755, true);
                     $fn = uniqid($tipo . '_') . '.' . $ext;
                     if (!move_uploaded_file($_FILES['arquivo']['tmp_name'], $dir . $fn))
