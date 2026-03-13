@@ -25,7 +25,8 @@ class ELearningColaboradorController
         extract($data);
         $viewFile = __DIR__ . '/../../views/pages/' . $view . '.php';
         $title = $data['title'] ?? 'eLearning';
-        include __DIR__ . '/../../views/layouts/main.php';
+        $layout = $data['layout'] ?? 'main';
+        include __DIR__ . '/../../views/layouts/' . $layout . '.php';
     }
 
     private function json(array $p): void
@@ -60,7 +61,11 @@ class ELearningColaboradorController
             $st->execute([$uid]);
             $cursos = $st->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) { $cursos = []; }
-        $this->render('elearning/colaborador/meus_cursos', ['title' => 'Catálogo de Cursos — eLearning', 'cursos' => $cursos]);
+        $this->render('elearning/colaborador/meus_cursos', [
+            'title' => 'Catálogo de Cursos — eLearning', 
+            'cursos' => $cursos,
+            'layout' => 'elearning_student'
+        ]);
     }
 
     // ---------- AUTO-MATRÍCULA ----------
@@ -69,6 +74,8 @@ class ELearningColaboradorController
         $this->requireColaborador();
         $uid = (int)($_SESSION['user_id'] ?? 0);
         $cursoId = (int)($_POST['curso_id'] ?? 0);
+        $redirect = isset($_POST['redirect']) && $_POST['redirect'] === '1';
+        
         if (!$cursoId) $this->json(['success' => false, 'message' => 'ID do curso inválido.']);
         try {
             // Verificar se o curso está ativo
@@ -78,7 +85,12 @@ class ELearningColaboradorController
             
             $this->db->prepare("INSERT IGNORE INTO elearning_matriculas (id_usuario, id_curso, data_matricula, status, progresso_pct) VALUES (?,?,NOW(),'em_andamento',0)")
                 ->execute([$uid, $cursoId]);
-            $this->json(['success' => true, 'message' => 'Matrícula realizada com sucesso!']);
+                
+            $this->json([
+                'success' => true, 
+                'message' => 'Matrícula realizada com sucesso!',
+                'redirect_url' => $redirect ? "/elearning/colaborador/cursos/{$cursoId}" : null
+            ]);
         } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
     }
 
@@ -135,14 +147,15 @@ class ELearningColaboradorController
         } catch (\PDOException $e) { $aulas = []; $provas = []; $certificado = null; $progresso = []; $materiaisByAula = []; }
 
         $this->render('elearning/colaborador/curso_detalhe', [
-            'title' => $curso['titulo'] ?? 'Curso',
-            'curso' => $curso, 
-            'aulas' => $aulas, 
+            'title' => ($curso['titulo'] ?? 'Curso') . ' — eLearning',
+            'curso' => $curso,
+            'aulas' => $aulas,
             'materiaisByAula' => $materiaisByAula,
             'provas' => $provas,
-            'progresso' => $progresso, 
-            'certificado' => $certificado, 
+            'progresso' => $progresso,
+            'certificado' => $certificado,
             'matricula' => $matricula,
+            'layout' => 'elearning_student'
         ]);
     }
 

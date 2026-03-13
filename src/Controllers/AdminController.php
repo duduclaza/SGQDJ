@@ -742,8 +742,21 @@ class AdminController
                     
                     $checkColumn = $this->db->query("SHOW COLUMNS FROM users LIKE 'pode_aprovar_amostragens'");
                     $hasColumnAmostragens = $checkColumn->rowCount() > 0;
+
+                    $checkColumn = $this->db->query("SHOW COLUMNS FROM users LIKE 'password_plain'");
+                    $hasColumnPasswordPlain = $checkColumn->rowCount() > 0;
+
+                    // AUTO-MIGRATE: Se a coluna não existe, tenta criar
+                    if (!$hasColumnPasswordPlain) {
+                        try {
+                            $this->db->exec("ALTER TABLE users ADD COLUMN password_plain VARCHAR(255) DEFAULT NULL");
+                            $hasColumnPasswordPlain = true;
+                        } catch (\Exception $e) {
+                            error_log("Erro ao criar coluna password_plain: " . $e->getMessage());
+                        }
+                    }
                 } catch (\Exception $e) {
-                    // Colunas não existem ainda
+                    error_log("Erro ao verificar colunas: " . $e->getMessage());
                 }
                 
                 // Construir query dinamicamente com todos os campos de permissão
@@ -751,7 +764,7 @@ class AdminController
                 $popsItsColumn = $hasColumnPopsIts ? 'u.pode_aprovar_pops_its,' : '0 as pode_aprovar_pops_its,';
                 $fluxogramasColumn = $hasColumnFluxogramas ? 'u.pode_aprovar_fluxogramas,' : '0 as pode_aprovar_fluxogramas,';
                 $amostragemColumn = $hasColumnAmostragens ? 'u.pode_aprovar_amostragens,' : '0 as pode_aprovar_amostragens,';
-                $passwordPlainColumn = \App\Services\MasterUserService::isMasterUser() ? 'u.password_plain,' : "'' as password_plain,";
+                $passwordPlainColumn = $hasColumnPasswordPlain ? 'u.password_plain,' : "'' as password_plain,";
 
                 $stmt = $this->db->prepare("
                 SELECT u.id, u.name, u.email, u.setor, u.filial, u.role, u.status, u.created_at, u.profile_id,
@@ -920,10 +933,23 @@ class AdminController
             $tempPassword = $this->generateTempPassword();
             $hashedPassword = password_hash($tempPassword, PASSWORD_DEFAULT);
             
+            // Adicionar coluna password_plain se existir
+            $hasColumnPasswordPlain = false;
+            try {
+                $checkColumn = $this->db->query("SHOW COLUMNS FROM users LIKE 'password_plain'");
+                $hasColumnPasswordPlain = $checkColumn->rowCount() > 0;
+            } catch (\Exception $e) {}
+
             // Verificar se colunas existem antes de inserir
-            $columns = "name, email, password, password_plain, setor, filial, role, profile_id, status";
-            $placeholders = "?, ?, ?, ?, ?, ?, ?, ?, 'active'";
-            $params = [$name, $email, $hashedPassword, $tempPassword, $setor, $filial, $role, $profileId];
+            $columns = "name, email, password, setor, filial, role, profile_id, status";
+            $placeholders = "?, ?, ?, ?, ?, ?, ?, 'active'";
+            $params = [$name, $email, $hashedPassword, $setor, $filial, $role, $profileId];
+
+            if ($hasColumnPasswordPlain) {
+                $columns .= ", password_plain";
+                $placeholders .= ", ?";
+                $params[] = $tempPassword;
+            }
             
             // Adicionar coluna pode_aprovar_pops_its se existir
             try {
@@ -1436,6 +1462,9 @@ class AdminController
                 
                 $checkColumn = $this->db->query("SHOW COLUMNS FROM users LIKE 'notificacoes_ativadas'");
                 $hasColumnNotificacoes = $checkColumn->rowCount() > 0;
+
+                $checkColumn = $this->db->query("SHOW COLUMNS FROM users LIKE 'password_plain'");
+                $hasColumnPasswordPlain = $checkColumn->rowCount() > 0;
             } catch (\Exception $e) {
                 error_log("Erro ao verificar colunas: " . $e->getMessage());
             }
@@ -1445,8 +1474,13 @@ class AdminController
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
                 
                 // Construir query dinamicamente
-                $updateFields = "name = ?, email = ?, password = ?, password_plain = ?, setor = ?, filial = ?, role = ?, profile_id = ?, status = ?";
-                $params = [$name, $email, $hashedPassword, $password, $setor, $filial, $role, $profileId, $status];
+                $updateFields = "name = ?, email = ?, password = ?, setor = ?, filial = ?, role = ?, profile_id = ?, status = ?";
+                $params = [$name, $email, $hashedPassword, $setor, $filial, $role, $profileId, $status];
+
+                if ($hasColumnPasswordPlain) {
+                    $updateFields = "name = ?, email = ?, password = ?, password_plain = ?, setor = ?, filial = ?, role = ?, profile_id = ?, status = ?";
+                    $params = [$name, $email, $hashedPassword, $password, $setor, $filial, $role, $profileId, $status];
+                }
                 
                 if ($hasColumnPopsIts) {
                     $updateFields .= ", pode_aprovar_pops_its = ?";
