@@ -297,10 +297,8 @@ else: ?>
             <td class="px-4 py-3 text-gray-600 whitespace-nowrap">
               <?php echo htmlspecialchars($d['cliente_nome']); ?>
             </td>
-            <td class="px-4 py-3 text-gray-600 max-w-xs">
-              <span title="<?php echo htmlspecialchars($d['descricao']); ?>">
-                <?php echo htmlspecialchars(mb_strimwidth($d['descricao'], 0, 80, '…')); ?>
-              </span>
+            <td class="px-4 py-3 text-gray-600 min-w-[200px] break-words">
+              <?php echo nl2br(htmlspecialchars($d['descricao'])); ?>
             </td>
             <td class="px-4 py-3 text-center font-medium text-gray-700">
                <?php echo (int)($d['quantidade'] ?? 1); ?>
