@@ -516,7 +516,7 @@ class TriagemTonersController
 
 
     /**
-     * Endpoint API para buscar toners com defeito dado um código de requisição e toner_id
+     * Endpoint API para buscar toners com defeito dado um código de requisição
      */
     public function getDefeitosPorCodigo(): void
     {
@@ -529,33 +529,19 @@ class TriagemTonersController
         }
 
         try {
-            // Trim to ensure exact matches
             $codigoRequisicao = trim($_GET['codigo_requisicao'] ?? '');
-            $tonerId = (int)($_GET['toner_id'] ?? 0);
 
-            if (empty($codigoRequisicao) || !$tonerId) {
+            if (empty($codigoRequisicao)) {
                 echo json_encode(['success' => true, 'data' => []]);
                 return;
             }
-
-            // Get the toner model name to match against the toners_defeitos table
-            $stmtToner = $this->db->prepare("SELECT modelo FROM toners WHERE id = ?");
-            $stmtToner->execute([$tonerId]);
-            $toner = $stmtToner->fetch(PDO::FETCH_ASSOC);
-
-            if (!$toner) {
-                echo json_encode(['success' => true, 'data' => []]);
-                return;
-            }
-
-            $modeloNome = $toner['modelo'];
 
             $stmt = $this->db->prepare("
-                SELECT id, numero_pedido, defeito_relatado, toner_modelo, cliente_nome, filial_nome
+                SELECT id, numero_pedido, defeito_relatado, toner_id, toner_modelo, cliente_id, cliente_nome, filial_nome
                 FROM toners_defeitos 
-                WHERE numero_pedido = ? AND toner_modelo = ?
+                WHERE numero_pedido = ?
             ");
-            $stmt->execute([$codigoRequisicao, $modeloNome]);
+            $stmt->execute([$codigoRequisicao]);
             $defeitosLocalizados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             echo json_encode(['success' => true, 'data' => $defeitosLocalizados]);
