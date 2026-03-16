@@ -1082,7 +1082,13 @@ function buscarDefeitosPorCodigo() {
   container.classList.remove('hidden');
   
   fetch('/triagem-toners/defeitos-codigo?codigo_requisicao=' + encodeURIComponent(codigo))
-    .then(r => r.json())
+    .then(async r => {
+      if (!r.ok) {
+        const text = await r.text();
+        throw new Error('HTTP ' + r.status + ' - ' + text.substring(0, 50));
+      }
+      return r.json();
+    })
     .then(res => {
       if (!res.success || !res.data || res.data.length === 0) {
         lista.innerHTML = '<div class="text-xs text-red-600">Nenhum toner com defeito encontrado para este código de requisição. A triagem exigirá que você informe o cliente e modelo manualmente, e as automações de defeito não serão aplicadas.</div>';
@@ -1110,9 +1116,18 @@ function buscarDefeitosPorCodigo() {
         onSelectDefectiveToner(firstRadio);
       }
     })
-    .catch(() => {
-      lista.innerHTML = '<div class="text-xs text-red-600">Erro ao buscar toners.</div>';
+    .catch((e) => {
+      lista.innerHTML = '<div class="text-xs text-red-600">Erro ao buscar toners: ' + escapeHtml(e.message) + '</div>';
     });
+}
+
+function escapeHtml(unsafe) {
+    return (unsafe || '').toString()
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
 }
 
 function onSelectDefectiveToner(radioInput) {
