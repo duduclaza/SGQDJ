@@ -453,8 +453,22 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
       <!-- Código de Requisição (Opcional) -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Código de Requisição <span class="text-gray-400 text-xs">(opcional)</span></label>
-        <input id="t-codigo-req" type="text" maxlength="100" placeholder="Ex: REQ-2026-0001"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="flex gap-2">
+          <input id="t-codigo-req" type="text" maxlength="100" placeholder="Ex: REQ-2026-0001"
+                 oninput="debouceBuscarDefeitos()" onchange="buscarDefeitosPorCodigo()"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <button type="button" onclick="buscarDefeitosPorCodigo()" class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg px-3 py-2 text-gray-600 transition-colors" title="Buscar Defeitos">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </button>
+        </div>
+        
+        <!-- Lista dinâmica de defeitos localizados -->
+        <div id="defeitos-lista-container" class="hidden mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div class="text-xs font-semibold text-blue-800 mb-2">Selecione o(s) toner(s) com defeito que corresponde(m) a esta triagem:</div>
+          <div id="defeitos-opcoes" class="space-y-2 max-h-40 overflow-y-auto">
+            <!-- Checkboxes will be rendered here -->
+          </div>
+        </div>
       </div>
 
       <!-- Observações -->
@@ -991,6 +1005,11 @@ function abrirModalEditar(r) {
     r.destino,
     Number(r.folhas_equivalentes || 0)
   );
+  
+  if (r.codigo_requisicao) {
+    buscarDefeitosPorCodigo(); // Attempt to load if there's a requirement code
+  }
+  
   document.getElementById('modal-triagem').classList.remove('hidden');
 }
 
@@ -1018,6 +1037,12 @@ function resetModalTriagem() {
   document.getElementById('resultado-calc').classList.add('hidden');
   document.getElementById('info-estoque').classList.add('hidden');
   document.getElementById('info-descarte').classList.add('hidden');
+  
+  const defContainer = document.getElementById('defeitos-lista-container');
+  if (defContainer) defContainer.classList.add('hidden');
+  const defLista = document.getElementById('defeitos-opcoes');
+  if (defLista) defLista.innerHTML = '';
+  
   onModoChange();
   lastCalcResult = null;
 }
@@ -1032,6 +1057,55 @@ function onTonerChange() {
   document.getElementById('info-vazio').textContent = parseFloat(opt.dataset.pesoVazio || 0).toFixed(2);
   infoBox.classList.remove('hidden');
   recalcular();
+  
+  if (document.getElementById('t-codigo-req').value) {
+    buscarDefeitosPorCodigo();
+  }
+}
+
+let buscarDefeitosDebounce = null;
+function debouceBuscarDefeitos() {
+  clearTimeout(buscarDefeitosDebounce);
+  buscarDefeitosDebounce = setTimeout(buscarDefeitosPorCodigo, 500);
+}
+
+function buscarDefeitosPorCodigo() {
+  const codigo = document.getElementById('t-codigo-req').value;
+  const tonerId = document.getElementById('t-toner-id').value;
+  const container = document.getElementById('defeitos-lista-container');
+  const lista = document.getElementById('defeitos-opcoes');
+  
+  if (!codigo || !tonerId) {
+    container.classList.add('hidden');
+    lista.innerHTML = '';
+    return;
+  }
+  
+  lista.innerHTML = '<div class="text-xs text-blue-600">Buscando...</div>';
+  container.classList.remove('hidden');
+  
+  fetch('/triagem-toners/defeitos-codigo?codigo_requisicao=' + encodeURIComponent(codigo) + '&toner_id=' + encodeURIComponent(tonerId))
+    .then(r => r.json())
+    .then(res => {
+      if (!res.success || !res.data || res.data.length === 0) {
+        lista.innerHTML = '<div class="text-xs text-red-600">Nenhum toner com defeito encontrado para este modelo e código de requisição. A triagem será bloqueada se você tentar salvar.</div>';
+        return;
+      }
+      
+      const defeitos = res.data;
+      lista.innerHTML = defeitos.map(d => `
+        <label class="flex items-start gap-2 p-2 bg-white rounded border border-blue-100 cursor-pointer hover:bg-blue-50 transition-colors">
+          <input type="checkbox" class="cb-toner-defeito mt-0.5" value="${d.id}" checked>
+          <div class="text-xs text-gray-700">
+            <strong>${d.toner_modelo}</strong> — ${d.defeito_relatado || 'Defeito não informado'}<br>
+            <span class="text-gray-500">Cliente: ${d.cliente_nome || 'N/A'}</span>
+          </div>
+        </label>
+      `).join('');
+    })
+    .catch(() => {
+      lista.innerHTML = '<div class="text-xs text-red-600">Erro ao buscar toners.</div>';
+    });
 }
 
 function onModoChange() {
@@ -1188,6 +1262,11 @@ function salvarTriagem() {
   fd.append('defeito_id', defeitoId);
   fd.append('codigo_requisicao', codigoReq);
   fd.append('observacoes', obs);
+  
+  const checkboxes = document.querySelectorAll('.cb-toner-defeito:checked');
+  if (checkboxes.length > 0) {
+    Array.from(checkboxes).forEach(cb => fd.append('toners_defeitos_ids[]', cb.value));
+  }
 
   const url = id ? '/triagem-toners/update' : '/triagem-toners/store';
   const btn = document.getElementById('btn-salvar');
