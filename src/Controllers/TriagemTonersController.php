@@ -537,7 +537,7 @@ class TriagemTonersController
             }
 
             $stmt = $this->db->prepare("
-                SELECT id, numero_pedido, defeito_relatado, toner_id, toner_modelo, cliente_id, cliente_nome, filial_nome
+                SELECT id, numero_pedido, descricao AS defeito_relatado, toner_id, modelo_toner AS toner_modelo, cliente_id, cliente_nome
                 FROM toners_defeitos 
                 WHERE numero_pedido = ?
             ");
@@ -884,8 +884,11 @@ class TriagemTonersController
             $observacoes = $_POST['observacoes'] ?? '';
             $filialRegistro = $_SESSION['user_filial'] ?? '';
             $colaboradorRegistro = $_SESSION['user_name'] ?? '';
-            // New array of specific defect toners to link
-            $tonersDefeitosIds = isset($_POST['toners_defeitos_ids']) ? explode(',', $_POST['toners_defeitos_ids']) : [];
+            
+            $tonersDefeitosIds = $_POST['toners_defeitos_ids'] ?? [];
+            if (!is_array($tonersDefeitosIds)) {
+                $tonersDefeitosIds = $tonersDefeitosIds ? [$tonersDefeitosIds] : [];
+            }
 
             if (!$toner_id || !$cliente_id || !$destino) {
                 echo json_encode(['success' => false, 'message' => 'Preencha cliente, toner e destino.']);
@@ -944,7 +947,7 @@ class TriagemTonersController
                 $stmtChkDef->execute([$codigoRequisicao]);
                 if ($stmtChkDef->fetch()) {
                     // Validar se o modelo do toner é permitido para este número de pedido
-                    $stmtMod = $this->db->prepare("SELECT id FROM toners_defeitos WHERE numero_pedido = ? AND toner_modelo = ? LIMIT 1");
+                    $stmtMod = $this->db->prepare("SELECT id FROM toners_defeitos WHERE numero_pedido = ? AND modelo_toner = ? LIMIT 1");
                     $stmtMod->execute([$codigoRequisicao, $toner['modelo']]);
                     if (!$stmtMod->fetch()) {
                         echo json_encode(['success' => false, 'message' => "O modelo de toner selecionado ('{$toner['modelo']}') não está vinculado a este pedido de defeito ($codigoRequisicao)."]);
@@ -1042,6 +1045,11 @@ class TriagemTonersController
             $observacoes = $_POST['observacoes'] ?? null;
             $filialRegistro = trim((string)($_SESSION['user_filial'] ?? ''));
             $colaboradorRegistro = trim((string)($_SESSION['user_name'] ?? ''));
+            
+            $tonersDefeitosIds = $_POST['toners_defeitos_ids'] ?? [];
+            if (!is_array($tonersDefeitosIds)) {
+                $tonersDefeitosIds = $tonersDefeitosIds ? [$tonersDefeitosIds] : [];
+            }
 
             if (!$id || !$toner_id || !$cliente_id || !$destino) {
                 echo json_encode(['success' => false, 'message' => 'Dados incompletos.']);
@@ -1095,6 +1103,20 @@ class TriagemTonersController
                 return;
             }
 
+            // Block validation: se existe código de requisição, checar modelo correspondente
+            if (!empty($codigoRequisicao)) {
+                $stmtChkDef = $this->db->prepare("SELECT id FROM toners_defeitos WHERE numero_pedido = ? LIMIT 1");
+                $stmtChkDef->execute([$codigoRequisicao]);
+                if ($stmtChkDef->fetch()) {
+                    $stmtMod = $this->db->prepare("SELECT id FROM toners_defeitos WHERE numero_pedido = ? AND modelo_toner = ? LIMIT 1");
+                    $stmtMod->execute([$codigoRequisicao, $toner['modelo']]);
+                    if (!$stmtMod->fetch()) {
+                        echo json_encode(['success' => false, 'message' => "O modelo de toner selecionado ('{$toner['modelo']}') não está vinculado a este pedido de defeito ($codigoRequisicao)."]);
+                        return;
+                    }
+                }
+            }
+
             $gramatura_toner      = (float)($toner['gramatura'] ?: ($toner['peso_cheio'] - $toner['peso_vazio']));
             $gramatura_restante   = null;
             $percentual_calculado = 0;
@@ -1140,7 +1162,7 @@ class TriagemTonersController
             ]);
 
             // Sync since we update triage
-            $this->syncDevolutiva($codigoRequisicao !== '' ? $codigoRequisicao : null, $destino, $parecer, $_SESSION['user_id']);
+            $this->syncDevolutiva($codigoRequisicao !== '' ? $codigoRequisicao : null, $destino, $parecer, $_SESSION['user_id'], $defeitoNome, $tonersDefeitosIds);
 
             echo json_encode(['success' => true, 'message' => 'Registro atualizado com sucesso!']);
         } catch (\Exception $e) {
