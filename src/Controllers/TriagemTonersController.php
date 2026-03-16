@@ -1205,7 +1205,31 @@ class TriagemTonersController
                 echo json_encode(['success' => false, 'message' => 'ID inválido.']);
                 return;
             }
+
+            // Fetch the triagem first to get the codigo_requisicao
+            $stmt = $this->db->prepare("SELECT codigo_requisicao FROM triagem_toners WHERE id = ?");
+            $stmt->execute([$id]);
+            $triagem = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Exclui a triagem
             $this->db->prepare("DELETE FROM triagem_toners WHERE id = ?")->execute([$id]);
+
+            // Clear Devolutiva from matching toners com defeito
+            if ($triagem && !empty($triagem['codigo_requisicao'])) {
+                $upd = $this->db->prepare("
+                    UPDATE toners_defeitos SET 
+                        devolutiva_descricao = NULL, 
+                        devolutiva_resultado = NULL,
+                        devolutiva_at = NULL,
+                        devolutiva_uid = NULL,
+                        devolutiva_foto1 = NULL,
+                        devolutiva_foto2 = NULL,
+                        devolutiva_foto3 = NULL
+                    WHERE numero_pedido = ?
+                ");
+                $upd->execute([$triagem['codigo_requisicao']]);
+            }
+
             echo json_encode(['success' => true, 'message' => 'Registro excluído com sucesso!']);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
