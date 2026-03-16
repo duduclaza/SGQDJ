@@ -1356,41 +1356,32 @@ class TriagemTonersController
         }
 
         try {
-            // Verifica se existe um toner com defeito com este número de pedido
-            $stmt = $this->db->prepare("SELECT id FROM toners_defeitos WHERE numero_pedido = ? LIMIT 1");
-            $stmt->execute([$codigoRequisicao]);
-            $defeito = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($defeito) {
-                $destinoTexto = $destino ?: 'Não informado';
-                $descricao = "Preenchido automaticamente via Triagem. Destino: {$destinoTexto}. Parecer: {$parecer}";
-                $resultado = 'DEFEITO_PROCEDENTE'; // We can map this or just set a standard automatic result.
-                
-                // If it goes to "Uso Interno" or "Estoque", maybe it wasn't a defect? But usually if it's in this list, they treat it.
-                // Let's use a clear dynamic text for the result if needed or stick to a generic one.
-                if (in_array($destinoTexto, ['Uso Interno', 'Estoque'])) {
-                    $resultado = 'TONER_SEM_DEFEITO'; // If it's good, then it had no defect
-                } elseif ($destinoTexto === 'Descarte' || $destinoTexto === 'Garantia') {
-                    $resultado = 'DEFEITO_PROCEDENTE';
-                } else {
-                    $resultado = 'TRIAGEM_FINALIZADA';
-                }
-
-                $upd = $this->db->prepare("
-                    UPDATE toners_defeitos SET 
-                        devolutiva_descricao = ?, 
-                        devolutiva_resultado = ?,
-                        devolutiva_at = NOW(),
-                        devolutiva_uid = ?
-                    WHERE id = ?
-                ");
-                $upd->execute([
-                    $descricao,
-                    $resultado,
-                    $userId,
-                    $defeito['id']
-                ]);
+            $destinoTexto = $destino ?: 'Não informado';
+            $descricao = "Preenchido automaticamente via Triagem. Destino: {$destinoTexto}. Parecer: {$parecer}";
+            $resultado = 'DEFEITO_PROCEDENTE'; 
+            
+            if (in_array($destinoTexto, ['Uso Interno', 'Estoque'])) {
+                $resultado = 'TONER_SEM_DEFEITO'; 
+            } elseif ($destinoTexto === 'Descarte' || $destinoTexto === 'Garantia') {
+                $resultado = 'DEFEITO_PROCEDENTE';
+            } else {
+                $resultado = 'TRIAGEM_FINALIZADA';
             }
+
+            $upd = $this->db->prepare("
+                UPDATE toners_defeitos SET 
+                    devolutiva_descricao = ?, 
+                    devolutiva_resultado = ?,
+                    devolutiva_at = NOW(),
+                    devolutiva_uid = ?
+                WHERE numero_pedido = ?
+            ");
+            $upd->execute([
+                $descricao,
+                $resultado,
+                $userId,
+                $codigoRequisicao
+            ]);
         } catch (\Exception $e) {
             error_log('Erro ao sincronizar devolutiva do toner com defeito: ' . $e->getMessage());
         }
