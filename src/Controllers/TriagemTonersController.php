@@ -1245,6 +1245,7 @@ class TriagemTonersController
                 $original['gramatura_restante'],
                 $original['percentual_calculado'],
                 $original['parecer'],
+                $original['destino'],
                 $original['valor_recuperado'],
                 $observacoes,
                 $_SESSION['user_id'],
