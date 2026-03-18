@@ -1,5 +1,6 @@
 <?php
 // Sistema SGQ OTI DJ - Versão Corrigida
+date_default_timezone_set('America/Sao_Paulo');
 session_start();
 
 // No-cache headers
