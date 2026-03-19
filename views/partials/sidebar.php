@@ -56,7 +56,7 @@ $menu = [
       ['label' => 'Controle de Descartes', 'href' => '/controle-descartes', 'icon' => '♻️', 'module' => 'controle_descartes'],
       ['label' => 'Precificação de Coleta', 'href' => '/precificacao-coleta-descartes', 'icon' => '💰', 'module' => 'precificacao_coleta_descartes'],
       // Itens originais de Gestão da Qualidade
-      ['label' => 'Homologações', 'href' => '/homologacoes', 'icon' => '✅', 'module' => 'homologacoes'],
+      ['label' => 'Homologações', 'href' => '/homologacoes', 'icon' => '🚧', 'module' => 'homologacoes', 'highlight' => 'mustard'],
       ['label' => 'Certificados', 'href' => '/certificados', 'icon' => '📜', 'module' => 'certificados'],
       ['label' => 'FMEA', 'href' => '/fmea', 'icon' => '📈', 'module' => 'fmea'],
       ['label' => 'POPs e ITs', 'href' => '/pops-e-its', 'icon' => '📚', 'module' => 'pops_its_visualizacao'],
@@ -346,7 +346,8 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
                       </div>
                     <?php else: ?>
                       <!-- Link normal do submenu -->
-                      <a href="<?= e($sub['href']) ?>" class="page-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-700 <?php echo $subActive?'bg-blue-500 text-white shadow-md':'text-slate-400 hover:text-white'; ?> <?php echo isset($sub['beta']) && $sub['beta'] ? 'beta-menu' : ''; ?> <?php echo $isRetornadosDeprecated ? 'retornados-warning' : ''; ?>">
+                      <?php $isMustardHighlight = isset($sub['highlight']) && $sub['highlight'] === 'mustard'; ?>
+                      <a href="<?= e($sub['href']) ?>" class="page-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-700 <?php echo $isMustardHighlight ? 'bg-yellow-500 text-black shadow-md hover:bg-yellow-600 hover:text-black' : ($subActive?'bg-blue-500 text-white shadow-md':'text-slate-400 hover:text-white'); ?> <?php echo isset($sub['beta']) && $sub['beta'] ? 'beta-menu' : ''; ?> <?php echo $isRetornadosDeprecated ? 'retornados-warning' : ''; ?>">
                         <span class="text-base <?php echo $isRetornadosDeprecated ? 'bomb-icon' : ''; ?>"><?= $isRetornadosDeprecated ? '💣' : e($sub['icon']) ?></span>
                         <span class="flex items-center gap-2 <?php echo $isRetornadosDeprecated ? 'flex-col items-start gap-0.5' : ''; ?>">
                           <?= e($sub['label']) ?>
