@@ -168,6 +168,21 @@
 }
 .funil-pill:hover { border-color: #3b82f6; color: #2563eb; background: #eff6ff; }
 .funil-pill.active { border-color: #2563eb; background: #2563eb; color: #fff; }
+
+/* Renovação - Badge animada */
+.renovation-badge-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    animation: float-badge 1.8s ease-in-out infinite;
+    font-size: 1rem;
+}
+
+@keyframes float-badge {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    50% { transform: translateY(-6px) scale(1.1); opacity: 0.9; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+}
 </style>
 
 <div class="p-6">
@@ -182,6 +197,7 @@
             <button onclick="openModalNovaHomologacao()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
                 <span>➕</span>
                 <span>Nova Homologação</span>
+                <span class="ml-2 renovation-badge-button">🚧</span>
             </button>
             <?php endif; ?>
             
@@ -192,6 +208,18 @@
             </button>
             <?php endif; ?>
         </div>
+    </div>
+
+    <!-- Faixa de atualização do módulo -->
+    <div id="homologUpdateBanner" style="display:block;" class="mb-6 rounded-lg p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 flex items-center justify-between shadow-md">
+        <div class="flex items-center space-x-4">
+            <div class="w-3 h-3 rounded-full bg-yellow-500 animate-ping"></div>
+            <div>
+                <strong class="text-base">⚙️ Atualização em andamento</strong>
+                <span class="block text-sm text-yellow-700">Este módulo está sendo atualizado — podem ocorrer bugs ou instabilidades.</span>
+            </div>
+        </div>
+        <button id="closeBannerBtn" class="text-yellow-800 hover:text-yellow-900 font-semibold text-lg" onclick="(function(){document.getElementById('homologUpdateBanner').style.display='none'; try{localStorage.setItem('homologBannerClosed','1')}catch(e){}})();">✖</button>
     </div>
 
     <!-- Barra de Filtros -->
@@ -714,6 +742,14 @@ const isUserAdmin = <?= json_encode($isAdmin || $isSuperAdmin) ?>;
 
 // Util: mover modais para o container global para sobrepor sidebar e layout
 document.addEventListener('DOMContentLoaded', () => {
+    // Esconder faixa de atualização se usuário já fechou
+    try {
+        if (localStorage.getItem('homologBannerClosed') === '1') {
+            const bannerEl = document.getElementById('homologUpdateBanner');
+            if (bannerEl) bannerEl.style.display = 'none';
+        }
+    } catch (e) {}
+
     const globalContainer = document.getElementById('global-modals-container');
     if (globalContainer) {
         const nova = document.getElementById('modalNovaHomologacao');
