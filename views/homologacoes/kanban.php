@@ -36,7 +36,7 @@ $statusColors = [
     </div>
 
     <!-- Faixa de atualização do módulo -->
-    <div id="homologUpdateBanner" class="mb-6 rounded-lg p-3 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 flex items-center justify-between">
+    <div id="homologUpdateBanner" style="display:block;" class="mb-6 rounded-lg p-3 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 flex items-center justify-between">
         <div class="flex items-center space-x-3">
             <div class="w-3 h-3 rounded-full bg-yellow-500 animate-ping"></div>
             <div>
@@ -44,7 +44,7 @@ $statusColors = [
                 <span class="block text-sm">Este módulo está sendo atualizado — podem ocorrer bugs ou instabilidades.</span>
             </div>
         </div>
-        <button id="closeBannerBtn" class="text-yellow-800 hover:text-yellow-900">Fechar ✖</button>
+        <button id="closeBannerBtn" class="text-yellow-800 hover:text-yellow-900" onclick="(function(){document.getElementById('homologUpdateBanner').style.display='none'; try{localStorage.setItem('homologBannerClosed','1')}catch(e){}})();">Fechar ✖</button>
     </div>
 
     <?php if ($canCreate): ?>
