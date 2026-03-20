@@ -415,7 +415,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
           </div>
         </a>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 sidebar-footer-icons transition-opacity duration-300">
         <!-- DEBUG: Valor da sessão -->
         <?php 
         $notifStatus = isset($_SESSION['notificacoes_ativadas']) ? $_SESSION['notificacoes_ativadas'] : 'não definido';
@@ -594,7 +594,8 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
     .sidebar-collapsed .sidebar-text,
     .sidebar-collapsed .submenu-arrow,
     .sidebar-collapsed .sidebar-header-text,
-    .sidebar-collapsed .sidebar-user-info {
+    .sidebar-collapsed .sidebar-user-info,
+    .sidebar-collapsed .sidebar-footer-icons {
       opacity: 0 !important;
       width: 0 !important;
       overflow: hidden !important;
