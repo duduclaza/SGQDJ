@@ -217,6 +217,86 @@ class HomologacoesKanbanController
     }
 
     /**
+     * V3.0: Verificar se usuário é ADMIN
+     */
+    private function isAdmin(int $userId): bool
+    {
+        return PermissionService::hasAdminPrivileges($userId);
+    }
+
+    /**
+     * V3.0: Verificar se usuário é CRIADOR ou ADMIN de uma homologação
+     */
+    private function isCreatorOrAdmin(int $userId, int $homologacaoId): bool
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT created_by FROM homologacoes WHERE id = ?");
+            $stmt->execute([$homologacaoId]);
+            $homologacao = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            return $homologacao && (
+                $homologacao['created_by'] == $userId || 
+                PermissionService::hasAdminPrivileges($userId)
+            );
+        } catch (\Exception $e) {
+            error_log("Erro ao verificar criador: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * V3.0: Verificar se usuário é RESPONSÁVEL de uma homologação
+     */
+    private function isResponsible(int $userId, int $homologacaoId): bool
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT COUNT(*) as count 
+                FROM homologacoes_responsaveis 
+                WHERE homologacao_id = ? AND user_id = ?
+            ");
+            $stmt->execute([$homologacaoId, $userId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['count'] > 0;
+        } catch (\Exception $e) {
+            error_log("Erro ao verificar responsável: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * V3.0: Verificar se pode editar PARTE 2 (Detalhes & Progresso)
+     * Permissão: ADMIN, CRIADOR ou RESPONSÁVEL
+     */
+    private function canEditPart2(int $userId, int $homologacaoId): bool
+    {
+        return $this->isAdmin($userId) || 
+               $this->isCreatorOrAdmin($userId, $homologacaoId) || 
+               $this->isResponsible($userId, $homologacaoId);
+    }
+
+    /**
+     * V3.0: Verificar se pode DELETAR card
+     * Permissão: Apenas ADMIN e CRIADOR
+     */
+    private function canDeleteCard(int $userId, int $homologacaoId): bool
+    {
+        return $this->isAdmin($userId) || 
+               $this->isCreatorOrAdmin($userId, $homologacaoId);
+    }
+
+    /**
+     * V3.0: Verificar se pode MOVER card (mudar status)
+     * Permissão: ADMIN, CRIADOR e RESPONSÁVEL podem mover
+     */
+    private function canMoveCard(int $userId, int $homologacaoId): bool
+    {
+        return $this->isAdmin($userId) || 
+               $this->isCreatorOrAdmin($userId, $homologacaoId) || 
+               $this->isResponsible($userId, $homologacaoId);
+    }
+
+    /**
      * Buscar homologações agrupadas por status para o Kanban
      */
     private function getHomologacoesKanban(): array
@@ -744,6 +824,9 @@ class HomologacoesKanbanController
                 $observacao ?: "Status alterado de {$statusAnterior} para {$novoStatus}"
             ]);
 
+            // V3.0: Registrar movimento em homologacoes_movimentacao
+            $this->registrarMovimentacao($homologacaoId, $statusAnterior, $novoStatus, $observacao);
+
             $this->db->commit();
 
             echo json_encode([
@@ -833,6 +916,191 @@ class HomologacoesKanbanController
         } catch (\Exception $e) {
             error_log('Erro ao buscar detalhes: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Erro ao buscar detalhes']);
+        }
+        exit;
+    }
+
+    /**
+     * V3.0: Atualizar PARTE 2 - Detalhes & Progresso (editável em qualquer etapa)
+     * Precisa validar permissão (canEditPart2)
+     */
+    public function updatePart2()
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $homologacaoId = (int)($_POST['homologacao_id'] ?? 0);
+
+            if (!$homologacaoId) {
+                echo json_encode(['success' => false, 'message' => 'ID inválido']);
+                exit;
+            }
+
+            // VALIDAR PERMISSÃO
+            if (!$this->canEditPart2($_SESSION['user_id'], $homologacaoId)) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Você não tem permissão para editar esta homologação'
+                ]);
+                exit;
+            }
+
+            // Buscar status atual
+            $stmt = $this->db->prepare("SELECT status FROM homologacoes WHERE id = ?");
+            $stmt->execute([$homologacaoId]);
+            $homologacao = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$homologacao) {
+                echo json_encode(['success' => false, 'message' => 'Homologação não encontrada']);
+                exit;
+            }
+
+            // Campos v3 PARTE 2
+            $tipoHomologacao2 = trim($_POST['tipo_homologacao_v2'] ?? '');
+            $clienteId = !empty($_POST['cliente_id']) ? (int)$_POST['cliente_id'] : null;
+            $dataInstalacao2 = trim($_POST['data_instalacao_v2'] ?? '');
+            $observacaoFaseTeste = trim($_POST['observacao_fase_teste'] ?? '');
+            $produtoAtendeuExpectativas = trim($_POST['produto_atendeu_expectativas'] ?? '');
+            $dataFinalizacaoTeste = trim($_POST['data_finalizacao_teste'] ?? '');
+            $parecerFinalTecnico = trim($_POST['parecer_final_tecnico'] ?? '');
+            $novoStatus = trim($_POST['status'] ?? '');
+
+            // Validação: se tipo='cliente', clienteId é obrigatório
+            if ($tipoHomologacao2 === 'cliente' && empty($clienteId)) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Cliente é obrigatório para homologações em cliente'
+                ]);
+                exit;
+            }
+
+            // Validação: Parecer obrigatório para FINALIZAR
+            if (!empty($novoStatus) && $novoStatus === 'finalizado') {
+                if (strlen($parecerFinalTecnico) < 20) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Parecer Final Técnico é obrigatório (mínimo 20 caracteres) para finalizar'
+                    ]);
+                    exit;
+                }
+            }
+
+            $this->db->beginTransaction();
+
+            // Preparar UPDATE dinâmico - apenas campos PARTE 2
+            $updates = ["updated_at = NOW()"];
+            $params = [];
+
+            if (!empty($tipoHomologacao2)) {
+                $updates[] = "tipo_homologacao_v2 = ?";
+                $params[] = $tipoHomologacao2;
+            }
+
+            if (!empty($clienteId)) {
+                $updates[] = "cliente_id = ?";
+                $params[] = $clienteId;
+            }
+
+            if (!empty($dataInstalacao2)) {
+                $updates[] = "data_instalacao_v2 = ?";
+                $params[] = $dataInstalacao2;
+            }
+
+            if (!empty($observacaoFaseTeste)) {
+                $updates[] = "observacao_fase_teste = ?";
+                $params[] = $observacaoFaseTeste;
+            }
+
+            if (!empty($produtoAtendeuExpectativas)) {
+                $updates[] = "produto_atendeu_expectativas = ?";
+                $params[] = $produtoAtendeuExpectativas;
+            }
+
+            if (!empty($dataFinalizacaoTeste)) {
+                $updates[] = "data_finalizacao_teste = ?";
+                $params[] = $dataFinalizacaoTeste;
+            }
+
+            if (!empty($parecerFinalTecnico)) {
+                $updates[] = "parecer_final_tecnico = ?";
+                $params[] = $parecerFinalTecnico;
+            }
+
+            // Se está finalizando
+            $finalizando = false;
+            if (!empty($novoStatus) && $novoStatus === 'finalizado') {
+                $finalizando = true;
+                $updates[] = "status = ?";
+                $params[] = $novoStatus;
+                
+                $updates[] = "finalizado_por = ?";
+                $params[] = $_SESSION['user_id'];
+                
+                $updates[] = "finalizado_at = NOW()";
+            } elseif (!empty($novoStatus)) {
+                $updates[] = "status = ?";
+                $params[] = $novoStatus;
+            }
+
+            $params[] = $homologacaoId;
+
+            // Executar UPDATE
+            $sql = "UPDATE homologacoes SET " . implode(", ", $updates) . " WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+
+            // Registrar no histórico (v2)
+            if (!empty($novoStatus)) {
+                $stmt = $this->db->prepare("
+                    INSERT INTO homologacoes_historico (
+                        homologacao_id,
+                        status_anterior,
+                        status_novo,
+                        usuario_id,
+                        observacao,
+                        created_at
+                    ) VALUES (?, ?, ?, ?, ?, NOW())
+                ");
+                $stmt->execute([
+                    $homologacaoId,
+                    $homologacao['status'],
+                    $novoStatus,
+                    $this->getUsuarioIdLog(),
+                    $_SESSION['user_name'] . " atualizou PARTE 2 da homologação"
+                ]);
+            }
+
+            // Registrar movimento (v3 novo)
+            if (!empty($novoStatus) && $novoStatus !== $homologacao['status']) {
+                $this->registrarMovimentacao(
+                    $homologacaoId,
+                    $homologacao['status'],
+                    $novoStatus,
+                    trim($_POST['observacao_movimento'] ?? '')
+                );
+            }
+
+            // Se finalizando, enviar email
+            if ($finalizando && !empty($parecerFinalTecnico)) {
+                $this->enviarEmailFinalizacao($homologacaoId);
+            }
+
+            $this->db->commit();
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Homologação atualizada com sucesso'
+            ]);
+
+        } catch (\Exception $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            error_log("Erro ao atualizar PARTE 2: " . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erro ao atualizar: ' . $e->getMessage()
+            ]);
         }
         exit;
     }
@@ -954,6 +1222,15 @@ class HomologacoesKanbanController
 
             if (!$homologacaoId) {
                 echo json_encode(['success' => false, 'message' => 'ID inválido']);
+                exit;
+            }
+
+            // V3.0: Validar permissão adicional (apenas ADMIN e CRIADOR)
+            if (!$this->canDeleteCard($_SESSION['user_id'], $homologacaoId)) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Apenas Admins e o criador podem deletar homologações'
+                ]);
                 exit;
             }
 
@@ -1864,5 +2141,195 @@ class HomologacoesKanbanController
         ];
         
         return $nomes[$etapa] ?? ucfirst(str_replace('_', ' ', $etapa));
+    }
+
+    /**
+     * V3.0: Registrar movimento de card em homologacoes_movimentacao
+     */
+    private function registrarMovimentacao(int $homologacaoId, string $statusAnterior, string $statusNovo, string $observacao = ''): void
+    {
+        try {
+            $stmt = $this->db->prepare("
+                INSERT INTO homologacoes_movimentacao (
+                    homologacao_id,
+                    status_antigo,
+                    status_novo,
+                    usuario_id,
+                    usuario_nome,
+                    data_movimentacao,
+                    observacao
+                ) VALUES (?, ?, ?, ?, ?, NOW(), ?)
+            ");
+            
+            $stmt->execute([
+                $homologacaoId,
+                $statusAnterior,
+                $statusNovo,
+                $_SESSION['user_id'] ?? 0,
+                $_SESSION['user_name'] ?? 'Sistema',
+                $observacao
+            ]);
+        } catch (\Exception $e) {
+            error_log("Erro ao registrar movimentação: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * V3.0: Enviar email de finalização para ADMINS + CRIADOR
+     */
+    private function enviarEmailFinalizacao(int $homologacaoId): void
+    {
+        try {
+            // Buscar dados da homologação
+            $stmt = $this->db->prepare("
+                SELECT h.*, u.name as criador_nome, u.email as criador_email
+                FROM homologacoes h
+                LEFT JOIN users u ON h.created_by = u.id
+                WHERE h.id = ?
+            ");
+            $stmt->execute([$homologacaoId]);
+            $homologacao = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$homologacao) {
+                return;
+            }
+
+            // Buscar TODOS os admins
+            $stmt = $this->db->query("
+                SELECT DISTINCT u.id, u.name, u.email
+                FROM users u
+                LEFT JOIN permission_user pu ON u.id = pu.user_id
+                LEFT JOIN permissions p ON pu.permission_id = p.id
+                WHERE (p.name = 'admin' OR u.is_admin = 1)
+                AND u.status = 'active'
+                AND u.email IS NOT NULL
+                AND u.email <> ''
+            ");
+            $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Preparar list de emails (admins + criador)
+            $emailsDestino = [];
+            foreach ($admins as $admin) {
+                if (!empty($admin['email'])) {
+                    $emailsDestino[$admin['email']] = $admin['name'];
+                }
+            }
+            
+            // Adicionar criador se tiver email
+            if (!empty($homologacao['criador_email'])) {
+                $emailsDestino[$homologacao['criador_email']] = $homologacao['criador_nome'] ?? 'Criador';
+            }
+
+            if (empty($emailsDestino)) {
+                return;
+            }
+
+            // Preparar conteúdo do email
+            $subject = "🎉 Homologação #{$homologacao['id']} - {$homologacao['cod_referencia']} FINALIZADA";
+            
+            $codCliente = !empty($homologacao['cliente_id']) ? "Cliente: {$homologacao['cliente_id']}\n" : '';
+            
+            $body = "
+Homologação Finalizada com Sucesso!
+
+═══════════════════════════════════════
+DETALHES
+═══════════════════════════════════════
+
+Código: {$homologacao['cod_referencia']}
+{$codCliente}
+Status: {$homologacao['status']}
+Criado por: {$homologacao['criador_nome']}
+Data de Criação: " . date('d/m/Y H:i', strtotime($homologacao['created_at'])) . "
+
+═══════════════════════════════════════
+PARECER TÉCNICO FINAL
+═══════════════════════════════════════
+
+{$homologacao['parecer_final_tecnico']}
+
+───────────────────────────────────────
+Finalizado em: " . date('d/m/Y H:i:s', strtotime($homologacao['finalizado_at'])) . "
+Por: {$homologacao['finalizado_por']}
+
+═══════════════════════════════════════
+
+Para visualizar a homologação completa, acesse:
+" . (getenv('APP_URL') ?: 'https://seu-dominio.com') . "/homologacoes/{$homologacao['id']}
+
+═══════════════════════════════════════
+SGQ OTI DJ - Gerenciamento de Homologações
+            ";
+
+            // Enviar email para cada destinatário
+            $emailService = new EmailService();
+            foreach ($emailsDestino as $email => $nome) {
+                try {
+                    $emailService->enviar([
+                        'destinatario' => $email,
+                        'assunto' => $subject,
+                        'corpo' => $body,
+                        'tipo' => 'homologacao_finalizada'
+                    ]);
+                } catch (\Exception $e) {
+                    error_log("Erro ao enviar email de finalização para {$email}: " . $e->getMessage());
+                }
+            }
+
+        } catch (\Exception $e) {
+            error_log("Erro em enviarEmailFinalizacao: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * V3.0: Buscar clientes para autocomplete
+     * Usado na PARTE 2 do formulário quando tipo='cliente'
+     */
+    public function buscarClientes()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        try {
+            $termo = trim($_GET['termo'] ?? '');
+            
+            if (strlen($termo) < 2) {
+                echo json_encode([
+                    'success' => true,
+                    'clientes' => [],
+                    'message' => 'Digite pelo menos 2 caracteres'
+                ]);
+                exit;
+            }
+
+            // Buscar por FULLTEXT índice (nome) ou CNPJ exato
+            $stmt = $this->db->prepare("
+                SELECT id, nome_cliente, cnpj, email, cidade, estado
+                FROM clientes
+                WHERE (
+                    MATCH(nome_cliente) AGAINST(? IN BOOLEAN MODE)
+                    OR cnpj LIKE ?
+                )
+                AND status = 'ativo'
+                ORDER BY nome_cliente ASC
+                LIMIT 20
+            ");
+            
+            $busca = "%{$termo}%";
+            $stmt->execute([$termo, $busca]);
+            $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode([
+                'success' => true,
+                'clientes' => $clientes
+            ]);
+
+        } catch (\Exception $e) {
+            error_log("Erro em buscarClientes: " . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erro ao buscar clientes: ' . $e->getMessage()
+            ]);
+        }
+        exit;
     }
 }

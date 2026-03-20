@@ -18,7 +18,9 @@ $router->post('/homologacoes/store', [HomologacoesKanbanController::class, 'stor
 $router->post('/homologacoes/update-status', [HomologacoesKanbanController::class, 'updateStatus']);
 $router->post('/homologacoes/{id}/status', [HomologacoesKanbanController::class, 'updateStatusById']);
 $router->post('/homologacoes/{id}/contadores', [HomologacoesKanbanController::class, 'updateContadores']);
+$router->post('/homologacoes/{id}/update-part2', [HomologacoesKanbanController::class, 'updatePart2']);
 $router->get('/homologacoes/{id}/details', [HomologacoesKanbanController::class, 'details']);
+$router->get('/homologacoes/api/clientes', [HomologacoesKanbanController::class, 'buscarClientes']);
 $router->post('/homologacoes/upload-anexo', [HomologacoesKanbanController::class, 'uploadAnexo']);
 $router->get('/homologacoes/anexo/{id}', [[HomologacoesKanbanController::class, 'downloadAnexo']);
 $router->post('/homologacoes/delete', [HomologacoesKanbanController::class, 'delete']);
