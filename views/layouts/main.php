@@ -31,7 +31,16 @@ if (!function_exists('flash')) {
   <title><?= e($title) ?></title>
   <script>if(window.console){const o=console.warn;console.warn=(...a)=>{if(a[0]&&String(a[0]).includes('cdn.tail'))return;o.apply(console,a)}}</script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    // Configurar tema inicial
+    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
   <link rel="stylesheet" href="/src/Support/modal-styles.css?v=<?= urlencode($assetVersion) ?>">
   <script src="/src/Support/modal-utils.js?v=<?= urlencode($assetVersion) ?>"></script>
   <script>
@@ -57,6 +66,7 @@ if (!function_exists('flash')) {
   <script>
     // Tailwind config with dark theme
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
@@ -88,15 +98,15 @@ if (!function_exists('flash')) {
     /* Loading overlay removido - causava problemas globais */
   </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
-  <div class="flex h-screen bg-gray-100">
+<body class="bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+  <div class="flex h-screen bg-gray-100 dark:bg-slate-900 transition-colors duration-300">
     <!-- Sidebar -->
     <?php include __DIR__ . '/../partials/sidebar.php'; ?>
     
     <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Header/Navbar -->
-      <header class="bg-white shadow-sm border-b border-gray-200">
+      <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700/50 transition-colors duration-300">
         <div class="flex items-center justify-between px-6 py-3">
           <!-- Espaço vazio à esquerda -->
           <div></div>
@@ -108,7 +118,7 @@ if (!function_exists('flash')) {
       </header>
       
       <!-- Content -->
-      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-slate-900 p-6 transition-colors duration-300">
         <!-- Aviso de migração de email removido - Resend API ativo -->
         
         <?php if ($msg = flash('success')): ?>
