@@ -66,8 +66,17 @@ if ($u['perfil'] !== 'compras') {
                         <input type="date" name="data_prevista_chegada" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Notificar Logística e TI quando faltarem (Dias)</label>
-                        <input type="number" name="dias_antecedencia_notif" value="3" min="1" max="15" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                        <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Informar X dias antes do vencimento</label>
+                        <div class="flex items-center gap-3">
+                            <input type="number" name="dias_antecedencia_notif" value="3" min="1" max="15" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-24 p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                            <span class="text-sm text-slate-500 dark:text-slate-400">dias antes da data prevista</span>
+                        </div>
+                    </div>
+                    <div class="flex items-end pb-2.5">
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" name="notificar_envolvidos" value="1" checked class="w-5 h-5 border border-slate-300 rounded bg-slate-50 text-primary-600 focus:ring-primary-500 dark:bg-slate-700 dark:border-slate-600">
+                            <span class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-primary-600 transition-colors">Enviar notificações para todos os envolvidos</span>
+                        </label>
                     </div>
                 </div>
             </div>

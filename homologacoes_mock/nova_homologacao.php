@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['criar_homologacao']))
         'responsaveis' => array_map('intval', $responsaveis),
         'data_prevista_chegada' => $_POST['data_prevista_chegada'] ?: null,
         'dias_antecedencia_notif' => (int)$_POST['dias_antecedencia_notif'],
+        'notificar_envolvidos' => isset($_POST['notificar_envolvidos']) ? 1 : 0,
     ];
     
     $id = criarHomologacaoMock($novoRegistro);

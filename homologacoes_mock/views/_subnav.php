@@ -20,6 +20,13 @@ $linksAtuais = $perfisSidebar[$u['perfil']] ?? [];
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
+<!-- Banner de Testes -->
+<div class="bg-rose-600 text-white text-center py-2 px-4 rounded-xl mb-4 font-bold tracking-wider animate-pulse shadow-lg flex items-center justify-center gap-2">
+    <i class="ph-bold ph-warning-octagon text-xl"></i>
+    MODULO EM FASE DE TESTES
+    <i class="ph-bold ph-warning-octagon text-xl"></i>
+</div>
+
 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
     <!-- Links Módulo -->
     <div class="flex flex-wrap gap-2">
@@ -40,8 +47,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <form method="POST" action="" class="m-0 p-0">
             <select name="usuario_logado_id" onchange="this.form.submit()" class="bg-transparent border-0 text-sm font-medium text-slate-700 dark:text-slate-200 focus:ring-0 cursor-pointer w-[200px]">
                 <?php foreach ($_SESSION['mock_usuarios'] as $mockUser): ?>
+                    <?php 
+                        $perfilTraduzido = [
+                            'compras' => 'Compras',
+                            'logistica' => 'Logistica',
+                            'responsavel' => 'Responsável'
+                        ];
+                        $labelPerfil = $perfilTraduzido[$mockUser['perfil']] ?? ucfirst($mockUser['perfil']);
+                    ?>
                     <option value="<?= $mockUser['id'] ?>" <?= $mockUser['id'] == $u['id'] ? 'selected' : '' ?> class="text-slate-800 dark:text-slate-900">
-                        <?= $mockUser['nome'] ?> (<?= ucfirst($mockUser['perfil']) ?>)
+                        Simular como <?= $labelPerfil ?> (<?= $mockUser['nome'] ?>)
                     </option>
                 <?php endforeach; ?>
             </select>

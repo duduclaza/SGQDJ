@@ -57,7 +57,7 @@ $menu = [
       ['label' => 'Precificação de Coleta', 'href' => '/precificacao-coleta-descartes', 'icon' => '<i class="ph ph-currency-dollar"></i>', 'module' => 'precificacao_coleta_descartes'],
       // Itens originais de Gestão da Qualidade
       ['label' => 'Homologações', 'href' => '/homologacoes', 'icon' => '<i class="ph ph-traffic-cone"></i>', 'module' => 'homologacoes', 'highlight' => 'mustard'],
-      ['label' => 'Homologações 2.0', 'href' => '/homologacoes_mock/index.php', 'title' => 'Homologações 2.0', 'icon' => '<i class="ph ph-traffic-cone"></i>', 'module' => 'homologacoes_2', 'highlight' => 'mustard'],
+      ['label' => 'Homologações 2.0', 'href' => '/homologacoes_mock/index.php', 'title' => 'Homologações 2.0', 'icon' => '<i class="ph ph-traffic-cone"></i>', 'is_public' => true, 'highlight' => 'mustard'],
       ['label' => 'Certificados', 'href' => '/certificados', 'icon' => '<i class="ph ph-scroll"></i>', 'module' => 'certificados'],
       ['label' => 'FMEA', 'href' => '/fmea', 'icon' => '<i class="ph ph-trend-up"></i>', 'module' => 'fmea'],
       ['label' => 'POPs e ITs', 'href' => '/pops-e-its', 'icon' => '<i class="ph ph-books"></i>', 'module' => 'pops_its_visualizacao'],
@@ -183,6 +183,11 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
           if (!$isAdmin) continue;
           $hasPermissionForItem = true;
         }
+
+        // Se é público, liberar para todos
+        if (isset($item['is_public']) && $item['is_public']) {
+            $hasPermissionForItem = true;
+        }
         
         // Se é módulo simples, verificar permissão
         if (isset($item['module'])) {
@@ -216,8 +221,8 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
                 $submenuActive = true;
               }
             } else {
-              // Para outros itens, verificar permissão no banco (se tiver module)
-              if (isset($sub['module']) && hasPermission($sub['module'])) {
+              // Para outros itens, verificar permissão no banco (se tiver module ou for publico)
+              if ((isset($sub['module']) && hasPermission($sub['module'])) || (isset($sub['is_public']) && $sub['is_public'])) {
                 $visibleSubmenus[] = $sub;
                 if (rtrim($sub['href'], '/') === $current) {
                   $submenuActive = true;
@@ -262,7 +267,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
         } else {
           // Para itens simples, verificar permissão direta
           if (!$hasPermissionForItem) {
-            $hasPermissionForItem = isset($item['module']) && hasPermission($item['module']);
+            $hasPermissionForItem = (isset($item['module']) && hasPermission($item['module'])) || (isset($item['is_public']) && $item['is_public']);
           }
         }
         
