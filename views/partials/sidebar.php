@@ -147,7 +147,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
     <ul class="space-y-1 px-3">
       <!-- Início - acessível a todos os usuários autenticados -->
       <li>
-        <a href="/inicio" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $current==='/inicio'?'bg-blue-100 dark:bg-blue-600/90 text-blue-800 dark:text-white font-semibold shadow':'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'; ?>">
+        <a href="/inicio" title="Início" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $current==='/inicio'?'bg-blue-100 dark:bg-blue-600/90 text-blue-800 dark:text-white font-semibold shadow':'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'; ?>">
           <span class="text-lg flex-shrink-0"><i class="ph ph-house"></i></span>
           <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300">Início</span>
         </a>
@@ -156,13 +156,13 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
       <!-- Dashboard só visível se tiver permissão -->
       <?php if (hasPermission('dashboard')): ?>
       <li>
-        <a href="/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $current==='/dashboard'?'bg-blue-100 dark:bg-blue-600/90 text-blue-800 dark:text-white font-semibold shadow':'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'; ?>">
+        <a href="/dashboard" title="Dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $current==='/dashboard'?'bg-blue-100 dark:bg-blue-600/90 text-blue-800 dark:text-white font-semibold shadow':'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'; ?>">
           <span class="text-lg flex-shrink-0"><i class="ph ph-chart-bar"></i></span>
           <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300">Dashboard</span>
         </a>
       </li>
       <li>
-        <a href="/dashboard-2" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $current==='/dashboard-2'?'bg-blue-100 dark:bg-blue-600/90 text-blue-800 dark:text-white font-semibold shadow':'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'; ?>">
+        <a href="/dashboard-2" title="Dashboard 2.0" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $current==='/dashboard-2'?'bg-blue-100 dark:bg-blue-600/90 text-blue-800 dark:text-white font-semibold shadow':'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'; ?>">
           <span class="text-lg flex-shrink-0"><i class="ph ph-compass"></i></span>
           <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300">Dashboard 2.0</span>
         </a>
@@ -273,7 +273,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
           <?php if ($hasSubmenu): ?>
             <?php $isCategory = isset($item['category']) && $item['category']; ?>
             <div class="submenu-container">
-              <button onclick="toggleSubmenu(this)" class="flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $submenuActive?'bg-blue-100 dark:bg-blue-600/90 text-blue-800 dark:text-white font-semibold shadow':($isCategory ? 'text-slate-700 hover:text-slate-900 bg-slate-200/50 dark:text-slate-200 dark:hover:text-white dark:bg-slate-800/30' : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'); ?>">
+              <button onclick="toggleSubmenu(this)" title="<?= e($item['label']) ?>" class="flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $submenuActive?'bg-blue-100 dark:bg-blue-600/90 text-blue-800 dark:text-white font-semibold shadow':($isCategory ? 'text-slate-700 hover:text-slate-900 bg-slate-200/50 dark:text-slate-200 dark:hover:text-white dark:bg-slate-800/30' : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'); ?>">
                 <div class="flex items-center gap-3">
                   <span class="text-lg flex-shrink-0"><?= $item['icon'] ?></span>
                   <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300 <?php echo $isCategory ? 'font-semibold tracking-wide' : ''; ?>"><?= e($item['label']) ?></span>
@@ -324,7 +324,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
                     <?php if ($hasNestedSubmenu): ?>
                       <!-- Submenu aninhado -->
                       <div class="submenu-container">
-                        <button onclick="toggleSubmenu(this)" class="flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
+                        <button onclick="toggleSubmenu(this)" title="<?= e($sub['label']) ?>" class="flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
                           <div class="flex items-center gap-3">
                             <span class="text-base flex-shrink-0"><?= $sub['icon'] ?></span>
                             <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300"><?= e($sub['label']) ?></span>
@@ -347,7 +347,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
                             $nestedActive = rtrim($nestedSub['href'], '/') === $current;
                           ?>
                             <li>
-                              <a href="<?= e($nestedSub['href']) ?>" class="page-link flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $nestedActive?'bg-blue-100 dark:bg-blue-500/90 text-blue-800 dark:text-white font-semibold shadow-sm':'text-slate-400 dark:text-slate-500 hover:text-white'; ?>">
+                              <a href="<?= e($nestedSub['href']) ?>" title="<?= e($nestedSub['label']) ?>" class="page-link flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $nestedActive?'bg-blue-100 dark:bg-blue-500/90 text-blue-800 dark:text-white font-semibold shadow-sm':'text-slate-400 dark:text-slate-500 hover:text-white'; ?>">
                                 <span class="flex-shrink-0"><?= $nestedSub['icon'] ?></span>
                                 <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300"><?= e($nestedSub['label']) ?></span>
                               </a>
@@ -358,7 +358,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
                     <?php else: ?>
                       <!-- Link normal do submenu -->
                       <?php $isMustardHighlight = isset($sub['highlight']) && $sub['highlight'] === 'mustard'; ?>
-                      <a href="<?= e($sub['href']) ?>" class="page-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $isMustardHighlight ? 'bg-yellow-500/90 text-black shadow-md hover:bg-yellow-600 hover:text-black' : ($subActive?'bg-blue-100 dark:bg-blue-500/90 text-blue-800 dark:text-white font-semibold shadow-sm':'text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'); ?> <?php echo isset($sub['beta']) && $sub['beta'] ? 'beta-menu' : ''; ?> <?php echo $isRetornadosDeprecated ? 'retornados-warning' : ''; ?>">
+                      <a href="<?= e($sub['href']) ?>" title="<?= e($sub['label']) ?>" class="page-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $isMustardHighlight ? 'bg-yellow-500/90 text-black shadow-md hover:bg-yellow-600 hover:text-black' : ($subActive?'bg-blue-100 dark:bg-blue-500/90 text-blue-800 dark:text-white font-semibold shadow-sm':'text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'); ?> <?php echo isset($sub['beta']) && $sub['beta'] ? 'beta-menu' : ''; ?> <?php echo $isRetornadosDeprecated ? 'retornados-warning' : ''; ?>">
                         <span class="text-base flex-shrink-0 <?php echo $isRetornadosDeprecated ? 'bomb-icon' : ''; ?>"><?= $isRetornadosDeprecated ? '<i class="ph-fill ph-warning"></i>' : $sub['icon'] ?></span>
                         <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300 flex items-center gap-2 <?php echo $isRetornadosDeprecated ? 'flex-col items-start gap-0.5' : ''; ?>">
                           <?= e($sub['label']) ?>
@@ -378,7 +378,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
               </ul>
             </div>
           <?php else: ?>
-            <a href="<?= e($item['href']) ?>" class="page-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $active?'bg-blue-100 dark:bg-blue-600/90 text-blue-800 dark:text-white font-semibold shadow':'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'; ?>">
+            <a href="<?= e($item['href']) ?>" title="<?= e($item['label']) ?>" class="page-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $active?'bg-blue-100 dark:bg-blue-600/90 text-blue-800 dark:text-white font-semibold shadow':'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'; ?>">
               <span class="text-lg flex-shrink-0"><?= $item['icon'] ?></span>
               <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300"><?= e($item['label']) ?></span>
             </a>
@@ -389,7 +389,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
       <!-- <i class="ph ph-chart-bar"></i> Usabilidade - Exclusivo para Super Admin -->
       <?php if (isSuperAdmin()): ?>
       <li class="mt-4 pt-4 border-t border-slate-700/50">
-        <a href="/usabilidade" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-700/80 <?php echo $current==='/usabilidade'?'bg-amber-700 text-white shadow-lg':'text-amber-400 hover:text-white'; ?>">
+        <a href="/usabilidade" title="Usabilidade" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-amber-700/80 <?php echo $current==='/usabilidade'?'bg-amber-700 text-white shadow-lg':'text-amber-400 hover:text-white'; ?>">
           <span class="text-lg flex-shrink-0"><i class="ph ph-chart-bar"></i></span>
           <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300">Usabilidade</span>
         </a>
@@ -409,10 +409,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
               <?= strtoupper(substr($_SESSION['user_name'] ?? 'U', 0, 1)) ?>
             </span>
           </div>
-          <div class="sidebar-user-info opacity-100 transition-all duration-300 overflow-hidden text-sm">
-            <div class="text-slate-800 dark:text-white font-medium truncate"><?= $_SESSION['user_name'] ?? 'Usuário' ?></div>
-            <div class="text-slate-500 dark:text-slate-400 text-xs truncate max-w-full"><?= $_SESSION['user_role'] ?? 'user' ?></div>
-          </div>
+          
         </a>
       </div>
       <div class="flex items-center gap-2 sidebar-footer-icons transition-opacity duration-300">
@@ -757,6 +754,11 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
   <script>
     // ===== DEFINIR FUNÇÃO GLOBAL PRIMEIRO - ANTES DE TUDO =====
     window.toggleSubmenu = function(button) {
+      const sidebarObj = document.getElementById('sidebar');
+      if (sidebarObj && sidebarObj.classList.contains('sidebar-collapsed')) {
+        sidebarObj.classList.remove('sidebar-collapsed');
+        localStorage.setItem('sidebarCollapsed', 'false');
+      }
       // console.log('toggleSubmenu chamada!', button);
       const submenu = button.parentElement.querySelector('.submenu');
       const arrow = button.querySelector('.submenu-arrow');
