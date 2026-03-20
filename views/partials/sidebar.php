@@ -57,7 +57,7 @@ $menu = [
       ['label' => 'Precificação de Coleta', 'href' => '/precificacao-coleta-descartes', 'icon' => '<i class="ph ph-currency-dollar"></i>', 'module' => 'precificacao_coleta_descartes'],
       // Itens originais de Gestão da Qualidade
       ['label' => 'Homologações', 'href' => '/homologacoes', 'icon' => '<i class="ph ph-traffic-cone"></i>', 'module' => 'homologacoes', 'highlight' => 'mustard'],
-      ['label' => 'Homologações 2.0', 'href' => '/homologacoes/index.php', 'title' => 'Homologações 2.0', 'icon' => '<i class="ph ph-traffic-cone"></i>', 'module' => 'homologacoes_2', 'highlight' => 'mustard'],
+      ['label' => 'Homologações 2.0', 'href' => '/homologacoes_mock/index.php', 'title' => 'Homologações 2.0', 'icon' => '<i class="ph ph-traffic-cone"></i>', 'module' => 'homologacoes_2', 'highlight' => 'mustard'],
       ['label' => 'Certificados', 'href' => '/certificados', 'icon' => '<i class="ph ph-scroll"></i>', 'module' => 'certificados'],
       ['label' => 'FMEA', 'href' => '/fmea', 'icon' => '<i class="ph ph-trend-up"></i>', 'module' => 'fmea'],
       ['label' => 'POPs e ITs', 'href' => '/pops-e-its', 'icon' => '<i class="ph ph-books"></i>', 'module' => 'pops_its_visualizacao'],

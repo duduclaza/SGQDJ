@@ -3,7 +3,8 @@ require_once __DIR__ . '/mock_data.php';
 
 // Busca Usuário pelo ID
 function getUserById($id) {
-    $usuarios = $_SESSION['mock_usuarios'];
+    if (!$id) return null;
+    $usuarios = $_SESSION['mock_usuarios'] ?? [];
     foreach ($usuarios as $u) {
         if ($u['id'] == $id) return $u;
     }
@@ -12,7 +13,7 @@ function getUserById($id) {
 
 // Busca Homologação pelo ID
 function getHomologacaoById($id) {
-    $homologacoes = $_SESSION['mock_homologacoes'];
+    $homologacoes = $_SESSION['mock_homologacoes'] ?? [];
     foreach ($homologacoes as $h) {
         if ($h['id'] == $id) return $h;
     }
@@ -35,16 +36,28 @@ function getStatusLabel($status) {
     return $labels[$status] ?? 'Desconhecido';
 }
 
-// Cor/Badge para Status
+// Cor/Badge para Status (Tailwind)
 function getBadgeClass($status) {
     $classes = [
-        'aguardando_chegada' => 'text-bg-warning',
-        'item_recebido'      => 'text-bg-info text-white',
-        'em_homologacao'     => 'text-bg-primary',
-        'concluida'          => 'text-bg-success',
-        'cancelada'          => 'text-bg-danger'
+        'aguardando_chegada' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+        'item_recebido'      => 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
+        'em_homologacao'     => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+        'concluida'          => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
+        'cancelada'          => 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400'
     ];
-    return $classes[$status] ?? 'text-bg-secondary';
+    return $classes[$status] ?? 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300';
+}
+
+// Cor da Borda / Border-color para Status (Tailwind)
+function getBorderClass($status) {
+    $classes = [
+        'aguardando_chegada' => 'border-amber-500',
+        'item_recebido'      => 'border-cyan-500',
+        'em_homologacao'     => 'border-blue-500',
+        'concluida'          => 'border-emerald-500',
+        'cancelada'          => 'border-rose-500'
+    ];
+    return $classes[$status] ?? 'border-slate-500';
 }
 
 // Dias restantes

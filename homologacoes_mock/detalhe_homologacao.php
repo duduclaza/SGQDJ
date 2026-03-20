@@ -1,0 +1,94 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/mock_data.php';
+require_once __DIR__ . '/helpers.php';
+
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$h = getHomologacaoById($id);
+
+if (!$h) {
+    echo "<div class='bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4 m-6 shadow-sm dark:bg-rose-900/20 dark:border-rose-800 dark:text-rose-300'>Homologação não encontrada ou inválida.</div>";
+    return;
+}
+
+// Global user profile switcher intercept
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trocar_usuario'])) {
+    $_SESSION['usuario_logado_id'] = (int)$_POST['usuario_logado_id'];
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
+}
+
+$u = getUsuarioLogado();
+$data = getMockData();
+
+// ===== AÇÕES DO FLUXO =====
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['acao'])) {
+        $acao = $_POST['acao'];
+        
+        if ($acao === 'confirmar_recebimento' && ($u['perfil'] === 'logistica' || $u['perfil'] === 'super_admin' || $u['perfil'] === 'admin')) {
+            atualizarHomologacaoMock($id, [
+                'status' => 'item_recebido',
+                'data_recebimento' => $_POST['data_recebimento'],
+                'recebido_por' => $u['id']
+            ]);
+            $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Item recebido registrado com sucesso!'];
+        }
+        elseif ($acao === 'iniciar_homologacao' && ($u['perfil'] === 'responsavel' || $u['perfil'] === 'super_admin' || $u['perfil'] === 'admin')) {
+            atualizarHomologacaoMock($id, [
+                'status' => 'em_homologacao',
+                'local_homologacao' => $_POST['local_homologacao'],
+                'data_inicio_homologacao' => $_POST['data_inicio_homologacao'],
+                'nome_cliente' => $_POST['nome_cliente'] ?? null,
+                'data_instalacao_cliente' => $_POST['data_instalacao_cliente'] ?? null
+            ]);
+            $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Homologação iniciada. Preencha o checklist técnico!'];
+        }
+        elseif ($acao === 'salvar_checklist' && ($u['perfil'] === 'responsavel' || $u['perfil'] === 'super_admin' || $u['perfil'] === 'admin')) {
+            $respostas = $_POST['checklist'] ?? [];
+            $booleadas = [];
+            foreach ($respostas as $k => $v) {
+                if ($v === '1') $booleadas[$k] = true;
+                elseif ($v === '0') $booleadas[$k] = false;
+                else $booleadas[$k] = null;
+            }
+            atualizarHomologacaoMock($id, [
+                'checklist_respostas' => $booleadas,
+                'observacoes_checklist' => $_POST['observacoes_checklist']
+            ]);
+            $_SESSION['flash_message'] = ['type' => 'info', 'text' => 'Bateria de testes rascunhada e salva com sucesso.'];
+        }
+        elseif ($acao === 'finalizar_homologacao' && ($u['perfil'] === 'responsavel' || $u['perfil'] === 'super_admin' || $u['perfil'] === 'admin')) {
+            atualizarHomologacaoMock($id, [
+                'status' => 'concluida',
+                'data_fim_homologacao' => $_POST['data_fim_homologacao'],
+                'resultado' => $_POST['resultado'],
+                'parecer_final' => $_POST['parecer_final']
+            ]);
+            // Save checklist final
+            $respostas = $_POST['checklist'] ?? [];
+            $booleadas = [];
+            foreach ($respostas as $k => $v) {
+                if ($v === '1') $booleadas[$k] = true;
+                elseif ($v === '0') $booleadas[$k] = false;
+                else $booleadas[$k] = null;
+            }
+            atualizarHomologacaoMock($id, ['checklist_respostas' => $booleadas]);
+            
+            $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Processo de Homologação Assinado e Finalizado!'];
+        }
+        
+        header("Location: detalhe_homologacao.php?id=$id");
+        exit;
+    }
+}
+
+// Reload data if modified
+$h = getHomologacaoById($id);
+$checklistItems = $data['checklists'][$h['tipo_equipamento']] ?? [];
+$respostas = $h['checklist_respostas'] ?? [];
+
+$title = $h['codigo'] . " - Homologação";
+$viewFile = __DIR__ . '/views/detalhe_homologacao.php';
+require_once __DIR__ . '/../views/layouts/main.php';
+?>
