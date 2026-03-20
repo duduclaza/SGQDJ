@@ -1,7 +1,5 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
-require_once __DIR__ . '/mock_data.php';
-require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/init.php';
 
 // Tratar troca de usuario no mock
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trocar_usuario'])) {
