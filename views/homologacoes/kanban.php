@@ -51,7 +51,7 @@ $statusColors = [
     <!-- Formulário Inline de Criação -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-semibold text-gray-900">✨ Solicitação de Homologação</h2>
+            <h2 class="text-xl font-semibold text-gray-900">✨ Nova Solicitação de Homologação</h2>
             <button type="button" id="toggleFormBtn" class="text-blue-600 hover:text-blue-800">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -59,86 +59,175 @@ $statusColors = [
             </button>
         </div>
 
-        <form id="formHomologacao" class="space-y-4" style="display: block;">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Código do Produto -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Código do Produto/Serviço <span class="text-red-500">*</span>
-                        <span class="relative group">
-                            <svg class="inline w-4 h-4 text-gray-400 cursor-help" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span class="invisible group-hover:visible absolute left-0 top-6 bg-gray-800 text-white text-xs rounded py-1 px-2 w-48 z-10">
-                                Coloque o código de referência cadastrado no seu ERP
-                            </span>
-                        </span>
-                    </label>
-                    <input type="text" name="codigo_produto" id="codigo_produto" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="Ex: PROD-12345">
+        <form id="formHomologacao" class="space-y-5" style="display: block;">
+            <!-- Seção 1: Informações Básicas -->
+            <fieldset class="border border-gray-300 rounded-lg p-4 space-y-4">
+                <legend class="text-sm font-semibold text-gray-900 px-2">📋 Informações Básicas</legend>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Código de Referência -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Código de Referência <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="cod_referencia" id="cod_referencia" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Ex: PROD-001">
+                    </div>
+
+                    <!-- Data de Vencimento -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Data de Vencimento <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" name="data_vencimento" id="data_vencimento" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
                 </div>
 
-                <!-- Fornecedor -->
+                <!-- Descrição -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Fornecedor <span class="text-red-500">*</span>
+                        Descrição <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="fornecedor" id="fornecedor" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="Nome do fornecedor">
+                    <textarea name="descricao" id="descricao" required rows="2"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Descreva o produto/serviço a ser homologado"></textarea>
                 </div>
-            </div>
 
-            <!-- Descrição -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Descrição <span class="text-red-500">*</span>
-                </label>
-                <textarea name="descricao" id="descricao" required rows="3"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Descreva o produto/serviço que será homologado"></textarea>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Motivo da Homologação -->
+                <!-- Observação -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Motivo da Homologação <span class="text-red-500">*</span>
+                        Observação
                     </label>
-                    <select name="motivo_homologacao" id="motivo_homologacao" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Selecione...</option>
-                        <?php foreach ($motivosHomologacao as $value => $label): ?>
-                            <option value="<?= $value ?>"><?= $label ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                    <textarea name="observacao" id="observacao" rows="2"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Adicione observações gerais"></textarea>
+                </div>
+            </fieldset>
+
+            <!-- Seção 2: Responsáveis e Departamento -->
+            <fieldset class="border border-gray-300 rounded-lg p-4 space-y-4">
+                <legend class="text-sm font-semibold text-gray-900 px-2">👥 Responsáveis</legend>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Departamento (Funil) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Departamento (Funil) <span class="text-red-500">*</span>
+                        </label>
+                        <select name="departamento_resp_id" id="departamento_resp_id" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Selecione...</option>
+                            <?php foreach ($departamentos as $dept): ?>
+                                <option value="<?= $dept['id'] ?>"><?= htmlspecialchars($dept['nome']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <!-- Pessoas Responsáveis -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Pessoas Responsáveis <span class="text-red-500">*</span>
+                        </label>
+                        <select name="responsaveis[]" id="responsaveis" multiple required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                style="min-height: 100px;">
+                            <?php foreach ($usuarios as $usuario): ?>
+                                <option value="<?= $usuario['id'] ?>">
+                                    <?= htmlspecialchars($usuario['name']) ?> (<?= htmlspecialchars($usuario['email'] ?? '') ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">💡 Selecione Ctrl+Click para múltiplos responsáveis</p>
+                    </div>
                 </div>
 
-                <!-- Responsáveis -->
+                <!-- Avisar Logística -->
+                <div class="flex items-center">
+                    <input type="checkbox" name="avisar_logistica" id="avisar_logistica" value="1"
+                           class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                    <label for="avisar_logistica" class="ml-2 text-sm text-gray-700">
+                        🚚 Notificar Logística sobre chegada da homologação
+                    </label>
+                </div>
+            </fieldset>
+
+            <!-- Seção 3: Detalhes da Homologação -->
+            <fieldset class="border border-gray-300 rounded-lg p-4 space-y-4">
+                <legend class="text-sm font-semibold text-gray-900 px-2">🔍 Detalhes da Homologação</legend>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Tipo de Homologação -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Tipo de Homologação
+                        </label>
+                        <select name="tipo_homologacao" id="tipo_homologacao"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                onchange="toggle_nome_cliente()">
+                            <option value="">Selecione...</option>
+                            <option value="interna">Interna</option>
+                            <option value="cliente">Em Cliente</option>
+                        </select>
+                    </div>
+
+                    <!-- Nome do Cliente (condicional) -->
+                    <div id="div_nome_cliente" style="display: none;">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Nome do Cliente <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="nome_cliente" id="nome_cliente"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Digite o nome do cliente">
+                    </div>
+                </div>
+
+                <!-- Data de Instalação -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Responsável(is) pela Homologação <span class="text-red-500">*</span>
+                        Data de Instalação
                     </label>
-                    <select name="responsaveis[]" id="responsaveis" multiple required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            style="height: 100px;">
-                        <?php foreach ($usuarios as $usuario): ?>
-                            <option value="<?= $usuario['id'] ?>"><?= htmlspecialchars($usuario['name']) ?> (<?= htmlspecialchars($usuario['department'] ?? 'N/A') ?>)</option>
-                        <?php endforeach; ?>
-                    </select>
-                    <p class="text-xs text-gray-500 mt-1">Segure Ctrl/Cmd para selecionar múltiplos</p>
+                    <input type="date" name="data_instalacao" id="data_instalacao"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
-            </div>
 
-            <!-- Avisar Logística -->
-            <div class="flex items-center">
-                <input type="checkbox" name="avisar_logistica" id="avisar_logistica" value="1"
-                       class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
-                <label for="avisar_logistica" class="ml-2 text-sm text-gray-700">
-                    🚚 Deseja avisar a logística que esta homologação está por chegar?
-                </label>
-            </div>
+                <!-- Observações Detalhes -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Observações Adicionais
+                    </label>
+                    <textarea name="observacoes_detalhes" id="observacoes_detalhes" rows="2"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Adicione observações específicas da homologação"></textarea>
+                </div>
+
+                <!-- Equipamento Atendeu Especificativas -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Equipamento Atendeu as Especificativas?
+                        </label>
+                        <select name="equipamento_atendeu_especificativas" id="equipamento_atendeu_especificativas"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                onchange="toggle_motivo_nao_atendeu()">
+                            <option value="">Selecione...</option>
+                            <option value="sim">Sim, atendeu completamente</option>
+                            <option value="parcial">Parcialmente</option>
+                            <option value="nao">Não, não atendeu</option>
+                        </select>
+                    </div>
+
+                    <!-- Motivo Não Atendeu (condicional) -->
+                    <div id="div_motivo_nao_atendeu" style="display: none;">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Motivo <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="motivo_nao_atendeu" id="motivo_nao_atendeu" placeholder="Descreva brevemente o motivo"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+            </fieldset>
 
             <!-- Botões -->
             <div class="flex justify-end space-x-3 pt-4 border-t">
@@ -148,6 +237,15 @@ $statusColors = [
                 </button>
                 <button type="submit" id="btnSalvar"
                         class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span>Criar Homologação</span>
+                </button>
+            </div>
+        </form>
+    </div>
+    <?php endif; ?>
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
@@ -275,6 +373,37 @@ $statusColors = [
 </div>
 
 <script>
+// Funções de toggle de campos condicionais
+function toggle_nome_cliente() {
+    const tipoHomologacao = document.getElementById('tipo_homologacao').value;
+    const divNomeCliente = document.getElementById('div_nome_cliente');
+    const inputNomeCliente = document.getElementById('nome_cliente');
+    
+    if (tipoHomologacao === 'cliente') {
+        divNomeCliente.style.display = 'block';
+        inputNomeCliente.required = true;
+    } else {
+        divNomeCliente.style.display = 'none';
+        inputNomeCliente.required = false;
+        inputNomeCliente.value = '';
+    }
+}
+
+function toggle_motivo_nao_atendeu() {
+    const atendeuEspecificativas = document.getElementById('equipamento_atendeu_especificativas').value;
+    const divMotivoNaoAtendeu = document.getElementById('div_motivo_nao_atendeu');
+    const inputMotivoNaoAtendeu = document.getElementById('motivo_nao_atendeu');
+    
+    if (atendeuEspecificativas === 'nao' || atendeuEspecificativas === 'parcial') {
+        divMotivoNaoAtendeu.style.display = 'block';
+        inputMotivoNaoAtendeu.required = true;
+    } else {
+        divMotivoNaoAtendeu.style.display = 'none';
+        inputMotivoNaoAtendeu.required = false;
+        inputMotivoNaoAtendeu.value = '';
+    }
+}
+
 // Toggle do formulário
 document.getElementById('toggleFormBtn')?.addEventListener('click', function() {
     const form = document.getElementById('formHomologacao');
@@ -284,6 +413,9 @@ document.getElementById('toggleFormBtn')?.addEventListener('click', function() {
 document.getElementById('btnCancelar')?.addEventListener('click', function() {
     document.getElementById('formHomologacao').reset();
     document.getElementById('formHomologacao').style.display = 'none';
+    // Resetar campos condicionais
+    document.getElementById('div_nome_cliente').style.display = 'none';
+    document.getElementById('div_motivo_nao_atendeu').style.display = 'none';
 });
 
 // Submit do formulário
@@ -292,7 +424,7 @@ document.getElementById('formHomologacao')?.addEventListener('submit', async fun
     
     const btnSalvar = document.getElementById('btnSalvar');
     btnSalvar.disabled = true;
-    btnSalvar.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Salvando...';
+    btnSalvar.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Criando...';
     
     try {
         const formData = new FormData(this);
@@ -307,13 +439,13 @@ document.getElementById('formHomologacao')?.addEventListener('submit', async fun
             alert('✅ Homologação criada com sucesso!');
             location.reload();
         } else {
-            alert('❌ ' + result.message);
+            alert('❌ ' + (result.message || 'Erro ao criar homologação'));
         }
     } catch (error) {
-        alert('❌ Erro ao criar homologação: ' + error.message);
+        alert('❌ Erro: ' + error.message);
     } finally {
         btnSalvar.disabled = false;
-        btnSalvar.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Solicitar Homologação';
+        btnSalvar.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> <span>Criar Homologação</span>';
     }
 });
 
@@ -338,50 +470,107 @@ async function verDetalhes(id) {
 
 function mostrarDetalhes(data) {
     const h = data.homologacao;
-    const motivosLabels = <?= json_encode($motivosHomologacao) ?>;
     
     let html = `
         <div class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="text-sm font-medium text-gray-500">Código do Produto</label>
-                    <p class="font-mono text-lg">${h.codigo_produto}</p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-500">Data Solicitação</label>
-                    <p>${new Date(h.data_solicitacao).toLocaleString('pt-BR')}</p>
-                </div>
-            </div>
-            
-            <div>
-                <label class="text-sm font-medium text-gray-500">Descrição</label>
-                <p class="text-gray-900">${h.descricao}</p>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="text-sm font-medium text-gray-500">Fornecedor</label>
-                    <p>${h.fornecedor}</p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-500">Motivo</label>
-                    <p>${motivosLabels[h.motivo_homologacao] || h.motivo_homologacao}</p>
+            <!-- Informações Básicas -->
+            <div class="border-b pb-4">
+                <h4 class="text-sm font-semibold text-gray-900 mb-3">📋 Informações Básicas</h4>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <label class="text-gray-500">Código Referência</label>
+                        <p class="font-mono text-gray-900">${h.cod_referencia}</p>
+                    </div>
+                    <div>
+                        <label class="text-gray-500">Departamento</label>
+                        <p class="font-gray-900">${h.departamento_nome || 'N/A'}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="text-gray-500">Descrição</label>
+                        <p class="text-gray-900">${h.descricao}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="text-gray-500">Observação</label>
+                        <p class="text-gray-900">${h.observacao || 'N/A'}</p>
+                    </div>
                 </div>
             </div>
-            
-            <div>
-                <label class="text-sm font-medium text-gray-500">Responsáveis</label>
-                <p>${h.responsaveis_nomes}</p>
+
+            <!-- Responsáveis -->
+            <div class="border-b pb-4">
+                <h4 class="text-sm font-semibold text-gray-900 mb-3">👥 Responsáveis</h4>
+                <div class="space-y-2 text-sm">
+                    ${data.responsaveis.map(r => `<div class="flex items-center justify-between bg-blue-50 p-2 rounded">
+                        <span>${r.name}</span>
+                        <span class="text-gray-500 text-xs">${r.email}</span>
+                    </div>`).join('')}
+                </div>
             </div>
-            
-            <div>
-                <label class="text-sm font-medium text-gray-500">Criado por</label>
-                <p>${h.criador_nome} (${h.criador_email})</p>
+
+            <!-- Detalhes da Homologação -->
+            <div class="border-b pb-4">
+                <h4 class="text-sm font-semibold text-gray-900 mb-3">🔍 Detalhes da Homologação</h4>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <label class="text-gray-500">Tipo</label>
+                        <p class="font-gray-900">${h.tipo_homologacao ? (h.tipo_homologacao === 'interna' ? 'Interna' : 'Em Cliente') : 'N/A'}</p>
+                    </div>
+                    ${h.tipo_homologacao === 'cliente' ? `<div>
+                        <label class="text-gray-500">Nome do Cliente</label>
+                        <p class="font-gray-900">${h.nome_cliente || 'N/A'}</p>
+                    </div>` : ''}
+                    <div>
+                        <label class="text-gray-500">Data de Instalação</label>
+                        <p class="font-gray-900">${h.data_instalacao ? new Date(h.data_instalacao).toLocaleDateString('pt-BR') : 'N/A'}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="text-gray-500">Observações Adicionais</label>
+                        <p class="text-gray-900">${h.observacoes_detalhes || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="text-gray-500">Equipamento Atendeu Especificativas</label>
+                        <p class="font-gray-900">${h.equipamento_atendeu_especificativas ? (h.equipamento_atendeu_especificativas === 'sim' ? '✅ Sim' : (h.equipamento_atendeu_especificativas === 'parcial' ? '⚠️ Parcial' : '❌ Não')) : 'N/A'}</p>
+                    </div>
+                    ${h.motivo_nao_atendeu ? `<div class="col-span-2">
+                        <label class="text-gray-500">Motivo</label>
+                        <p class="text-gray-900">${h.motivo_nao_atendeu}</p>
+                    </div>` : ''}
+                </div>
             </div>
-            
+
+            <!-- Status e Datas -->
+            <div class="border-b pb-4">
+                <h4 class="text-sm font-semibold text-gray-900 mb-3">📊 Status</h4>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <label class="text-gray-500">Status Atual</label>
+                        <p class="font-gray-900 uppercase">${h.status}</p>
+                    </div>
+                    <div>
+                        <label class="text-gray-500">Data Vencimento</label>
+                        <p class="font-gray-900">${h.data_vencimento ? new Date(h.data_vencimento).toLocaleDateString('pt-BR') : 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="text-gray-500">Criado por</label>
+                        <p class="font-gray-900">${h.criador_nome}</p>
+                    </div>
+                    <div>
+                        <label class="text-gray-500">Data Criação</label>
+                        <p class="font-gray-900">${new Date(h.created_at).toLocaleDateString('pt-BR')}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histórico -->
             <div>
-                <label class="text-sm font-medium text-gray-500">Avisar Logística</label>
-                <p>${h.avisar_logistica ? '✅ Sim' : '❌ Não'}</p>
+                <h4 class="text-sm font-semibold text-gray-900 mb-3">📜 Histórico</h4>
+                <div class="space-y-2 max-h-[300px] overflow-y-auto">
+                    ${data.historico.map(h => `<div class="text-xs bg-gray-50 p-2 rounded border-l-2 border-gray-300">
+                        <p class="font-semibold text-gray-900">${h.usuario_nome || 'Sistema'}</p>
+                        <p class="text-gray-600">${h.observacao || 'Sem observação'}</p>
+                        <p class="text-gray-400 text-[10px]">${new Date(h.created_at).toLocaleString('pt-BR')}</p>
+                    </div>`).join('')}
+                </div>
             </div>
         </div>
     `;

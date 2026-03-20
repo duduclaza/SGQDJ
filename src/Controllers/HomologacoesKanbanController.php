@@ -302,12 +302,12 @@ class HomologacoesKanbanController
             if (!$this->canCreateHomologacao($_SESSION['user_id'])) {
                 echo json_encode([
                     'success' => false, 
-                    'message' => 'Você não tem permissão para criar homologações. Apenas o departamento de Compras pode criar.'
+                    'message' => 'Você não tem permissão para criar homologações.'
                 ]);
                 exit;
             }
 
-            // Validar dados
+            // Validar dados obrigatórios
             $codReferencia      = trim($_POST['cod_referencia'] ?? '');
             $descricao          = trim($_POST['descricao'] ?? '');
             $avisarLogistica    = isset($_POST['avisar_logistica']) && $_POST['avisar_logistica'] === '1';
@@ -315,6 +315,21 @@ class HomologacoesKanbanController
             $dataVencimento     = trim($_POST['data_vencimento'] ?? '');
             $diasAviso          = max(1, (int)($_POST['dias_aviso'] ?? 7));
             $departamentoRespId = !empty($_POST['departamento_resp_id']) ? (int)$_POST['departamento_resp_id'] : null;
+            
+            // Novos campos
+            $tipoHomologacao                = trim($_POST['tipo_homologacao'] ?? '');
+            $nomeCliente                    = trim($_POST['nome_cliente'] ?? '');
+            $dataInstalacao                 = trim($_POST['data_instalacao'] ?? '');
+            $observacoesDetalhes            = trim($_POST['observacoes_detalhes'] ?? '');
+            $equipamentoAtendeuEspecificativas = trim($_POST['equipamento_atendeu_especificativas'] ?? '');
+            $motivoNaoAtendeu               = trim($_POST['motivo_nao_atendeu'] ?? '');
+            
+            // Responsáveis (múltiplos)
+            $responsaveis = $_POST['responsaveis'] ?? [];
+            if (!is_array($responsaveis)) {
+                $responsaveis = [];
+            }
+            $responsaveis = array_filter(array_map('intval', $responsaveis));
 
             if (empty($codReferencia) || empty($descricao)) {
                 echo json_encode([
@@ -327,7 +342,7 @@ class HomologacoesKanbanController
             if (empty($departamentoRespId)) {
                 echo json_encode([
                     'success' => false, 
-                    'message' => 'Selecione o Departamento responsável pela homologação'
+                    'message' => 'Selecione o Departamento'
                 ]);
                 exit;
             }
@@ -336,6 +351,23 @@ class HomologacoesKanbanController
                 echo json_encode([
                     'success' => false, 
                     'message' => 'Informe a Data de Vencimento'
+                ]);
+                exit;
+            }
+
+            if (empty($responsaveis)) {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'Selecione pelo menos um responsável'
+                ]);
+                exit;
+            }
+
+            // Validação condicional: se tipo é cliente, nome do cliente é obrigatório
+            if ($tipoHomologacao === 'cliente' && empty($nomeCliente)) {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'Informe o nome do cliente para homologações de cliente'
                 ]);
                 exit;
             }
@@ -349,19 +381,31 @@ class HomologacoesKanbanController
                     descricao, 
                     avisar_logistica, 
                     observacao,
+                    tipo_homologacao,
+                    nome_cliente,
+                    data_instalacao,
+                    observacoes_detalhes,
+                    equipamento_atendeu_especificativas,
+                    motivo_nao_atendeu,
                     data_vencimento,
                     dias_aviso,
                     departamento_resp_id,
                     status, 
                     created_by, 
                     created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, 'aguardando_recebimento', ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'aguardando_recebimento', ?, NOW())
             ");
             $stmt->execute([
                 $codReferencia,
                 $descricao,
                 $avisarLogistica ? 1 : 0,
                 $observacao,
+                $tipoHomologacao ?: null,
+                $nomeCliente ?: null,
+                $dataInstalacao ?: null,
+                $observacoesDetalhes ?: null,
+                $equipamentoAtendeuEspecificativas ?: null,
+                $motivoNaoAtendeu ?: null,
                 $dataVencimento ?: null,
                 $diasAviso,
                 $departamentoRespId,
@@ -369,6 +413,22 @@ class HomologacoesKanbanController
             ]);
 
             $homologacaoId = $this->db->lastInsertId();
+
+            // Inserir responsáveis
+            $stmtResp = $this->db->prepare("
+                INSERT INTO homologacoes_responsaveis (homologacao_id, user_id, created_at)
+                VALUES (?, ?, NOW())
+            ");
+            foreach ($responsaveis as $userId) {
+                try {
+                    $stmtResp->execute([$homologacaoId, $userId]);
+                } catch (\Exception $e) {
+                    // Ignorar erros de UNIQUE constraint
+                    if (strpos($e->getMessage(), 'UNIQUE') === false) {
+                        throw $e;
+                    }
+                }
+            }
 
             // Registrar histórico
             $stmtHist = $this->db->prepare("
@@ -385,8 +445,8 @@ class HomologacoesKanbanController
 
             $this->db->commit();
 
-            // Notificar todos os usuários do departamento responsável
-            $this->notificarDepartamento($homologacaoId, $departamentoRespId, $avisarLogistica);
+            // Notificar responsáveis (não mais todo o departamento)
+            $this->notificarResponsaveis($homologacaoId, $responsaveis, $avisarLogistica);
 
             echo json_encode([
                 'success' => true,
@@ -469,6 +529,14 @@ class HomologacoesKanbanController
             $alertaFinalizacao = trim($_POST['alerta_finalizacao'] ?? '');
             $testeCliente = trim($_POST['teste_cliente'] ?? '');
             $observacao = trim($_POST['observacao'] ?? '');
+            
+            // Novos campos de detalhes
+            $tipoHomologacao = trim($_POST['tipo_homologacao'] ?? '');
+            $nomeCliente = trim($_POST['nome_cliente'] ?? '');
+            $dataInstalacao = trim($_POST['data_instalacao'] ?? '');
+            $observacoesDetalhes = trim($_POST['observacoes_detalhes'] ?? '');
+            $equipamentoAtendeuEspecificativas = trim($_POST['equipamento_atendeu_especificativas'] ?? '');
+            $motivoNaoAtendeu = trim($_POST['motivo_nao_atendeu'] ?? '');
 
             if (!$homologacaoId || !$novoStatus) {
                 echo json_encode(['success' => false, 'message' => 'Dados inválidos']);
@@ -526,6 +594,37 @@ class HomologacoesKanbanController
             if (!empty($testeCliente)) {
                 $updates[] = "teste_cliente = ?";
                 $params[] = $testeCliente;
+            }
+            
+            // Adicionar novos campos
+            if (!empty($tipoHomologacao)) {
+                $updates[] = "tipo_homologacao = ?";
+                $params[] = $tipoHomologacao;
+            }
+
+            if (!empty($nomeCliente)) {
+                $updates[] = "nome_cliente = ?";
+                $params[] = $nomeCliente;
+            }
+
+            if (!empty($dataInstalacao)) {
+                $updates[] = "data_instalacao = ?";
+                $params[] = $dataInstalacao;
+            }
+
+            if (!empty($observacoesDetalhes)) {
+                $updates[] = "observacoes_detalhes = ?";
+                $params[] = $observacoesDetalhes;
+            }
+
+            if (!empty($equipamentoAtendeuEspecificativas)) {
+                $updates[] = "equipamento_atendeu_especificativas = ?";
+                $params[] = $equipamentoAtendeuEspecificativas;
+            }
+
+            if (!empty($motivoNaoAtendeu)) {
+                $updates[] = "motivo_nao_atendeu = ?";
+                $params[] = $motivoNaoAtendeu;
             }
 
             $params[] = $homologacaoId;
@@ -676,9 +775,11 @@ class HomologacoesKanbanController
                 SELECT 
                     h.*,
                     u.name as criador_nome,
-                    u.email as criador_email
+                    u.email as criador_email,
+                    d.nome as departamento_nome
                 FROM homologacoes h
                 LEFT JOIN users u ON h.created_by = u.id
+                LEFT JOIN departamentos d ON h.departamento_resp_id = d.id
                 WHERE h.id = ?
             ");
             $stmt->execute([(int)$id]);
@@ -691,7 +792,7 @@ class HomologacoesKanbanController
 
             // Buscar responsáveis
             $stmt = $this->db->prepare("
-                SELECT u.id, u.name, u.email
+                SELECT u.id, u.name, u.email, u.department
                 FROM homologacoes_responsaveis hr
                 LEFT JOIN users u ON hr.user_id = u.id
                 WHERE hr.homologacao_id = ?
@@ -942,6 +1043,74 @@ class HomologacoesKanbanController
 
         } catch (\Exception $e) {
             error_log("Erro ao enviar notificações: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Notificar responsáveis selecionados sobre nova homologação
+     */
+    private function notificarResponsaveis(int $homologacaoId, array $usuarioIds, bool $avisarLogistica): void
+    {
+        try {
+            // Buscar dados da homologação
+            $stmt = $this->db->prepare("
+                SELECT h.*, u.name as criador_nome
+                FROM homologacoes h
+                LEFT JOIN users u ON h.created_by = u.id
+                WHERE h.id = ?
+            ");
+            $stmt->execute([$homologacaoId]);
+            $homologacao = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$homologacao) return;
+
+            // Notificar cada responsável via sininho + email
+            $emails = [];
+            $mensagem = "Você foi designado como responsável pela homologação #{$homologacaoId} - {$homologacao['cod_referencia']}";
+            
+            if (!empty($usuarioIds)) {
+                $in = str_repeat('?,', count($usuarioIds) - 1) . '?';
+                $stmtResp = $this->db->prepare("SELECT id, name, email FROM users WHERE id IN ($in) AND status = 'active'");
+                $stmtResp->execute(array_map('intval', $usuarioIds));
+                $responsaveis = $stmtResp->fetchAll(PDO::FETCH_ASSOC);
+
+                foreach ($responsaveis as $resp) {
+                    // Criar notificação no sistema (sininho)
+                    $this->criarNotificacao((int)$resp['id'], $homologacaoId, $mensagem);
+                    
+                    // Adicionar email para envio em lote
+                    if (!empty($resp['email']) && filter_var($resp['email'], FILTER_VALIDATE_EMAIL)) {
+                        $emails[] = $resp['email'];
+                    }
+                }
+            }
+
+            // Notificar logística se solicitado
+            if ($avisarLogistica) {
+                $stmtLog = $this->db->query("
+                    SELECT id, email FROM users 
+                    WHERE LOWER(department) = 'logistica' AND status = 'active'
+                ");
+                $logUsers = $stmtLog->fetchAll(PDO::FETCH_ASSOC);
+                
+                foreach ($logUsers as $user) {
+                    $this->criarNotificacao(
+                        (int)$user['id'], 
+                        $homologacaoId, 
+                        "Nova homologação aguardando recebimento: #{$homologacaoId} - {$homologacao['cod_referencia']}"
+                    );
+                    if (!empty($user['email']) && filter_var($user['email'], FILTER_VALIDATE_EMAIL)) {
+                        $emails[] = $user['email'];
+                    }
+                }
+            }
+
+            // Enviar emails em lote se houver
+            if (!empty($emails)) {
+                $this->enviarEmailHomologacao($emails, $homologacao, 'responsavel');
+            }
+
+        } catch (\Exception $e) {
+            error_log("Erro ao notificar responsáveis: " . $e->getMessage());
         }
     }
 

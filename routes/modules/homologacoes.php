@@ -11,6 +11,9 @@ use App\Controllers\ChecklistsController;
 // ===== HOMOLOGAÇÕES =====
 
 $router->get('/homologacoes', [HomologacoesKanbanController::class, 'index']);
+$router->get('/homologacoes/tutorial', function() {
+    include __DIR__ . '/../../views/homologacoes/tutorial.php';
+});
 $router->post('/homologacoes/store', [HomologacoesKanbanController::class, 'store']);
 $router->post('/homologacoes/update-status', [HomologacoesKanbanController::class, 'updateStatus']);
 $router->post('/homologacoes/{id}/status', [HomologacoesKanbanController::class, 'updateStatusById']);
