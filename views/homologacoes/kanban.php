@@ -246,16 +246,7 @@ $statusColors = [
         </form>
     </div>
     <?php endif; ?>
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    <span>Solicitar Homologação</span>
-                    <span class="ml-3 renovation-badge" title="Módulo em reformulação">🚧 Em reforma</span>
-                </button>
-            </div>
-        </form>
-    </div>
-    <?php endif; ?>
+
 
     <!-- Kanban Board -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
