@@ -6,7 +6,7 @@
 
 <section class="space-y-6">
   <div class="flex justify-between items-center">
-    <h1 class="text-2xl font-semibold text-gray-900">Registro de Retornados</h1>
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Registro de Retornados</h1>
     <div class="flex space-x-3">
       <button id="toggleRetornadoFormBtn" type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -18,9 +18,9 @@
   </div>
 
   <!-- Formulário Inline de Registro de Retornados -->
-  <div id="retornadoFormContainer" class="hidden bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-6">
+  <div id="retornadoFormContainer" class="hidden bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 p-6 mb-6 transition-colors">
     <div class="flex justify-between items-center mb-6">
-      <h2 id="retornadoFormTitle" class="text-xl font-semibold text-gray-900">Registrar Novo Retornado</h2>
+      <h2 id="retornadoFormTitle" class="text-xl font-semibold text-gray-900 dark:text-white">Registrar Novo Retornado</h2>
       <button onclick="cancelRetornadoForm()" class="text-gray-400 hover:text-gray-600">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -34,19 +34,19 @@
       <!-- Usuário e Filial -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label for="nomeUsuario" class="block text-sm font-medium text-gray-700 mb-2">Nome do Usuário</label>
-          <input type="text" id="nomeUsuario" name="usuario" value="<?= $_SESSION['user_name'] ?? 'Usuário' ?>" readonly class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-600 cursor-not-allowed">
+          <label for="nomeUsuario" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome do Usuário</label>
+          <input type="text" id="nomeUsuario" name="usuario" value="<?= $_SESSION['user_name'] ?? 'Usuário' ?>" readonly class="w-full px-3 py-2 bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-md text-gray-600 dark:text-gray-400 cursor-not-allowed">
         </div>
         <div>
-          <label for="filialUsuario" class="block text-sm font-medium text-gray-700 mb-2">Filial</label>
-          <input type="text" id="filialUsuario" name="filial" value="<?= $_SESSION['user_filial'] ?? 'Jundiaí' ?>" readonly class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-600 cursor-not-allowed">
+          <label for="filialUsuario" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filial</label>
+          <input type="text" id="filialUsuario" name="filial" value="<?= $_SESSION['user_filial'] ?? 'Jundiaí' ?>" readonly class="w-full px-3 py-2 bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-md text-gray-600 dark:text-gray-400 cursor-not-allowed">
         </div>
       </div>
 
       <!-- Modelo, Serial e Quantidade -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="relative">
-          <label for="modeloToner" class="block text-sm font-medium text-gray-700 mb-2">Modelo do Toner *</label>
+          <label for="modeloToner" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Modelo do Toner *</label>
           <div class="relative">
             <input 
               type="text" 
@@ -55,7 +55,7 @@
               required 
               placeholder="🔍 Digite para buscar um modelo..."
               autocomplete="off"
-              class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 pr-10 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-md text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
             <input type="hidden" id="modeloId" name="modelo_id" value="">
             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -81,48 +81,48 @@
           </div>
         </div>
         <div>
-          <label for="codigoCliente" class="block text-sm font-medium text-gray-700 mb-2">Código Cliente *</label>
-          <input type="text" id="codigoCliente" name="codigo_cliente" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <label for="codigoCliente" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Código Cliente *</label>
+          <input type="text" id="codigoCliente" name="codigo_cliente" required class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-md text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         </div>
         <div>
-          <label for="quantidade" class="block text-sm font-medium text-gray-700 mb-2">Quantidade *</label>
-          <input type="number" id="quantidade" name="quantidade" value="1" min="1" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          <p class="mt-1 text-xs text-gray-500">Quantidade de toners retornados</p>
+          <label for="quantidade" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quantidade *</label>
+          <input type="number" id="quantidade" name="quantidade" value="1" min="1" required class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-md text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Quantidade de toners retornados</p>
         </div>
       </div>
 
       <!-- Dados do Modelo (Exibição) -->
-      <div id="dadosModelo" class="hidden bg-gray-50 rounded-lg p-4">
-        <h3 class="text-lg font-medium text-gray-900 mb-3">Dados do Modelo</h3>
+      <div id="dadosModelo" class="hidden bg-gray-50 dark:bg-slate-900 rounded-lg p-4 border border-gray-200 dark:border-slate-700 transition-colors">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-3">Dados do Modelo</h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
-            <span class="text-gray-600">Peso Cheio:</span>
-            <span id="pesoCheio" class="font-medium ml-2">-</span>
+            <span class="text-gray-600 dark:text-gray-400">Peso Cheio:</span>
+            <span id="pesoCheio" class="font-medium ml-2 text-gray-900 dark:text-white">-</span>
           </div>
           <div>
-            <span class="text-gray-600">Peso Vazio:</span>
-            <span id="pesoVazio" class="font-medium ml-2">-</span>
+            <span class="text-gray-600 dark:text-gray-400">Peso Vazio:</span>
+            <span id="pesoVazio" class="font-medium ml-2 text-gray-900 dark:text-white">-</span>
           </div>
           <div>
-            <span class="text-gray-600">Gramatura:</span>
-            <span id="gramatura" class="font-medium ml-2">-</span>
+            <span class="text-gray-600 dark:text-gray-400">Gramatura:</span>
+            <span id="gramatura" class="font-medium ml-2 text-gray-900 dark:text-white">-</span>
           </div>
           <div>
-            <span class="text-gray-600">Rendimento:</span>
-            <span id="rendimento" class="font-medium ml-2">-</span>
+            <span class="text-gray-600 dark:text-gray-400">Rendimento:</span>
+            <span id="rendimento" class="font-medium ml-2 text-gray-900 dark:text-white">-</span>
           </div>
         </div>
       </div>
 
       <!-- Tipo de Medição -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-3">Tipo de Medição *</label>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Tipo de Medição *</label>
         <div class="flex space-x-4">
-          <label class="flex items-center">
+          <label class="flex items-center dark:text-gray-300 cursor-pointer">
             <input type="radio" name="modo" value="peso" class="mr-2" onchange="toggleMedicaoType()">
             <span>Peso Físico</span>
           </label>
-          <label class="flex items-center">
+          <label class="flex items-center dark:text-gray-300 cursor-pointer">
             <input type="radio" name="modo" value="chip" class="mr-2" onchange="toggleMedicaoType()">
             <span>% do Chip</span>
           </label>
@@ -132,66 +132,66 @@
       <!-- Campo de Peso -->
       <div id="camposPeso" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label for="pesoRetornado" class="block text-sm font-medium text-gray-700 mb-2">Peso do Retornado (g) *</label>
-          <input type="number" id="pesoRetornado" name="peso_retornado" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" oninput="calcularGramatura()" onchange="calcularGramatura()">
+          <label for="pesoRetornado" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Peso do Retornado (g) *</label>
+          <input type="number" id="pesoRetornado" name="peso_retornado" step="0.1" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-md text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" oninput="calcularGramatura()" onchange="calcularGramatura()">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Gramatura Restante</label>
-          <div id="gramaturaRestante" class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-700">-</div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Gramatura Restante</label>
+          <div id="gramaturaRestante" class="px-3 py-2 bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-md text-gray-700 dark:text-gray-400 transition-colors">-</div>
         </div>
       </div>
 
       <!-- Campo de Percentual -->
       <div id="camposPercentual" class="hidden">
         <div>
-          <label for="percentualChip" class="block text-sm font-medium text-gray-700 mb-2">% do Chip *</label>
-          <input type="number" id="percentualChip" name="percentual_chip" min="0" max="100" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" oninput="calcularPercentual()" onchange="calcularPercentual()">
+          <label for="percentualChip" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">% do Chip *</label>
+          <input type="number" id="percentualChip" name="percentual_chip" min="0" max="100" step="0.1" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-md text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" oninput="calcularPercentual()" onchange="calcularPercentual()">
         </div>
       </div>
 
       <!-- Resultado dos Cálculos -->
-      <div id="resultadoCalculo" class="hidden bg-blue-50 rounded-lg p-4">
-        <h3 class="text-lg font-medium text-blue-900 mb-3">Resultado da Análise</h3>
+      <div id="resultadoCalculo" class="hidden bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800/50">
+        <h3 class="text-lg font-medium text-blue-900 dark:text-blue-300 mb-3">Resultado da Análise</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
-            <span class="text-blue-700">% Restante:</span>
-            <span id="percentualRestante" class="font-bold ml-2">-</span>
+            <span class="text-blue-700 dark:text-blue-400">% Restante:</span>
+            <span id="percentualRestante" class="font-bold ml-2 text-blue-900 dark:text-blue-200">-</span>
           </div>
           <div>
-            <span class="text-blue-700">Folhas Estimadas:</span>
-            <span id="folhasEstimadas" class="font-bold ml-2">-</span>
+            <span class="text-blue-700 dark:text-blue-400">Folhas Estimadas:</span>
+            <span id="folhasEstimadas" class="font-bold ml-2 text-blue-900 dark:text-blue-200">-</span>
           </div>
           <div>
-            <span class="text-blue-700">Valor Estimado:</span>
-            <span id="valorEstimado" class="font-bold ml-2">-</span>
+            <span class="text-blue-700 dark:text-blue-400">Valor Estimado:</span>
+            <span id="valorEstimado" class="font-bold ml-2 text-blue-900 dark:text-blue-200">-</span>
           </div>
         </div>
-        <div id="orientacaoSistema" class="bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 p-4 rounded-lg shadow-sm">
+        <div id="orientacaoSistema" class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-l-4 border-yellow-500 p-4 rounded-lg shadow-sm">
           <div class="flex items-center mb-2">
-            <svg class="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <p class="text-yellow-800 font-semibold">Orientação do Sistema:</p>
+            <p class="text-yellow-800 dark:text-yellow-300 font-semibold">Orientação do Sistema:</p>
           </div>
-          <p id="textoOrientacao" class="text-yellow-800 font-medium text-lg">-</p>
+          <p id="textoOrientacao" class="text-yellow-800 dark:text-yellow-200 font-medium text-lg">-</p>
         </div>
       </div>
 
       <!-- Seleção de Destino -->
       <div id="selecaoDestino" class="hidden">
-        <label class="block text-sm font-medium text-gray-700 mb-3">Destino do Toner *</label>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Destino do Toner *</label>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <button type="button" onclick="selecionarDestino('descarte')" class="destino-btn border-2 border-gray-300 rounded-lg p-3 text-center hover:border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-colors">
-            <div class="text-red-600 font-medium">Descarte</div>
+          <button type="button" onclick="selecionarDestino('descarte')" class="destino-btn border-2 border-gray-300 dark:border-slate-700 rounded-lg p-3 text-center bg-white dark:bg-slate-800 hover:border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200 dark:focus:ring-red-900/40 transition-colors">
+            <div class="text-red-600 dark:text-red-400 font-medium">Descarte</div>
           </button>
-          <button type="button" onclick="selecionarDestino('uso_interno')" class="destino-btn border-2 border-gray-300 rounded-lg p-3 text-center hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors">
-            <div class="text-blue-600 font-medium">Uso Interno</div>
+          <button type="button" onclick="selecionarDestino('uso_interno')" class="destino-btn border-2 border-gray-300 dark:border-slate-700 rounded-lg p-3 text-center bg-white dark:bg-slate-800 hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors">
+            <div class="text-blue-600 dark:text-blue-400 font-medium">Uso Interno</div>
           </button>
-          <button type="button" onclick="selecionarDestino('estoque')" class="destino-btn border-2 border-gray-300 rounded-lg p-3 text-center hover:border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-colors">
-            <div class="text-green-600 font-medium">Estoque</div>
+          <button type="button" onclick="selecionarDestino('estoque')" class="destino-btn border-2 border-gray-300 dark:border-slate-700 rounded-lg p-3 text-center bg-white dark:bg-slate-800 hover:border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-900/40 transition-colors">
+            <div class="text-green-600 dark:text-green-400 font-medium">Estoque</div>
           </button>
-          <button type="button" onclick="selecionarDestino('garantia')" class="destino-btn border-2 border-gray-300 rounded-lg p-3 text-center hover:border-purple-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors">
-            <div class="text-purple-600 font-medium">Garantia</div>
+          <button type="button" onclick="selecionarDestino('garantia')" class="destino-btn border-2 border-gray-300 dark:border-slate-700 rounded-lg p-3 text-center bg-white dark:bg-slate-800 hover:border-purple-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-900/40 transition-colors">
+            <div class="text-purple-600 dark:text-purple-400 font-medium">Garantia</div>
           </button>
         </div>
         <input type="hidden" id="destinoSelecionado" name="destino" required>
@@ -199,16 +199,16 @@
 
       <!-- Campo de Observação (para Descarte) -->
       <div id="campoObservacao" class="hidden">
-        <label for="observacaoDescarte" class="block text-sm font-medium text-gray-700 mb-2">Observação</label>
-        <textarea id="observacaoDescarte" name="observacao" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Motivo do descarte ou observações adicionais..."></textarea>
+        <label for="observacaoDescarte" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Observação</label>
+        <textarea id="observacaoDescarte" name="observacao" rows="3" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-md text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="Motivo do descarte ou observações adicionais..."></textarea>
       </div>
 
       <!-- Botões de Ação -->
-      <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-        <button type="button" onclick="cancelRetornadoForm()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+      <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-slate-700">
+        <button type="button" onclick="cancelRetornadoForm()" class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
           Cancelar
         </button>
-        <button type="submit" id="submitRetornadoBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        <button type="submit" id="submitRetornadoBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm">
           Registrar Retornado
         </button>
       </div>
@@ -1787,19 +1787,19 @@ function editarRetornado(id) {
   </div>
 
   <!-- Filters and Search -->
-  <div class="bg-white border rounded-lg p-4">
+  <div class="bg-white dark:bg-slate-800 border dark:border-slate-700/50 rounded-lg p-4 transition-colors">
     <div class="grid grid-cols-1 lg:grid-cols-7 gap-3">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
-        <input type="text" id="searchInput" placeholder="Modelo, cód. cliente, usuário..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Buscar</label>
+        <input type="text" id="searchInput" placeholder="Modelo, cód. cliente, usuário..." class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Data Inicial</label>
-        <input type="date" id="dateFrom" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Inicial</label>
+        <input type="date" id="dateFrom" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Data Final</label>
-        <input type="date" id="dateTo" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Final</label>
+        <input type="date" id="dateTo" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
       </div>
       <div class="flex items-end">
         <button onclick="filterData()" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center space-x-1">
@@ -1834,10 +1834,10 @@ function editarRetornado(id) {
           <span>Colunas</span>
         </button>
         <!-- Dropdown de Colunas -->
-        <div id="columnFilterDropdown" class="hidden absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-          <div class="p-3 border-b border-gray-200">
+        <div id="columnFilterDropdown" class="hidden absolute top-full left-0 mt-1 w-56 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg z-50">
+          <div class="p-3 border-b border-gray-200 dark:border-slate-700">
             <div class="flex justify-between items-center mb-2">
-              <span class="text-sm font-medium text-gray-700">Exibir Colunas</span>
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Exibir Colunas</span>
               <button onclick="toggleColumnFilter(event)" class="text-gray-400 hover:text-gray-600">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -1851,9 +1851,9 @@ function editarRetornado(id) {
             </div>
           </div>
           <div class="p-2 max-h-64 overflow-y-auto">
-            <label class="flex items-center px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+            <label class="flex items-center px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-slate-700 rounded cursor-pointer">
               <input type="checkbox" data-column="0" checked class="column-checkbox mr-2 rounded text-purple-600 focus:ring-purple-500">
-              <span class="text-sm text-gray-700">Modelo</span>
+              <span class="text-sm text-gray-700 dark:text-gray-300">Modelo</span>
             </label>
             <label class="flex items-center px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
               <input type="checkbox" data-column="1" checked class="column-checkbox mr-2 rounded text-purple-600 focus:ring-purple-500">
@@ -1898,78 +1898,78 @@ function editarRetornado(id) {
   </div>
 
   <!-- Data Grid -->
-  <div class="bg-white border rounded-lg overflow-hidden">
+  <div class="bg-white dark:bg-slate-800 border dark:border-slate-700/50 rounded-lg overflow-hidden transition-colors">
     <!-- Barra de rolagem superior sincronizada -->
     <div id="topScrollWrapper" class="overflow-x-auto" style="overflow-y: hidden; height: 20px;">
       <div id="topScrollContent" style="height: 1px;"></div>
     </div>
     <div id="tableContainer" class="overflow-x-auto" style="max-height: 70vh; overflow-y: auto;">
-      <table id="resizableTable" class="min-w-full divide-y divide-gray-200" style="table-layout: fixed;">
-        <thead class="bg-gray-50 sticky top-0 z-10">
+      <table id="resizableTable" class="min-w-full divide-y divide-gray-200 dark:divide-slate-700" style="table-layout: fixed;">
+        <thead class="bg-gray-50 dark:bg-slate-900/50 sticky top-0 z-10">
           <tr>
-            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 120px; width: 150px;"><span>Modelo</span><div class="resizer"></div></th>
-            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 100px; width: 120px;"><span>Código Cliente</span><div class="resizer"></div></th>
-            <th class="resizable-th px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 50px; width: 60px;"><span>Qtd</span><div class="resizer"></div></th>
-            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 100px; width: 120px;"><span>Usuário</span><div class="resizer"></div></th>
-            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 80px; width: 100px;"><span>Filial</span><div class="resizer"></div></th>
-            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 80px; width: 100px;"><span>Destino</span><div class="resizer"></div></th>
-            <th class="resizable-th px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 80px; width: 100px;"><span>Valor</span><div class="resizer"></div></th>
-            <th class="resizable-th px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 100px; width: 150px;"><span>Observação</span><div class="resizer"></div></th>
-            <th class="resizable-th px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 80px; width: 100px;"><span>Data</span><div class="resizer"></div></th>
-            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 120px; width: 140px;">Ações</th>
+            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="min-width: 120px; width: 150px;"><span>Modelo</span><div class="resizer"></div></th>
+            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="min-width: 100px; width: 120px;"><span>Código Cliente</span><div class="resizer"></div></th>
+            <th class="resizable-th px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="min-width: 50px; width: 60px;"><span>Qtd</span><div class="resizer"></div></th>
+            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="min-width: 100px; width: 120px;"><span>Usuário</span><div class="resizer"></div></th>
+            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="min-width: 80px; width: 100px;"><span>Filial</span><div class="resizer"></div></th>
+            <th class="resizable-th px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="min-width: 80px; width: 100px;"><span>Destino</span><div class="resizer"></div></th>
+            <th class="resizable-th px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="min-width: 80px; width: 100px;"><span>Valor</span><div class="resizer"></div></th>
+            <th class="resizable-th px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="min-width: 100px; width: 150px;"><span>Observação</span><div class="resizer"></div></th>
+            <th class="resizable-th px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="min-width: 80px; width: 100px;"><span>Data</span><div class="resizer"></div></th>
+            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style="min-width: 120px; width: 140px;">Ações</th>
           </tr>
         </thead>
-        <tbody id="retornadosTable" class="bg-white divide-y divide-gray-200">
+        <tbody id="retornadosTable" class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
           <?php if (!empty($retornados)): ?>
             <?php foreach ($retornados as $retornado): ?>
-              <tr class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                   <?= e($retornado['modelo']) ?>
                   <?php if (!$retornado['modelo_cadastrado']): ?>
-                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300">
                       Modelo não cadastrado
                     </span>
                   <?php endif; ?>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= e($retornado['codigo_cliente']) ?></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"><?= e($retornado['codigo_cliente']) ?></td>
                 <td class="px-3 py-2 whitespace-nowrap text-sm text-center">
-                  <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                  <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300">
                     <?= e($retornado['quantidade'] ?? 1) ?>
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= e($retornado['usuario']) ?></td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= e($retornado['filial']) ?></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"><?= e($retornado['usuario']) ?></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"><?= e($retornado['filial']) ?></td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <?php 
                     $colors = [
-                      'descarte' => 'bg-red-100 text-red-800',
-                      'estoque' => 'bg-green-100 text-green-800', 
-                      'uso_interno' => 'bg-blue-100 text-blue-800',
-                      'garantia' => 'bg-purple-100 text-purple-800'
+                      'descarte' => 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300',
+                      'estoque' => 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300', 
+                      'uso_interno' => 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300',
+                      'garantia' => 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300'
                     ];
-                    $color = $colors[$retornado['destino']] ?? 'bg-gray-100 text-gray-800';
+                    $color = $colors[$retornado['destino']] ?? 'bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-gray-300';
                   ?>
                   <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <?= $color ?>">
                     <?= ucfirst(str_replace('_', ' ', $retornado['destino'])) ?>
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
                   <?php if (isset($retornado['valor_calculado']) && $retornado['valor_calculado'] > 0): ?>
-                    <span class="font-semibold text-green-600">R$ <?= number_format($retornado['valor_calculado'], 2, ',', '.') ?></span>
+                    <span class="font-semibold text-green-600 dark:text-green-400">R$ <?= number_format($retornado['valor_calculado'], 2, ',', '.') ?></span>
                   <?php else: ?>
-                    <span class="text-gray-400">-</span>
+                    <span class="text-gray-400 dark:text-gray-500">-</span>
                   <?php endif; ?>
                 </td>
-                <td class="px-3 py-2 text-sm text-gray-900 max-w-xs">
+                <td class="px-3 py-2 text-sm text-gray-900 dark:text-gray-300 max-w-xs">
                   <?php if (!empty($retornado['observacao'])): ?>
                     <span class="truncate block" title="<?= htmlspecialchars($retornado['observacao']) ?>">
                       <?= htmlspecialchars(substr($retornado['observacao'], 0, 50)) ?><?= strlen($retornado['observacao']) > 50 ? '...' : '' ?>
                     </span>
                   <?php else: ?>
-                    <span class="text-gray-400">-</span>
+                    <span class="text-gray-400 dark:text-gray-500">-</span>
                   <?php endif; ?>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= date('d/m/Y', strtotime($retornado['data_registro'])) ?></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"><?= date('d/m/Y', strtotime($retornado['data_registro'])) ?></td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <div class="flex space-x-2">
                     <button onclick="editarRetornado(<?= $retornado['id'] ?>)" 
@@ -1995,18 +1995,18 @@ function editarRetornado(id) {
     
     <!-- Pagination -->
     <?php if (isset($pagination) && $pagination['total_pages'] > 1): ?>
-      <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-        <div class="flex items-center text-sm text-gray-700">
+      <div class="px-4 py-3 bg-gray-50 dark:bg-slate-900/50 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between">
+        <div class="flex items-center text-sm text-gray-700 dark:text-gray-300">
           <span>Mostrando <?= ($pagination['current_page'] - 1) * $pagination['per_page'] + 1 ?> a <?= min($pagination['current_page'] * $pagination['per_page'], $pagination['total_records']) ?> de <?= $pagination['total_records'] ?> registros</span>
         </div>
         <div class="flex items-center space-x-2">
           <!-- Previous Button -->
           <?php if ($pagination['has_prev']): ?>
-            <a href="?page=<?= $pagination['current_page'] - 1 ?>" class="px-2 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded hover:bg-gray-50 hover:text-gray-700 transition-colors">
+            <a href="?page=<?= $pagination['current_page'] - 1 ?>" class="px-2 py-1 text-sm font-medium text-gray-500 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
               Anterior
             </a>
           <?php else: ?>
-            <span class="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-100 border border-gray-200 rounded-md cursor-not-allowed">
+            <span class="px-3 py-2 text-sm font-medium text-gray-300 dark:text-gray-600 bg-gray-100 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-md cursor-not-allowed">
               Anterior
             </span>
           <?php endif; ?>
@@ -2030,7 +2030,7 @@ function editarRetornado(id) {
                 <?= $i ?>
               </span>
             <?php else: ?>
-              <a href="?page=<?= $i ?>" class="px-2 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded hover:bg-gray-50 hover:text-gray-700 transition-colors">
+              <a href="?page=<?= $i ?>" class="px-2 py-1 text-sm font-medium text-gray-500 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
                 <?= $i ?>
               </a>
             <?php endif; ?>
@@ -2045,11 +2045,11 @@ function editarRetornado(id) {
           
           <!-- Next Button -->
           <?php if ($pagination['has_next']): ?>
-            <a href="?page=<?= $pagination['current_page'] + 1 ?>" class="px-2 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded hover:bg-gray-50 hover:text-gray-700 transition-colors">
+            <a href="?page=<?= $pagination['current_page'] + 1 ?>" class="px-2 py-1 text-sm font-medium text-gray-500 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
               Próximo
             </a>
           <?php else: ?>
-            <span class="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-100 border border-gray-200 rounded-md cursor-not-allowed">
+            <span class="px-3 py-2 text-sm font-medium text-gray-300 dark:text-gray-600 bg-gray-100 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-md cursor-not-allowed">
               Próximo
             </span>
           <?php endif; ?>
@@ -2066,10 +2066,10 @@ function editarRetornado(id) {
 
 <!-- Retornado Modal -->
 <div id="retornadoModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] overflow-y-auto flex items-center justify-center p-4">
-  <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto transition-colors">
     <!-- Header -->
-    <div class="px-6 py-4 border-b border-gray-200 bg-white rounded-t-xl sticky top-0 z-10 flex justify-between items-center">
-      <h3 class="text-lg font-semibold text-gray-900">Registrar Novo Retornado</h3>
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-t-xl sticky top-0 z-10 flex justify-between items-center">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Registrar Novo Retornado</h3>
       <button onclick="window.closeRetornadoModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -2080,16 +2080,16 @@ function editarRetornado(id) {
     <!-- Content -->
     <form id="retornadoForm" class="px-6 py-6 space-y-6">
       <!-- Mode Selection -->
-      <div class="bg-gray-50 p-4 rounded-lg">
-        <label class="block text-sm font-medium text-gray-700 mb-3">Modo de Registro</label>
+      <div class="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-lg">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Modo de Registro</label>
         <div class="flex space-x-4">
           <label class="flex items-center">
             <input type="radio" name="modo" value="peso" class="mr-2" checked onchange="window.toggleMode()">
-            <span class="text-sm font-medium">Modo Peso</span>
+            <span class="text-sm font-medium dark:text-gray-300">Modo Peso</span>
           </label>
           <label class="flex items-center">
             <input type="radio" name="modo" value="chip" class="mr-2" onchange="window.toggleMode()">
-            <span class="text-sm font-medium">Modo % Chip</span>
+            <span class="text-sm font-medium dark:text-gray-300">Modo % Chip</span>
           </label>
         </div>
       </div>
@@ -2097,8 +2097,8 @@ function editarRetornado(id) {
       <!-- Basic Fields -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
-          <select name="modelo" onchange="window.updateTonerData()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Modelo *</label>
+          <select name="modelo" onchange="window.updateTonerData()" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
           <option value="">Selecione o modelo</option>
           <?php foreach ($toners as $toner): ?>
             <option value="<?= e($toner) ?>"><?= e($toner) ?></option>
@@ -2106,12 +2106,12 @@ function editarRetornado(id) {
         </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Usuário *</label>
-          <input type="text" name="usuario" value="Sistema" required readonly class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-700 focus:ring-0 focus:border-gray-300">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Usuário *</label>
+          <input type="text" name="usuario" value="Sistema" required readonly class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-gray-100 dark:bg-slate-700/50 text-gray-700 dark:text-gray-400 focus:ring-0 focus:border-gray-300">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Filial *</label>
-          <select name="filial" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filial *</label>
+          <select name="filial" required class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
             <option value="">Selecione a filial</option>
             <?php foreach ($filiais as $filial): ?>
               <option value="<?= e($filial) ?>"><?= e($filial) ?></option>
@@ -2119,33 +2119,33 @@ function editarRetornado(id) {
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Código do Cliente *</label>
-          <input type="text" name="codigo_cliente" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Código do Cliente *</label>
+          <input type="text" name="codigo_cliente" required class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
         </div>
       </div>
 
       <!-- Mode-specific Fields -->
       <div id="pesoFields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Peso Retornado (g)</label>
-          <input type="number" name="peso_retornado" step="0.01" min="0" oninput="window.calculatePercentage(); window.calculateValue(); window.showGuidance(); window.checkAutoDiscard();" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Peso Retornado (g)</label>
+          <input type="number" name="peso_retornado" step="0.01" min="0" oninput="window.calculatePercentage(); window.calculateValue(); window.showGuidance(); window.checkAutoDiscard();" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Percentual Restante</label>
-          <input type="text" id="percentualCalculado" readonly class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-50">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Percentual Restante</label>
+          <input type="text" id="percentualCalculado" readonly class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-slate-700/50 text-gray-900 dark:text-white">
         </div>
       </div>
 
       <div id="chipFields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Percentual do Chip (%)</label>
-          <input type="number" name="percentual_chip" step="0.01" min="0" max="100" oninput="window.calculatePercentage(); window.calculateValue(); window.showGuidance(); window.checkAutoDiscard();" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Percentual do Chip (%)</label>
+          <input type="number" name="percentual_chip" step="0.01" min="0" max="100" oninput="window.calculatePercentage(); window.calculateValue(); window.showGuidance(); window.checkAutoDiscard();" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
         </div>
       </div>
 
       <!-- Destination Selection -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-3">Destino Final *</label>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Destino Final *</label>
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <button type="button" onclick="window.selectDestino('descarte')" class="destino-btn p-3 border-2 border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors text-center" data-destino="descarte">
             <div class="text-sm font-bold">DESCARTE</div>
@@ -2164,9 +2164,9 @@ function editarRetornado(id) {
       </div>
 
       <!-- Value Calculation Display -->
-      <div id="valorCalculado" class="hidden bg-green-50 border border-green-200 rounded-lg p-4">
-        <div class="text-sm font-medium text-green-800 mb-1">Valor Calculado para Estoque:</div>
-        <div class="text-lg font-bold text-green-900" id="valorDisplay">R$ 0,00</div>
+      <div id="valorCalculado" class="hidden bg-green-50 dark:bg-green-900/40 border border-green-200 dark:border-green-800 rounded-lg p-4 transition-colors">
+        <div class="text-sm font-medium text-green-800 dark:text-green-300 mb-1">Valor Calculado para Estoque:</div>
+        <div class="text-lg font-bold text-green-900 dark:text-white" id="valorDisplay">R$ 0,00</div>
       </div>
 
       <!-- Guidance Display -->
@@ -2177,15 +2177,15 @@ function editarRetornado(id) {
 
       <!-- Campo de Observação (aparece apenas quando destino é descarte) -->
       <div id="observacao-container" class="hidden">
-        <label for="retornado-observacao" class="block text-sm font-medium text-gray-700 mb-2">Observação (opcional)</label>
-        <textarea id="retornado-observacao" name="observacao" rows="3" placeholder="Digite uma observação sobre o descarte..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+        <label for="retornado-observacao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Observação (opcional)</label>
+        <textarea id="retornado-observacao" name="observacao" rows="3" placeholder="Digite uma observação sobre o descarte..." class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-colors"></textarea>
       </div>
     </form>
 
     <!-- Footer -->
-    <div class="px-6 py-6 bg-gray-50 border-t border-gray-200 rounded-b-xl sticky bottom-0 z-10">
+    <div class="px-6 py-6 bg-gray-50 dark:bg-slate-900/50 border-t border-gray-200 dark:border-slate-700 rounded-b-xl sticky bottom-0 z-10 transition-colors">
       <div class="flex justify-end space-x-4">
-        <button onclick="window.closeRetornadoModal()" class="px-6 py-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        <button onclick="window.closeRetornadoModal()" class="px-6 py-3 text-base font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
           Cancelar
         </button>
         <button onclick="window.submitRetornado()" class="px-6 py-3 text-base font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-colors">
@@ -2198,39 +2198,39 @@ function editarRetornado(id) {
 
 <!-- Import Modal -->
 <div id="importModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
-  <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl">
+  <div class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-4xl transition-colors">
     <!-- Header -->
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-900">Importar Retornados</h3>
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Importar Retornados</h3>
     </div>
     
     <!-- Content -->
     <div class="px-6 py-4">
       <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Arquivo Excel (.xlsx)</label>
-        <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv" class="w-full border border-gray-300 rounded-md px-3 py-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Arquivo Excel (.xlsx)</label>
+        <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv" class="w-full border border-gray-300 dark:border-slate-600 rounded-md px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
       </div>
       
       <div id="importProgress" class="mb-4" style="display: none;">
-        <div class="bg-gray-200 rounded-full h-2 mb-2">
+        <div class="bg-gray-200 dark:bg-slate-700 rounded-full h-2 mb-2">
           <div id="importProgressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
         </div>
-        <p id="importStatus" class="text-sm text-gray-600">Preparando importação...</p>
+        <p id="importStatus" class="text-sm text-gray-600 dark:text-gray-400">Preparando importação...</p>
       </div>
       
       <!-- Debug Console -->
       <div id="debugConsole" class="mb-4" style="display: none;">
-        <h4 class="text-sm font-semibold text-gray-700 mb-2">Debug Console:</h4>
+        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Debug Console:</h4>
         <div id="debugOutput" class="bg-gray-900 text-green-400 p-3 rounded-md h-64 overflow-y-auto text-xs font-mono"></div>
         <button onclick="downloadDebugReport()" id="downloadDebugBtn" class="mt-2 px-3 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700">Baixar Relatório Debug</button>
       </div>
     </div>
     
     <!-- Footer -->
-    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-900/50 border-t border-gray-200 dark:border-slate-700 rounded-b-lg transition-colors">
       <!-- Template Download -->
       <div class="mb-3">
-        <button onclick="downloadRetornadosTemplate()" class="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-orange-700 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors">
+        <button onclick="downloadRetornadosTemplate()" class="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800/50 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
           </svg>
@@ -2240,7 +2240,7 @@ function editarRetornado(id) {
       
       <!-- Action Buttons -->
       <div class="flex space-x-3">
-        <button id="importCancelBtn" onclick="closeImportModal()" class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        <button id="importCancelBtn" onclick="closeImportModal()" class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
           Cancelar
         </button>
         <button onclick="toggleDebug()" id="debugToggleBtn" class="px-4 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700">Mostrar Debug</button>

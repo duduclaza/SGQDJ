@@ -7,7 +7,7 @@
 
 <section class="space-y-6">
   <div class="flex justify-between items-center">
-    <h1 class="text-2xl font-semibold text-gray-900">Amostragens</h1>
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Amostragens</h1>
     <div class="flex space-x-3">
       <button id="toggleAmostragemFormBtn" type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -19,9 +19,9 @@
   </div>
 
   <!-- Formulário Inline de Nova Amostragem -->
-  <div id="amostragemFormContainer" class="hidden bg-white border rounded-lg p-6">
+  <div id="amostragemFormContainer" class="hidden bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-6 shadow-sm transition-colors">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-lg font-semibold text-gray-900">Nova Amostragem</h2>
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Nova Amostragem</h2>
       <button id="closeAmostragemFormBtn" class="text-gray-400 hover:text-gray-600">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -35,25 +35,25 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Número da NF -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Número da NF *</label>
-          <input type="text" name="numero_nf" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Número da NF *</label>
+          <input type="text" name="numero_nf" required class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors">
         </div>
 
         <!-- Status -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-3">Status *</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Status *</label>
           <div class="flex space-x-4">
             <label class="flex items-center">
               <input type="radio" name="status" value="pendente" class="mr-2" checked>
-              <span class="text-sm font-medium text-yellow-700">Pendente</span>
+              <span class="text-sm font-medium text-yellow-700 dark:text-yellow-500">Pendente</span>
             </label>
             <label class="flex items-center">
               <input type="radio" name="status" value="aprovado" class="mr-2">
-              <span class="text-sm font-medium text-green-700">Aprovado</span>
+              <span class="text-sm font-medium text-green-700 dark:text-green-500">Aprovado</span>
             </label>
             <label class="flex items-center">
               <input type="radio" name="status" value="reprovado" class="mr-2">
-              <span class="text-sm font-medium text-red-700">Reprovado</span>
+              <span class="text-sm font-medium text-red-700 dark:text-red-500">Reprovado</span>
             </label>
           </div>
         </div>
@@ -62,42 +62,42 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Anexo da NF -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Anexo da NF (PDF) *</label>
-          <input id="arquivo_nf" type="file" name="arquivo_nf" accept="application/pdf,.pdf" required onchange="validatePdfFile(this)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          <p class="text-xs text-gray-500 mt-1">Apenas PDF até 10MB</p>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Anexo da NF (PDF) *</label>
+          <input id="arquivo_nf" type="file" name="arquivo_nf" accept="application/pdf,.pdf" required onchange="validatePdfFile(this)" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors">
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Apenas PDF até 10MB</p>
           <div id="arquivo_nf_preview" class="mt-2"></div>
         </div>
 
         <!-- Evidências -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Evidências (Fotos)</label>
-          <input id="evidencias" type="file" name="evidencias[]" accept="image/*" multiple onchange="validateEvidenceFiles(this)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          <p class="text-xs text-gray-500 mt-1">Selecione uma ou mais fotos como evidência (opcional)</p>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Evidências (Fotos)</label>
+          <input id="evidencias" type="file" name="evidencias[]" accept="image/*" multiple onchange="validateEvidenceFiles(this)" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors">
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Selecione uma ou mais fotos como evidência (opcional)</p>
           <div id="evidencias_preview" class="mt-2"></div>
         </div>
       </div>
 
       <!-- Responsáveis -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Responsáveis *</label>
-        <div class="border border-gray-300 rounded-lg p-3 bg-white" style="min-height: 120px; max-height: 200px; overflow-y: auto;">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Responsáveis *</label>
+        <div class="border border-gray-300 dark:border-slate-600 rounded-lg p-3 bg-white dark:bg-slate-900 transition-colors" style="min-height: 120px; max-height: 200px; overflow-y: auto;">
           <div id="responsaveisCheckboxes">
             <!-- Checkboxes will be loaded dynamically -->
           </div>
         </div>
-        <p class="text-xs text-gray-500 mt-1">Selecione um ou mais responsáveis</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Selecione um ou mais responsáveis</p>
       </div>
 
       <!-- Observação -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
-        <textarea name="observacao" rows="3" placeholder="Observações sobre a amostragem (opcional)..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"></textarea>
-        <p class="text-xs text-gray-500 mt-1">Campo obrigatório apenas para status "Reprovado"</p>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observação</label>
+        <textarea name="observacao" rows="3" placeholder="Observações sobre a amostragem (opcional)..." class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors"></textarea>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Campo obrigatório apenas para status "Reprovado"</p>
       </div>
 
       <!-- Botões -->
-      <div class="flex justify-end space-x-4 pt-4 border-t">
-        <button type="button" onclick="closeAmostragemForm()" class="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+      <div class="flex justify-end space-x-4 pt-4 border-t dark:border-slate-700 transition-colors">
+        <button type="button" onclick="closeAmostragemForm()" class="px-6 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
           Cancelar
         </button>
         <button type="button" onclick="submitAmostragem()" class="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-colors">
@@ -108,15 +108,15 @@
   </div>
 
   <!-- Filters and Search -->
-  <div class="bg-white border rounded-lg p-4">
+  <div class="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-4 shadow-sm transition-colors">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
       <div class="lg:col-span-2">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
-        <input type="text" id="searchInput" placeholder="Número da NF, status..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Buscar</label>
+        <input type="text" id="searchInput" placeholder="Número da NF, status..." class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors">
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-        <select id="statusFilter" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+        <select id="statusFilter" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors">
           <option value="">Todos</option>
           <option value="pendente">Pendente</option>
           <option value="aprovado">Aprovado</option>
@@ -135,10 +135,10 @@
   </div>
 
   <!-- Amostragens Grid -->
-  <div class="bg-white border rounded-lg overflow-hidden">
+  <div class="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg overflow-hidden shadow-sm transition-colors">
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+        <thead class="bg-gray-50 dark:bg-slate-900/50">
           <tr>
             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número NF</th>
             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responsáveis</th>
@@ -151,9 +151,9 @@
         <tbody class="bg-white divide-y divide-gray-200" id="amostragemTableBody">
           <?php if (isset($amostragens) && !empty($amostragens)): ?>
             <?php foreach ($amostragens as $amostragem): ?>
-              <tr>
-                <td class="px-4 py-2 text-sm text-gray-900"><?= e($amostragem['numero_nf']) ?></td>
-                <td class="px-4 py-2 text-sm text-gray-500">
+              <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+                <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100 font-medium"><?= e($amostragem['numero_nf']) ?></td>
+                <td class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
                   <?php 
                   if (!empty($amostragem['responsaveis_list'])) {
                     $names = array_column($amostragem['responsaveis_list'], 'name');
@@ -170,26 +170,26 @@
                   ?>
                 </td>
                 <td class="px-4 py-2">
-                  <select onchange="updateStatus(<?= $amostragem['id'] ?>, this.value, this)" class="text-xs font-semibold rounded-full px-2 py-1 border-0 focus:ring-2 focus:ring-blue-500 <?php 
-                    echo $amostragem['status'] === 'aprovado' ? 'bg-green-100 text-green-800' : 
-                         ($amostragem['status'] === 'pendente' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'); 
+                  <select onchange="updateStatus(<?= $amostragem['id'] ?>, this.value, this)" class="text-xs font-semibold rounded-full px-2 py-1 border-0 focus:ring-2 focus:ring-blue-500 cursor-pointer <?php 
+                    echo $amostragem['status'] === 'aprovado' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 
+                         ($amostragem['status'] === 'pendente' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'); 
                   ?>">
                     <option value="pendente" <?= $amostragem['status'] === 'pendente' ? 'selected' : '' ?>>Pendente</option>
                     <option value="aprovado" <?= $amostragem['status'] === 'aprovado' ? 'selected' : '' ?>>Aprovado</option>
                     <option value="reprovado" <?= $amostragem['status'] === 'reprovado' ? 'selected' : '' ?>>Reprovado</option>
                   </select>
                 </td>
-                <td class="px-4 py-2 text-sm text-gray-900"><?= date('d/m/Y', strtotime($amostragem['data_registro'])) ?></td>
-                <td class="px-4 py-2 text-sm text-gray-500">
+                <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100"><?= date('d/m/Y', strtotime($amostragem['data_registro'])) ?></td>
+                <td class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
                   <div class="flex items-center space-x-2">
-                    <span id="obs-text-<?= $amostragem['id'] ?>" class="flex-1 cursor-pointer" onclick="editObservacao(<?= $amostragem['id'] ?>)" title="Clique para editar">
+                    <span id="obs-text-<?= $amostragem['id'] ?>" class="flex-1 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onclick="editObservacao(<?= $amostragem['id'] ?>)" title="Clique para editar">
                       <?php if (!empty($amostragem['observacao'])): ?>
                         <?= e(substr($amostragem['observacao'], 0, 50)) ?><?= strlen($amostragem['observacao']) > 50 ? '...' : '' ?>
                       <?php else: ?>
-                        <span class="text-gray-400 italic">Clique para adicionar</span>
+                        <span class="text-gray-400 dark:text-gray-500 italic">Clique para adicionar</span>
                       <?php endif; ?>
                     </span>
-                    <textarea id="obs-input-<?= $amostragem['id'] ?>" class="hidden flex-1 text-xs border border-gray-300 rounded px-2 py-1 resize-none" rows="2" placeholder="Digite a observação..."><?= e($amostragem['observacao']) ?></textarea>
+                    <textarea id="obs-input-<?= $amostragem['id'] ?>" class="hidden flex-1 text-xs border border-gray-300 dark:border-slate-600 rounded px-2 py-1 resize-none bg-white dark:bg-slate-900 text-gray-900 dark:text-white" rows="2" placeholder="Digite a observação..."><?= e($amostragem['observacao']) ?></textarea>
                     <div id="obs-buttons-<?= $amostragem['id'] ?>" class="hidden flex space-x-1">
                       <button onclick="saveObservacao(<?= $amostragem['id'] ?>)" class="text-green-600 hover:text-green-800 text-xs">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -207,7 +207,7 @@
                 <td class="px-4 py-2 text-sm">
                   <div class="flex items-center space-x-2">
                     <?php if ($amostragem['has_pdf']): ?>
-                      <a href="/toners/amostragens/<?= $amostragem['id'] ?>/pdf" target="_blank" class="text-blue-600 hover:text-blue-800 text-xs bg-blue-50 px-2 py-1 rounded">
+                      <a href="/toners/amostragens/<?= $amostragem['id'] ?>/pdf" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-xs bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded transition-colors">
                         <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
                         </svg>
@@ -215,7 +215,7 @@
                       </a>
                     <?php endif; ?>
                     <?php if ($amostragem['total_evidencias'] > 0): ?>
-                      <button onclick="viewEvidencias(<?= $amostragem['id'] ?>)" class="text-green-600 text-xs bg-green-50 px-2 py-1 rounded hover:bg-green-100 transition-colors">
+                      <button onclick="viewEvidencias(<?= $amostragem['id'] ?>)" class="text-green-600 dark:text-green-400 text-xs bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors border-none cursor-pointer">
                         <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
                         </svg>
@@ -232,7 +232,7 @@
             <?php endforeach; ?>
           <?php else: ?>
             <tr>
-              <td colspan="6" class="px-4 py-8 text-center text-gray-500">Nenhuma amostragem encontrada</td>
+              <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Nenhuma amostragem encontrada</td>
             </tr>
           <?php endif; ?>
         </tbody>
@@ -317,7 +317,7 @@ function loadUsers() {
       if (Array.isArray(users)) {
         users.forEach((user, index) => {
           const checkboxDiv = document.createElement('div');
-          checkboxDiv.className = 'flex items-center p-2 hover:bg-blue-50 rounded-lg mb-1';
+          checkboxDiv.className = 'flex items-center p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg mb-1 transition-colors';
           
           const checkbox = document.createElement('input');
           checkbox.type = 'checkbox';
@@ -328,7 +328,7 @@ function loadUsers() {
           
           const label = document.createElement('label');
           label.htmlFor = `responsavel_${index}`;
-          label.innerHTML = `<div class="flex flex-col"><span class="text-sm font-medium text-gray-900">${user.name}</span><span class="text-xs text-gray-500">${user.email}</span></div>`;
+          label.innerHTML = `<div class="flex flex-col"><span class="text-sm font-medium text-gray-900 dark:text-gray-100">${user.name}</span><span class="text-xs text-gray-500 dark:text-gray-400">${user.email}</span></div>`;
           label.className = 'cursor-pointer flex-1';
           
           checkboxDiv.appendChild(checkbox);
@@ -607,15 +607,15 @@ function showFilePreview(file, containerId) {
   const c = document.getElementById(containerId);
   if (!c) return;
   c.innerHTML = `
-    <div class="flex items-center p-2 bg-green-50 border border-green-200 rounded-lg">
-      <svg class="w-6 h-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="flex items-center p-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg transition-colors">
+      <svg class="w-6 h-6 text-green-600 dark:text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M8 6h8m5 5v7a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2h6"></path>
       </svg>
       <div class="flex-1">
-        <p class="text-sm font-medium text-green-800">${file.name}</p>
-        <p class="text-xs text-green-600">${(file.size/1048576).toFixed(2)} MB</p>
+        <p class="text-sm font-medium text-green-800 dark:text-green-200">${file.name}</p>
+        <p class="text-xs text-green-600 dark:text-green-400">${(file.size/1048576).toFixed(2)} MB</p>
       </div>
-      <button type="button" onclick="clearFilePreview('arquivo_nf')" class="text-green-600 hover:text-green-800">&times;</button>
+      <button type="button" onclick="clearFilePreview('arquivo_nf')" class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 bg-transparent border-none cursor-pointer text-xl">&times;</button>
     </div>`;
 }
 
@@ -652,29 +652,32 @@ async function viewEvidencias(amostragemId) {
     
     if (data.success && data.evidencias.length > 0) {
       let html = `
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onclick="this.remove()">
-          <div class="bg-white rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-lg font-semibold">Evidências - Amostragem #${amostragemId}</h3>
-              <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" onclick="this.remove()">
+          <div class="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl transition-colors" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-0">Evidências - Amostragem #${amostragemId}</h3>
+              <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 bg-gray-100 dark:bg-slate-700 rounded-full w-8 h-8 flex items-center justify-center transition-colors border-none cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </button>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       `;
       
       data.evidencias.forEach(evidencia => {
         html += `
-          <div class="border rounded-lg overflow-hidden">
-            <img src="/toners/amostragens/${amostragemId}/evidencia/${evidencia.id}" 
-                 alt="${evidencia.name}" 
-                 class="w-full h-32 object-cover cursor-pointer"
-                 onclick="window.open('/toners/amostragens/${amostragemId}/evidencia/${evidencia.id}', '_blank')">
-            <div class="p-2">
-              <p class="text-xs font-medium truncate" title="${evidencia.name}">${evidencia.name}</p>
-              <p class="text-xs text-gray-500">${(evidencia.size/1024).toFixed(1)} KB</p>
+          <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group">
+            <div class="relative overflow-hidden">
+              <img src="/toners/amostragens/${amostragemId}/evidencia/${evidencia.id}" 
+                   alt="${evidencia.name}" 
+                   class="w-full h-40 object-cover cursor-pointer group-hover:scale-105 transition-transform duration-300"
+                   onclick="window.open('/toners/amostragens/${amostragemId}/evidencia/${evidencia.id}', '_blank')">
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all pointer-events-none"></div>
+            </div>
+            <div class="p-3">
+              <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate mb-1" title="${evidencia.name}">${evidencia.name}</p>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 m-0">${(evidencia.size/1024).toFixed(1)} KB</p>
             </div>
           </div>
         `;
@@ -742,9 +745,9 @@ async function updateStatus(id, newStatus, selectElement) {
     if (result && result.success) {
       // Atualizar cor do select usando o elemento passado como parâmetro
       if (selectElement) {
-        selectElement.className = `text-xs font-semibold rounded-full px-2 py-1 border-0 focus:ring-2 focus:ring-blue-500 ${
-          newStatus === 'aprovado' ? 'bg-green-100 text-green-800' : 
-          newStatus === 'pendente' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+        selectElement.className = `text-xs font-semibold rounded-full px-2 py-1 border-0 focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+          newStatus === 'aprovado' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 
+          newStatus === 'pendente' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
         }`;
       }
       

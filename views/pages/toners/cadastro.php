@@ -8,54 +8,54 @@
   </div>
   
   <!-- Formulário de Cadastro -->
-  <div class="bg-white border rounded-lg p-6">
-    <h2 class="text-lg font-medium mb-4">Cadastrar Novo Toner</h2>
+  <div class="bg-white dark:bg-slate-800 border dark:border-slate-700/50 rounded-lg p-6 transition-colors">
+    <h2 class="text-lg font-medium dark:text-white mb-4">Cadastrar Novo Toner</h2>
     <form method="post" action="/toners/cadastro" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
-        <input type="text" name="modelo" placeholder="Ex: HP CF280A" class="w-full border rounded px-3 py-2" required>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Modelo *</label>
+        <input type="text" name="modelo" placeholder="Ex: HP CF280A" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" required>
       </div>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Cheio (g) <span class="text-gray-500 text-xs">(opcional)</span></label>
-        <input type="number" step="0.01" name="peso_cheio" placeholder="Ex: 850.50" class="w-full border rounded px-3 py-2" oninput="calcularCampos()" onchange="calcularCampos()">
-        <p class="text-xs text-gray-500 mt-1">Se informar peso, ambos devem ser preenchidos</p>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Peso Cheio (g) <span class="text-gray-500 dark:text-gray-400 text-xs">(opcional)</span></label>
+        <input type="number" step="0.01" name="peso_cheio" placeholder="Ex: 850.50" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" oninput="calcularCampos()" onchange="calcularCampos()">
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Se informar peso, ambos devem ser preenchidos</p>
       </div>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Vazio (g) <span class="text-gray-500 text-xs">(opcional)</span></label>
-        <input type="number" step="0.01" name="peso_vazio" placeholder="Ex: 120.30" class="w-full border rounded px-3 py-2" oninput="calcularCampos()" onchange="calcularCampos()">
-        <p class="text-xs text-gray-500 mt-1">Se informar peso, ambos devem ser preenchidos</p>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Peso Vazio (g) <span class="text-gray-500 dark:text-gray-400 text-xs">(opcional)</span></label>
+        <input type="number" step="0.01" name="peso_vazio" placeholder="Ex: 120.30" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" oninput="calcularCampos()" onchange="calcularCampos()">
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Se informar peso, ambos devem ser preenchidos</p>
       </div>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">📊 Gramatura (g)</label>
-        <input type="number" step="0.01" name="gramatura" value="" class="w-full border rounded px-3 py-2 bg-gradient-to-r from-gray-50 to-gray-100 text-green-600 font-semibold" readonly>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">📊 Gramatura (g)</label>
+        <input type="number" step="0.01" name="gramatura" value="" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-700 dark:to-slate-750 text-green-600 dark:text-green-400 font-semibold" readonly>
       </div>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Capacidade de Folhas *</label>
-        <input type="number" name="capacidade_folhas" placeholder="Ex: 2700" class="w-full border rounded px-3 py-2" required oninput="calcularCampos()" onchange="calcularCampos()">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Capacidade de Folhas *</label>
+        <input type="number" name="capacidade_folhas" placeholder="Ex: 2700" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" required oninput="calcularCampos()" onchange="calcularCampos()">
       </div>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Preço do Toner (R$) *</label>
-        <input type="number" step="0.01" name="preco_toner" placeholder="Ex: 89.90" class="w-full border rounded px-3 py-2" required oninput="calcularCampos()" onchange="calcularCampos()">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Preço do Toner (R$) *</label>
+        <input type="number" step="0.01" name="preco_toner" placeholder="Ex: 89.90" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" required oninput="calcularCampos()" onchange="calcularCampos()">
       </div>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">📊 Gramatura por Folha (g)</label>
-        <input type="number" step="0.0001" name="gramatura_por_folha" value="" class="w-full border rounded px-3 py-2 bg-gradient-to-r from-gray-50 to-gray-100 text-green-600 font-semibold" readonly>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">📊 Gramatura por Folha (g)</label>
+        <input type="number" step="0.0001" name="gramatura_por_folha" value="" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-700 dark:to-slate-750 text-green-600 dark:text-green-400 font-semibold" readonly>
       </div>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">📊 Custo por Folha (R$)</label>
-        <input type="number" step="0.0001" name="custo_por_folha" value="" class="w-full border rounded px-3 py-2 bg-gradient-to-r from-gray-50 to-gray-100 text-green-600 font-semibold" readonly>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">📊 Custo por Folha (R$)</label>
+        <input type="number" step="0.0001" name="custo_por_folha" value="" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-700 dark:to-slate-750 text-green-600 dark:text-green-400 font-semibold" readonly>
       </div>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Cor *</label>
-        <select name="cor" class="w-full border rounded px-3 py-2" required>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cor *</label>
+        <select name="cor" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" required>
           <option value="">Selecione a cor</option>
           <option value="Yellow">Yellow</option>
           <option value="Magenta">Magenta</option>
@@ -65,8 +65,8 @@
       </div>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
-        <select name="tipo" class="w-full border rounded px-3 py-2" required>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo *</label>
+        <select name="tipo" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" required>
           <option value="">Selecione o tipo</option>
           <option value="Original">Original</option>
           <option value="Compativel">Compatível</option>
@@ -81,11 +81,11 @@
   </div>
 
   <!-- Lista/Grid -->
-  <div class="bg-white border rounded-lg">
-    <div class="px-4 py-3 border-b flex justify-between items-center">
+  <div class="bg-white dark:bg-slate-800 border dark:border-slate-700/50 rounded-lg transition-colors">
+    <div class="px-4 py-3 border-b dark:border-slate-700 flex justify-between items-center">
       <div>
-        <h2 class="text-lg font-medium">Toners Cadastrados</h2>
-        <p class="text-sm text-gray-600 mt-1" id="resultsCount">
+        <h2 class="text-lg font-medium dark:text-white">Toners Cadastrados</h2>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" id="resultsCount">
           Carregando...
         </p>
       </div>
@@ -98,12 +98,12 @@
     </div>
     
     <!-- Campo de Busca -->
-    <div class="px-4 py-3 border-b bg-gray-50">
+    <div class="px-4 py-3 border-b dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
       <div class="flex gap-3 items-center">
         <!-- Dropdown de Coluna -->
         <select 
           id="searchColumn" 
-          class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+          class="border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white transition-colors"
         >
           <option value="all">Todas as colunas</option>
           <option value="0">Modelo</option>
@@ -117,10 +117,10 @@
             type="text" 
             id="searchToners" 
             placeholder="Digite para buscar..." 
-            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
           >
           <button type="button" id="runSearchBtn" title="Buscar" onclick="window.searchToners && window.searchToners()"
-                  class="absolute inset-y-0 left-0 pl-3 pr-2 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
+                  class="absolute inset-y-0 left-0 pl-3 pr-2 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
@@ -141,20 +141,20 @@
       </div>
     </div>
     <div class="overflow-x-auto">
-      <table class="min-w-full text-sm">
-        <thead class="bg-gray-50">
+      <table class="min-w-full text-sm divide-y divide-gray-200 dark:divide-slate-700">
+        <thead class="bg-gray-50 dark:bg-slate-900/50">
           <tr>
-            <th class="px-3 py-2 text-left font-medium text-gray-700">Modelo</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700">Peso Cheio</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700">Peso Vazio</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700">Gramatura</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700">Cap. Folhas</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700">Preço</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700">Gram/Folha</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700">Custo/Folha</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700">Cor</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700">Tipo</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700">
+            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Modelo</th>
+            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Peso Cheio</th>
+            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Peso Vazio</th>
+            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Gramatura</th>
+            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Cap. Folhas</th>
+            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Preço</th>
+            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Gram/Folha</th>
+            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Custo/Folha</th>
+            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Cor</th>
+            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Tipo</th>
+            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
               <div class="flex items-center space-x-1">
                 <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -162,10 +162,10 @@
                 <span>Última Atualização</span>
               </div>
             </th>
-            <th class="px-3 py-2 text-right font-medium text-gray-700">Ações</th>
+            <th class="px-3 py-2 text-right font-medium text-gray-700 dark:text-gray-300">Ações</th>
           </tr>
         </thead>
-        <tbody class="divide-y" id="tonersTbody">
+        <tbody class="divide-y divide-gray-200 dark:divide-slate-700 text-gray-900 dark:text-gray-300" id="tonersTbody">
           <?php if (empty($toners)): ?>
             <tr>
               <td colspan="12" class="px-4 py-8 text-center text-gray-500">Nenhum toner cadastrado</td>
@@ -175,7 +175,7 @@
               <?php 
                 // Verificar se o cadastro está incompleto (sem peso_cheio ou peso_vazio)
                 $cadastroIncompleto = empty($t['peso_cheio']) || empty($t['peso_vazio']);
-                $rowClass = $cadastroIncompleto ? 'bg-red-50 border-l-4 border-l-red-400' : '';
+                $rowClass = $cadastroIncompleto ? 'bg-red-50 dark:bg-red-900/20 border-l-4 border-l-red-400 dark:border-l-red-800' : 'hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors';
               ?>
               <tr class="<?= $rowClass ?>" data-toner-id="<?= $t['id'] ?>" <?= $cadastroIncompleto ? 'title="Cadastro incompleto: Peso Cheio e Peso Vazio não preenchidos"' : '' ?>>
                 <td class="px-3 py-2">
@@ -185,7 +185,7 @@
                 <td class="px-3 py-2">
                   <span class="edit-display-peso_cheio-<?= $t['id'] ?>">
                     <?php if (empty($t['peso_cheio'])): ?>
-                      <span class="text-red-600 font-medium text-xs">⚠️ Não informado</span>
+                      <span class="text-red-600 dark:text-red-400 font-medium text-xs">⚠️ Não informado</span>
                     <?php else: ?>
                       <?= number_format($t['peso_cheio'], 2) ?>g
                     <?php endif; ?>
@@ -195,7 +195,7 @@
                 <td class="px-3 py-2">
                   <span class="edit-display-peso_vazio-<?= $t['id'] ?>">
                     <?php if (empty($t['peso_vazio'])): ?>
-                      <span class="text-red-600 font-medium text-xs">⚠️ Não informado</span>
+                      <span class="text-red-600 dark:text-red-400 font-medium text-xs">⚠️ Não informado</span>
                     <?php else: ?>
                       <?= number_format($t['peso_vazio'], 2) ?>g
                     <?php endif; ?>
@@ -326,9 +326,9 @@
 
   <!-- Import Modal -->
   <div id="importModal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4" style="z-index: 999999; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md" onclick="event.stopPropagation()">
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md transition-colors" onclick="event.stopPropagation()">
       <!-- Header -->
-      <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white rounded-t-lg">
+      <div class="px-6 py-5 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-gray-50 to-white dark:from-slate-900 dark:to-slate-800 rounded-t-lg transition-colors">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mr-3">
@@ -337,13 +337,13 @@
               </svg>
             </div>
             <div>
-              <h3 class="text-xl font-bold text-gray-900">📊 Importar Toners</h3>
-              <p class="text-sm text-gray-600 mt-1">Faça upload de um arquivo Excel ou CSV com os dados dos toners</p>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">📊 Importar Toners</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Faça upload de um arquivo Excel ou CSV com os dados dos toners</p>
             </div>
           </div>
           <!-- Close Button -->
-          <button onclick="console.log('X clicado!'); event.stopPropagation(); closeImportModal();" class="flex-shrink-0 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors duration-200 group">
-            <svg class="w-5 h-5 text-gray-500 group-hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button onclick="console.log('X clicado!'); event.stopPropagation(); closeImportModal();" class="flex-shrink-0 w-8 h-8 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full flex items-center justify-center transition-colors duration-200 group">
+            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           </button>
@@ -354,19 +354,19 @@
       <div class="px-6 py-4 space-y-4">
         <!-- File Input -->
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-3">
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
             📁 Selecione o arquivo Excel ou CSV:
           </label>
           <div class="relative group">
             <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" 
-                   class="w-full border-2 border-dashed border-gray-300 rounded-xl px-4 py-4 text-sm focus:ring-3 focus:ring-blue-200 focus:border-blue-400 hover:border-gray-400 transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                   class="w-full border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl px-4 py-4 text-sm focus:ring-3 focus:ring-blue-200 focus:border-blue-400 hover:border-gray-400 dark:hover:border-slate-500 transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900/30 file:text-blue-700 dark:file:text-blue-400 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50 bg-white dark:bg-slate-900 text-gray-900 dark:text-white">
             <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
               <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
               </svg>
             </div>
           </div>
-          <div class="flex items-center mt-2 text-xs text-gray-500">
+          <div class="flex items-center mt-2 text-xs text-gray-500 dark:text-gray-400">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
@@ -376,18 +376,18 @@
         
         <!-- Progress Bar (hidden by default) -->
         <div id="progressContainer" class="hidden">
-          <div class="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-xl p-4 mb-4">
+          <div class="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-4 transition-colors">
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center">
-                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-2"></div>
-                <span class="text-sm font-semibold text-gray-700">⚡ Progresso da Importação</span>
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 dark:border-blue-400 mr-2"></div>
+                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">⚡ Progresso da Importação</span>
               </div>
-              <span id="progressText" class="text-sm font-bold text-blue-600">0%</span>
+              <span id="progressText" class="text-sm font-bold text-blue-600 dark:text-blue-400">0%</span>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-4 shadow-inner">
+            <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-4 shadow-inner">
               <div id="progressBar" class="bg-gradient-to-r from-blue-500 via-blue-600 to-green-500 h-4 rounded-full transition-all duration-500 ease-out shadow-sm" style="width: 0%"></div>
             </div>
-            <div id="importStatus" class="text-sm text-gray-700 bg-white rounded-lg p-3 mt-3 border border-gray-200 shadow-sm">
+            <div id="importStatus" class="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 rounded-lg p-3 mt-3 border border-gray-200 dark:border-slate-700 shadow-sm">
               Preparando importação...
             </div>
           </div>
@@ -395,11 +395,11 @@
       </div>
       
       <!-- Footer -->
-      <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+      <div class="px-6 py-4 bg-gray-50 dark:bg-slate-900/50 border-t border-gray-200 dark:border-slate-700 rounded-b-lg transition-colors">
         <!-- Template Download -->
         <div class="mb-3">
           <button onclick="downloadTemplate()" 
-                  class="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-blue-700 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg hover:from-blue-100 hover:to-blue-200 hover:border-blue-300 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 transition-all duration-200 shadow-sm hover:shadow">
+                  class="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-400 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border border-blue-200 dark:border-blue-800 rounded-lg hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-800/50 dark:hover:to-blue-700/50 hover:border-blue-300 dark:hover:border-blue-700 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 focus:ring-opacity-50 transition-all duration-200 shadow-sm hover:shadow">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
@@ -647,41 +647,18 @@ function openImportModal() {
     if (modal.parentElement !== document.body) {
       document.body.appendChild(modal);
     }
-    // Remover hidden e forçar estilos necessários
+    // Remover hidden e deixar que as classes Tailwind cuidem do resto
     modal.classList.remove('hidden');
-    modal.style.cssText = `
-      display: flex !important;
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      z-index: 999999 !important;
-      background-color: rgba(0, 0, 0, 0.85) !important;
-      align-items: center !important;
-      justify-content: center !important;
-      padding: 16px !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-    `;
+    modal.classList.add('flex'); // Garantir que seja flex para o centralizamento
     
-    // Garantir que o modal apareça por cima de tudo
+    // Garantir que o modal apareça por cima de tudo e o fundo seja escuro
     document.body.style.overflow = 'hidden'; // Impede scroll da página
     
-    // Garantir que o conteúdo interno seja visível
+    // Garantir que o conteúdo interno seja visível (já deve estar pelo HTML que editamos)
     const modalContent = modal.querySelector('.bg-white');
     if (modalContent) {
-      modalContent.style.cssText = `
-        background: white !important;
-        border-radius: 8px !important;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
-        width: 100% !important;
-        max-width: 28rem !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        z-index: 100000 !important;
-        position: relative !important;
-      `;
+      // Remover estilos inline agressivos que impedem dark mode
+      modalContent.style.cssText = '';
     }
     
     // Adicionar evento de clique no overlay para fechar
@@ -709,62 +686,59 @@ function createFullScreenModal() {
   document.body.style.overflow = 'hidden';
   
   const modalHTML = `
-    <div id="fullScreenImportModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 16px;">
-      <div style="background: white; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); width: 100%; max-width: 28rem;" onclick="event.stopPropagation()">
+    <div id="fullScreenImportModal" class="fixed inset-0 bg-black bg-opacity-90 z-[999999] flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md transition-colors" onclick="event.stopPropagation()">
         <!-- Header -->
-        <div style="padding: 24px 24px 16px 24px; border-bottom: 1px solid #e5e7eb; background: linear-gradient(to right, #f9fafb, white); border-radius: 12px 12px 0 0; display: flex; align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center;">
-            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-              <svg style="width: 24px; height: 24px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="px-6 py-5 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-gray-50 to-white dark:from-slate-900 dark:to-slate-800 rounded-t-xl flex items-center justify-between transition-colors">
+          <div class="flex items-center">
+            <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mr-3">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
               </svg>
             </div>
             <div>
-              <h3 style="font-size: 20px; font-weight: bold; color: #111827; margin: 0;">📊 Importar Toners</h3>
-              <p style="font-size: 14px; color: #6b7280; margin: 4px 0 0 0;">Faça upload de um arquivo Excel ou CSV com os dados dos toners</p>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-0">📊 Importar Toners</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 mb-0">Faça upload de um arquivo Excel ou CSV com os dados dos toners</p>
             </div>
           </div>
-          <button onclick="closeFullScreenModal()" style="width: 32px; height: 32px; background: #f3f4f6; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
-            <svg style="width: 20px; height: 20px; color: #6b7280;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button onclick="closeFullScreenModal()" class="w-8 h-8 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full flex items-center justify-center cursor-pointer transition-colors border-none group">
+            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           </button>
         </div>
         
         <!-- Content -->
-        <div style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div class="p-6 flex flex-col gap-4">
           <!-- File Input -->
           <div>
-            <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 12px;">
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
               📁 Selecione o arquivo Excel ou CSV:
             </label>
             <input type="file" id="fullScreenFileInput" accept=".xlsx,.xls,.csv" 
-                   style="width: 100%; border: 2px dashed #d1d5db; border-radius: 12px; padding: 16px; font-size: 14px; transition: all 0.2s;" 
-                   onchange="this.style.borderColor='#3b82f6'"
-                   onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'"
-                   onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='none'">
-            <div style="flex items-center mt-2 text-xs text-gray-500">
-              <svg style="width: 16px; height: 16px; margin-right: 4px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="w-full border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl p-4 text-sm focus:ring-3 focus:ring-blue-200 focus:border-blue-400 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900/30 file:text-blue-700 dark:file:text-blue-400 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50">
+            <div class="flex items-center mt-2 text-xs text-gray-500 dark:text-gray-400">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
-              Formatos aceitos: <span style="font-weight: 500;">.xlsx, .xls, .csv</span> • Tamanho máximo: <span style="font-weight: 500;">10MB</span>
+              Formatos aceitos: <span class="font-medium">.xlsx, .xls, .csv</span> • Tamanho máximo: <span class="font-medium">10MB</span>
             </div>
           </div>
           
           <!-- Progress Container -->
-          <div id="fullScreenProgressContainer" style="display: none;">
-            <div style="background: linear-gradient(to right, #dbeafe, #dcfce7); border: 1px solid #3b82f6; border-radius: 12px; padding: 16px;">
-              <div style="flex items-center justify-between mb-3">
-                <div style="flex items-center">
-                  <div style="width: 20px; height: 20px; border: 2px solid #3b82f6; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px;"></div>
-                  <span style="font-size: 14px; font-weight: 600; color: #374151;">⚡ Progresso da Importação</span>
+          <div id="fullScreenProgressContainer" class="hidden">
+            <div class="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 transition-colors">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center">
+                  <div class="w-5 h-5 border-2 border-blue-600 dark:border-blue-400 border-t-transparent rounded-full animate-spin mr-2"></div>
+                  <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">⚡ Progresso da Importação</span>
                 </div>
-                <span id="fullScreenProgressText" style="font-size: 14px; font-weight: bold; color: #3b82f6;">0%</span>
+                <span id="fullScreenProgressText" class="text-sm font-bold text-blue-600 dark:text-blue-400">0%</span>
               </div>
-              <div style="width: 100%; background: #e5e7eb; border-radius: 9999px; height: 16px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
-                <div id="fullScreenProgressBar" style="background: linear-gradient(to right, #3b82f6, #10b981); height: 16px; border-radius: 9999px; transition: all 0.5s ease-out; width: 0%;"></div>
+              <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-4 shadow-inner">
+                <div id="fullScreenProgressBar" class="bg-gradient-to-r from-blue-500 to-green-500 h-4 rounded-full transition-all duration-500 w-0"></div>
               </div>
-              <div id="fullScreenImportStatus" style="font-size: 14px; color: #374151; background: white; border-radius: 8px; padding: 12px; margin-top: 12px; border: 1px solid #e5e7eb;">
+              <div id="fullScreenImportStatus" class="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 rounded-lg p-3 mt-3 border border-gray-200 dark:border-slate-700">
                 Preparando importação...
               </div>
             </div>
@@ -772,14 +746,12 @@ function createFullScreenModal() {
         </div>
         
         <!-- Footer -->
-        <div style="padding: 16px 24px 24px 24px; background: #f9fafb; border-top: 1px solid #e5e7eb; border-radius: 0 0 12px 12px;">
+        <div class="px-6 pb-6 pt-4 bg-gray-50 dark:bg-slate-900/50 border-t border-gray-200 dark:border-slate-700 rounded-b-xl transition-colors">
           <!-- Template Download -->
-          <div style="margin-bottom: 12px;">
+          <div class="mb-3">
             <button onclick="downloadTemplate()" 
-                    style="width: 100%; display: flex; align-items: center; justify-content: center; padding: 12px 16px; font-size: 14px; font-weight: 500; color: #1d4ed8; background: linear-gradient(to right, #dbeafe, #bfdbfe); border: 1px solid #3b82f6; border-radius: 8px; cursor: pointer; transition: background-color 0.2s;"
-                    onmouseover="this.style.background='linear-gradient(to right, #bfdbfe, #93c5fd)'"
-                    onmouseout="this.style.background='linear-gradient(to right, #dbeafe, #bfdbfe)'">
-              <svg style="width: 16px; height: 16px; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-full flex items-center justify-center px-4 py-3 text-sm font-medium text-blue-700 dark:text-blue-400 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border border-blue-200 dark:border-blue-800 rounded-lg cursor-pointer transition-colors shadow-sm border-none">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
               📥 Baixar Template
@@ -789,13 +761,11 @@ function createFullScreenModal() {
           <!-- Import Button -->
           <div>
             <button onclick="importFullScreenExcel()" 
-                    style="width: 100%; padding: 12px 16px; font-size: 14px; font-weight: 600; color: white; background: linear-gradient(to right, #10b981, #059669); border: 1px solid #10b981; border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-              <span style="display: flex; align-items: center; justify-content: center;">
-                <svg style="width: 16px; height: 16px; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                </svg>
-                📤 Importar Dados
-              </span>
+                    class="w-full py-3 px-4 text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 border-none rounded-lg cursor-pointer transition-all shadow-md hover:shadow-lg flex items-center justify-center">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+              </svg>
+              📤 Importar Dados
             </button>
           </div>
         </div>
@@ -886,58 +856,58 @@ function createDynamicModal() {
   }
   
   const modalHTML = `
-    <div id="dynamicImportModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 16px;">
-      <div style="background: white; border-radius: 8px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 100%; max-width: 28rem;" onclick="event.stopPropagation()">
+    <div id="dynamicImportModal" class="fixed inset-0 bg-black bg-opacity-80 z-[99999] flex items-center justify-center p-4 transition-all">
+      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md transition-colors" onclick="event.stopPropagation()">
         <!-- Header -->
-        <div style="padding: 24px 24px 16px 24px; border-bottom: 1px solid #e5e7eb;">
-          <h3 style="font-size: 18px; font-weight: 600; color: #111827; margin: 0;">Importar Toners</h3>
+        <div class="px-6 py-5 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-gray-50 to-white dark:from-slate-900 dark:to-slate-800 rounded-t-xl transition-colors">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-0">Importar Toners</h3>
         </div>
         
         <!-- Content -->
-        <div style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div class="p-6 flex flex-col gap-4">
           <!-- File Input -->
           <div>
-            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Selecione o arquivo Excel:
             </label>
             <input type="file" id="dynamicExcelFileInput" accept=".xlsx,.xls,.csv" 
-                   style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; font-size: 14px;">
-            <p style="font-size: 12px; color: #6b7280; margin-top: 4px; margin-bottom: 0;">Formatos aceitos: .xlsx, .xls, .csv</p>
+                   class="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-3 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-0">Formatos aceitos: .xlsx, .xls, .csv</p>
           </div>
           
           <!-- Progress Container -->
-          <div id="dynamicProgressContainer" style="display: none;">
-            <div style="margin-bottom: 12px;">
-              <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 4px;">
+          <div id="dynamicProgressContainer" class="hidden">
+            <div class="mb-3">
+              <div class="flex justify-between text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 <span>Progresso da Importação</span>
                 <span id="dynamicProgressText">0%</span>
               </div>
-              <div style="width: 100%; background: #e5e7eb; border-radius: 9999px; height: 12px;">
-                <div id="dynamicProgressBar" style="background: linear-gradient(to right, #3b82f6, #2563eb); height: 12px; border-radius: 9999px; transition: all 0.5s ease-out; width: 0%;"></div>
+              <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-3">
+                <div id="dynamicProgressBar" class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500 w-0"></div>
               </div>
             </div>
-            <div id="dynamicImportStatus" style="font-size: 14px; color: #4b5563; background: #f9fafb; border-radius: 8px; padding: 8px;"></div>
+            <div id="dynamicImportStatus" class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-slate-900 rounded-lg p-3 border border-gray-100 dark:border-slate-700 italic"></div>
           </div>
         </div>
         
         <!-- Footer -->
-        <div style="padding: 16px 24px 24px 24px; background: #f9fafb; border-top: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;">
+        <div class="px-6 pb-6 pt-4 bg-gray-50 dark:bg-slate-900/50 border-t border-gray-200 dark:border-slate-700 rounded-b-xl transition-colors">
           <!-- Template Download -->
-          <div style="margin-bottom: 12px;">
+          <div class="mb-3">
             <button onclick="downloadTemplate()" 
-                    style="width: 100%; display: flex; align-items: center; justify-content: center; padding: 8px 16px; font-size: 14px; font-weight: 500; color: #1d4ed8; background: #dbeafe; border: 1px solid #bfdbfe; border-radius: 8px; cursor: pointer; transition: background-color 0.2s;">
+                    class="w-full flex items-center justify-center px-4 py-3 text-sm font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-lg cursor-pointer transition-colors shadow-sm border-none">
               📥 Baixar Template Excel
             </button>
           </div>
           
           <!-- Action Buttons -->
-          <div style="display: flex; gap: 12px;">
+          <div class="flex gap-3">
             <button onclick="closeDynamicModal()" 
-                    style="flex: 1; padding: 8px 16px; font-size: 14px; font-weight: 500; color: #374151; background: white; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; transition: background-color 0.2s;">
+                    class="flex-1 px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-slate-700">
               Cancelar
             </button>
             <button onclick="importDynamicExcel()" 
-                    style="flex: 1; padding: 8px 16px; font-size: 14px; font-weight: 500; color: white; background: #16a34a; border: 1px solid transparent; border-radius: 8px; cursor: pointer; transition: background-color 0.2s;">
+                    class="flex-1 px-4 py-3 text-sm font-semibold text-white bg-green-600 border-none rounded-lg cursor-pointer transition-colors hover:bg-green-700 shadow-md">
               📤 Importar Dados
             </button>
           </div>

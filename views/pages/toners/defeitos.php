@@ -10,20 +10,20 @@
   <!-- Cabeçalho -->
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
     <div>
-      <h1 class="text-2xl font-semibold text-gray-900">Toners com Defeito</h1>
-      <p class="text-sm text-gray-500 mt-0.5">Registre toners com defeito identificados e notifique os administradores automaticamente.</p>
+      <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Toners com Defeito</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Registre toners com defeito identificados e notifique os administradores automaticamente.</p>
     </div>
-    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200">
+    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/50 transition-colors">
       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
       <?php echo count($defeitos_historico ?? []); ?> registros
     </span>
   </div>
 
   <!-- ======================= FORMULÁRIO ======================= -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100 bg-red-50 flex items-center gap-2">
-      <svg class="w-5 h-5 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-      <h2 class="text-base font-semibold text-red-800">Registrar Toner com Defeito</h2>
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden transition-colors">
+    <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-red-50 dark:bg-red-900/10 flex items-center gap-2">
+      <svg class="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      <h2 class="text-base font-semibold text-red-800 dark:text-red-400">Registrar Toner com Defeito</h2>
     </div>
 
     <?php if (!empty($canEdit)): ?>
@@ -33,29 +33,30 @@
       
       <!-- Número do Pedido -->
       <div class="md:col-span-3 flex flex-col">
-        <label for="numeroPedido" class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Número do Pedido <span class="text-red-500">*</span></label>
+        <label for="numeroPedido" class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Número do Pedido <span class="text-red-500">*</span></label>
         <div class="relative group">
           <input type="text" id="numeroPedido" name="numero_pedido"
             placeholder="Ex: 54321"
-            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 focus:bg-white focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none placeholder-gray-400 group-hover:bg-white group-hover:border-gray-300">
+            class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none placeholder-gray-400 dark:placeholder-gray-600 group-hover:bg-white dark:group-hover:bg-slate-800 group-hover:border-gray-300 dark:group-hover:border-slate-600">
         </div>
       </div>
 
       <!-- Nº OS -->
       <div class="md:col-span-3 flex flex-col">
-        <label for="numeroOs" class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Nº OS <span class="text-gray-400 font-normal lowercase">opcional</span></label>
+        <label for="numeroOs" class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Nº OS <span class="text-gray-400 font-normal lowercase">opcional</span></label>
         <div class="relative group">
           <input type="text" id="numeroOs" name="numero_os"
             placeholder="Ex: 10045"
-            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 focus:bg-white focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none placeholder-gray-400 group-hover:bg-white group-hover:border-gray-300">
+            class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none placeholder-gray-400 dark:placeholder-gray-600 group-hover:bg-white dark:group-hover:bg-slate-800 group-hover:border-gray-300 dark:group-hover:border-slate-600">
         </div>
       </div>
+Sync check.
 
       <!-- Filial -->
       <div class="md:col-span-3 flex flex-col">
-        <label for="filialSelect" class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Filial <span class="text-gray-400 font-normal lowercase">opcional</span></label>
+        <label for="filialSelect" class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Filial <span class="text-gray-400 font-normal lowercase">opcional</span></label>
         <select id="filialSelect" name="filial_id"
-          class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 focus:bg-white focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none group-hover:bg-white group-hover:border-gray-300">
+          class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none group-hover:bg-white dark:group-hover:bg-slate-800 group-hover:border-gray-300 dark:group-hover:border-slate-600">
           <option value="">— Selecione —</option>
           <?php foreach ($filiais_lista ?? [] as $fil): ?>
           <option value="<?= (int)$fil['id'] ?>"><?= htmlspecialchars($fil['nome']) ?></option>
@@ -65,21 +66,21 @@
 
       <!-- Modelo do Toner (Busca) -->
       <div class="md:col-span-6 flex flex-col">
-        <label for="buscaToner" class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Modelo do Toner <span class="text-red-500">*</span></label>
+        <label for="buscaToner" class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Modelo do Toner <span class="text-red-500">*</span></label>
         <div class="relative group">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg class="h-5 w-5 text-gray-400 group-focus-within:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
           <input type="text" id="buscaToner"
             placeholder="Pesquise o modelo..."
-            class="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-sm font-medium text-gray-800 focus:bg-white focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none placeholder-gray-400 group-hover:bg-white group-hover:border-gray-300"
+            class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg pl-10 pr-4 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none placeholder-gray-400 dark:placeholder-gray-600 group-hover:bg-white dark:group-hover:bg-slate-800 group-hover:border-gray-300 dark:group-hover:border-slate-600"
             autocomplete="off">
             
           <!-- Select Oculto / Dropdown simulado -->
-          <div id="dropdownToner" class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl hidden max-h-60 overflow-y-auto">
-             <select id="selectToner" name="toner_id" size="5" class="w-full text-sm border-none focus:ring-0 p-1">
+          <div id="dropdownToner" class="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl hidden max-h-60 overflow-y-auto">
+             <select id="selectToner" name="toner_id" size="5" class="w-full text-sm border-none focus:ring-0 p-1 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-100">
                 <?php foreach ($toners_lista as $t): ?>
-                  <option value="<?php echo (int)$t['id']; ?>" data-label="<?php echo htmlspecialchars($t['modelo']); ?>" class="p-2 hover:bg-red-50 rounded cursor-pointer">
+                  <option value="<?php echo (int)$t['id']; ?>" data-label="<?php echo htmlspecialchars($t['modelo']); ?>" class="p-2 hover:bg-red-50 dark:hover:bg-red-900/10 rounded cursor-pointer">
                     <?php echo htmlspecialchars($t['modelo']); ?>
                   </option>
                 <?php
@@ -96,33 +97,33 @@ endif; ?>
 
       <!-- Quantidade -->
       <div class="md:col-span-3 flex flex-col">
-        <label for="quantidadeDefeito" class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Qtd. <span class="text-red-500">*</span></label>
+        <label for="quantidadeDefeito" class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Qtd. <span class="text-red-500">*</span></label>
         <div class="relative group">
            <input type="number" id="quantidadeDefeito" name="quantidade" value="1" min="1"
-            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-semibold text-gray-800 text-center focus:bg-white focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none group-hover:bg-white group-hover:border-gray-300">
+            class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm font-semibold text-gray-800 dark:text-gray-100 text-center focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none group-hover:bg-white dark:group-hover:bg-slate-800 group-hover:border-gray-300 dark:group-hover:border-slate-600">
         </div>
       </div>
 
       <!-- Linha 2: Cliente (12) -->
       <div class="md:col-span-12 flex flex-col">
-        <label for="buscaCliente" class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Cliente <span class="text-red-500">*</span></label>
+        <label for="buscaCliente" class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Cliente <span class="text-red-500">*</span></label>
         <div class="relative group">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
              <svg class="h-5 w-5 text-gray-400 group-focus-within:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
           </div>
           <input type="text" id="buscaCliente"
             placeholder="Pesquise por nome ou código do cliente..."
-            class="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-sm font-medium text-gray-800 focus:bg-white focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none placeholder-gray-400 group-hover:bg-white group-hover:border-gray-300"
+            class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg pl-10 pr-4 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none placeholder-gray-400 dark:placeholder-gray-600 group-hover:bg-white dark:group-hover:bg-slate-800 group-hover:border-gray-300 dark:group-hover:border-slate-600"
             autocomplete="off">
 
            <!-- Select Oculto / Dropdown -->
-           <div id="dropdownCliente" class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl hidden max-h-60 overflow-y-auto">
-              <select id="selectCliente" name="cliente_id" size="5" class="w-full text-sm border-none focus:ring-0 p-1">
+           <div id="dropdownCliente" class="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl hidden max-h-60 overflow-y-auto transition-colors">
+              <select id="selectCliente" name="cliente_id" size="5" class="w-full text-sm border-none focus:ring-0 p-1 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-100">
                 <?php foreach ($clientes_lista as $c): ?>
                   <option value="<?php echo (int)$c['id']; ?>"
                     data-label="<?php echo htmlspecialchars($c['codigo'] . ' – ' . $c['nome']); ?>"
                     data-nome="<?php echo htmlspecialchars($c['nome']); ?>"
-                    class="p-2 hover:bg-red-50 rounded cursor-pointer">
+                    class="p-2 hover:bg-red-50 dark:hover:bg-red-900/10 rounded cursor-pointer transition-colors">
                     <?php echo htmlspecialchars($c['codigo'] . ' – ' . $c['nome']); ?>
                   </option>
                 <?php
@@ -139,20 +140,20 @@ endif; ?>
 
       <!-- Linha 3: Descrição (12) -->
       <div class="md:col-span-12 flex flex-col">
-        <label for="descricaoDefeito" class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Descrição do Defeito <span class="text-red-500">*</span></label>
+        <label for="descricaoDefeito" class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Descrição do Defeito <span class="text-red-500">*</span></label>
         <textarea id="descricaoDefeito" name="descricao" rows="4"
           placeholder="Descreva detalhadamente o problema (ex: Manchas na lateral, ruído ao imprimir, etc)..."
-          class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-800 focus:bg-white focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none resize-y placeholder-gray-400 hover:bg-white hover:border-gray-300"></textarea>
+          class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-3 text-sm text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none resize-y placeholder-gray-400 dark:placeholder-gray-600 hover:bg-white dark:hover:bg-slate-800 hover:border-gray-300 dark:hover:border-slate-600"></textarea>
       </div>
 
       <!-- Linha 4: Fotos (12) -->
       <div class="md:col-span-12">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">Evidências Fotográficas <span class="text-gray-400 font-normal lowercase ml-1">(opcional, máx 3)</span></label>
+        <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 block">Evidências Fotográficas <span class="text-gray-400 font-normal lowercase ml-1">(opcional, máx 3)</span></label>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <?php for ($i = 1; $i <= 3; $i++): ?>
           <div class="relative group">
             <label for="foto<?php echo $i; ?>"
-              class="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 bg-gray-50 rounded-xl h-32 cursor-pointer hover:border-red-400 hover:bg-red-50/50 transition-all duration-200" id="labelFoto<?php echo $i; ?>">
+              class="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 rounded-xl h-32 cursor-pointer hover:border-red-400 dark:hover:border-red-500 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-all duration-200" id="labelFoto<?php echo $i; ?>">
               
               <span id="previewFoto<?php echo $i; ?>" class="w-full h-full hidden rounded-xl overflow-hidden relative">
                 <img id="imgPreview<?php echo $i; ?>" src="" alt="Prévia" class="w-full h-full object-cover">
@@ -161,14 +162,14 @@ endif; ?>
                 </div>
               </span>
               
-              <span id="placeholderFoto<?php echo $i; ?>" class="flex flex-col items-center gap-1 text-gray-400 group-hover:text-red-400 transition-colors">
+              <span id="placeholderFoto<?php echo $i; ?>" class="flex flex-col items-center gap-1 text-gray-400 group-hover:text-red-400 dark:group-hover:text-red-500 transition-colors">
                 <svg class="w-8 h-8 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <span class="text-xs font-medium">Foto <?php echo $i; ?></span>
               </span>
             </label>
             <input type="file" id="foto<?php echo $i; ?>" name="foto<?php echo $i; ?>" accept="image/*" class="hidden" data-index="<?php echo $i; ?>">
             <button type="button" id="removerFoto<?php echo $i; ?>"
-              class="hidden absolute -top-2 -right-2 bg-red-100 text-red-600 rounded-full p-1 shadow-md hover:bg-red-200 transition-colors"
+              class="hidden absolute -top-2 -right-2 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-full p-1 shadow-md hover:bg-red-200 dark:hover:bg-red-900 transition-colors"
                 title="Remover foto"
               onclick="removerFoto(<?php echo $i; ?>)">
                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -181,27 +182,27 @@ endfor; ?>
 
       <!-- Linha 5: Notificar Setores (12) -->
       <div class="md:col-span-12">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">
+        <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 block">
           Notificar Setores
-          <span class="text-gray-400 font-normal lowercase ml-1">(opcional â€” usuÃ¡rios dos setores selecionados receberÃ£o email)</span>
+          <span class="text-gray-400 dark:text-gray-500 font-normal lowercase ml-1">(opcional — usuários dos setores selecionados receberão email)</span>
         </label>
         <div class="flex flex-wrap gap-2">
           <?php if (!empty($departamentos_lista)): ?>
             <?php foreach ($departamentos_lista as $dep): ?>
-              <label class="inline-flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-red-50 hover:border-red-300 transition-all has-[:checked]:bg-red-50 has-[:checked]:border-red-400 has-[:checked]:text-red-700 select-none">
+              <label class="inline-flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/10 hover:border-red-300 dark:hover:border-red-700 transition-all has-[:checked]:bg-red-50 dark:has-[:checked]:bg-red-900/20 has-[:checked]:border-red-400 dark:has-[:checked]:border-red-500 has-[:checked]:text-red-700 dark:has-[:checked]:text-red-400 select-none">
                 <input type="checkbox" name="notificar_setores[]" value="<?php echo htmlspecialchars($dep['nome']); ?>"
-                  class="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2">
-                <span class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($dep['nome']); ?></span>
+                  class="w-4 h-4 text-red-600 bg-gray-100 dark:bg-slate-800 border-gray-300 dark:border-slate-600 rounded focus:ring-red-500 focus:ring-2">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300"><?php echo htmlspecialchars($dep['nome']); ?></span>
               </label>
             <?php endforeach; ?>
           <?php else: ?>
-            <span class="text-sm text-gray-400 italic">Nenhum departamento cadastrado.</span>
+            <span class="text-sm text-gray-400 dark:text-gray-500 italic">Nenhum departamento cadastrado.</span>
           <?php endif; ?>
         </div>
       </div>
 
       <!-- Botão -->
-      <div class="md:col-span-12 flex justify-end pt-4 border-t border-gray-100 mt-2">
+      <div class="md:col-span-12 flex justify-end pt-4 border-t border-gray-100 dark:border-slate-700 mt-2 transition-colors">
         <button type="submit" id="btnRegistrar"
           class="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-sm font-bold rounded-lg shadow-lg shadow-red-500/20 transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -219,23 +220,23 @@ endfor; ?>
   </div>
 
   <!-- ======================= HISTÓRICO ======================= -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-      <h2 class="text-base font-semibold text-gray-800">Histórico de Registros</h2>
-      <span class="text-sm text-gray-400"><?php echo count($defeitos_historico ?? []); ?> registro(s)</span>
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden transition-colors">
+    <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
+      <h2 class="text-base font-semibold text-gray-800 dark:text-white">Histórico de Registros</h2>
+      <span class="text-sm text-gray-400 dark:text-gray-500"><?php echo count($defeitos_historico ?? []); ?> registro(s)</span>
     </div>
 
     <!-- Barra de busca -->
-    <div class="px-6 py-3 border-b border-gray-100 flex items-center gap-3">
+    <div class="px-6 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center gap-3">
       <div class="relative flex-1 max-w-md">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </div>
         <input type="text" id="buscaHistorico" placeholder="Buscar por modelo, pedido, OS, cliente, filial, descrição..."
-          class="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all"
+          class="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 dark:focus:border-red-500/40 transition-all text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600"
           oninput="filtrarHistorico()">
       </div>
-      <span id="contadorResultados" class="text-xs text-gray-400"></span>
+      <span id="contadorResultados" class="text-xs text-gray-400 dark:text-gray-500"></span>
     </div>
 
     <?php if (empty($defeitos_historico)): ?>
@@ -247,7 +248,7 @@ else: ?>
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm" id="tabelaHistorico">
         <thead>
-          <tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          <tr class="bg-gray-50 dark:bg-slate-900/50 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
             <th class="px-4 py-3 text-left">Data</th>
             <th class="px-4 py-3 text-left">Modelo</th>
             <th class="px-4 py-3 text-left">Nº Pedido</th>
@@ -262,9 +263,9 @@ else: ?>
             <th class="px-4 py-3 text-center">Ações</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
+        <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
           <?php foreach ($defeitos_historico as $d): ?>
-          <tr class="hover:bg-gray-50 transition-colors defeito-row"
+          <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors defeito-row"
               data-busca="<?= strtolower(htmlspecialchars(
                   ($d['modelo_toner'] ?? '') . ' ' .
                   ($d['numero_pedido'] ?? '') . ' ' .
@@ -273,34 +274,34 @@ else: ?>
                   ($d['filial_nome'] ?? '') . ' ' .
                   ($d['descricao'] ?? '')
               )) ?>">
-            <td class="px-4 py-3 text-gray-500 whitespace-nowrap">
+            <td class="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap transition-colors">
               <?php echo date('d/m/Y H:i', strtotime($d['created_at'])); ?>
             </td>
-            <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+            <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap transition-colors">
               <?php echo htmlspecialchars($d['modelo_toner']); ?>
             </td>
-            <td class="px-4 py-3 text-gray-600 whitespace-nowrap">
+            <td class="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap transition-colors">
               <?php echo htmlspecialchars($d['numero_pedido']); ?>
             </td>
-            <td class="px-4 py-3 text-gray-600 whitespace-nowrap">
-              <?php echo $d['numero_os'] ? htmlspecialchars($d['numero_os']) : '<span class="text-gray-300">—</span>'; ?>
+            <td class="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap transition-colors">
+              <?php echo $d['numero_os'] ? htmlspecialchars($d['numero_os']) : '<span class="text-gray-300 dark:text-gray-600">—</span>'; ?>
             </td>
-            <td class="px-4 py-3 whitespace-nowrap">
+            <td class="px-4 py-3 whitespace-nowrap transition-colors">
               <?php if (!empty($d['filial_nome'])): ?>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 transition-colors">
                   <?= htmlspecialchars($d['filial_nome']) ?>
                 </span>
               <?php else: ?>
-                <span class="text-gray-300">—</span>
+                <span class="text-gray-300 dark:text-gray-600">—</span>
               <?php endif; ?>
             </td>
-            <td class="px-4 py-3 text-gray-600 whitespace-nowrap">
+            <td class="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap transition-colors">
               <?php echo htmlspecialchars($d['cliente_nome']); ?>
             </td>
-            <td class="px-4 py-3 text-gray-600 min-w-[200px] break-words">
+            <td class="px-4 py-3 text-gray-600 dark:text-gray-400 min-w-[200px] break-words transition-colors">
               <?php echo nl2br(htmlspecialchars($d['descricao'])); ?>
             </td>
-            <td class="px-4 py-3 text-center font-medium text-gray-700">
+            <td class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 transition-colors">
                <?php echo (int)($d['quantidade'] ?? 1); ?>
             </td>
             <td class="px-4 py-3 text-center">
@@ -311,12 +312,12 @@ else: ?>
                   <a href="/toners/defeitos/<?php echo (int)$d['id']; ?>/foto/<?php echo $n; ?>"
                      target="_blank"
                      title="<?php echo htmlspecialchars($fotoNome); ?>"
-                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors">
+                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 transition-colors border border-blue-100 dark:border-blue-900/50 shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                   </a>
                   <?php
       else: ?>
-                  <span class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-300">
+                  <span class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-slate-900 flex items-center justify-center text-gray-300 dark:text-gray-700 border border-gray-100 dark:border-slate-800 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                   </span>
                   <?php
@@ -325,32 +326,31 @@ else: ?>
     endfor; ?>
               </div>
             </td>
-            <td class="px-4 py-3 text-gray-500 whitespace-nowrap">
+            <td class="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap transition-colors">
               <?php echo htmlspecialchars($d['registrado_por_nome'] ?? '—'); ?>
             </td>
-            <td class="px-4 py-3 text-center">
+            <td class="px-4 py-3 text-center transition-colors">
                 <?php if (!empty($d['devolutiva_descricao'])): ?>
                 <div class="flex flex-col items-center gap-1">
-                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900/50 transition-colors">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     Respondida
                   </span>
                   <?php
     $res = $d['devolutiva_resultado'] ?? '';
-    // Let's render the text since $res now stores the dynamic string
     if ($res !== ''):
 ?>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50 transition-colors">
                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                     <?php echo htmlspecialchars($res); ?>
                   </span>
                   <?php endif; ?>
-
-                  <span class="text-[10px] text-gray-400" title="<?php echo htmlspecialchars($d['devolutiva_descricao']); ?>">
+ 
+                  <span class="text-[10px] text-gray-400 dark:text-gray-500 transition-colors" title="<?php echo htmlspecialchars($d['devolutiva_descricao']); ?>">
                     <?php echo htmlspecialchars(mb_strimwidth($d['devolutiva_descricao'], 0, 40, '…')); ?>
                   </span>
                   <?php if (!empty($d['devolutiva_por_nome'])): ?>
-                    <span class="text-[10px] text-gray-400">
+                    <span class="text-[10px] text-gray-400 dark:text-gray-500 transition-colors">
                       por <?php echo htmlspecialchars($d['devolutiva_por_nome']); ?>
                       <?php if (!empty($d['devolutiva_at'])): ?>
                         em <?php echo date('d/m/Y', strtotime($d['devolutiva_at'])); ?>
@@ -360,7 +360,7 @@ else: ?>
                 </div>
               <?php
     else: ?>
-                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-400 border border-gray-200">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-400 dark:text-gray-500 transition-colors">
                   <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                   Pendente
                 </span>
@@ -384,7 +384,7 @@ else: ?>
                             data-devolutiva-por="<?php echo htmlspecialchars($d['devolutiva_por_nome'] ?? ''); ?>"
                             data-devolutiva-at="<?php echo !empty($d['devolutiva_at']) ? date('d/m/Y H:i', strtotime($d['devolutiva_at'])) : ''; ?>"
                             data-has-devolutiva="<?php echo $hasDevolutiva ? '1' : '0'; ?>"
-                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg <?php echo $hasDevolutiva ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-800 border-blue-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600 border-gray-200'; ?> transition-colors border" title="Ver Devolutiva">
+                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg <?php echo $hasDevolutiva ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-800 dark:hover:text-blue-200 border border-blue-200 dark:border-blue-800 transition-colors shadow-sm' : 'bg-gray-50 dark:bg-slate-900 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-gray-300 border border-gray-200 dark:border-slate-700 transition-colors shadow-none'; ?>" title="Ver Devolutiva">
                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                        <span class="text-xs font-medium">Ver</span>
                     </button>
@@ -394,21 +394,21 @@ else: ?>
                     <button type="button" onclick="openDevolutiva(<?php echo $d['id']; ?>, 'edit', this)"
                             data-desc="<?php echo htmlspecialchars($d['devolutiva_descricao'] ?? ''); ?>"
                             data-resultado="<?php echo htmlspecialchars($d['devolutiva_resultado'] ?? ''); ?>"
-                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-50 text-yellow-600 hover:bg-yellow-100 hover:text-yellow-800 transition-colors border border-yellow-200" title="Editar Devolutiva">
+                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 hover:text-yellow-800 dark:hover:text-yellow-200 transition-colors border border-yellow-200 dark:border-yellow-800 shadow-sm" title="Editar Devolutiva">
                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                     </button>
                   <?php elseif (!$hasDevolutiva && $canInsert): ?>
                     <!-- Inserir Devolutiva (só Qualidade/Admin) -->
                     <button type="button" onclick="openDevolutiva(<?php echo $d['id']; ?>, 'create', this)"
                             data-resultado=""
-                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-800 transition-colors border border-green-200" title="Inserir Devolutiva">
+                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50 hover:text-green-800 dark:hover:text-green-200 transition-colors border border-green-200 dark:border-green-800 shadow-sm" title="Inserir Devolutiva">
                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                        <span class="text-xs font-medium">Devolutiva</span>
                     </button>
                   <?php endif; ?>
 
                   <button type="button" onclick="excluirDefeito(<?php echo $d['id']; ?>)"
-                     class="text-red-500 hover:text-red-700 transition-colors" title="Excluir Registro">
+                     class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Excluir Registro">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                   </button>
               </div>
@@ -427,11 +427,11 @@ endif; ?>
 
 <!-- Toast de feedback -->
 <div id="toastDefeito"
-  class="fixed bottom-6 right-6 z-50 hidden max-w-sm bg-white border rounded-xl shadow-lg px-5 py-4 flex items-start gap-3 transition-all duration-300">
-  <span id="toastIconDefeito" class="mt-0.5 shrink-0 w-5 h-5"></span>
+  class="fixed bottom-6 right-6 z-50 hidden max-w-sm bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-xl shadow-lg px-5 py-4 flex items-start gap-3 transition-all duration-300">
+  <span id="toastIconDefeito" class="mt-0.5 shrink-0 w-5 h-5 transition-colors"></span>
   <div>
-    <p id="toastTituloDefeito" class="text-sm font-semibold text-gray-800"></p>
-    <p id="toastMsgDefeito" class="text-sm text-gray-500 mt-0.5"></p>
+    <p id="toastTituloDefeito" class="text-sm font-semibold text-gray-800 dark:text-white transition-colors"></p>
+    <p id="toastMsgDefeito" class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 transition-colors"></p>
   </div>
 </div>
 
@@ -737,39 +737,39 @@ function showToast(type, titulo, msg) {
 <div id="modalDevolutiva" class="fixed inset-0 z-[99999] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="z-index: 99999;">
   
   <!-- Overlay Backdrop -->
-  <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm pointer-events-auto" aria-hidden="true" onclick="closeDevolutiva()"></div>
+  <div class="fixed inset-0 bg-gray-900 bg-opacity-75 dark:bg-opacity-90 transition-opacity backdrop-blur-sm pointer-events-auto" aria-hidden="true" onclick="closeDevolutiva()"></div>
 
   <!-- Centralização -->
   <div class="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 pointer-events-none">
       
       <!-- Modal Card -->
-      <div class="pointer-events-auto relative w-full max-w-lg bg-white rounded-xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden transform transition-all ring-1 ring-black ring-opacity-5">
+      <div class="pointer-events-auto relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden transform transition-all ring-1 ring-black ring-opacity-5 dark:ring-white dark:ring-opacity-10 transition-colors">
         
         <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0">
-            <h3 class="text-lg font-semibold text-gray-900" id="modal-title">Devolutiva (Qualidade)</h3>
-            <button type="button" onclick="closeDevolutiva()" class="text-gray-400 hover:text-gray-500 transition-colors bg-white hover:bg-gray-100 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 border border-transparent hover:border-gray-200">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800 shrink-0 transition-colors">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modal-title">Devolutiva (Qualidade)</h3>
+            <button type="button" onclick="closeDevolutiva()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 border border-transparent hover:border-gray-200 dark:hover:border-slate-600">
                 <span class="sr-only">Fechar</span>
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
         </div>
 
         <!-- Scrollable Content -->
-        <div class="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-gray-200">
+        <div class="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-slate-700 bg-white dark:bg-slate-900 transition-colors">
             <form id="formDevolutiva">
                 <input type="hidden" name="defeito_id" id="devolutivaDefeitoId">
                 
-                <div class="mb-5 p-3.5 bg-blue-50 border border-blue-100 rounded-lg flex gap-3 text-sm text-blue-700" id="devolutivaModeText">
-                    <svg class="w-5 h-5 shrink-0 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="mb-5 p-3.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/50 rounded-lg flex gap-3 text-sm text-blue-700 dark:text-blue-400" id="devolutivaModeText">
+                    <svg class="w-5 h-5 shrink-0 text-blue-400 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     <span>Insira a análise técnica e evidências.</span>
                 </div>
 
                 <div class="space-y-6">
                     <!-- Classificação do Resultado -->
                     <div id="devolutivaResultadoDiv">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="devolutivaResultadoInput">Classificação (Defeito) <span class="text-red-500" id="devolutivaResultadoObr">*</span></label>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 transition-colors" for="devolutivaResultadoInput">Classificação (Defeito) <span class="text-red-500" id="devolutivaResultadoObr">*</span></label>
                         <select name="devolutiva_resultado" id="devolutivaResultadoInput"
-                            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm font-medium text-gray-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                            class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-lg px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
                             <option value="">— Selecione a classificação —</option>
                             <!-- Hardcoded fallback defaults from before, so old ones work logically -->
                             <option value="DEFEITO_PROCEDENTE">DEFEITO PROCEDENTE (Antigo)</option>
@@ -783,19 +783,19 @@ function showToast(type, titulo, msg) {
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Descrição Técnica</label>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 transition-colors">Descrição Técnica</label>
                         <textarea name="devolutiva_descricao" id="devolutivaDesc" rows="5" 
-                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm placeholder-gray-400 resize-none transition-shadow"
+                            class="block w-full rounded-lg border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 resize-none transition-all"
                             placeholder="Descreva detalhadamente a análise realizada..."
                             required></textarea>
                     </div>
                     
                     <div id="devolutivaUploads">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Evidências (Até 3 fotos)</label>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 transition-colors">Evidências (Até 3 fotos)</label>
                         <div class="grid grid-cols-3 gap-3">
                             <?php for ($i = 1; $i <= 3; $i++): ?>
                             <div class="relative group aspect-square">
-                                <label class="block w-full h-full border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-red-500 hover:bg-red-50/30 transition-all overflow-hidden bg-gray-50/50">
+                                <label class="block w-full h-full border-2 border-dashed border-gray-300 dark:border-slate-800 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-red-500 dark:hover:border-red-500 hover:bg-red-50/30 dark:hover:bg-red-900/10 transition-all overflow-hidden bg-gray-50/50 dark:bg-slate-950/50">
                                     <input type="file" name="devolutiva_foto<?php echo $i; ?>" id="devFoto<?php echo $i; ?>" accept="image/*" class="hidden" onchange="previewDevFoto(this, <?php echo $i; ?>)">
                                     
                                     <div id="devPlaceholder<?php echo $i; ?>" class="text-center p-2 transition-transform group-hover:scale-105">
@@ -825,8 +825,8 @@ endfor; ?>
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 shrink-0 rounded-b-xl">
-              <button type="button" onclick="closeDevolutiva()" class="px-5 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 shadow-sm transition-all">
+        <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3 shrink-0 rounded-b-xl transition-colors">
+              <button type="button" onclick="closeDevolutiva()" class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 dark:focus:ring-slate-700 shadow-sm transition-all">
                 Cancelar
               </button>
               <button type="submit" form="formDevolutiva" id="btnSaveDevolutiva" class="px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg text-sm font-semibold hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 shadow-lg shadow-red-500/20 transition-all transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed">
@@ -887,10 +887,10 @@ function openDevolutiva(id, mode, btn) {
         
         // Render resultado badge with dynamic text
         if (resultado) {
-            resultadoBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold bg-blue-100 text-blue-700 border border-blue-200';
+            resultadoBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 transition-colors shadow-sm';
             resultadoBadge.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>${resultado}`;
         } else {
-            resultadoBadge.className = 'text-xs text-gray-400 italic';
+            resultadoBadge.className = 'text-xs text-gray-400 dark:text-gray-500 italic transition-colors';
             resultadoBadge.innerHTML = 'Não classificado';
         }
         

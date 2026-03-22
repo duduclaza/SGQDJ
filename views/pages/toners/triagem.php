@@ -24,8 +24,8 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
   <div class="mb-6">
     <div class="flex justify-between items-center flex-wrap gap-3">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900">Triagem de Toners</h1>
-        <p class="mt-1 text-gray-600">Avalie a gramatura restante e defina o destino do toner retornado</p>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Triagem de Toners</h1>
+        <p class="mt-1 text-gray-600 dark:text-gray-400">Avalie a gramatura restante e defina o destino do toner retornado</p>
       </div>
       <div class="flex gap-2 flex-wrap">
         <?php if ($canImport): ?>
@@ -55,48 +55,48 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
   </div>
 
   <!-- Filtros -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 p-4 mb-6 transition-colors">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
       <div class="sm:col-span-2 lg:col-span-2">
-        <label class="block text-xs font-medium text-gray-700 mb-1">Busca Inteligente</label>
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Busca Inteligente</label>
         <div class="relative">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </span>
-          <input id="f-search" type="text" placeholder="Modelo, cliente, colaborador ou cód. requisição..." class="w-full border border-gray-300 rounded-xl pl-9 pr-3 py-2.5 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+          <input id="f-search" type="text" placeholder="Modelo, cliente, colaborador ou cód. requisição..." class="w-full border border-gray-300 dark:border-slate-600 rounded-xl pl-9 pr-3 py-2.5 text-sm bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
         </div>
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Filial</label>
-        <input id="f-filial" type="text" placeholder="Ex.: Matriz" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Filial</label>
+        <input id="f-filial" type="text" placeholder="Ex.: Matriz" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Modelo</label>
-        <input id="f-modelo" type="text" placeholder="Ex.: HP CF280A" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Modelo</label>
+        <input id="f-modelo" type="text" placeholder="Ex.: HP CF280A" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Cliente</label>
-        <input id="f-cliente" type="text" placeholder="Nome ou código" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Cliente</label>
+        <input id="f-cliente" type="text" placeholder="Nome ou código" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Colaborador</label>
-        <input id="f-colaborador" type="text" placeholder="Nome" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Colaborador</label>
+        <input id="f-colaborador" type="text" placeholder="Nome" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Defeito</label>
-        <input id="f-defeito" type="text" placeholder="Descrição" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Defeito</label>
+        <input id="f-defeito" type="text" placeholder="Descrição" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Fornecedor</label>
-        <input id="f-fornecedor" type="text" placeholder="Fornecedor" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Fornecedor</label>
+        <input id="f-fornecedor" type="text" placeholder="Fornecedor" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Cód. Requisição</label>
-        <input id="f-codigo-req" type="text" placeholder="REQ-2026..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Cód. Requisição</label>
+        <input id="f-codigo-req" type="text" placeholder="REQ-2026..." class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Destino</label>
-        <select id="f-destino" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Destino</label>
+        <select id="f-destino" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Todos</option>
           <option value="Descarte">Descarte</option>
           <option value="Garantia">Garantia</option>
@@ -105,28 +105,28 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
         </select>
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Modo</label>
-        <select id="f-modo" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Modo</label>
+        <select id="f-modo" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Todos</option>
           <option value="peso">Peso</option>
           <option value="percentual">% Direto</option>
         </select>
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">% Mín.</label>
-        <input id="f-percentual-min" type="number" min="0" max="100" step="0.01" placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">% Mín.</label>
+        <input id="f-percentual-min" type="number" min="0" max="100" step="0.01" placeholder="0" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">% Máx.</label>
-        <input id="f-percentual-max" type="number" min="0" max="100" step="0.01" placeholder="100" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">% Máx.</label>
+        <input id="f-percentual-max" type="number" min="0" max="100" step="0.01" placeholder="100" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Data Início</label>
-        <input id="f-data-inicio" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Data Início</label>
+        <input id="f-data-inicio" type="date" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Data Fim</label>
-        <input id="f-data-fim" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Data Fim</label>
+        <input id="f-data-fim" type="date" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
     </div>
     <div class="flex justify-end mt-3 gap-2">
@@ -137,10 +137,10 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
   </div>
 
   <!-- Grid -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 overflow-hidden transition-colors">
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200 text-sm">
-        <thead class="bg-gray-50">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700 text-sm">
+        <thead class="bg-gray-50 dark:bg-slate-900/50">
           <tr id="grid-head"></tr>
         </thead>
         <tbody id="grid-body" class="divide-y divide-gray-100">
@@ -149,7 +149,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
       </table>
     </div>
     <!-- Paginação -->
-    <div class="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50">
+    <div class="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
       <span id="pag-info" class="text-sm text-gray-500"></span>
       <div class="flex gap-1" id="pag-buttons"></div>
     </div>
@@ -158,21 +158,21 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
 <!-- ========== MODAL: PERSONALIZAR COLUNAS ========== -->
 <div id="modal-colunas" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl transition-colors">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700">
       <div>
-        <h2 class="text-lg font-bold text-gray-900">Personalizar colunas</h2>
-        <p class="text-xs text-gray-500 mt-0.5">Escolha quais colunas exibir e ajuste a ordem.</p>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white">Personalizar colunas</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Escolha quais colunas exibir e ajuste a ordem.</p>
       </div>
-      <button onclick="fecharModalColunas()" class="text-gray-400 hover:text-gray-600">
+      <button onclick="fecharModalColunas()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
     <div class="px-6 py-4">
       <div id="colunas-lista" class="space-y-2 max-h-80 overflow-y-auto"></div>
     </div>
-    <div class="flex justify-end gap-2 px-6 py-4 border-t border-gray-200 bg-gray-50">
-      <button onclick="resetColunasPadrao()" class="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100">Padrão</button>
+    <div class="flex justify-end gap-2 px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
+      <button onclick="resetColunasPadrao()" class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700">Padrão</button>
       <button onclick="salvarPreferenciasColunas()" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg">Salvar</button>
     </div>
   </div>
@@ -180,19 +180,19 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
 <!-- ========== MODAL: DUPLICAR COM OUTRO CLIENTE ========== -->
 <div id="modal-duplicate-cliente" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
-    <h3 class="text-lg font-bold text-gray-900 mb-2">Duplicar com outro cliente</h3>
-    <p class="text-sm text-gray-500 mb-4">Selecione o cliente para o novo registro duplicado.</p>
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg p-6 transition-colors">
+    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Duplicar com outro cliente</h3>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Selecione o cliente para o novo registro duplicado.</p>
 
     <input type="hidden" id="duplicate-id">
 
-    <label class="block text-sm font-medium text-gray-700 mb-1">Buscar cliente</label>
+    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Buscar cliente</label>
     <input id="duplicate-cliente-search" type="text" placeholder="Digite nome/código do cliente..."
            oninput="autoSelecionarInteligente('duplicate-cliente-search','duplicate-cliente-id')"
-           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+           class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm mb-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
 
-    <label class="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
-    <select id="duplicate-cliente-id" onchange="sincronizarInputComSelect('duplicate-cliente-id','duplicate-cliente-search')" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cliente</label>
+    <select id="duplicate-cliente-id" onchange="sincronizarInputComSelect('duplicate-cliente-id','duplicate-cliente-search')" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       <option value="">Selecione o cliente...</option>
       <?php foreach (($clientes ?? []) as $c): ?>
       <option value="<?= (int)$c['id'] ?>"><?= e(($c['codigo'] ?? '') . ' - ' . ($c['nome'] ?? '')) ?></option>
@@ -200,7 +200,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
     </select>
 
     <div class="flex justify-end gap-2 mt-5">
-      <button type="button" onclick="fecharModalDuplicateCliente()" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Cancelar</button>
+      <button type="button" onclick="fecharModalDuplicateCliente()" class="px-4 py-2 text-sm bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600">Cancelar</button>
       <button type="button" onclick="confirmarDuplicacaoComCliente()" class="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">Duplicar</button>
     </div>
   </div>
@@ -208,27 +208,27 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
 <!-- ========== MODAL: IMPORTAÇÃO ========== -->
 <div id="modal-importacao" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-      <h2 class="text-lg font-bold text-gray-900">Importar Triagens</h2>
-      <button onclick="fecharModalImportacao()" class="text-gray-400 hover:text-gray-600 transition-colors">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg transition-colors">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+      <h2 class="text-lg font-bold text-gray-900 dark:text-white">Importar Triagens</h2>
+      <button onclick="fecharModalImportacao()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
     <div class="px-6 py-5 space-y-4">
-      <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
+      <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800/50 rounded-lg p-3 text-xs text-blue-800 dark:text-blue-200">
         1) Baixe o modelo em <strong>Baixar Modelo</strong>.<br>
         2) Preencha os dados da triagem.<br>
         3) Importe o arquivo CSV/XLS/XLSX.
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Arquivo</label>
-        <input id="arquivo-importacao" type="file" accept=".csv,.xls,.xlsx" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Arquivo</label>
+        <input id="arquivo-importacao" type="file" accept=".csv,.xls,.xlsx" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white">
       </div>
       <div id="import-feedback" class="hidden text-sm rounded-lg p-3"></div>
     </div>
-    <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
-      <button onclick="fecharModalImportacao()" class="px-5 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancelar</button>
+    <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
+      <button onclick="fecharModalImportacao()" class="px-5 py-2 text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">Cancelar</button>
       <button id="btn-importar" onclick="importarPlanilha()" class="px-5 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors font-medium">Importar</button>
     </div>
   </div>
@@ -245,23 +245,44 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
     border: 1px solid #e5edf8;
     box-shadow: 0 24px 70px rgba(2, 8, 23, 0.24);
   }
+  .dark #modal-triagem .triagem-modal-panel {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    border-color: #334155;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+  }
   #modal-triagem .triagem-modal-header {
     background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
     border-bottom-color: #e4eaf5;
+  }
+  .dark #modal-triagem .triagem-modal-header {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    border-bottom-color: #334155;
   }
   #modal-triagem .triagem-modal-body {
     background:
       radial-gradient(circle at top right, rgba(37, 99, 235, 0.05), transparent 45%),
       radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.05), transparent 45%);
   }
+  .dark #modal-triagem .triagem-modal-body {
+    background:
+      radial-gradient(circle at top right, rgba(37, 99, 235, 0.1), transparent 45%),
+      radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.1), transparent 45%);
+  }
   #modal-triagem .triagem-modal-footer {
     border-top-color: #e4eaf5;
     background: #f8fafc;
+  }
+  .dark #modal-triagem .triagem-modal-footer {
+    border-top-color: #334155;
+    background: #1e293b;
   }
   #modal-triagem label {
     color: #1e3a5f;
     font-weight: 600;
     letter-spacing: 0.01em;
+  }
+  .dark #modal-triagem label {
+    color: #cbd5e1;
   }
   #modal-triagem input:not([type="radio"]),
   #modal-triagem select,
@@ -272,15 +293,33 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
     transition: all 0.18s ease;
   }
+  .dark #modal-triagem input:not([type="radio"]),
+  .dark #modal-triagem select,
+  .dark #modal-triagem textarea {
+    background-color: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  }
   #modal-triagem input:not([type="radio"]):focus,
   #modal-triagem select:focus,
   #modal-triagem textarea:focus {
     border-color: #60a5fa;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
   }
+  .dark #modal-triagem input:not([type="radio"]):focus,
+  .dark #modal-triagem select:focus,
+  .dark #modal-triagem textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  }
   #modal-triagem input[readonly] {
     background: #f1f5f9 !important;
     color: #475569 !important;
+  }
+  .dark #modal-triagem input[readonly] {
+    background: #0f172a !important;
+    color: #94a3b8 !important;
   }
   #modal-triagem .triagem-modal-body::-webkit-scrollbar {
     width: 9px;
@@ -288,6 +327,9 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
   #modal-triagem .triagem-modal-body::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 999px;
+  }
+  .dark #modal-triagem .triagem-modal-body::-webkit-scrollbar-thumb {
+    background: #475569;
   }
 </style>
 
@@ -486,13 +528,13 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
 <!-- ========== MODAL: PARÂMETROS ========== -->
 <div id="modal-params" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transition-colors">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700">
       <div>
-        <h2 class="text-lg font-bold text-gray-900">⚙️ Parâmetros de Triagem</h2>
-        <p class="text-xs text-gray-500 mt-0.5">Configure os pareceres por faixa de percentual</p>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white">⚙️ Parâmetros de Triagem</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Configure os pareceres por faixa de percentual</p>
       </div>
-      <button onclick="fecharModalParams()" class="text-gray-400 hover:text-gray-600">
+      <button onclick="fecharModalParams()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
@@ -503,8 +545,8 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
         Adicionar Faixa
       </button>
     </div>
-    <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
-      <button onclick="fecharModalParams()" class="px-5 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancelar</button>
+    <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
+      <button onclick="fecharModalParams()" class="px-5 py-2 text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700">Cancelar</button>
       <button onclick="salvarParametros()" class="px-5 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-medium">Salvar Parâmetros</button>
     </div>
   </div>
@@ -512,16 +554,16 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
 <!-- ========== MODAL: CONFIRMAR EXCLUSÃO ========== -->
 <div id="modal-delete" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
-    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-      <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center transition-colors">
+    <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
     </div>
-    <h3 class="text-lg font-bold text-gray-900 mb-2">Excluir Registro</h3>
-    <p class="text-sm text-gray-500 mb-6">Tem certeza que deseja excluir este registro de triagem? Esta ação não pode ser desfeita.</p>
+    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Excluir Registro</h3>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Tem certeza que deseja excluir este registro de triagem? Esta ação não pode ser desfeita.</p>
     <input type="hidden" id="delete-id">
     <div class="flex gap-3 justify-center">
-      <button onclick="fecharModalDelete()" class="px-5 py-2 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">Cancelar</button>
-      <button onclick="confirmarDelete()" class="px-5 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg font-medium">Excluir</button>
+      <button onclick="fecharModalDelete()" class="px-5 py-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg transition-colors">Cancelar</button>
+      <button onclick="confirmarDelete()" class="px-5 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg font-medium transition-colors">Excluir</button>
     </div>
   </div>
 </div>
