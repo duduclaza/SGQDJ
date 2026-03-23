@@ -5,6 +5,7 @@ $perfisSidebar = [
         ['url' => 'index.php', 'label' => 'Painel Geral', 'icon' => 'ph-chart-pie-slice'],
         ['url' => 'nova_homologacao.php', 'label' => 'Nova Homologação', 'icon' => 'ph-plus-circle'],
         ['url' => 'monitoramento.php', 'label' => 'Monitorar Entregas', 'icon' => 'ph-magnifying-glass'],
+        ['url' => 'gerenciar_cadastros.php', 'label' => 'Gerenciar', 'icon' => 'ph-gear'],
     ],
     'logistica' => [
         ['url' => 'index.php', 'label' => 'Painel Geral', 'icon' => 'ph-chart-pie-slice'],

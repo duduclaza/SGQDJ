@@ -35,6 +35,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['criar_homologacao']))
 $data = getMockData();
 $responsaveis = array_filter($data['usuarios'], fn($u) => $u['perfil'] === 'responsavel');
 
+// Buscar tipos de produto reais do banco para o select
+use App\Config\Database;
+$db = Database::getInstance();
+$stmtTipos = $db->query("SELECT * FROM homologacao_tipos_produto WHERE ativo = 1 ORDER BY nome ASC");
+$tiposReais = $stmtTipos->fetchAll(PDO::FETCH_ASSOC);
+
+// Buscar fornecedores reais do banco para o select
+$stmtFornecedores = $db->query("SELECT id, nome FROM fornecedores WHERE ativo = 1 ORDER BY nome ASC");
+$fornecedoresReais = $stmtFornecedores->fetchAll(PDO::FETCH_ASSOC);
+
 $title = "Nova Homologação - Homologações 2.0";
 $viewFile = __DIR__ . '/views/nova_homologacao.php';
 require_once __DIR__ . '/../views/layouts/main.php';
