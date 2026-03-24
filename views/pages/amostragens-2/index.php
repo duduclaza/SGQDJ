@@ -530,10 +530,10 @@ function construirUrlPaginacao($pagina) {
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
               <?= e($amostra['numero_nf']) ?>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400" title="<?= e($amostra['usuario_nome']) ?>">
               <?= e($amostra['usuario_nome']) ?>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400" title="<?= e($amostra['filial_nome']) ?>">
               <?= e($amostra['filial_nome']) ?>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -782,14 +782,23 @@ function construirUrlPaginacao($pagina) {
 .grid-wrapper table {
   zoom: var(--grid-zoom);
   transform-origin: top left;
-  table-layout: fixed; /* Importante para o resize manual funcionar bem */
+  /* Removido fixed para permitir que as colunas respirem melhor */
   width: 100%;
 }
 
-/* Forçar larguras mínimas para evitar quebra de layout no zoom baixo */
+/* Forçar larguras mínimas e evitar quebra de linha/sobreposição */
 .grid-wrapper th, .grid-wrapper td {
-  min-width: 80px;
+  min-width: 120px; 
+  white-space: nowrap !important; /* Garantir que não quebre linha nunca */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
+
+/* Colunas específicas podem ser menores */
+.grid-wrapper th:nth-child(1), .grid-wrapper td:nth-child(1) { min-width: 100px; } /* Data */
+.grid-wrapper th:nth-child(2), .grid-wrapper td:nth-child(2) { min-width: 90px; }  /* NF */
 
 /* Estilos do Resizer (Drag Handle) */
 .resizer {
@@ -1763,10 +1772,7 @@ document.addEventListener('DOMContentLoaded', function() {
     applyColumnVisibility(savedVisibility);
   }
 
-  // Ajustar layout da tabela para suportar redimensionamento
-  table.style.tableLayout = 'fixed';
-
-  // Configurar Sincronização de Scroll
+  // Sincronização de Scroll
   setupScrollSync();
 });
 
