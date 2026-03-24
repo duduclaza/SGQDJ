@@ -360,6 +360,27 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
   #grid-scroll .w-16 {
     width: calc(4rem * var(--grid-zoom, 1));
   }
+
+  /* Resizer Handle */
+  .resizer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 6px;
+    cursor: col-resize;
+    user-select: none;
+    z-index: 10;
+    transition: background-color 0.2s;
+  }
+  .resizer:hover, .resizer.resizing {
+    background-color: rgba(59, 130, 246, 0.5);
+  }
+  th {
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 </style>
 
 <!-- ========== MODAL: NOVA / EDITAR TRIAGEM ========== -->
@@ -658,6 +679,56 @@ function loadZoomPreference() {
   if (saved) updateGridZoom(saved, false);
 }
 
+// Resizable Columns Logic
+let resizerState = {
+  active: false,
+  key: null,
+  startX: 0,
+  startWidth: 0,
+  th: null
+};
+
+function initResize(e, key) {
+  e.preventDefault();
+  const th = e.target.parentElement;
+  resizerState = {
+    active: true,
+    key: key,
+    startX: e.pageX,
+    startWidth: th.offsetWidth,
+    th: th
+  };
+  e.target.classList.add('resizing');
+  window.addEventListener('mousemove', onMouseMoveResize);
+  window.addEventListener('mouseup', onMouseUpResize);
+}
+
+function onMouseMoveResize(e) {
+  if (!resizerState.active) return;
+  const delta = e.pageX - resizerState.startX;
+  const newWidth = Math.max(50, resizerState.startWidth + delta);
+  resizerState.th.style.width = newWidth + 'px';
+  resizerState.th.style.minWidth = newWidth + 'px';
+  
+  // Update gridColumns state
+  const col = gridColumns.find(c => c.key === resizerState.key);
+  if (col) col.width = newWidth;
+  
+  syncTopScrollWidth();
+}
+
+function onMouseUpResize() {
+  if (!resizerState.active) return;
+  resizerState.active = false;
+  const resizer = resizerState.th.querySelector('.resizer');
+  if (resizer) resizer.classList.remove('resizing');
+  
+  window.removeEventListener('mousemove', onMouseMoveResize);
+  window.removeEventListener('mouseup', onMouseUpResize);
+  
+  saveColumnPreferences();
+}
+
 function saveFilters() {
   const filters = {
     search: document.getElementById('f-search').value,
@@ -715,7 +786,11 @@ function loadColumnPreferences() {
     saved.forEach((item) => {
       const base = defaultsByKey.get(item.key);
       if (!base) return;
-      merged.push({ ...base, visible: base.locked ? true : !!item.visible });
+      merged.push({ 
+        ...base, 
+        visible: base.locked ? true : !!item.visible,
+        width: item.width || null
+      });
       defaultsByKey.delete(item.key);
     });
 
@@ -736,12 +811,22 @@ function renderGridHeader() {
 
   head.innerHTML = getActiveColumns().map((col) => {
     const alignClass = col.align === 'center' ? 'text-center' : 'text-left';
-    return `<th class="px-4 py-3 ${alignClass} font-semibold text-gray-600 dark:text-gray-300">${col.label}</th>`;
+    const widthStyle = col.width ? `style="width: ${col.width}px; min-width: ${col.width}px;"` : '';
+    const resizer = col.locked ? '' : `<div class="resizer" onmousedown="initResize(event, '${col.key}')"></div>`;
+    
+    return `<th class="px-4 py-3 ${alignClass} font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap" ${widthStyle}>
+      ${col.label}
+      ${resizer}
+    </th>`;
   }).join('');
 }
 
 function saveColumnPreferences() {
-  const data = gridColumns.map(({ key, visible }) => ({ key, visible: !!visible }));
+  const data = gridColumns.map(({ key, visible, width }) => ({ 
+    key, 
+    visible: !!visible,
+    width: width || null
+  }));
   localStorage.setItem(GRID_COLUMNS_STORAGE_KEY, JSON.stringify(data));
 }
 
