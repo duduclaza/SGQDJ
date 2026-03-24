@@ -348,7 +348,7 @@
 <div id="modalFinalizar" class="modal-backend hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 text-left">
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-xl mx-auto overflow-hidden animate-modal">
         <div class="bg-primary-600 p-5 flex justify-between items-center text-white">
-            <h5 class="text-lg font-bold flex items-center gap-2"><i class="ph-fill ph-seal-check"></i> Emitir Parecer Definitivo de TI</h5>
+            <h5 class="text-lg font-bold flex items-center gap-2"><i class="ph-fill ph-seal-check"></i> Emitir Parecer Definitivo</h5>
             <button type="button" onclick="closeModal('modalFinalizar')" class="text-primary-100 hover:text-white transition-colors"><i class="ph-bold ph-x text-xl"></i></button>
         </div>
         
