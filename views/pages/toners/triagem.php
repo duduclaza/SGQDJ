@@ -138,9 +138,18 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
   <!-- Grid -->
   <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 overflow-hidden transition-colors">
-    <!-- Barra de rolagem superior -->
-    <div id="grid-top-scroll" class="overflow-x-auto" style="overflow-y:hidden;height:12px;">
-      <div id="grid-top-scroll-inner" style="height:1px;"></div>
+    <!-- Zoom and Barra de rolagem superior -->
+    <div class="px-4 py-2 bg-gray-50 dark:bg-slate-900/30 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">🔍 Ajustar Zoom:</span>
+        <input type="range" id="grid-zoom-slider" min="0.7" max="1.3" step="0.05" value="1.0" 
+               class="w-32 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+               oninput="updateGridZoom(this.value)">
+        <span id="grid-zoom-val" class="text-xs font-bold text-gray-700 dark:text-gray-300 w-8">100%</span>
+      </div>
+      <div id="grid-top-scroll" class="flex-1 overflow-x-auto" style="overflow-y:hidden;height:12px;">
+        <div id="grid-top-scroll-inner" style="height:1px;"></div>
+      </div>
     </div>
     <div id="grid-scroll" class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700 text-sm">
@@ -332,8 +341,24 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
     background: #cbd5e1;
     border-radius: 999px;
   }
-  .dark #modal-triagem .triagem-modal-body::-webkit-scrollbar-thumb {
+  #modal-triagem .triagem-modal-body::-webkit-scrollbar-thumb {
     background: #475569;
+  }
+
+  /* Grid Zoom Styles */
+  #grid-scroll table {
+    font-size: calc(0.8125rem * var(--grid-zoom, 1));
+    transition: font-size 0.1s ease;
+  }
+  #grid-scroll th, #grid-scroll td {
+    padding-left: calc(1rem * var(--grid-zoom, 1));
+    padding-right: calc(1rem * var(--grid-zoom, 1));
+    padding-top: calc(0.75rem * var(--grid-zoom, 1));
+    padding-bottom: calc(0.75rem * var(--grid-zoom, 1));
+    transition: padding 0.1s ease;
+  }
+  #grid-scroll .w-16 {
+    width: calc(4rem * var(--grid-zoom, 1));
   }
 </style>
 
