@@ -251,10 +251,9 @@
                                     
                                     <?php if ($canEdit): ?>
                                     <div class="flex rounded-md shadow-sm" role="group">
-                                        <!-- Not Tested -->
-                                        <input type="radio" class="hidden peer/none" name="checklist[<?= $key ?>]" id="<?= $key ?>_none" value="" <?= $val === null ? 'checked' : '' ?>>
-                                        <label for="<?= $key ?>_none" class="px-3 py-1.5 text-xs font-medium bg-white text-slate-600 border border-slate-200 rounded-s-lg cursor-pointer hover:bg-slate-50 hover:text-slate-800 peer-checked/none:bg-slate-600 peer-checked/none:text-white peer-checked/none:border-slate-600 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 dark:peer-checked/none:bg-slate-600 dark:peer-checked/none:text-white dark:peer-checked/none:border-slate-600 transition-colors">
-                                            <i class="ph-bold ph-minus"></i> N/A
+                                        <input type="radio" class="hidden peer/none" name="checklist[<?= $key ?>]" id="<?= $key ?>_none" value="pendente" <?= ($val === null || $val === 'pendente' || $val === '') ? 'checked' : '' ?>>
+                                        <label for="<?= $key ?>_none" class="px-3 py-1.5 text-xs font-medium bg-white text-amber-600 border border-slate-200 rounded-s-lg cursor-pointer hover:bg-amber-50 hover:text-amber-800 peer-checked/none:bg-amber-500 peer-checked/none:text-white peer-checked/none:border-amber-600 dark:bg-slate-900 dark:border-slate-700 dark:text-amber-500 dark:hover:text-white dark:hover:bg-slate-800 dark:peer-checked/none:bg-amber-600 dark:peer-checked/none:text-white dark:peer-checked/none:border-amber-600 transition-colors">
+                                            <i class="ph-bold ph-clock"></i> PEND
                                         </label>
 
                                         <!-- Passed -->
@@ -271,8 +270,8 @@
                                     </div>
                                     <?php else: ?>
                                     <div class="shrink-0">
-                                        <?php if ($val === null): ?>
-                                            <span class="bg-slate-100 text-slate-800 text-xs font-medium px-2.5 py-1 rounded dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600">Pendente</span>
+                                        <?php if ($val === null || $val === 'pendente' || $val === ''): ?>
+                                            <span class="bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-1 rounded dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50"><i class="ph-bold ph-clock mr-1"></i> Pendente</span>
                                         <?php elseif ($isOk): ?>
                                             <span class="bg-emerald-100 text-emerald-800 text-xs font-medium px-2.5 py-1 rounded dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50"><i class="ph-bold ph-check mr-1"></i> Checked</span>
                                         <?php else: ?>
@@ -390,11 +389,18 @@
         const formChecklistInputs = document.querySelectorAll('input[name^="checklist"]:checked');
         let hasPass = false;
         let hasFail = false;
+        let hasPendente = false;
         
         formChecklistInputs.forEach(inp => {
             if (inp.value === "1") hasPass = true;
-            if (inp.value === "0") hasFail = true;
+            else if (inp.value === "0") hasFail = true;
+            else if (inp.value === "pendente" || inp.value === "") hasPendente = true;
         });
+        
+        if (hasPendente) {
+            alert('Não é possível finalizar o veredito. Existem itens no Checklist com status PENDENTE.');
+            return;
+        }
         
         let resultado = '';
         if (hasPass && !hasFail) {

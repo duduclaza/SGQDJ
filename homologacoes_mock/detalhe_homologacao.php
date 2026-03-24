@@ -48,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($respostas as $k => $v) {
                 if ($v === '1') $booleadas[$k] = true;
                 elseif ($v === '0') $booleadas[$k] = false;
+                elseif ($v === 'pendente') $booleadas[$k] = 'pendente';
                 else $booleadas[$k] = null;
             }
             atualizarHomologacaoMock($id, [
@@ -69,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($respostas as $k => $v) {
                 if ($v === '1') $booleadas[$k] = true;
                 elseif ($v === '0') $booleadas[$k] = false;
+                elseif ($v === 'pendente') $booleadas[$k] = 'pendente';
                 else $booleadas[$k] = null;
             }
             atualizarHomologacaoMock($id, ['checklist_respostas' => $booleadas]);
