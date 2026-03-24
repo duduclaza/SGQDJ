@@ -51,9 +51,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 elseif ($v === 'pendente') $booleadas[$k] = 'pendente';
                 else $booleadas[$k] = null;
             }
+            $obs_atual = $h['observacoes_checklist'] ?? '';
+            $nova_obs = trim($_POST['nova_observacao'] ?? '');
+            if ($nova_obs !== '') {
+                $timestamp = date('d/m/Y \à\s H:i');
+                $nome_usuario = $u['nome'] ?? 'Usuário';
+                $bloco = "[$timestamp - $nome_usuario]\n$nova_obs";
+                $obs_atual = $obs_atual === '' ? $bloco : $obs_atual . "\n\n" . $bloco;
+            }
+
             atualizarHomologacaoMock($id, [
                 'checklist_respostas' => $booleadas,
-                'observacoes_checklist' => $_POST['observacoes_checklist']
+                'observacoes_checklist' => $obs_atual
             ]);
             $_SESSION['flash_message'] = ['type' => 'info', 'text' => 'Bateria de testes rascunhada e salva com sucesso.'];
         }
@@ -79,12 +88,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $novo_status = ($tem_pendente || $resultado === 'pendente') ? 'em_homologacao' : 'concluida';
 
+            $obs_atual = $h['observacoes_checklist'] ?? '';
+            $nova_obs = trim($_POST['nova_observacao'] ?? '');
+            if ($nova_obs !== '') {
+                $timestamp = date('d/m/Y \à\s H:i');
+                $nome_usuario = $u['nome'] ?? 'Usuário';
+                $bloco = "[$timestamp - $nome_usuario]\n$nova_obs";
+                $obs_atual = $obs_atual === '' ? $bloco : $obs_atual . "\n\n" . $bloco;
+            }
+
             atualizarHomologacaoMock($id, [
                 'status' => $novo_status,
                 'data_fim_homologacao' => $_POST['data_fim_homologacao'],
                 'resultado' => $resultado,
                 'parecer_final' => $_POST['parecer_final'],
-                'checklist_respostas' => $booleadas
+                'checklist_respostas' => $booleadas,
+                'observacoes_checklist' => $obs_atual
             ]);
             
             if ($novo_status === 'em_homologacao') {

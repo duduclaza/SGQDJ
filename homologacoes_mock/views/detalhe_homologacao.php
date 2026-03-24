@@ -284,12 +284,17 @@
                         </div>
 
                         <div class="mb-6">
-                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 border-b border-slate-200 dark:border-slate-700 pb-2 flex items-center gap-2"><i class="ph-bold ph-pencil-simple"></i> Observações Técnicas Parciais do Teste</label>
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 border-b border-slate-200 dark:border-slate-700 pb-2 flex items-center gap-2"><i class="ph-bold ph-pencil-simple"></i> Histórico de Observações Técnicas Parciais</label>
+                            
+                            <?php if ($h['observacoes_checklist']): ?>
+                                <div class="bg-indigo-50/50 dark:bg-slate-900/50 rounded-lg p-4 text-sm text-slate-700 dark:text-slate-300 font-mono border border-slate-200 dark:border-slate-700 mb-3 max-h-60 overflow-y-auto whitespace-pre-wrap"><?= htmlspecialchars($h['observacoes_checklist']) ?></div>
+                            <?php endif; ?>
+
                             <?php if ($canEdit): ?>
-                                <textarea name="observacoes_checklist" rows="3" placeholder="Surgiram problemas de compatibilidade nos drivers..." class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-slate-500 dark:text-white font-mono"><?= $h['observacoes_checklist'] ?></textarea>
-                            <?php else: ?>
+                                <textarea name="nova_observacao" rows="2" placeholder="Adicionar nova observação no diário de testes..." class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-slate-500 dark:text-white font-mono shadow-sm"></textarea>
+                            <?php elseif (!$h['observacoes_checklist']): ?>
                                 <div class="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4 text-sm text-slate-600 dark:text-slate-400 italic font-mono border border-slate-200 dark:border-slate-700">
-                                    <?= $h['observacoes_checklist'] ?: 'Nenhuma ressalva preenchida pela equipe de TI.' ?>
+                                    Nenhuma ressalva preenchida pela equipe de TI.
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -442,11 +447,11 @@
         });
         
         // Copiar obs se houver
-        const obs = document.querySelector('textarea[name="observacoes_checklist"]');
-        if(obs) {
+        const obs = document.querySelector('textarea[name="nova_observacao"]');
+        if(obs && obs.value.trim() !== '') {
             const hiddenObs = document.createElement('input');
             hiddenObs.type = 'hidden';
-            hiddenObs.name = 'observacoes_checklist';
+            hiddenObs.name = 'nova_observacao';
             hiddenObs.value = obs.value;
             hiddenDiv.appendChild(hiddenObs);
         }
