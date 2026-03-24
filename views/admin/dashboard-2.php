@@ -61,6 +61,8 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
 <?php elseif ($moduloAtual === 'toners-defeito'): ?>
 <!-- ===== TONERS COM DEFEITO DASHBOARD ===== -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 <style>
   :root {
     --dash-bg: #0f172a;
@@ -83,6 +85,22 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   .filter-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--dash-text); border-radius: 10px; padding: 8px 12px; font-size: 0.82rem; transition: border-color 0.2s; outline: none; width: 100%; }
   .filter-input:focus { border-color: var(--dash-accent); box-shadow: 0 0 0 2px rgba(244,63,94,0.15); }
   .filter-input option { color: #f8fafc; background: #0f172a; } /* Fix para contraste das opções */
+  
+  /* TomSelect Dark Theme Overrides */
+  .ts-wrapper.filter-input { padding: 0; border: none; background: transparent; }
+  .ts-control {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--dash-text);
+    border-radius: 10px; padding: 8px 12px; font-size: 0.82rem; cursor: pointer; box-shadow: none;
+  }
+  .ts-wrapper.focus .ts-control { border-color: var(--dash-accent); box-shadow: 0 0 0 2px rgba(244,63,94,0.15); background: rgba(255,255,255,0.06); color: var(--dash-text); }
+  .ts-dropdown, .ts-control, .ts-control input { color: var(--dash-text); }
+  .ts-dropdown {
+    background: #0f172a; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);
+    font-size: 0.82rem; z-index: 50; margin-top: 4px;
+  }
+  .ts-dropdown .option { padding: 8px 12px; cursor: pointer; }
+  .ts-dropdown .active { background: rgba(244,63,94,0.15); color: var(--dash-text); }
+
   .chart-wrapper { position: relative; width: 100%; }
   .chart-wrapper canvas { width: 100% !important; }
 </style>
@@ -264,10 +282,41 @@ function initCharts() {
   charts.devolutivas = new Chart(document.getElementById('chartDevolutivas'), { type: 'doughnut', data: { labels: [], datasets: [] }, options: commonPieOptions });
 }
 
+let tsCliente, tsFilial;
+function initTomSelects() {
+    tsCliente = new TomSelect('#filtroCliente', {
+        create: false,
+        placeholder: 'Cliente (Todos)',
+        onChange: function() { fetchTonersDefeitoDashboard(); }
+    });
+    tsFilial = new TomSelect('#filtroFilial', {
+        create: false,
+        placeholder: 'Filial (Todas)',
+        onChange: function() { fetchTonersDefeitoDashboard(); }
+    });
+}
+
 function updateSelectOptions(selectId, options, keepSelected = true) {
+  const ts = selectId === 'filtroCliente' ? tsCliente : (selectId === 'filtroFilial' ? tsFilial : null);
+  
+  if (ts) {
+    const currentVal = ts.getValue();
+    ts.clearOptions();
+    ts.addOption({value: '', text: selectId === 'filtroCliente' ? 'Cliente (Todos)' : 'Filial (Todas)'});
+    options.forEach(opt => {
+      ts.addOption({value: opt, text: opt});
+    });
+    if (keepSelected && options.includes(currentVal)) {
+      ts.setValue(currentVal, true);
+    } else {
+      ts.setValue('', true);
+    }
+    return;
+  }
+
   const el = document.getElementById(selectId);
   const currentVal = el.value;
-  const oldText = el.options[0].text;
+  const oldText = el.options[0] ? el.options[0].text : 'Selecione';
   el.innerHTML = `<option value="">${oldText}</option>`;
   options.forEach(opt => {
     let optEl = document.createElement('option');
@@ -283,8 +332,8 @@ function updateSelectOptions(selectId, options, keepSelected = true) {
 function cleanFilters() {
   document.getElementById('filtroDataInicio').value = '';
   document.getElementById('filtroDataFim').value = '';
-  document.getElementById('filtroCliente').value = '';
-  document.getElementById('filtroFilial').value = '';
+  if (tsCliente) tsCliente.setValue('', true);
+  if (tsFilial) tsFilial.setValue('', true);
   fetchTonersDefeitoDashboard();
 }
 
@@ -366,6 +415,7 @@ async function fetchTonersDefeitoDashboard() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initCharts();
+  initTomSelects();
   fetchTonersDefeitoDashboard();
 });
 </script>
