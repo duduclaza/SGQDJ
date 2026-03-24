@@ -189,11 +189,11 @@
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5" id="div_cliente" style="display: none;">
                                 <div>
-                                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Instituição / Contrato</label>
+                                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Cliente</label>
                                     <input type="text" name="nome_cliente" placeholder="Qual cliente?" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-slate-500 dark:text-white">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Deploy Field</label>
+                                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Data da instalação no cliente</label>
                                     <input type="date" name="data_instalacao_cliente" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                                 </div>
                             </div>
