@@ -138,7 +138,11 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
   <!-- Grid -->
   <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 overflow-hidden transition-colors">
-    <div class="overflow-x-auto">
+    <!-- Barra de rolagem superior -->
+    <div id="grid-top-scroll" class="overflow-x-auto" style="overflow-y:hidden;height:12px;">
+      <div id="grid-top-scroll-inner" style="height:1px;"></div>
+    </div>
+    <div id="grid-scroll" class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700 text-sm">
         <thead class="bg-gray-50 dark:bg-slate-900/50">
           <tr id="grid-head"></tr>
@@ -793,8 +797,33 @@ document.addEventListener('DOMContentLoaded', () => {
   loadColumnPreferences();
   renderGridHeader();
 
+  // Sync top scrollbar with the main grid scroll
+  const topScroll = document.getElementById('grid-top-scroll');
+  const gridScroll = document.getElementById('grid-scroll');
+  let syncing = false;
+  topScroll.addEventListener('scroll', () => {
+    if (syncing) return;
+    syncing = true;
+    gridScroll.scrollLeft = topScroll.scrollLeft;
+    syncing = false;
+  });
+  gridScroll.addEventListener('scroll', () => {
+    if (syncing) return;
+    syncing = true;
+    topScroll.scrollLeft = gridScroll.scrollLeft;
+    syncing = false;
+  });
+
   carregarRegistros(1);
 });
+
+function syncTopScrollWidth() {
+  const gridScroll = document.getElementById('grid-scroll');
+  const inner = document.getElementById('grid-top-scroll-inner');
+  if (gridScroll && inner) {
+    inner.style.width = gridScroll.scrollWidth + 'px';
+  }
+}
 
 // ===== GRID =====
 function carregarRegistros(page) {
@@ -893,6 +922,8 @@ function renderGrid(data) {
     const rowCells = activeCols.map((col) => cellByColumn[col.key] || '<td class="px-4 py-3 text-xs text-gray-400 dark:text-gray-500">—</td>').join('');
     return `<tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">${rowCells}</tr>`;
   }).join('');
+  // Update top scrollbar width after rendering
+  setTimeout(syncTopScrollWidth, 0);
 }
 
 function escapeHtml(value) {
