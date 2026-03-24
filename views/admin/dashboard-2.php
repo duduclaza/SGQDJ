@@ -82,6 +82,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   .kpi-card-inner { display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
   .filter-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--dash-text); border-radius: 10px; padding: 8px 12px; font-size: 0.82rem; transition: border-color 0.2s; outline: none; width: 100%; }
   .filter-input:focus { border-color: var(--dash-accent); box-shadow: 0 0 0 2px rgba(244,63,94,0.15); }
+  .filter-input option { color: #f8fafc; background: #0f172a; } /* Fix para contraste das opções */
   .chart-wrapper { position: relative; width: 100%; }
   .chart-wrapper canvas { width: 100% !important; }
 </style>
