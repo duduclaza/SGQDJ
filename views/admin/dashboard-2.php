@@ -87,19 +87,19 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   .filter-input option { color: #f8fafc; background: #0f172a; } /* Fix para contraste das opções */
   
   /* TomSelect Dark Theme Overrides */
-  .ts-wrapper.filter-input { padding: 0; border: none; background: transparent; }
-  .ts-control {
-    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--dash-text);
-    border-radius: 10px; padding: 8px 12px; font-size: 0.82rem; cursor: pointer; box-shadow: none;
+  .ts-wrapper.filter-input { padding: 0 !important; border: none !important; background: transparent !important; box-shadow: none !important; }
+  .ts-wrapper .ts-control {
+    background: #1e293b !important; border: 1px solid rgba(255,255,255,0.12) !important; color: #f8fafc !important;
+    border-radius: 10px !important; padding: 8px 12px !important; font-size: 0.82rem !important; cursor: pointer !important; box-shadow: none !important;
   }
-  .ts-wrapper.focus .ts-control { border-color: var(--dash-accent); box-shadow: 0 0 0 2px rgba(244,63,94,0.15); background: rgba(255,255,255,0.06); color: var(--dash-text); }
-  .ts-dropdown, .ts-control, .ts-control input { color: var(--dash-text); }
-  .ts-dropdown {
-    background: #0f172a; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);
-    font-size: 0.82rem; z-index: 50; margin-top: 4px;
+  .ts-wrapper.focus .ts-control { border-color: #f43f5e !important; box-shadow: 0 0 0 2px rgba(244,63,94,0.15) !important; background: #1e293b !important; color: #f8fafc !important; }
+  .ts-wrapper .ts-dropdown, .ts-wrapper .ts-control input { color: #f8fafc !important; }
+  .ts-wrapper .ts-dropdown {
+    background: #0f172a !important; border: 1px solid rgba(255,255,255,0.12) !important; border-radius: 8px !important; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5) !important;
+    font-size: 0.82rem !important; z-index: 50 !important; margin-top: 4px !important;
   }
-  .ts-dropdown .option { padding: 8px 12px; cursor: pointer; }
-  .ts-dropdown .active { background: rgba(244,63,94,0.15); color: var(--dash-text); }
+  .ts-wrapper .ts-dropdown .option { padding: 8px 12px !important; cursor: pointer !important; color: #f8fafc !important; background: #0f172a !important; }
+  .ts-wrapper .ts-dropdown .active { background: #f43f5e !important; color: #ffffff !important; }
 
   .chart-wrapper { position: relative; width: 100%; }
   .chart-wrapper canvas { width: 100% !important; }
