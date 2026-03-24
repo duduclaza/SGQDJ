@@ -59,10 +59,6 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
                 </div>
                 <form method="POST" action="" class="p-6">
                     <input type="hidden" name="confirmar_recebimento_id" value="<?= $h['id'] ?>">
-                    <div class="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl mb-5 text-amber-800 dark:text-amber-300 text-sm flex gap-3">
-                        <i class="ph-fill ph-info text-xl shrink-0"></i>
-                        A conferência das peças (Nº Série, Qualidade) será feita pela TI durante a homologação. Apenas confirme que as caixas chegaram na porta.
-                    </div>
                     
                     <div class="mb-4">
                         <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Data do Recebimento</label>

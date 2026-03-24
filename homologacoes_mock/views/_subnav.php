@@ -11,7 +11,6 @@ $perfisSidebar = [
         ['url' => 'logistica.php', 'label' => 'Painel Logística', 'icon' => 'ph-truck'],
     ],
     'responsavel' => [
-        ['url' => 'index.php', 'label' => 'Painel Geral', 'icon' => 'ph-chart-pie-slice'],
         ['url' => 'minha_fila.php', 'label' => 'Minhas Homologações', 'icon' => 'ph-list-checks'],
     ]
 ];

@@ -16,7 +16,7 @@ $homologacoes = $data['homologacoes'];
 // Filtrar as homologações onde o usuário logado consta na array 'responsaveis'
 $minha_fila = array_filter($homologacoes, function($h) use ($u) {
     if (!in_array($u['id'], $h['responsaveis'])) return false;
-    return in_array($h['status'], ['item_recebido', 'em_homologacao']);
+    return in_array($h['status'], ['aguardando_chegada', 'item_recebido', 'em_homologacao']);
 });
 
 $historico = array_filter($homologacoes, function($h) use ($u) {
