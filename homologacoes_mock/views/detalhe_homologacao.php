@@ -94,8 +94,8 @@
                         <h4 class="font-bold text-slate-800 dark:text-white text-sm mb-1">Testes em Curso da TI</h4>
                         <p class="text-xs text-slate-500 dark:text-slate-400">Iniciado em <?= date('d/m/Y', strtotime($h['data_inicio_homologacao'])) ?> (Local: <?= ucfirst($h['local_homologacao']) ?>)</p>
                     <?php else: ?>
-                        <div class="absolute w-4 h-4 bg-white dark:bg-slate-700 rounded-full border-4 border-slate-200 dark:border-slate-500 -left-[9px] top-1"></div>
-                        <h4 class="font-bold text-slate-400 dark:text-slate-500 text-sm mb-1">Aguardando Avaliação Analistas</h4>
+                        <div class="absolute w-4 h-4 bg-amber-400 dark:bg-amber-500 rounded-full border-4 border-white dark:border-slate-800 -left-[9px] top-1 animate-pulse"></div>
+                        <h4 class="font-bold text-amber-600 dark:text-amber-400 text-sm mb-1">Aguardando Avaliação dos Técnicos</h4>
                     <?php endif; ?>
                 </div>
                 
@@ -169,21 +169,20 @@
                         <h5 class="text-xl font-bold text-cyan-600 dark:text-cyan-500 mb-2 flex items-center gap-2">
                             <i class="ph-fill ph-play-circle"></i> Iniciar Esteira de Testes
                         </h5>
-                        <p class="text-slate-600 dark:text-slate-300 text-sm mb-6">A Logistics notificou que o amontoado do fornecedor <strong><?= $h['fornecedor'] ?></strong> desceu. Retirou ele da doca? Registre a bancada para habilitar o questionário.</p>
                         
                         <form method="POST" class="bg-cyan-50 dark:bg-cyan-900/10 p-5 rounded-xl border border-cyan-100 dark:border-cyan-800/50">
                             <input type="hidden" name="acao" value="iniciar_homologacao">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                                 <div>
-                                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Dia do Unboxing / Ligamento</label>
+                                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Data do Start da Homologação</label>
                                     <input type="date" name="data_inicio_homologacao" value="<?= date('Y-m-d') ?>" required class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Local do Circuito</label>
+                                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Local</label>
                                     <select name="local_homologacao" required onchange="document.getElementById('div_cliente').style.display = this.value === 'cliente' ? 'flex' : 'none'" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
-                                        <option value="">Selecione a alocação...</option>
-                                        <option value="laboratorio">Bancada Laboratório TI SGI</option>
-                                        <option value="cliente">Planta Externa do Cliente (Produção Ativa)</option>
+                                        <option value="">Selecione...</option>
+                                        <option value="laboratorio">Laboratório</option>
+                                        <option value="cliente">Cliente</option>
                                     </select>
                                 </div>
                             </div>
