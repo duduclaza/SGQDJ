@@ -140,6 +140,15 @@ class AdminController
 
             if ($modulo === 'triagem') {
                 $triagemStats = $this->getTriagemDashboard2Stats();
+            } else if ($modulo === 'toners-defeito') {
+                $triagemStats = [
+                    'total_registros' => 0, // Placeholder
+                    'media_percentual' => 0,
+                    'total_estoque' => 0,
+                    'valor_recuperado' => 0,
+                    'por_destino' => [],
+                    'ultimos_registros' => []
+                ];
             }
 
             $title = 'Dashboard 2.0 - SGQ OTI DJ';
@@ -167,6 +176,15 @@ class AdminController
     public function dashboard2Triagem()
     {
         $_GET['modulo'] = 'triagem';
+        $this->dashboard2();
+    }
+
+    /**
+     * Dashboard 2.0 - Página individual de Toners com Defeito
+     */
+    public function dashboard2TonersDefeito()
+    {
+        $_GET['modulo'] = 'toners-defeito';
         $this->dashboard2();
     }
 
@@ -439,6 +457,148 @@ class AdminController
                     'filiais' => $filiais ?: [],
                     'faixas_retorno' => $faixasRetorno,
                 ],
+            ]);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Erro: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
+    /**
+     * API JSON: Dados completos do Dashboard de Toners com Defeito com filtros dinâmicos
+     * GET /dashboard-2/toners-defeito/data
+     */
+    public function dashboard2TonersDefeitoData()
+    {
+        if (ob_get_level()) ob_clean();
+        header('Content-Type: application/json; charset=utf-8');
+
+        if (!isset($_SESSION['user_id']) || !\App\Services\PermissionService::hasPermission($_SESSION['user_id'], 'dashboard', 'view')) {
+            echo json_encode(['success' => false, 'message' => 'Sem permissão']);
+            exit;
+        }
+
+        try {
+            $tableExists = $this->db->query("SHOW TABLES LIKE 'toners_defeitos'")->rowCount() > 0;
+            if (!$tableExists) {
+                echo json_encode(['success' => true, 'charts' => []]);
+                exit;
+            }
+
+            // --- Build dynamic WHERE ---
+            $where = '1=1';
+            $params = [];
+
+            $dataInicio = !empty($_GET['data_inicio']) ? trim((string)$_GET['data_inicio']) : null;
+            $dataFim = !empty($_GET['data_fim']) ? trim((string)$_GET['data_fim']) : null;
+
+            $inicioDate = null;
+            $fimDate = null;
+            if ($dataInicio && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataInicio)) {
+                $inicioDate = $dataInicio;
+            }
+            if ($dataFim && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataFim)) {
+                $fimDate = $dataFim;
+            }
+
+            if ($inicioDate && $fimDate && $inicioDate > $fimDate) {
+                [$inicioDate, $fimDate] = [$fimDate, $inicioDate];
+            }
+
+            if ($inicioDate) {
+                $where .= ' AND t.created_at >= ?';
+                $params[] = $inicioDate . ' 00:00:00';
+            }
+            if ($fimDate) {
+                $where .= ' AND t.created_at < DATE_ADD(?, INTERVAL 1 DAY)';
+                $params[] = $fimDate;
+            }
+
+            if (!empty($_GET['filial'])) {
+                $where .= ' AND f.nome LIKE ?';
+                $params[] = '%' . trim($_GET['filial']) . '%';
+            }
+
+            if (!empty($_GET['cliente'])) {
+                $where .= ' AND t.cliente_nome = ?';
+                $params[] = trim($_GET['cliente']);
+            }
+
+            // 1. Quantidade por modelo (Gráfico de Barras)
+            $sqlModelos = "SELECT COALESCE(NULLIF(t.modelo_toner, ''), 'Desconhecido') AS label, SUM(t.quantidade) AS total
+                           FROM toners_defeitos t
+                           LEFT JOIN filiais f ON f.id = t.filial_id
+                           WHERE {$where}
+                           GROUP BY label ORDER BY total DESC LIMIT 15";
+            $stmt = $this->db->prepare($sqlModelos);
+            $stmt->execute($params);
+            $chartModelos = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // 2. Quantidade por filial (Gráfico de Pizza)
+            $sqlFiliais = "SELECT COALESCE(NULLIF(f.nome, ''), 'Matriz/Sem Filial') AS label, SUM(t.quantidade) AS total
+                           FROM toners_defeitos t
+                           LEFT JOIN filiais f ON f.id = t.filial_id
+                           WHERE {$where}
+                           GROUP BY label ORDER BY total DESC";
+            $stmt = $this->db->prepare($sqlFiliais);
+            $stmt->execute($params);
+            $chartFiliais = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // 3. Quantidade por cliente (Gráfico de Barras)
+            $sqlClientes = "SELECT COALESCE(NULLIF(t.cliente_nome, ''), 'Desconhecido') AS label, SUM(t.quantidade) AS total
+                            FROM toners_defeitos t
+                            LEFT JOIN filiais f ON f.id = t.filial_id
+                            WHERE {$where}
+                            GROUP BY label ORDER BY total DESC LIMIT 15";
+            $stmt = $this->db->prepare($sqlClientes);
+            $stmt->execute($params);
+            $chartClientes = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // 4. Devolutivas feitas X pendentes (Gráfico de Pizza)
+            $sqlDevolutivas = "SELECT 
+                                 CASE WHEN t.devolutiva_resultado IS NOT NULL AND t.devolutiva_resultado != '' THEN 'Feitas' ELSE 'Pendentes' END AS label,
+                                 COUNT(*) AS total
+                               FROM toners_defeitos t
+                               LEFT JOIN filiais f ON f.id = t.filial_id
+                               WHERE {$where}
+                               GROUP BY label ORDER BY total DESC";
+            $stmt = $this->db->prepare($sqlDevolutivas);
+            $stmt->execute($params);
+            $chartDevolutivas = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // KPIs for the top cards (total defeitos and items without devolutivas) total qty
+            $sqlKpis = "SELECT 
+                            SUM(t.quantidade) AS total_quantidade,
+                            COUNT(t.id) AS total_registros,
+                            SUM(CASE WHEN t.devolutiva_resultado IS NULL OR t.devolutiva_resultado = '' THEN 1 ELSE 0 END) AS pendentes
+                        FROM toners_defeitos t 
+                        LEFT JOIN filiais f ON f.id = t.filial_id
+                        WHERE {$where}";
+            $stmt = $this->db->prepare($sqlKpis);
+            $stmt->execute($params);
+            $kpis = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            // Filters
+            $filiais = $this->db->query("SELECT DISTINCT nome FROM filiais ORDER BY nome")->fetchAll(\PDO::FETCH_COLUMN);
+            $clientes = $this->db->query("SELECT DISTINCT cliente_nome FROM toners_defeitos WHERE cliente_nome IS NOT NULL AND cliente_nome != '' ORDER BY cliente_nome")->fetchAll(\PDO::FETCH_COLUMN);
+
+            echo json_encode([
+                'success' => true,
+                'kpis' => [
+                    'total_quantidade' => (int)($kpis['total_quantidade'] ?? 0),
+                    'total_registros' => (int)($kpis['total_registros'] ?? 0),
+                    'pendentes' => (int)($kpis['pendentes'] ?? 0)
+                ],
+                'charts' => [
+                    'modelos' => $chartModelos,
+                    'filiais' => $chartFiliais,
+                    'clientes' => $chartClientes,
+                    'devolutivas' => $chartDevolutivas,
+                ],
+                'filter_options' => [
+                    'filiais' => $filiais ?: [],
+                    'clientes' => $clientes ?: []
+                ]
             ]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Erro: ' . $e->getMessage()]);

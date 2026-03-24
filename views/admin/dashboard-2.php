@@ -15,7 +15,7 @@ $triagemStats = $triagemStats ?? [
 $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
 ?>
 
-<?php if ($moduloAtual !== 'triagem'): ?>
+<?php if ($moduloAtual !== 'triagem' && $moduloAtual !== 'toners-defeito'): ?>
 <!-- ===== PORTAL MODE ===== -->
 <section class="space-y-6">
   <div class="flex items-center justify-between">
@@ -39,7 +39,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     </a>
 
     <!-- Novo Card: Toners com Defeito -->
-    <a href="#" class="group bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md hover:border-rose-300 transition-all">
+    <a href="/dashboard-2/toners-defeito" class="group bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md hover:border-rose-300 transition-all">
       <div class="flex items-start justify-between">
         <div>
           <h2 class="text-base font-semibold text-gray-900">Toners com Defeito</h2>
@@ -53,11 +53,321 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
         <span class="text-xl">⚠️</span>
       </div>
       <div class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-rose-600 group-hover:text-rose-700">
-        Em desenvolvimento <span>→</span>
+        Entrar no dashboard <span>→</span>
       </div>
     </a>
   </div>
 </section>
+<?php elseif ($moduloAtual === 'toners-defeito'): ?>
+<!-- ===== TONERS COM DEFEITO DASHBOARD ===== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --dash-bg: #0f172a;
+    --dash-surface: rgba(255,255,255,0.04);
+    --dash-border: rgba(255,255,255,0.08);
+    --dash-text: #e2e8f0;
+    --dash-muted: #94a3b8;
+    --dash-accent: #f43f5e;
+    --dash-accent2: #fb7185;
+    --dash-green: #34d399;
+    --dash-red: #f87171;
+    --dash-orange: #fb923c;
+    --dash-yellow: #fbbf24;
+  }
+  .dash-container { background: var(--dash-bg); color: var(--dash-text); min-height: calc(100vh - 60px); }
+  .dash-card { background: var(--dash-surface); border: 1px solid var(--dash-border); border-radius: 16px; backdrop-filter: blur(12px); }
+  .kpi-value { font-size: 1.85rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; white-space: nowrap; }
+  .kpi-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dash-muted); min-height: 2.4em; display: flex; align-items: flex-end; }
+  .kpi-card-inner { display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+  .filter-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--dash-text); border-radius: 10px; padding: 8px 12px; font-size: 0.82rem; transition: border-color 0.2s; outline: none; width: 100%; }
+  .filter-input:focus { border-color: var(--dash-accent); box-shadow: 0 0 0 2px rgba(244,63,94,0.15); }
+  .chart-wrapper { position: relative; width: 100%; }
+  .chart-wrapper canvas { width: 100% !important; }
+</style>
+
+<div class="dash-container px-6 py-8">
+  <div class="max-w-[1400px] mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-3 text-sm font-medium text-slate-400 mb-2">
+          <a href="/dashboard-2" class="hover:text-white transition">Dashboard 2.0</a>
+          <span>/</span>
+          <span class="text-rose-400">Toners com Defeito</span>
+        </div>
+        <h1 class="text-2xl font-bold text-white flex items-center gap-3">
+          <span class="p-2 bg-rose-500/20 text-rose-400 rounded-xl">⚠️</span>
+          Indicadores de Toners com Defeito
+        </h1>
+      </div>
+      
+      <!-- Date Filters -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-xl border border-white/10">
+          <input type="date" id="filtroDataInicio" class="filter-input !bg-transparent !border-transparent w-full md:w-36 text-xs">
+          <span class="text-slate-500 text-xs">até</span>
+          <input type="date" id="filtroDataFim" class="filter-input !bg-transparent !border-transparent w-full md:w-36 text-xs">
+        </div>
+        <button onclick="fetchTonersDefeitoDashboard()" class="p-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition shadow-lg shadow-rose-500/20" title="Atualizar dados">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtros Globais -->
+    <div class="dash-card p-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-2 mr-2">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+          <span class="text-xs font-semibold text-slate-300 uppercase letter-spacing-wide">Filtros</span>
+        </div>
+        
+        <select id="filtroCliente" class="filter-input w-full md:w-48 text-xs" onchange="fetchTonersDefeitoDashboard()">
+          <option value="">Cliente (Todos)</option>
+        </select>
+        <select id="filtroFilial" class="filter-input w-full md:w-48 text-xs" onchange="fetchTonersDefeitoDashboard()">
+          <option value="">Filial (Todas)</option>
+        </select>
+        
+        <button onclick="cleanFilters()" class="text-xs text-rose-400 hover:text-white transition px-2 ml-auto">Limpar filtros</button>
+      </div>
+    </div>
+
+    <!-- KPIs Principais -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="dash-card p-5 dash-card-glow relative overflow-hidden group">
+        <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-500/10 rounded-full blur-xl group-hover:bg-rose-500/20 transition-all"></div>
+        <div class="kpi-card-inner relative z-10">
+          <div class="kpi-label mb-2">Total de Toners com Defeito Registrados</div>
+          <div class="flex items-end gap-3 justify-between mt-auto">
+            <div class="kpi-value text-white" id="kpi_registros">-</div>
+            <div class="p-2 rounded-xl bg-white/5 text-rose-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card p-5 dash-card-glow relative overflow-hidden group">
+        <div class="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/10 rounded-full blur-xl group-hover:bg-orange-500/20 transition-all"></div>
+        <div class="kpi-card-inner relative z-10">
+          <div class="kpi-label mb-2">Quantidade Total de Itens</div>
+          <div class="flex items-end gap-3 justify-between mt-auto">
+            <div class="kpi-value text-white" id="kpi_quantidade">-</div>
+            <div class="p-2 rounded-xl bg-white/5 text-orange-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card p-5 dash-card-glow relative overflow-hidden group">
+        <div class="absolute -right-4 -top-4 w-24 h-24 bg-yellow-500/10 rounded-full blur-xl group-hover:bg-yellow-500/20 transition-all"></div>
+        <div class="kpi-card-inner relative z-10">
+          <div class="kpi-label mb-2">Devolutivas Pendentes (Itens)</div>
+          <div class="flex items-end gap-3 justify-between mt-auto">
+            <div class="kpi-value text-white" id="kpi_pendentes">-</div>
+            <div class="p-2 rounded-xl bg-white/5 text-yellow-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Linha 1 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="dash-card p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-white">Quantidade por Modelo (Top 15)</h3>
+        </div>
+        <div class="chart-wrapper h-[280px]">
+          <canvas id="chartModelos"></canvas>
+        </div>
+      </div>
+      
+      <div class="dash-card p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-white">Quantidade por Filial</h3>
+        </div>
+         <div class="chart-wrapper h-[280px] flex justify-center">
+            <div class="w-full max-w-[280px]">
+              <canvas id="chartFiliais"></canvas>
+            </div>
+         </div>
+      </div>
+    </div>
+
+    <!-- Charts Linha 2 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="dash-card p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-white">Quantidade por Cliente (Top 15)</h3>
+        </div>
+        <div class="chart-wrapper h-[280px]">
+          <canvas id="chartClientes"></canvas>
+        </div>
+      </div>
+      
+      <div class="dash-card p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-white">Devolutivas (Feitas x Pendentes)</h3>
+        </div>
+        <div class="chart-wrapper h-[280px] flex justify-center">
+           <div class="w-full max-w-[280px]">
+             <canvas id="chartDevolutivas"></canvas>
+           </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let charts = {};
+
+function initCharts() {
+  Chart.defaults.color = '#94a3b8';
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.font.size = 11;
+  Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+  Chart.defaults.plugins.tooltip.titleColor = '#fff';
+  Chart.defaults.plugins.tooltip.bodyColor = '#e2e8f0';
+  Chart.defaults.plugins.tooltip.borderColor = 'rgba(255,255,255,0.1)';
+  Chart.defaults.plugins.tooltip.borderWidth = 1;
+  Chart.defaults.plugins.tooltip.padding = 10;
+  Chart.defaults.plugins.tooltip.cornerRadius = 8;
+  
+  const commonBarOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { border: { display: false }, grid: { color: 'rgba(255,255,255,0.05)', drawTicks: false } },
+      x: { border: { display: false }, grid: { display: false }, ticks: { maxRotation: 45, minRotation: 45 } }
+    }
+  };
+
+  const commonPieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'right', labels: { color: '#e2e8f0', usePointStyle: true, boxWidth: 8, padding: 15 } } },
+    cutout: '70%'
+  };
+
+  charts.modelos = new Chart(document.getElementById('chartModelos'), { type: 'bar', data: { labels: [], datasets: [] }, options: commonBarOptions });
+  charts.filiais = new Chart(document.getElementById('chartFiliais'), { type: 'doughnut', data: { labels: [], datasets: [] }, options: commonPieOptions });
+  charts.clientes = new Chart(document.getElementById('chartClientes'), { type: 'bar', data: { labels: [], datasets: [] }, options: commonBarOptions });
+  charts.devolutivas = new Chart(document.getElementById('chartDevolutivas'), { type: 'doughnut', data: { labels: [], datasets: [] }, options: commonPieOptions });
+}
+
+function updateSelectOptions(selectId, options, keepSelected = true) {
+  const el = document.getElementById(selectId);
+  const currentVal = el.value;
+  const oldText = el.options[0].text;
+  el.innerHTML = `<option value="">${oldText}</option>`;
+  options.forEach(opt => {
+    let optEl = document.createElement('option');
+    optEl.value = opt;
+    optEl.textContent = opt;
+    el.appendChild(optEl);
+  });
+  if (keepSelected && options.includes(currentVal)) {
+    el.value = currentVal;
+  }
+}
+
+function cleanFilters() {
+  document.getElementById('filtroDataInicio').value = '';
+  document.getElementById('filtroDataFim').value = '';
+  document.getElementById('filtroCliente').value = '';
+  document.getElementById('filtroFilial').value = '';
+  fetchTonersDefeitoDashboard();
+}
+
+async function fetchTonersDefeitoDashboard() {
+  const params = new URLSearchParams({
+    data_inicio: document.getElementById('filtroDataInicio').value,
+    data_fim: document.getElementById('filtroDataFim').value,
+    cliente: document.getElementById('filtroCliente').value,
+    filial: document.getElementById('filtroFilial').value,
+  });
+
+  try {
+    const res = await fetch('/dashboard-2/toners-defeito/data?' + params.toString());
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Erro desconhecido');
+
+    // Update KPIs
+    document.getElementById('kpi_registros').innerText = data.kpis.total_registros;
+    document.getElementById('kpi_quantidade').innerText = data.kpis.total_quantidade;
+    document.getElementById('kpi_pendentes').innerText = data.kpis.pendentes;
+
+    // Update Filter Options
+    if (data.filter_options) {
+      updateSelectOptions('filtroCliente', data.filter_options.clientes);
+      updateSelectOptions('filtroFilial', data.filter_options.filiais);
+    }
+
+    // Update Chart: Modelos
+    charts.modelos.data = {
+      labels: data.charts.modelos.map(item => item.label),
+      datasets: [{
+        data: data.charts.modelos.map(item => item.total),
+        backgroundColor: '#f43f5e',
+        borderRadius: 4
+      }]
+    };
+    charts.modelos.update();
+
+    // Update Chart: Filiais
+    charts.filiais.data = {
+      labels: data.charts.filiais.map(item => item.label),
+      datasets: [{
+        data: data.charts.filiais.map(item => item.total),
+        backgroundColor: ['#22d3ee','#818cf8','#34d399','#f43f5e','#fbbf24','#c084fc','#fb923c','#a3e635','#f472b6','#60a5fa'],
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    };
+    charts.filiais.update();
+
+    // Update Chart: Clientes
+    charts.clientes.data = {
+      labels: data.charts.clientes.map(item => item.label),
+      datasets: [{
+        data: data.charts.clientes.map(item => item.total),
+        backgroundColor: '#818cf8',
+        borderRadius: 4
+      }]
+    };
+    charts.clientes.update();
+
+    // Update Chart: Devolutivas
+    const colorsDev = { 'Feitas': '#34d399', 'Pendentes': '#fbbf24' };
+    charts.devolutivas.data = {
+      labels: data.charts.devolutivas.map(item => item.label),
+      datasets: [{
+        data: data.charts.devolutivas.map(item => item.total),
+        backgroundColor: data.charts.devolutivas.map(item => colorsDev[item.label] || '#94a3b8'),
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    };
+    charts.devolutivas.update();
+
+  } catch (err) {
+    console.error('Erro fetching toners defeito dashboard:', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initCharts();
+  fetchTonersDefeitoDashboard();
+});
+</script>
 <?php else: ?>
 <!-- ===== TRIAGEM DASHBOARD ===== -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>

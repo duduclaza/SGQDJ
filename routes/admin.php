@@ -52,6 +52,8 @@ $router->get('/dashboard-2', [AdminController::class, 'dashboard2']);
 $router->get('/dashboard-2/triagem', [AdminController::class, 'dashboard2Triagem']);
 $router->get('/dashboard-2/triagem/data', [AdminController::class, 'dashboard2TriagemData']);
 $router->get('/dashboard-2/triagem/reprovados', [AdminController::class, 'dashboard2TriagemReprovados']);
+$router->get('/dashboard-2/toners-defeito', [AdminController::class, 'dashboard2TonersDefeito']);
+$router->get('/dashboard-2/toners-defeito/data', [AdminController::class, 'dashboard2TonersDefeitoData']);
 
 // Admin (alias para dashboard)
 $router->get('/admin', function() {
