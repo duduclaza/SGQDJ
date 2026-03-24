@@ -58,24 +58,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['flash_message'] = ['type' => 'info', 'text' => 'Bateria de testes rascunhada e salva com sucesso.'];
         }
         elseif ($acao === 'finalizar_homologacao' && ($u['perfil'] === 'responsavel' || $u['perfil'] === 'super_admin' || $u['perfil'] === 'admin')) {
-            atualizarHomologacaoMock($id, [
-                'status' => 'concluida',
-                'data_fim_homologacao' => $_POST['data_fim_homologacao'],
-                'resultado' => $_POST['resultado'],
-                'parecer_final' => $_POST['parecer_final']
-            ]);
-            // Save checklist final
             $respostas = $_POST['checklist'] ?? [];
             $booleadas = [];
+            $tem_pendente = false;
             foreach ($respostas as $k => $v) {
                 if ($v === '1') $booleadas[$k] = true;
                 elseif ($v === '0') $booleadas[$k] = false;
-                elseif ($v === 'pendente') $booleadas[$k] = 'pendente';
-                else $booleadas[$k] = null;
+                elseif ($v === 'pendente') {
+                    $booleadas[$k] = 'pendente';
+                    $tem_pendente = true;
+                } else {
+                    $booleadas[$k] = null;
+                    $tem_pendente = true;
+                }
             }
-            atualizarHomologacaoMock($id, ['checklist_respostas' => $booleadas]);
+
+            $resultado = $_POST['resultado'];
+            $novo_status = ($tem_pendente || $resultado === 'pendente') ? 'em_homologacao' : 'concluida';
+
+            atualizarHomologacaoMock($id, [
+                'status' => $novo_status,
+                'data_fim_homologacao' => $_POST['data_fim_homologacao'],
+                'resultado' => $resultado,
+                'parecer_final' => $_POST['parecer_final'],
+                'checklist_respostas' => $booleadas
+            ]);
             
-            $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Processo de Homologação Assinado e Finalizado!'];
+            if ($novo_status === 'em_homologacao') {
+                $_SESSION['flash_message'] = ['type' => 'info', 'text' => 'Veredito salvo como rascunho. A homologação permanece em andamento (Pendente).'];
+            } else {
+                $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Processo de Homologação Assinado e Finalizado!'];
+            }
         }
         
         header("Location: detalhe_homologacao.php?id=$id");

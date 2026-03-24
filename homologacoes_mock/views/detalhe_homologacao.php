@@ -360,9 +360,10 @@
                     <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Decisão Oficial (Pass/Fail)</label>
                     <select name="resultado" required class="bg-slate-50 border border-primary-300 text-slate-900 font-bold text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                         <option value="">Julgamento...</option>
-                        <option value="aprovado">Aprovado</option>
-                        <option value="aprovado com restrições">Aprovado com restrições</option>
-                        <option value="reprovado">Reprovado</option>
+                        <option value="aprovado" <?= ($h['resultado']??'') === 'aprovado' ? 'selected' : '' ?>>Aprovado</option>
+                        <option value="aprovado com restrições" <?= ($h['resultado']??'') === 'aprovado com restrições' ? 'selected' : '' ?>>Aprovado com restrições</option>
+                        <option value="reprovado" <?= ($h['resultado']??'') === 'reprovado' ? 'selected' : '' ?>>Reprovado</option>
+                        <option value="pendente" <?= ($h['resultado']??'') === 'pendente' ? 'selected' : '' ?>>Pendente</option>
                     </select>
                 </div>
                 <div>
@@ -373,7 +374,7 @@
             
             <div class="mb-6">
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Laudo Técnico (Texto Justificativo)</label>
-                <textarea name="parecer_final" rows="4" required placeholder="Disserte motivos práticos indicando a viabilidade de compra de lotes futuros dessa Spec." class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-3 dark:bg-slate-900 dark:border-slate-600 dark:text-white"></textarea>
+                <textarea name="parecer_final" rows="4" required placeholder="Disserte motivos práticos indicando a viabilidade de compra de lotes futuros dessa Spec." class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-3 dark:bg-slate-900 dark:border-slate-600 dark:text-white"><?= htmlspecialchars($h['parecer_final'] ?? '') ?></textarea>
             </div>
             
             <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -397,13 +398,10 @@
             else if (inp.value === "pendente" || inp.value === "") hasPendente = true;
         });
         
-        if (hasPendente) {
-            alert('Não é possível finalizar o veredito. Existem itens no Checklist com status PENDENTE.');
-            return;
-        }
-        
         let resultado = '';
-        if (hasPass && !hasFail) {
+        if (hasPendente) {
+            resultado = 'pendente';
+        } else if (hasPass && !hasFail) {
             resultado = 'aprovado';
         } else if (!hasPass && hasFail) {
             resultado = 'reprovado';
