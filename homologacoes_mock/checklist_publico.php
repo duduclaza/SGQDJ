@@ -47,9 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$concluido) {
     } elseif (!$hasPass && $hasFail) {
         $resultado = 'reprovado';
     } elseif ($hasPass && $hasFail) {
-        $resultado = 'aprovado com ressalvas';
+        $resultado = 'aprovado com restrições';
     } else {
-        $resultado = 'aprovado com ressalvas'; // fallback Se nao marcou nada, estranho vir vazio.
+        $resultado = 'aprovado com restrições'; // fallback Se nao marcou nada, estranho vir vazio.
     }
     
     $laudo = "Avaliação externa realizada via Celular.\nAvaliador: {$nome}\nObservações: " . ($obs ?: "Nenhuma.") . "\n\nO sistema calculou automaticamente o veredicto com base nas respostas e fechou a homologação.";

@@ -356,21 +356,14 @@
             <input type="hidden" name="acao" value="finalizar_homologacao">
             <div id="hiddenChecklistData" class="hidden"></div>
             
-            <div class="bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300 p-4 rounded-xl mb-6 text-sm flex gap-3">
-                <i class="ph-fill ph-warning-circle text-xl shrink-0 mt-0.5"></i>
-                <div>
-                    ATENÇÃO: Despachar a conclusão travará o checklist e o arquivo. O Setor de Compras será automaticamente habilitado a seguir com as aquisições baseadas no seu veredicto.
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5 mt-4">
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Decisão Oficial (Pass/Fail)</label>
                     <select name="resultado" required class="bg-slate-50 border border-primary-300 text-slate-900 font-bold text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                         <option value="">Julgamento...</option>
-                        <option value="aprovado">Aprovado (Atende Core)</option>
-                        <option value="aprovado com ressalvas">Aprovado C/ Restrições Parciais</option>
-                        <option value="reprovado">Reprovado (Descarte na Aquisição)</option>
+                        <option value="aprovado">Aprovado</option>
+                        <option value="aprovado com restrições">Aprovado com restrições</option>
+                        <option value="reprovado">Reprovado</option>
                     </select>
                 </div>
                 <div>
@@ -409,7 +402,7 @@
         } else if (!hasPass && hasFail) {
             resultado = 'reprovado';
         } else if (hasPass && hasFail) {
-            resultado = 'aprovado com ressalvas';
+            resultado = 'aprovado com restrições';
         }
         
         const selectElement = document.querySelector('select[name="resultado"]');
