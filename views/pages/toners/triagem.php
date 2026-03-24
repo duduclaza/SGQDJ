@@ -142,7 +142,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
     <div class="px-4 py-2 bg-gray-50 dark:bg-slate-900/30 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between gap-4">
       <div class="flex items-center gap-2">
         <span class="text-xs font-medium text-gray-500 dark:text-gray-400">🔍 Ajustar Zoom:</span>
-        <input type="range" id="grid-zoom-slider" min="0.7" max="1.3" step="0.05" value="1.0" 
+        <input type="range" id="grid-zoom-slider" min="0.5" max="1.3" step="0.05" value="1.0" 
                class="w-32 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
                oninput="updateGridZoom(this.value)">
         <span id="grid-zoom-val" class="text-xs font-bold text-gray-700 dark:text-gray-300 w-8">100%</span>
