@@ -98,7 +98,21 @@ $defeitos = $defeitos ?? [];
         <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-100 dark:divide-slate-700">
           <?php if (empty($defeitos)): ?>
             <tr>
-              <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 italic">Nenhum defeito cadastrado.</td>
+              <td colspan="6" class="px-6 py-20 text-center">
+                <div class="flex flex-col items-center justify-center space-y-4">
+                  <div class="w-20 h-20 bg-slate-100 dark:bg-slate-900 rounded-full flex items-center justify-center text-slate-300 dark:text-slate-600">
+                    <i class="ph ph-puzzle-piece text-5xl"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-lg font-bold text-gray-900 dark:text-white">Nenhum defeito encontrado</h4>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs mx-auto">Parece que ainda não há defeitos registrados no sistema ou sua busca não retornou resultados.</p>
+                  </div>
+                  <button onclick="openFormModal()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-blue-500/20">
+                    <i class="ph ph-plus-circle text-lg"></i>
+                    Cadastrar Primeiro Defeito
+                  </button>
+                </div>
+              </td>
             </tr>
           <?php else: ?>
             <?php foreach ($defeitos as $d): ?>

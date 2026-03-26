@@ -244,11 +244,20 @@ if ($isAdmin) {
                 </button>
             </div>
         </div>
-        <div id="no-data" class="text-center py-12 hidden">
-            <svg class="mx-auto h-12 w-12 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            <p class="mt-4 text-gray-500 dark:text-slate-400 font-medium">Nenhum descarte encontrado.</p>
+        <div id="no-data" class="text-center py-20 hidden">
+            <div class="flex flex-col items-center justify-center space-y-4">
+                <div class="w-20 h-20 bg-slate-100 dark:bg-slate-900 rounded-full flex items-center justify-center text-slate-300 dark:text-slate-600">
+                    <i class="ph ph-recycle text-5xl"></i>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold text-gray-900 dark:text-white">Nenhum descarte encontrado</h4>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs mx-auto">Não encontramos registros com os filtros aplicados ou ainda não há descartes nesta categoria.</p>
+                </div>
+                <button onclick="abrirModalDescarte()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-blue-500/20">
+                    <i class="ph ph-plus-circle text-lg"></i>
+                    Novo Descarte
+                </button>
+            </div>
         </div>
     </div>
 </div>

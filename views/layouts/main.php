@@ -360,6 +360,49 @@ if (!function_exists('flash')) {
       }
     };
 
+    // ========== GLOBAL KEYBOARD LISTENERS ==========
+    document.addEventListener('keydown', function(e) {
+      // Tecla ESC para fechar modais
+      if (e.key === 'Escape') {
+        const confirmOverlay = document.getElementById('global-confirm-overlay');
+        if (confirmOverlay && !confirmOverlay.classList.contains('hidden')) {
+          document.getElementById('global-confirm-cancel')?.click();
+          return;
+        }
+
+        // Tentar encontrar o modal ativo no módulo
+        // Procurar por DIVs que são overlays e estão visíveis
+        const moduleModals = document.querySelectorAll('div[id*="modal-"], div[id*="formContainer"], div[id*="form-container"]');
+        moduleModals.forEach(m => {
+          if (!m.classList.contains('hidden')) {
+            // Tentar encontrar botão fechar ou cancelar dentro do modal
+            const closeBtn = m.querySelector('button[onclick*="fechar"], button[onclick*="close"], button[id*="cancel"]');
+            if (closeBtn) closeBtn.click();
+            else m.classList.add('hidden'); // Fallback: apenas esconde
+          }
+        });
+        // Tecla ENTER para salvar modais simples
+        if (e.key === 'Enter') {
+            // Não disparar se estiver em um textarea
+            if (e.target.tagName === 'TEXTAREA') return;
+
+            // Procurar modal ativo
+            const moduleModals = document.querySelectorAll('div[id*="modal-"], div[id*="formContainer"], div[id*="form-container"]');
+            moduleModals.forEach(m => {
+                if (!m.classList.contains('hidden')) {
+                    // Tentar encontrar o botão principal de salvar/confirmar
+                    // Prioridade para botões com texto "Salvar", "Atualizar", "Confirmar" ou "Enviar"
+                    const saveBtn = m.querySelector('button.bg-blue-600, button[type="submit"], button[onclick*="salvar"], button[onclick*="save"]');
+                    if (saveBtn && !saveBtn.disabled) {
+                        e.preventDefault();
+                        saveBtn.click();
+                    }
+                }
+            });
+        }
+      }
+    });
+
     // Page transition
     document.addEventListener('DOMContentLoaded', function() {
       const pageContent = document.querySelector('.page-transition');
