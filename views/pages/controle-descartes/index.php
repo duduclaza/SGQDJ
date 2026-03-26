@@ -133,7 +133,7 @@ if ($isAdmin) {
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Código do Produto</label>
-                <input type="text" id="filtro-codigo-produto" placeholder="Buscar por código" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <input type="text" id="filtro-codigo-produto" placeholder="Buscar por código" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número da OS</label>
@@ -306,7 +306,7 @@ if ($isAdmin) {
                 <button type="button" onclick="fecharModalImportacao()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md">
                     Cancelar
                 </button>
-                <button type="button" onclick="baixarTemplate()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md">
+                <button type="button" onclick="baixarTemplate()" class="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-md">
                     Baixar Template
                 </button>
                 <button type="button" id="btn-importar" onclick="processarImportacao()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md" disabled>
@@ -445,7 +445,7 @@ if ($isAdmin) {
                 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Novo Status: *</label>
-                    <select id="novo-status" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <select id="novo-status" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Selecione...</option>
                         <option value="Aguardando Descarte">⏳ Aguardando Descarte</option>
                         <option value="Itens Descartados">✅ Itens Descartados</option>
@@ -463,7 +463,7 @@ if ($isAdmin) {
                     <button type="button" onclick="fecharModalAlterarStatus()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md">
                         Cancelar
                     </button>
-                    <button type="button" onclick="salvarNovoStatus()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md">
+                    <button type="button" onclick="salvarNovoStatus()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">
                         Salvar Status
                     </button>
                 </div>
@@ -801,7 +801,7 @@ function carregarDescartes(page = 1) {
         })
         .catch(error => {
             console.error('Erro:', error);
-            alert('Erro ao carregar descartes');
+            showToast('Erro ao carregar descartes. Tente atualizar a página.', 'error');
         });
 }
 
@@ -963,7 +963,7 @@ function confirmarExclusao() {
     const senha = document.getElementById('admin-password').value;
     
     if (!senha) {
-        alert('Por favor, insira a senha do administrador');
+        showToast('Por favor, insira a senha do administrador', 'warning');
         return;
     }
     
@@ -983,12 +983,12 @@ function confirmarExclusao() {
             mostrarNotificacao('Descarte excluído com sucesso!', 'success');
             carregarDescartes();
         } else {
-            alert('Erro: ' + data.message);
+            showToast('Erro: ' + data.message, 'error');
         }
     })
     .catch(error => {
         console.error('Erro:', error);
-        alert('Erro ao excluir descarte');
+        showToast('Erro ao excluir descarte', 'error');
     });
 }
 
@@ -1022,23 +1022,23 @@ document.getElementById('btn-salvar-descarte').addEventListener('click', functio
     .then(async (response) => {
         // Se o servidor tentar redirecionar (ex: sessão expirada), response.type pode ser 'opaqueredirect'
         if (response.type === 'opaqueredirect' || (response.status >= 300 && response.status < 400)) {
-            alert('Sua sessão pode ter expirado. Por favor, faça login novamente.');
+            showToast('Sua sessão pode ter expirado. Por favor, faça login novamente.', 'error');
             return { success: false };
         }
         try { return await response.json(); } catch (_) { return { success: false, message: 'Resposta inválida do servidor' }; }
     })
     .then(data => {
         if (data && data.success) {
-            alert(data.message || 'Registro salvo com sucesso!');
+            showToast(data.message || 'Registro salvo com sucesso!', 'success');
             fecharModalDescarte();
             carregarDescartes();
         } else if (data && data.message) {
-            alert('Erro: ' + data.message);
+            showToast('Erro: ' + data.message, 'error');
         }
     })
     .catch(error => {
         console.error('Erro:', error);
-        alert('Erro ao salvar descarte');
+        showToast('Erro ao salvar descarte', 'error');
     })
     .finally(() => {
         // Reabilitar botão

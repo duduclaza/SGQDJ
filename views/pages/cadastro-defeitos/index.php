@@ -165,6 +165,7 @@ function openFormModal() {
   document.getElementById('imagemAtualContainer').classList.add('hidden');
   document.getElementById('imagemAtualPreview').src = '';
   document.getElementById('imgDica').style.display = 'none';
+  document.getElementById('btnSalvarDefeito').textContent = 'Salvar Registro';
 }
 
 function closeFormModal() {
@@ -181,6 +182,7 @@ function editDefeito(defeito) {
   document.getElementById('img-obrigatoria').classList.add('hidden');
   document.getElementById('defeitoId').value = defeito.id;
   document.getElementById('nomeDefeito').value = defeito.nome_defeito || '';
+  document.getElementById('btnSalvarDefeito').textContent = 'Atualizar Registro';
 
   // Mostrar preview da imagem atual se existir
   const previewContainer = document.getElementById('imagemAtualContainer');
@@ -198,65 +200,66 @@ function editDefeito(defeito) {
     previewImg.src = '';
     imgDica.style.display = 'none';
   }
+
+  // Scroll suave até o formulário
+  document.getElementById('formContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-async function deleteDefeito(id) {
-  if (!confirm('Tem certeza que deseja excluir este defeito?')) return;
+function deleteDefeito(id) {
+  showConfirm(
+    'Tem certeza que deseja excluir este defeito? Esta ação não pode ser desfeita.',
+    async () => {
+      try {
+        const response = await fetch('/cadastro-defeitos/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+          body: `id=${id}`
+        });
 
-  try {
-    const response = await fetch('/cadastro-defeitos/delete', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      body: `id=${id}`
-    });
+        const raw = await response.text();
+        let result;
+        try { result = JSON.parse(raw); } catch (_) { throw new Error(raw || `HTTP ${response.status}`); }
 
-    const raw = await response.text();
-    let result;
-    try {
-      result = JSON.parse(raw);
-    } catch (_) {
-      throw new Error(raw || `HTTP ${response.status}`);
-    }
-
-    alert(result.message);
-    if (result.success) window.location.reload();
-  } catch (error) {
-    alert('Erro ao excluir defeito: ' + (error.message || 'erro desconhecido'));
-  }
+        showToast(result.message, result.success ? 'success' : 'error');
+        if (result.success) setTimeout(() => window.location.reload(), 1200);
+      } catch (error) {
+        showToast('Erro ao excluir defeito: ' + (error.message || 'erro desconhecido'), 'error');
+      }
+    },
+    { title: 'Excluir Defeito', okText: 'Excluir' }
+  );
 }
 
 document.getElementById('defeitoForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
+  const btn = document.getElementById('btnSalvarDefeito');
   const formData = new FormData(this);
   const defeitoId = document.getElementById('defeitoId').value;
   const isEditing = defeitoId && defeitoId !== '';
   const url = isEditing ? '/cadastro-defeitos/update' : '/cadastro-defeitos/store';
 
+  setButtonLoading(btn, true);
+
   try {
     const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest'
-      },
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
       body: formData
     });
 
     const raw = await response.text();
     let result;
-    try {
-      result = JSON.parse(raw);
-    } catch (_) {
-      throw new Error(raw || `HTTP ${response.status}`);
-    }
+    try { result = JSON.parse(raw); } catch (_) { throw new Error(raw || `HTTP ${response.status}`); }
 
-    alert(result.message);
-    if (result.success) window.location.reload();
+    showToast(result.message, result.success ? 'success' : 'error');
+    if (result.success) setTimeout(() => window.location.reload(), 1200);
+    else setButtonLoading(btn, false);
   } catch (error) {
-    alert('Erro ao salvar defeito: ' + (error.message || 'erro desconhecido'));
+    showToast('Erro ao salvar defeito: ' + (error.message || 'erro desconhecido'), 'error');
+    setButtonLoading(btn, false);
   }
 });
 </script>
+
+
