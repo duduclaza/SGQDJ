@@ -44,11 +44,24 @@ $defeitos = $defeitos ?? [];
 
         <div>
           <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Imagem do Defeito <span id="img-obrigatoria" class="text-red-500">*</span></label>
+
+          <!-- Preview da imagem atual (modo edição) -->
+          <div id="imagemAtualContainer" class="hidden mb-3">
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider font-bold mb-1.5">Imagem Atual</p>
+            <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-900/60 border border-gray-200 dark:border-slate-600 rounded-xl">
+              <img id="imagemAtualPreview" src="" alt="Imagem atual" class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm">
+              <div>
+                <p class="text-xs font-semibold text-gray-700 dark:text-gray-300" id="imagemAtualNome"></p>
+                <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Envie um novo arquivo abaixo para substituir</p>
+              </div>
+            </div>
+          </div>
+
           <div class="relative group">
             <input type="file" name="imagem" id="imagemDefeito" accept="image/*" 
                    class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white file:mr-4 file:py-1 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 dark:file:bg-blue-900/30 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 transition-all cursor-pointer">
           </div>
-          <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-2 px-1">
+          <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-2 px-1" id="imgDica" style="display:none">
             <span class="font-bold">Dica:</span> No modo edição, envie uma imagem apenas se desejar substituir a atual.
           </p>
         </div>
@@ -125,7 +138,7 @@ $defeitos = $defeitos ?? [];
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right">
                   <div class="flex items-center justify-end gap-2">
-                    <button onclick='editDefeito(<?= json_encode(['id' => $d['id'], 'nome_defeito' => $d['nome_defeito']]) ?>)' class="p-2 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-all shadow-sm" title="Editar">
+                    <button onclick='editDefeito(<?= json_encode(['id' => $d['id'], 'nome_defeito' => $d['nome_defeito'], 'imagem_nome' => $d['imagem_nome']]) ?>)' class="p-2 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-all shadow-sm" title="Editar">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                     </button>
                     <button onclick="deleteDefeito(<?= (int)$d['id'] ?>)" class="p-2 bg-red-50 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/60 transition-all shadow-sm" title="Excluir">
@@ -149,11 +162,17 @@ function openFormModal() {
   document.getElementById('img-obrigatoria').classList.remove('hidden');
   document.getElementById('defeitoForm').reset();
   document.getElementById('defeitoId').value = '';
+  document.getElementById('imagemAtualContainer').classList.add('hidden');
+  document.getElementById('imagemAtualPreview').src = '';
+  document.getElementById('imgDica').style.display = 'none';
 }
 
 function closeFormModal() {
   document.getElementById('formContainer').classList.add('hidden');
   document.getElementById('defeitoForm').reset();
+  document.getElementById('imagemAtualContainer').classList.add('hidden');
+  document.getElementById('imagemAtualPreview').src = '';
+  document.getElementById('imgDica').style.display = 'none';
 }
 
 function editDefeito(defeito) {
@@ -162,6 +181,23 @@ function editDefeito(defeito) {
   document.getElementById('img-obrigatoria').classList.add('hidden');
   document.getElementById('defeitoId').value = defeito.id;
   document.getElementById('nomeDefeito').value = defeito.nome_defeito || '';
+
+  // Mostrar preview da imagem atual se existir
+  const previewContainer = document.getElementById('imagemAtualContainer');
+  const previewImg = document.getElementById('imagemAtualPreview');
+  const previewNome = document.getElementById('imagemAtualNome');
+  const imgDica = document.getElementById('imgDica');
+
+  if (defeito.imagem_nome) {
+    previewImg.src = '/cadastro-defeitos/' + defeito.id + '/imagem';
+    previewNome.textContent = defeito.imagem_nome;
+    previewContainer.classList.remove('hidden');
+    imgDica.style.display = 'block';
+  } else {
+    previewContainer.classList.add('hidden');
+    previewImg.src = '';
+    imgDica.style.display = 'none';
+  }
 }
 
 async function deleteDefeito(id) {
