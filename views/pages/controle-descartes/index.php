@@ -82,8 +82,8 @@ if ($isAdmin) {
     <div class="mb-8">
         <div class="flex justify-between items-center">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Controle de Descartes</h1>
-                <p class="mt-2 text-gray-600">Gerenciamento de descartes de equipamentos</p>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Controle de Descartes</h1>
+                <p class="mt-2 text-gray-600 dark:text-gray-400">Gerenciamento de descartes de equipamentos</p>
             </div>
             <div class="flex space-x-2 flex-wrap gap-2">
                 <?php if ($isAdmin): ?>
@@ -123,25 +123,25 @@ if ($isAdmin) {
     </div>
 
     <!-- Filtros -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Filtros de Busca</h3>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Filtros de Busca</h3>
         <!-- Primeira linha de filtros -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Número de Série</label>
-                <input type="text" id="filtro-numero-serie" placeholder="Digite o número de série" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número de Série</label>
+                <input type="text" id="filtro-numero-serie" placeholder="Digite o número de série" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Código do Produto</label>
-                <input type="text" id="filtro-codigo-produto" placeholder="Buscar por código" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Código do Produto</label>
+                <input type="text" id="filtro-codigo-produto" placeholder="Buscar por código" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Número da OS</label>
-                <input type="text" id="filtro-numero-os" placeholder="Digite o número da OS" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número da OS</label>
+                <input type="text" id="filtro-numero-os" name="numero_os_filter" autocomplete="off" placeholder="Digite o número da OS" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Filial</label>
-                <select id="filtro-filial" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filial</label>
+                <select id="filtro-filial" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">Todas as filiais</option>
                     <?php foreach ($filiais as $filial): ?>
                         <option value="<?= $filial['id'] ?>"><?= e($filial['nome']) ?></option>
@@ -152,23 +152,23 @@ if ($isAdmin) {
         <!-- Segunda linha de filtros -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Data Início</label>
-                <input type="date" id="filtro-data-inicio" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Data Início</label>
+                <input type="date" id="filtro-data-inicio" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Data Fim</label>
-                <input type="date" id="filtro-data-fim" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Data Fim</label>
+                <input type="date" id="filtro-data-fim" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Andamento</label>
-                <select id="filtro-andamento" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Andamento</label>
+                <select id="filtro-andamento" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
                     <option value="">Todos</option>
                     <option value="Em aberto">🔄 Em aberto</option>
                     <option value="Concluído">✅ Concluído</option>
                 </select>
             </div>
             <div class="flex items-end justify-end space-x-3">
-                <button onclick="limparFiltros()" class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md">
+                <button onclick="limparFiltros()" class="px-4 py-2 text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md">
                     Limpar
                 </button>
                 <button onclick="aplicarFiltros()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">
@@ -179,31 +179,31 @@ if ($isAdmin) {
     </div>
 
     <!-- Tabela de Descartes -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Lista de Descartes</h3>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Lista de Descartes</h3>
         </div>
         <!-- Barra de rolagem superior -->
         <div id="scroll-top-container" class="overflow-x-auto" style="overflow-y: hidden;">
             <div id="scroll-top-content" style="height: 1px;"></div>
         </div>
         <div id="tabela-scroll-container" class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50 sticky top-0">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-900 sticky top-0">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número de Série</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filial</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código Produto</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Descarte</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responsável</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">OS</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Andamento</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Anexo</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Número de Série</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Filial</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Código Produto</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Descrição</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Data Descarte</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Responsável</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">OS</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Andamento</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Anexo</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
                     </tr>
                 </thead>
-                <tbody id="tabela-descartes" class="bg-white divide-y divide-gray-200">
+                <tbody id="tabela-descartes" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     <!-- Dados carregados via JavaScript -->
                 </tbody>
             </table>
@@ -246,11 +246,11 @@ if ($isAdmin) {
 
 <!-- Modal Importação -->
 <div id="modal-importacao" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <div class="mt-3">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-900">Importar Descartes via Excel</h3>
-                <button onclick="fecharModalImportacao()" class="text-gray-400 hover:text-gray-600">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Importar Descartes via Excel</h3>
+                <button onclick="fecharModalImportacao()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -258,9 +258,9 @@ if ($isAdmin) {
             </div>
             
             <div class="mb-6">
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                    <h4 class="font-medium text-blue-900 mb-2">📋 Instruções:</h4>
-                    <ol class="list-decimal list-inside text-sm text-blue-800 space-y-1">
+                <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+                    <h4 class="font-medium text-blue-900 dark:text-blue-200 mb-2">📋 Instruções:</h4>
+                    <ol class="list-decimal list-inside text-sm text-blue-800 dark:text-blue-300 space-y-1">
                         <li>Clique em "Baixar Template" para obter o modelo Excel</li>
                         <li>Preencha os dados seguindo o exemplo incluído</li>
                         <li>Salve o arquivo e faça o upload abaixo</li>
@@ -268,14 +268,14 @@ if ($isAdmin) {
                     </ol>
                 </div>
 
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                    <h4 class="font-medium text-yellow-900 mb-2">⚠️ Campos obrigatórios:</h4>
-                    <p class="text-sm text-yellow-800">Número de Série, Filial, Código do Produto, Descrição do Produto, Responsável Técnico</p>
+                <div class="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+                    <h4 class="font-medium text-yellow-900 dark:text-yellow-200 mb-2">⚠️ Campos obrigatórios:</h4>
+                    <p class="text-sm text-yellow-800 dark:text-yellow-300">Número de Série, Filial, Código do Produto, Descrição do Produto, Responsável Técnico</p>
                 </div>
 
-                <label class="block text-sm font-medium text-gray-700 mb-2">Selecione o arquivo Excel:</label>
-                <input type="file" id="arquivo-importacao" accept=".xlsx,.xls,.csv" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <small class="text-gray-500">Formatos aceitos: .xlsx, .xls, .csv</small>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Selecione o arquivo Excel:</label>
+                <input type="file" id="arquivo-importacao" accept=".xlsx,.xls,.csv" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <small class="text-gray-500 dark:text-gray-400">Formatos aceitos: .xlsx, .xls, .csv</small>
             </div>
 
             <div id="preview-importacao" class="hidden mb-4">
@@ -310,11 +310,11 @@ if ($isAdmin) {
 
 <!-- Modal Descarte -->
 <div id="modal-descarte" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <div class="mt-3">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-900" id="modal-titulo">Novo Descarte</h3>
-                <button onclick="fecharModalDescarte()" class="text-gray-400 hover:text-gray-600">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white" id="modal-titulo">Novo Descarte</h3>
+                <button onclick="fecharModalDescarte()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -326,12 +326,12 @@ if ($isAdmin) {
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Número de Série *</label>
-                        <input type="text" id="numero-serie" name="numero_serie" required autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número de Série *</label>
+                        <input type="text" id="numero-serie" name="numero_serie" required autocomplete="off" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Filial *</label>
-                        <select id="filial-id" name="filial_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filial *</label>
+                        <select id="filial-id" name="filial_id" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">Selecione uma filial</option>
                             <?php foreach ($filiais as $filial): ?>
                                 <option value="<?= $filial['id'] ?>"><?= e($filial['nome']) ?></option>
@@ -342,44 +342,44 @@ if ($isAdmin) {
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Código do Produto *</label>
-                        <input type="text" id="codigo-produto" name="codigo_produto" required autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Código do Produto *</label>
+                        <input type="text" id="codigo-produto" name="codigo_produto" required autocomplete="off" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Data do Descarte</label>
-                        <input type="date" id="data-descarte" name="data_descarte" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <small class="text-gray-500">Se não informada, será considerado hoje</small>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Data do Descarte</label>
+                        <input type="date" id="data-descarte" name="data_descarte" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <small class="text-gray-500 dark:text-gray-400">Se não informada, será considerado hoje</small>
                     </div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrição do Produto *</label>
-                    <textarea id="descricao-produto" name="descricao_produto" required rows="3" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descrição do Produto *</label>
+                    <textarea id="descricao-produto" name="descricao_produto" required rows="3" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Número da OS</label>
-                        <input type="text" id="numero-os" name="numero_os" autocomplete="new-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número da OS</label>
+                        <input type="text" id="numero-os" name="numero_os" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Responsável Técnico *</label>
-                        <input type="text" id="responsavel-tecnico" name="responsavel_tecnico" required autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Responsável Técnico *</label>
+                        <input type="text" id="responsavel-tecnico" name="responsavel_tecnico" required autocomplete="off" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Anexo da OS Assinada</label>
-                    <input type="file" id="anexo-os" name="anexo_os" accept=".png,.jpg,.jpeg,.pdf" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <small class="text-gray-500">Formatos aceitos: PNG, JPEG, PDF. Máximo 10MB</small>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Anexo da OS Assinada</label>
+                    <input type="file" id="anexo-os" name="anexo_os" accept=".png,.jpg,.jpeg,.pdf" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <small class="text-gray-500 dark:text-gray-400">Formatos aceitos: PNG, JPEG, PDF. Máximo 10MB</small>
                 </div>
 
-                <div class="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                <div class="mb-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Notificar Pessoas (Opcional)
                     </label>
                     <select id="notificar-usuarios" name="notificar_usuarios[]" multiple 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" 
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
                             style="min-height: 150px;">
                         <?php foreach ($usuariosNotificacao as $usuario): ?>
                         <option value="<?= $usuario['id'] ?>">
@@ -390,14 +390,14 @@ if ($isAdmin) {
                         </option>
                         <?php endforeach; ?>
                     </select>
-                    <small class="text-gray-600 mt-2 block">
-                        💡 <strong>Dica:</strong> Segure <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Ctrl</kbd> (ou <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Cmd</kbd> no Mac) e clique para selecionar múltiplas pessoas. Se nenhuma pessoa for selecionada, ninguém será notificado por email.
+                    <small class="text-gray-600 dark:text-gray-400 mt-2 block">
+                        💡 <strong>Dica:</strong> Segure <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">Ctrl</kbd> (ou <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">Cmd</kbd> no Mac) e clique para selecionar múltiplas pessoas. Se nenhuma pessoa for selecionada, ninguém será notificado por email.
                     </small>
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Observações</label>
-                    <textarea id="observacoes" name="observacoes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Observações</label>
+                    <textarea id="observacoes" name="observacoes" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
 
                 <div class="flex justify-end space-x-3">
@@ -415,11 +415,11 @@ if ($isAdmin) {
 
 <!-- Modal Alterar Status -->
 <div id="modal-alterar-status" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <div class="mt-3">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-900">Alterar Status do Descarte</h3>
-                <button onclick="fecharModalAlterarStatus()" class="text-gray-400 hover:text-gray-600">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Alterar Status do Descarte</h3>
+                <button onclick="fecharModalAlterarStatus()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -430,13 +430,13 @@ if ($isAdmin) {
                 <input type="hidden" id="status-descarte-id">
                 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status Atual:</label>
-                    <p id="status-atual-display" class="text-sm text-gray-600 mb-4"></p>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status Atual:</label>
+                    <p id="status-atual-display" class="text-sm text-gray-600 dark:text-gray-400 mb-4"></p>
                 </div>
                 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Novo Status: *</label>
-                    <select id="novo-status" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Novo Status: *</label>
+                    <select id="novo-status" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <option value="">Selecione...</option>
                         <option value="Aguardando Descarte">⏳ Aguardando Descarte</option>
                         <option value="Itens Descartados">✅ Itens Descartados</option>
@@ -445,9 +445,9 @@ if ($isAdmin) {
                 </div>
                 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Justificativa:</label>
-                    <textarea id="justificativa-status" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ex: Aprovado após conferência física..."></textarea>
-                    <small class="text-gray-500">Opcional, mas recomendado</small>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Justificativa:</label>
+                    <textarea id="justificativa-status" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ex: Aprovado após conferência física..."></textarea>
+                    <small class="text-gray-500 dark:text-gray-400">Opcional, mas recomendado</small>
                 </div>
                 
                 <div class="flex justify-end space-x-3">
@@ -465,21 +465,21 @@ if ($isAdmin) {
 
 <!-- Modal Alterar Status de Andamento -->
 <div id="modal-alterar-andamento" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <div class="mt-3">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-900">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">
                     <span class="text-orange-500">🔧</span> Status de Andamento
                 </h3>
-                <button onclick="fecharModalAlterarAndamento()" class="text-gray-400 hover:text-gray-600">
+                <button onclick="fecharModalAlterarAndamento()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
             
-            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p class="text-sm text-blue-800">
+            <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p class="text-sm text-blue-800 dark:text-blue-200">
                     <strong>💡 Dica:</strong> Use este campo para a área técnica acompanhar o andamento do descarte.
                 </p>
             </div>
@@ -488,13 +488,13 @@ if ($isAdmin) {
                 <input type="hidden" id="andamento-descarte-id">
                 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status Atual:</label>
-                    <p id="andamento-atual-display" class="text-sm text-gray-600 mb-4"></p>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status Atual:</label>
+                    <p id="andamento-atual-display" class="text-sm text-gray-600 dark:text-gray-400 mb-4"></p>
                 </div>
                 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Selecione o novo status: *</label>
-                    <select id="novo-andamento" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Selecione o novo status: *</label>
+                    <select id="novo-andamento" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
                         <option value="">Selecione...</option>
                         <option value="Em aberto">🔄 Em aberto</option>
                         <option value="Concluído">✅ Concluído</option>
@@ -516,7 +516,7 @@ if ($isAdmin) {
 
 <!-- Modal Log de Ações -->
 <div id="modal-logs" class="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 backdrop-blur-sm">
-    <div class="relative top-5 mx-auto border-0 w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-2xl rounded-xl bg-white mb-10">
+    <div class="relative top-5 mx-auto border-0 w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-2xl rounded-xl bg-white dark:bg-gray-800 mb-10 border-gray-200 dark:border-gray-700">
         <!-- Header com gradiente -->
         <div class="bg-gradient-to-r from-gray-700 to-gray-900 rounded-t-xl px-6 py-4">
             <div class="flex justify-between items-center">
@@ -541,11 +541,11 @@ if ($isAdmin) {
         
         <div class="p-6">
             <!-- Filtros do Log -->
-            <div class="bg-gray-50 rounded-lg p-4 mb-6">
+            <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Ação</label>
-                        <select id="log-filtro-acao" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Ação</label>
+                        <select id="log-filtro-acao" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400">
                             <option value="">Todas</option>
                             <option value="INSERT">➕ Inserção</option>
                             <option value="UPDATE">✏️ Alteração</option>
@@ -554,12 +554,12 @@ if ($isAdmin) {
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
-                        <input type="date" id="log-filtro-data-inicio" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Início</label>
+                        <input type="date" id="log-filtro-data-inicio" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
-                        <input type="date" id="log-filtro-data-fim" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Fim</label>
+                        <input type="date" id="log-filtro-data-fim" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400">
                     </div>
                     <div class="flex items-end">
                         <button onclick="carregarLogs()" class="w-full px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center">
@@ -573,19 +573,19 @@ if ($isAdmin) {
             </div>
             
             <!-- Tabela de Logs -->
-            <div class="border border-gray-200 rounded-lg overflow-hidden">
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                 <div class="overflow-x-auto max-h-96 overflow-y-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-100 sticky top-0">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-100 dark:bg-gray-900 sticky top-0">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Data/Hora</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ação</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Usuário</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Descrição</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Detalhes</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Data/Hora</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Ação</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Usuário</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Descrição</th>
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Detalhes</th>
                             </tr>
                         </thead>
-                        <tbody id="tabela-logs" class="bg-white divide-y divide-gray-100">
+                        <tbody id="tabela-logs" class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
                             <!-- Dados carregados via JavaScript -->
                         </tbody>
                     </table>
@@ -618,11 +618,11 @@ if ($isAdmin) {
 
 <!-- Modal Senha Admin para Exclusão -->
 <div id="modal-senha-admin" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <div class="mt-3">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-900">🔐 Confirmação de Exclusão</h3>
-                <button onclick="fecharModalSenhaAdmin()" class="text-gray-400 hover:text-gray-600">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">🔐 Confirmação de Exclusão</h3>
+                <button onclick="fecharModalSenhaAdmin()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -638,8 +638,8 @@ if ($isAdmin) {
             <input type="hidden" id="excluir-descarte-id">
             
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Senha do Administrador *</label>
-                <input type="password" id="admin-password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Digite a senha do admin">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Senha do Administrador *</label>
+                <input type="password" id="admin-password" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Digite a senha do admin">
             </div>
             
             <div class="flex justify-end space-x-3">
