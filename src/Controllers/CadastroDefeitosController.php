@@ -46,7 +46,8 @@ class CadastroDefeitosController
         }
 
         $stmt = $this->db->query(
-            "SELECT d.*, u.name AS criado_por_nome
+            "SELECT d.id, d.nome_defeito, d.imagem_nome, d.imagem_tipo, d.created_by, d.created_at, d.updated_at,
+                    u.name AS criado_por_nome
              FROM cadastro_defeitos d
              LEFT JOIN users u ON u.id = d.created_by
              ORDER BY d.created_at DESC"
