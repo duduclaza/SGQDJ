@@ -143,15 +143,12 @@ $defeitos = $defeitos ?? [];
 </section>
 
 <script>
-let isEditingDefeito = false;
-
 function openFormModal() {
   document.getElementById('formContainer').classList.remove('hidden');
   document.getElementById('formTitle').textContent = 'Novo Defeito';
   document.getElementById('img-obrigatoria').classList.remove('hidden');
   document.getElementById('defeitoForm').reset();
   document.getElementById('defeitoId').value = '';
-  isEditingDefeito = false;
 }
 
 function closeFormModal() {
@@ -165,7 +162,6 @@ function editDefeito(defeito) {
   document.getElementById('img-obrigatoria').classList.add('hidden');
   document.getElementById('defeitoId').value = defeito.id;
   document.getElementById('nomeDefeito').value = defeito.nome_defeito || '';
-  isEditingDefeito = true;
 }
 
 async function deleteDefeito(id) {
@@ -200,7 +196,9 @@ document.getElementById('defeitoForm').addEventListener('submit', async function
   e.preventDefault();
 
   const formData = new FormData(this);
-  const url = isEditingDefeito ? '/cadastro-defeitos/update' : '/cadastro-defeitos/store';
+  const defeitoId = document.getElementById('defeitoId').value;
+  const isEditing = defeitoId && defeitoId !== '';
+  const url = isEditing ? '/cadastro-defeitos/update' : '/cadastro-defeitos/store';
 
   try {
     const response = await fetch(url, {
