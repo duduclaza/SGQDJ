@@ -167,17 +167,17 @@ if ($isAdmin) {
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Andamento</label>
-                <select id="filtro-andamento" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select id="filtro-andamento" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">Todos</option>
                     <option value="Em aberto">🔄 Em aberto</option>
                     <option value="Concluído">✅ Concluído</option>
                 </select>
             </div>
             <div class="flex items-end justify-end space-x-3">
-                <button onclick="limparFiltros()" class="px-4 py-2 text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md">
+                <button id="btn-limpar" onclick="limparFiltros()" class="px-4 py-2 text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-all">
                     Limpar
                 </button>
-                <button onclick="aplicarFiltros()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">
+                <button id="btn-filtrar" onclick="aplicarFiltros()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-all shadow-sm hover:shadow-blue-500/20">
                     Buscar
                 </button>
             </div>
@@ -383,25 +383,21 @@ if ($isAdmin) {
                     <small class="text-gray-500 dark:text-gray-400">Formatos aceitos: PNG, JPEG, PDF. Máximo 10MB</small>
                 </div>
 
-                <div class="mb-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Notificar Pessoas (Opcional)
+                        <i class="ph ph-bell mr-1 text-amber-500"></i>Notificar Pessoas
+                        <span class="text-xs font-normal text-gray-400 ml-1">(opcional)</span>
                     </label>
-                    <select id="notificar-usuarios" name="notificar_usuarios[]" multiple 
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                            style="min-height: 150px;">
+                    <select id="notificar-usuarios" name="notificar_usuarios[]" multiple placeholder="Buscar pessoas para notificar...">
                         <?php foreach ($usuariosNotificacao as $usuario): ?>
                         <option value="<?= $usuario['id'] ?>">
-                            <?= htmlspecialchars($usuario['name']) ?> (<?= htmlspecialchars($usuario['email']) ?>)
-                            <?php if (in_array($usuario['role'], ['admin', 'super_admin'])): ?>
-                                - Admin
-                            <?php endif; ?>
+                            <?= htmlspecialchars($usuario['name']) ?> (<?= htmlspecialchars($usuario['email']) ?>)<?php if (in_array($usuario['role'], ['admin', 'super_admin'])): ?> · Admin<?php endif; ?>
                         </option>
                         <?php endforeach; ?>
                     </select>
-                    <small class="text-gray-600 dark:text-gray-400 mt-2 block">
-                        💡 <strong>Dica:</strong> Segure <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">Ctrl</kbd> (ou <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">Cmd</kbd> no Mac) e clique para selecionar múltiplas pessoas. Se nenhuma pessoa for selecionada, ninguém será notificado por email.
-                    </small>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
+                        Se nenhuma pessoa for selecionada, ninguém será notificado por e-mail.
+                    </p>
                 </div>
 
                 <div class="mb-6">
@@ -676,6 +672,20 @@ let logsPaginacao = { page: 1, per_page: 20, total: 0, total_pages: 0 };
 document.addEventListener('DOMContentLoaded', function() {
     carregarDataInicial();
     carregarDescartes();
+
+    // Inicializar TomSelect para notificações
+    const selectNotificar = document.getElementById('notificar-usuarios');
+    if (selectNotificar && typeof TomSelect !== 'undefined') {
+        window.tsNotificar = new TomSelect('#notificar-usuarios', {
+            plugins: ['remove_button'],
+            maxOptions: null,
+            render: {
+                no_results: function(data, escape) {
+                    return '<div class="no-results px-3 py-2 text-sm text-gray-500">Nenhum usuário encontrado para "' + escape(data.input) + '"</div>';
+                }
+            }
+        });
+    }
     
     // Debounce para busca em tempo real
     let debounceTimer = null;
@@ -749,7 +759,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function carregarDataInicial() {
-    fetch('/controle-descartes/first-date')
+    return fetch('/controle-descartes/first-date')
         .then(response => response.json())
         .then(data => {
             if (data.success && data.first_date) {
@@ -787,7 +797,7 @@ function carregarDescartes(page = 1) {
     // Feedback visual de carregamento
     document.getElementById('tabela-descartes').innerHTML = '<tr><td colspan="10" class="px-6 py-4 text-center">Carregando...</td></tr>';
 
-    fetch(`/controle-descartes/list?${params.toString()}`)
+    return fetch(`/controle-descartes/list?${params.toString()}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -886,21 +896,36 @@ function renderizarTabela() {
 
 // Aplicar filtros
 function aplicarFiltros() {
+    const btn = event?.target?.closest('button');
+    if (btn && btn.id === 'btn-filtrar') setButtonLoading(btn, true);
+    
     paginacao.page = 1; // Resetar para primeira página
-    carregarDescartes();
+    carregarDescartes().finally(() => {
+        if (btn && btn.id === 'btn-filtrar') setButtonLoading(btn, false);
+    });
 }
 
 // Limpar filtros
 function limparFiltros() {
+    const btn = event?.target?.closest('button');
+    if (btn) setButtonLoading(btn, true);
+
     document.getElementById('filtro-numero-serie').value = '';
     document.getElementById('filtro-codigo-produto').value = '';
     document.getElementById('f-os-number').value = '';
     document.getElementById('filtro-filial').value = '';
     document.getElementById('filtro-data-fim').value = '';
     document.getElementById('filtro-andamento').value = '';
+    
     paginacao.page = 1; // Resetar para primeira página
-    carregarDataInicial(); // Recarregar data inicial
-    carregarDescartes();
+    
+    Promise.all([
+        carregarDataInicial(), // Recarregar data inicial
+        carregarDescartes()
+    ]).finally(() => {
+        if (btn) setButtonLoading(btn, false);
+        showToast('Filtros limpos com sucesso', 'info');
+    });
 }
 
 // Abrir modal para novo descarte
@@ -909,12 +934,9 @@ function abrirModalDescarte() {
     document.getElementById('form-descarte').reset();
     document.getElementById('descarte-id').value = '';
     
-    // Limpar seleção do select múltiplo
-    const selectNotificar = document.getElementById('notificar-usuarios');
-    if (selectNotificar) {
-        for (let i = 0; i < selectNotificar.options.length; i++) {
-            selectNotificar.options[i].selected = false;
-        }
+    // Limpar seleção do select múltiplo (TomSelect)
+    if (window.tsNotificar) {
+        window.tsNotificar.clear();
     }
     
     document.getElementById('modal-descarte').classList.remove('hidden');

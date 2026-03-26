@@ -33,6 +33,31 @@ if (!function_exists('flash')) {
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- TomSelect — multi-select premium (global) -->
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+  <style>
+    /* TomSelect dark mode overrides */
+    .dark .ts-wrapper .ts-control {
+      background-color: rgb(30,41,59) !important;
+      border-color: rgb(71,85,105) !important;
+      color: rgb(241,245,249) !important;
+    }
+    .dark .ts-dropdown {
+      background-color: rgb(30,41,59) !important;
+      border-color: rgb(71,85,105) !important;
+      color: rgb(241,245,249) !important;
+    }
+    .dark .ts-dropdown .option:hover,
+    .dark .ts-dropdown .option.active {
+      background-color: rgb(51,65,85) !important;
+    }
+    .dark .ts-wrapper.multi .ts-control .item {
+      background-color: rgb(37,99,235) !important;
+      color: #fff !important;
+      border-color: transparent !important;
+    }
+  </style>
   <script>
     // Configurar tema inicial
     if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -105,15 +130,77 @@ if (!function_exists('flash')) {
     
     <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-hidden">
-      <!-- Header/Navbar -->
+      <!-- Header/Navbar com Breadcrumb -->
       <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700/50 transition-colors duration-300">
         <div class="flex items-center justify-between px-6 py-3">
-          <!-- Espaço vazio à esquerda -->
-          <div></div>
-          
-          <div class="flex items-center gap-4">
-            <!-- Ícones do canto superior direito removidos a pedido do usuário -->
+
+          <!-- Breadcrumb -->
+          <?php
+            $routeMap = [
+              'inicio'                    => ['label' => 'Início',                   'icon' => 'ph-house'],
+              'dashboard'                 => ['label' => 'Dashboard',                'icon' => 'ph-chart-bar'],
+              'dashboard-2'               => ['label' => 'Dashboard 2.0',            'icon' => 'ph-compass'],
+              'toners'                    => ['label' => 'Toners',                   'icon' => 'ph-drop'],
+              'cadastro'                  => ['label' => 'Cadastro de Toners',       'icon' => 'ph-drop'],
+              'triagem-toners'            => ['label' => 'Triagem de Toners',        'icon' => 'ph-magnifying-glass'],
+              'cadastro-maquinas'         => ['label' => 'Cadastro de Máquinas',     'icon' => 'ph-printer'],
+              'cadastro-pecas'            => ['label' => 'Cadastro de Peças',        'icon' => 'ph-wrench'],
+              'cadastro-defeitos'         => ['label' => 'Cadastro de Defeitos',     'icon' => 'ph-puzzle-piece'],
+              'controle-descartes'        => ['label' => 'Controle de Descartes',    'icon' => 'ph-recycle'],
+              'precificacao-coleta-descartes' => ['label' => 'Precificação de Coleta', 'icon' => 'ph-currency-dollar'],
+              'amostragens-2'             => ['label' => 'Amostragens 2.0',          'icon' => 'ph-flask'],
+              'homologacoes'              => ['label' => 'Homologações',             'icon' => 'ph-traffic-cone'],
+              'certificados'              => ['label' => 'Certificados',             'icon' => 'ph-scroll'],
+              'fmea'                      => ['label' => 'FMEA',                     'icon' => 'ph-trend-up'],
+              'pops-e-its'                => ['label' => 'POPs e ITs',              'icon' => 'ph-books'],
+              'fluxogramas'               => ['label' => 'Fluxogramas',              'icon' => 'ph-git-merge'],
+              'auditorias'                => ['label' => 'Auditorias',              'icon' => 'ph-magnifying-glass'],
+              'nao-conformidades'         => ['label' => 'Não Conformidades',        'icon' => 'ph-warning'],
+              'melhoria-continua-2'       => ['label' => 'Melhoria Contínua',        'icon' => 'ph-rocket-launch'],
+              'controle-de-rc'            => ['label' => 'Controle de RC',           'icon' => 'ph-folders'],
+              'garantias'                 => ['label' => 'Garantias',               'icon' => 'ph-shield-check'],
+              'nps'                       => ['label' => 'Formulários Online',       'icon' => 'ph-chart-bar'],
+              'toners/defeitos'           => ['label' => 'Toners com Defeito',       'icon' => 'ph-warning'],
+              'atendimento'               => ['label' => 'Atendimento',             'icon' => 'ph-phone'],
+              'admin'                     => ['label' => 'Administrativo',           'icon' => 'ph-gear'],
+              'registros'                 => ['label' => 'Registros',               'icon' => 'ph-folder'],
+              'cadastros'                 => ['label' => 'Cadastros',               'icon' => 'ph-note-pencil'],
+              'perfil'                    => ['label' => 'Meu Perfil',              'icon' => 'ph-user-circle'],
+              'profile'                   => ['label' => 'Meu Perfil',              'icon' => 'ph-user-circle'],
+              'usabilidade'               => ['label' => 'Usabilidade',             'icon' => 'ph-chart-bar'],
+            ];
+
+            $rawPath = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/');
+            $segments = array_values(array_filter(explode('/', ltrim($rawPath, '/'))));
+
+            // Tentar match com rota completa (2 segmentos) primeiro
+            $fullKey = implode('/', array_slice($segments, 0, 2));
+            $module  = $routeMap[$fullKey] ?? $routeMap[$segments[0] ?? ''] ?? null;
+          ?>
+          <div class="flex items-center gap-2 text-sm">
+            <a href="/inicio" class="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              <i class="ph ph-house text-base"></i>
+              <span class="hidden sm:inline">Início</span>
+            </a>
+            <?php if ($module): ?>
+              <i class="ph ph-caret-right text-slate-300 dark:text-slate-600 text-xs"></i>
+              <span class="flex items-center gap-1.5 text-slate-700 dark:text-slate-200 font-semibold">
+                <i class="ph <?= e($module['icon']) ?> text-base text-blue-500 dark:text-blue-400"></i>
+                <?= e($module['label']) ?>
+              </span>
+            <?php endif; ?>
           </div>
+
+          <!-- Lado direito: usuário logado -->
+          <div class="flex items-center gap-3">
+            <a href="/profile" class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">
+              <div class="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                <?= strtoupper(substr($_SESSION['user_name'] ?? 'U', 0, 1)) ?>
+              </div>
+              <span class="hidden md:inline font-medium"><?= e(explode(' ', $_SESSION['user_name'] ?? 'Usuário')[0]) ?></span>
+            </a>
+          </div>
+
         </div>
       </header>
       
