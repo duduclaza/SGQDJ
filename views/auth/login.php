@@ -1,10 +1,13 @@
 <!-- Logo e cabeçalho -->
 <div class="text-center mb-8">
-  <div class="logo-badge">
-    <img src="/assets/logodj.png" alt="DJ" class="h-7 object-contain brightness-0 invert">
+  <div class="logo-badge" style="background:transparent; box-shadow:none; padding:0; width:auto; height:auto; border-radius:0;">
+    <img src="/assets/otilogo.png" alt="OTI" class="h-12 object-contain mx-auto" style="filter: brightness(0) invert(1);">
   </div>
-  <h1 class="text-xl font-bold text-white tracking-tight">Bem-vindo ao SGQ</h1>
-  <p class="text-slate-500 text-xs mt-1 font-medium flex items-center justify-center gap-1.5">
+  <h1 class="text-xl font-bold text-white tracking-tight mt-4">Bem-vindo ao SGI OTI</h1>
+  <p class="text-slate-400 text-xs mt-1 font-medium leading-relaxed px-2">
+    Sistema de Gestão Integrada para empresas de Outsourcing de TI
+  </p>
+  <p class="text-slate-600 text-[11px] mt-2 font-medium flex items-center justify-center gap-1.5">
     <span class="status-dot"></span>
     Sistema operacional
   </p>
