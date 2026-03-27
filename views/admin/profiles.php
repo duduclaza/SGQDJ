@@ -164,7 +164,13 @@
                   class="px-12 py-4 text-sm font-black text-white bg-slate-900 dark:bg-white dark:text-slate-900 rounded-2xl hover:scale-105 active:scale-95 shadow-xl transition-all">
             Ativar Configurações
           </button>
-      <!-- Profiles Table Card -->
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Profiles Table Card -->
+
   <div class="bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl rounded-3xl shadow-sm border border-slate-200/50 dark:border-slate-700/50 overflow-hidden transition-all">
     <div class="px-10 py-8 border-b border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
       <div>
