@@ -41,6 +41,7 @@
                             <?php endif; ?>
                         </td></tr>
                         <tr class="flex justify-between py-2"><td class="text-slate-500 dark:text-slate-400 font-medium">N/S Lote</td><td class="text-slate-800 dark:text-slate-200 text-right"><?= $h['numero_serie'] ?: '<span class="italic text-slate-400">Não informado</span>' ?></td></tr>
+                        <tr class="flex justify-between py-2 border-t border-slate-100 dark:border-slate-700 mt-1 pt-3"><td class="text-rose-500 dark:text-rose-400 font-bold uppercase text-[10px]">Vencimento Técnico</td><td class="text-rose-600 dark:text-rose-400 font-black text-right"><?= $h['data_vencimento'] ? date('d/m/Y', strtotime($h['data_vencimento'])) : '-' ?></td></tr>
                     </tbody>
                 </table>
                 <div class="mt-4 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-400">
@@ -48,11 +49,12 @@
                     <?= $h['descricao'] ?>
                 </div>
                 
-                <h6 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-6 mb-3">Auditoria</h6>
+                <h6 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-6 mb-3">Auditoria / SLAs</h6>
                 <table class="w-full text-xs">
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
                         <tr class="flex justify-between py-2"><td class="text-slate-500 dark:text-slate-400">Criador</td><td class="text-slate-700 dark:text-slate-300 text-right"><?= getUserById($h['criado_por'])['nome'] ?></td></tr>
-                        <tr class="flex justify-between py-2"><td class="text-slate-500 dark:text-slate-400">Logística Prev.</td><td class="text-slate-700 dark:text-slate-300 text-right"><?= $h['data_prevista_chegada'] ? date('d/m/Y', strtotime($h['data_prevista_chegada'])) : '-' ?></td></tr>
+                        <tr class="flex justify-between py-2"><td class="text-slate-500 dark:text-slate-400 whitespace-nowrap">Logística (Chegada)</td><td class="text-slate-700 dark:text-slate-300 text-right"><?= $h['data_prevista_chegada'] ? date('d/m/Y', strtotime($h['data_prevista_chegada'])) : '-' ?></td></tr>
+                        <tr class="flex justify-between py-2"><td class="text-rose-500 dark:text-rose-400 font-semibold italic">Deadline Final (SLA)</td><td class="text-rose-600 dark:text-rose-400 font-bold text-right"><?= $h['data_vencimento'] ? date('d/m/Y', strtotime($h['data_vencimento'])) : '-' ?></td></tr>
                         <tr class="flex flex-col gap-2 py-2">
                             <td class="text-slate-500 dark:text-slate-400">Técnicos Designados</td>
                             <td class="flex flex-wrap gap-1">

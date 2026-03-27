@@ -101,14 +101,30 @@ if ($u['perfil'] !== 'compras') {
                 <h3 class="text-md font-bold flex items-center gap-2 text-slate-700 dark:text-slate-300 mb-4"><i class="ph-fill ph-truck text-amber-500 text-lg"></i> Logística e SLA</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Previsão de Chegada Físico</label>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                            <i class="ph-bold ph-truck text-amber-500"></i> Previsão de Chegada Físico
+                        </label>
                         <input type="date" name="data_prevista_chegada" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Informar X dias antes do vencimento da homologação</label>
+                        <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Alertar X dias antes da chegada (Logística)</label>
                         <div class="flex items-center gap-3">
                             <input type="number" name="dias_antecedencia_notif" value="3" min="1" max="15" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-24 p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
-                            <span class="text-sm text-slate-500 dark:text-slate-400">dias antes da data prevista</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">dias antes</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                            <i class="ph-bold ph-calendar-check text-rose-500"></i> Vencimento da Homologação
+                        </label>
+                        <input type="date" name="data_vencimento" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                    </div>
+                    <div class="mt-2">
+                        <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Alertar X dias antes do vencimento (Equipe)</label>
+                        <div class="flex items-center gap-3">
+                            <input type="number" name="dias_vencimento_notif" value="5" min="1" max="30" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-24 p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                            <span class="text-xs text-slate-500 dark:text-slate-400">dias antes</span>
                         </div>
                     </div>
                     <div class="flex items-end pb-2.5">

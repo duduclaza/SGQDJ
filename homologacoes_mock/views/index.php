@@ -8,9 +8,13 @@
 
 <!-- Alertas -->
 <?php foreach ($alertas as $alerta): ?>
-    <div class="bg-amber-50 border-l-4 border-amber-500 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 p-4 rounded-r-xl shadow-sm mb-6 flex items-start gap-3">
-        <i class="ph-fill ph-warning-circle text-xl mt-0.5"></i>
-        <div class="text-sm"><?= $alerta ?></div>
+    <?php 
+        $alertColor = $alerta['tipo'] === 'logistica' ? 'amber' : 'rose';
+        $alertIcon = $alerta['tipo'] === 'logistica' ? 'ph-truck' : 'ph-warning-octagon';
+    ?>
+    <div class="bg-<?= $alertColor ?>-50 border-l-4 border-<?= $alertColor ?>-500 text-<?= $alertColor ?>-800 dark:bg-<?= $alertColor ?>-900/30 dark:text-<?= $alertColor ?>-300 p-4 rounded-r-xl shadow-sm mb-4 last:mb-6 flex items-start gap-3">
+        <i class="ph-fill <?= $alertIcon ?> text-xl mt-0.5"></i>
+        <div class="text-sm"><?= $alerta['msg'] ?></div>
     </div>
 <?php endforeach; ?>
 

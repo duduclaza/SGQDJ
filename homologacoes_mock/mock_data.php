@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Versão dos dados mock - incrementar para forçar reset dos dados antigos
-$MOCK_DATA_VERSION = 4;
+$MOCK_DATA_VERSION = 5;
 
 // Inicializar os dados mockados na sessão, se ainda não existirem ou se a versão mudou
 if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $MOCK_DATA_VERSION) {
@@ -33,6 +33,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'numero_serie'          => 'SN-HP-2025-00123',
             'quantidade'            => 1,
             'tipo_aquisicao'        => 'comprado',
+            'data_vencimento'       => '2025-02-15',
+            'dias_vencimento_notif' => 5,
             'status'                => 'concluida',
             'criado_por'            => 1,
             'responsaveis'          => [3, 4],
@@ -73,6 +75,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'numero_serie'          => 'SN-DELL-2025-00456',
             'quantidade'            => 1,
             'tipo_aquisicao'        => 'comprado',
+            'data_vencimento'       => '2025-03-01',
+            'dias_vencimento_notif' => 5,
             'status'                => 'concluida',
             'criado_por'            => 1,
             'responsaveis'          => [5],
@@ -113,6 +117,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'numero_serie'          => 'LOT-2025-NPG59-001',
             'quantidade'            => 5,
             'tipo_aquisicao'        => 'emprestado',
+            'data_vencimento'       => '2025-04-10',
+            'dias_vencimento_notif' => 10,
             'status'                => 'concluida',
             'criado_por'            => 1,
             'responsaveis'          => [3, 5],
@@ -149,6 +155,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'numero_serie'          => 'LOT-FUS-2025-0089',
             'quantidade'            => 2,
             'tipo_aquisicao'        => 'comprado',
+            'data_vencimento'       => '2025-03-30',
+            'dias_vencimento_notif' => 5,
             'status'                => 'item_recebido',
             'criado_por'            => 1,
             'responsaveis'          => [4],
@@ -178,6 +186,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'numero_serie'          => 'SN-LNV-2025-00789',
             'quantidade'            => 1,
             'tipo_aquisicao'        => 'comprado',
+            'data_vencimento'       => date('Y-m-d', strtotime('+7 days')),
+            'dias_vencimento_notif' => 5,
             'status'                => 'aguardando_chegada',
             'criado_por'            => 1,
             'responsaveis'          => [3, 4, 5],

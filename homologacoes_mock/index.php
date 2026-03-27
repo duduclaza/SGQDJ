@@ -34,10 +34,26 @@ $lista = array_filter($homologacoes, function($h) use ($filtroStatus, $filtroTip
 // Alertas de Notificação
 $alertas = [];
 foreach ($homologacoes as $h) {
-    if ($h['status'] === 'aguardando_chegada' && $h['data_prevista_chegada']) {
-        $dias = calcularDiasRestantes($h['data_prevista_chegada']);
-        if ($dias !== null && $dias <= $h['dias_antecedencia_notif']) {
-            $alertas[] = "Atenção: A homologação <strong>{$h['codigo']}</strong> ({$h['modelo']}) tem chegada prevista para daqui a {$dias} dias!";
+    // 1. Alerta de Logística (Chegada)
+    if ($h['status'] === 'aguardando_chegada' && !empty($h['data_prevista_chegada'])) {
+        $diasChegada = calcularDiasRestantes($h['data_prevista_chegada']);
+        if ($diasChegada !== null && $diasChegada <= ($h['dias_antecedencia_notif'] ?? 3)) {
+            $alertas[] = [
+                'tipo' => 'logistica',
+                'msg' => "🚚 <strong>Logística:</strong> A homologação <strong>{$h['codigo']}</strong> ({$h['modelo']}) tem chegada prevista para daqui a <strong>{$diasChegada} dias</strong>!"
+            ];
+        }
+    }
+
+    // 2. Alerta de Equipe (Vencimento)
+    if ($h['status'] !== 'concluida' && $h['status'] !== 'cancelada' && !empty($h['data_vencimento'])) {
+        $diasVenc = calcularDiasRestantes($h['data_vencimento']);
+        if ($diasVenc !== null && $diasVenc <= ($h['dias_vencimento_notif'] ?? 5)) {
+            $msgVenc = $diasVenc < 0 ? "⚠️ <strong>ATENÇÃO:</strong> A homologação <strong>{$h['codigo']}</strong> está <strong>VENCIDA</strong> há " . abs($diasVenc) . " dias!" : "📅 <strong>Prazo:</strong> A homologação <strong>{$h['codigo']}</strong> ({$h['modelo']}) vence em <strong>{$diasVenc} dias</strong>!";
+            $alertas[] = [
+                'tipo' => 'vencimento',
+                'msg' => $msgVenc
+            ];
         }
     }
 }
