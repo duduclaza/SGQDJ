@@ -32,12 +32,12 @@ $whatsappLink = "https://wa.me/{$whatsappNumber}?text={$whatsappMessage}";
                 Módulo <?= $modulo ?>
             </div>
 
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-800 dark:text-white tracking-tight mb-4 font-sans">
-                Acesso Limitado
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-800 tracking-tight mb-4 font-sans">
+                Acesso Indisponível
             </h2>
             
-            <p class="text-slate-600 dark:text-slate-400 text-base sm:text-lg mb-10 leading-relaxed max-w-md mx-auto">
-                Este módulo de alta performance não está ativo em sua assinatura atual. Solicite uma <strong class="text-blue-600 dark:text-blue-400 font-semibold">amostra grátis</strong> diretamente ao nosso centro de tecnologia.
+            <p class="text-slate-600 text-base sm:text-lg mb-10 leading-relaxed max-w-md mx-auto">
+                Sua assinatura não tem acesso a esse módulo! Entre em contato com o suporte para mais informações ou para solicitar uma demonstração.
             </p>
 
             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">

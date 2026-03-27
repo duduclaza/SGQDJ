@@ -289,12 +289,12 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
           <?php if ($hasSubmenu): ?>
             <?php $isCategory = isset($item['category']) && $item['category']; ?>
             <div class="submenu-container">
-              <button onclick="toggleSubmenu(this)" title="<?= e($item['label']) ?>" class="flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 <?php echo $submenuActive?'!bg-slate-900 !text-white hover:!bg-slate-800 hover:!text-white font-semibold shadow-md':($isCategory ? 'text-slate-700 bg-slate-100/60 font-semibold tracking-wide' : 'text-slate-600'); ?>">
+              <button onclick="toggleSubmenu(this)" title="<?= e($item['label']) ?>" class="group flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:bg-slate-800/50 hover:text-white <?php echo $submenuActive?'bg-blue-600/10 text-blue-400 font-semibold shadow-[0_0_15px_rgba(59,130,246,0.1)] border border-blue-500/20':'text-slate-400 border border-transparent'; ?>">
                 <div class="flex items-center gap-3">
-                  <span class="text-lg flex-shrink-0"><?= $item['icon'] ?></span>
-                  <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300 <?php echo $isCategory ? 'font-semibold tracking-wide' : ''; ?>"><?= e($item['label']) ?></span>
+                  <span class="text-lg flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/40 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors <?php echo $submenuActive?'!bg-blue-500/30 !text-blue-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]':''; ?>"><?= $item['icon'] ?></span>
+                  <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300"><?= e($item['label']) ?></span>
                 </div>
-                <span class="submenu-arrow transition-transform duration-200 text-slate-400 dark:text-slate-500">
+                <span class="submenu-arrow transition-transform duration-200 text-slate-400 group-hover:text-white">
                   <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                   </svg>
@@ -340,12 +340,12 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
                     <?php if ($hasNestedSubmenu): ?>
                       <!-- Submenu aninhado -->
                       <div class="submenu-container">
-                        <button onclick="toggleSubmenu(this)" title="<?= e($sub['label']) ?>" class="flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-100 hover:text-slate-800 text-slate-500">
+                        <button onclick="toggleSubmenu(this)" title="<?= e($sub['label']) ?>" class="group flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:bg-slate-800/50 hover:text-white text-slate-400 border border-transparent">
                           <div class="flex items-center gap-3">
-                            <span class="text-base flex-shrink-0"><?= $sub['icon'] ?></span>
+                            <span class="text-base flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/40 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors"><?= $sub['icon'] ?></span>
                             <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300"><?= e($sub['label']) ?></span>
                           </div>
-                          <span class="submenu-arrow transition-transform duration-200 text-slate-400 dark:text-slate-500">
+                          <span class="submenu-arrow transition-transform duration-200 text-slate-400 group-hover:text-white">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                               <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
