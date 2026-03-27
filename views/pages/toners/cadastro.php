@@ -352,11 +352,26 @@
     </div>
     
     <!-- Controles de Paginação -->
-    <div id="tonersPagination" class="px-6 py-4 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="text-sm text-slate-500" id="paginationInfo">
-        Mostrando <span class="font-bold">1</span> a <span class="font-bold">50</span> de <span class="font-bold">...</span> resultados
+    <div id="tonersPagination" class="px-6 py-4 border-t border-slate-100 dark:border-slate-700/50 flex flex-col md:flex-row items-center justify-between gap-4">
+      <!-- Seletor de registros por página -->
+      <div class="flex items-center gap-2 hidden md:flex">
+        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Mostrar:</label>
+        <select onchange="window.changeItemsPerPage(this.value)" id="itemsPerPageSelect" class="border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer outline-none">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50" selected>50</option>
+          <option value="100">100</option>
+        </select>
+        <span class="text-sm text-slate-600 dark:text-slate-400 font-medium">por página</span>
       </div>
-      <div class="flex flex-wrap gap-1" id="paginationControls">
+
+      <!-- Informação de registros -->
+      <div class="text-sm text-slate-700 dark:text-slate-300" id="paginationInfo">
+        Mostrando <span class="font-semibold text-slate-900 dark:text-white">1</span> até <span class="font-semibold text-slate-900 dark:text-white">50</span> de <span class="font-semibold text-slate-900 dark:text-white">...</span> registros
+      </div>
+
+      <!-- Navegação de páginas -->
+      <div class="flex items-center gap-1" id="paginationControls">
         <!-- Botões injetados via JS -->
       </div>
     </div>

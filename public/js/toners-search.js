@@ -138,6 +138,12 @@ window.goToPage = function(page) {
     }
 };
 
+window.changeItemsPerPage = function(perPage) {
+    window.itemsPerPage = parseInt(perPage, 10);
+    window.currentPage = 1;
+    window.renderPage();
+};
+
 window.updatePaginationUI = function(startIndex, endIndex, total, totalPages) {
     const infoSpan = document.getElementById('paginationInfo');
     const controls = document.getElementById('paginationControls');
@@ -146,46 +152,64 @@ window.updatePaginationUI = function(startIndex, endIndex, total, totalPages) {
         if (total === 0) {
             infoSpan.innerHTML = 'Nenhum resultado';
         } else {
-            infoSpan.innerHTML = `Mostrando <span class="font-bold">${startIndex + 1}</span> a <span class="font-bold">${endIndex}</span> de <span class="font-bold">${total}</span> resultados`;
+            infoSpan.innerHTML = `Mostrando <span class="font-semibold text-slate-900 dark:text-white">${startIndex + 1}</span> até <span class="font-semibold text-slate-900 dark:text-white">${endIndex}</span> de <span class="font-semibold text-slate-900 dark:text-white">${total}</span> registros`;
         }
     }
     
     if (controls) {
         controls.innerHTML = '';
         if (totalPages > 1) {
-            // AnteriorBtn
-            const prevBtn = document.createElement('button');
-            prevBtn.className = `px-3 py-1.5 text-sm font-medium rounded-lg border transition-all ${window.currentPage === 1 ? 'border-slate-100 text-slate-300 cursor-not-allowed' : 'border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'}`;
-            prevBtn.textContent = 'Anterior';
-            if (window.currentPage > 1) prevBtn.onclick = () => window.goToPage(window.currentPage - 1);
-            controls.appendChild(prevBtn);
+            const btnClassNormal = "px-3 py-2 flex items-center justify-center border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer shadow-sm";
+            const btnClassActive = "px-3 py-2 flex items-center justify-center border rounded-lg text-sm font-medium transition-colors bg-blue-600 text-white border-blue-600 shadow-md";
+
+            // Primeira
+            if (window.currentPage > 1) {
+                const firstBtn = document.createElement('button');
+                firstBtn.className = btnClassNormal;
+                firstBtn.textContent = '« Primeira';
+                firstBtn.onclick = () => window.goToPage(1);
+                controls.appendChild(firstBtn);
+            }
+
+            // Anterior
+            if (window.currentPage > 1) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = btnClassNormal;
+                prevBtn.textContent = '‹ Anterior';
+                prevBtn.onclick = () => window.goToPage(window.currentPage - 1);
+                controls.appendChild(prevBtn);
+            }
             
             // Números
-            for (let p = 1; p <= totalPages; p++) {
-                if (totalPages > 7) {
-                    if (p !== 1 && p !== totalPages && Math.abs(p - window.currentPage) > 1) {
-                        if (p === 2 || p === totalPages - 1) {
-                            const dots = document.createElement('span');
-                            dots.className = 'px-2 py-1 text-slate-400 text-sm';
-                            dots.textContent = '...';
-                            controls.appendChild(dots);
-                        }
-                        continue;
-                    }
-                }
+            const limit = 2; // quantos de cada lado
+            const inicio = Math.max(1, window.currentPage - limit);
+            const fim = Math.min(totalPages, window.currentPage + limit);
+
+            for (let p = inicio; p <= fim; p++) {
                 const btn = document.createElement('button');
-                btn.className = `min-w-[32px] px-2 py-1.5 mx-0.5 text-sm font-bold rounded-lg border transition-all ${p === window.currentPage ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-blue-600'}`;
+                btn.className = (p === window.currentPage) ? btnClassActive : btnClassNormal;
                 btn.textContent = p;
                 if (p !== window.currentPage) btn.onclick = () => window.goToPage(p);
                 controls.appendChild(btn);
             }
             
-            // ProximaBtn
-            const nextBtn = document.createElement('button');
-            nextBtn.className = `px-3 py-1.5 text-sm font-medium rounded-lg border transition-all ${window.currentPage === totalPages ? 'border-slate-100 text-slate-300 cursor-not-allowed' : 'border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'}`;
-            nextBtn.textContent = 'Próxima';
-            if (window.currentPage < totalPages) nextBtn.onclick = () => window.goToPage(window.currentPage + 1);
-            controls.appendChild(nextBtn);
+            // Próxima
+            if (window.currentPage < totalPages) {
+                const nextBtn = document.createElement('button');
+                nextBtn.className = btnClassNormal;
+                nextBtn.textContent = 'Próxima ›';
+                nextBtn.onclick = () => window.goToPage(window.currentPage + 1);
+                controls.appendChild(nextBtn);
+            }
+
+            // Última
+            if (window.currentPage < totalPages) {
+                const lastBtn = document.createElement('button');
+                lastBtn.className = btnClassNormal;
+                lastBtn.textContent = 'Última »';
+                lastBtn.onclick = () => window.goToPage(totalPages);
+                controls.appendChild(lastBtn);
+            }
         }
     }
 };
