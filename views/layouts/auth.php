@@ -11,6 +11,7 @@ $title = $title ?? 'OTI - Login';
   <meta http-equiv="Expires" content="0">
   <title><?= e($title) ?></title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
     .btn-primary {
       background: #1d4ed8;
       box-shadow: 0 4px 14px 0 rgba(29, 78, 216, 0.39);
