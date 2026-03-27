@@ -31,7 +31,7 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
 }
 ?>
 <!doctype html>
-<html lang="pt-br" class="dark">
+<html lang="pt-br">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">

@@ -445,10 +445,6 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
           <i class="ph ph-headset text-xl"></i>
         </a>
 
-        <!-- Theme Toggle -->
-        <button id="themeToggleBtn" class="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-white p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Alternar Tema">
-          <i id="themeToggleIcon" class="ph ph-moon text-xl"></i>
-        </button>
         
         <!-- Sininho de Notificações - Visível apenas se ativado -->
         <?php if (isset($_SESSION['notificacoes_ativadas']) && $_SESSION['notificacoes_ativadas']): ?>
@@ -810,35 +806,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
         });
       }
 
-      // Theme Toggle Logic
-      const themeToggleBtn = document.getElementById('themeToggleBtn');
-      const themeToggleIcon = document.getElementById('themeToggleIcon');
 
-      function syncToggleIcon() {
-        if (!themeToggleIcon) return;
-        if (document.documentElement.classList.contains('dark')) {
-          themeToggleIcon.classList.remove('ph-moon');
-          themeToggleIcon.classList.add('ph-sun');
-        } else {
-          themeToggleIcon.classList.remove('ph-sun');
-          themeToggleIcon.classList.add('ph-moon');
-        }
-      }
-
-      syncToggleIcon();
-
-      if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', function() {
-          if (document.documentElement.classList.contains('dark')) {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('color-theme', 'light');
-          } else {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('color-theme', 'dark');
-          }
-          syncToggleIcon();
-        });
-      }
     });
 
     // Mobile menu
