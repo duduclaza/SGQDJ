@@ -679,7 +679,6 @@ let logsPaginacao = { page: 1, per_page: 20, total: 0, total_pages: 0 };
 
 // Carregar dados ao inicializar
 document.addEventListener('DOMContentLoaded', function() {
-    carregarDataInicial();
     carregarDescartes();
 
     // Inicializar TomSelect para notificações
@@ -767,20 +766,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 500);
 });
 
-function carregarDataInicial() {
-    return fetch('/controle-descartes/first-date')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.first_date) {
-                document.getElementById('filtro-data-inicio').value = data.first_date;
-            } else {
-                // Caso não tenha registros, colocar 30 dias atrás como padrão
-                const trintaDiasAtras = new Date();
-                trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
-                document.getElementById('filtro-data-inicio').value = trintaDiasAtras.toISOString().split('T')[0];
-            }
-        });
-}
 
 function carregarDescartes(page = 1) {
     const params = new URLSearchParams();
@@ -928,10 +913,7 @@ function limparFiltros() {
     
     paginacao.page = 1; // Resetar para primeira página
     
-    Promise.all([
-        carregarDataInicial(), // Recarregar data inicial
-        carregarDescartes()
-    ]).finally(() => {
+    carregarDescartes().finally(() => {
         if (btn) setButtonLoading(btn, false);
         showToast('Filtros limpos com sucesso', 'info');
     });
