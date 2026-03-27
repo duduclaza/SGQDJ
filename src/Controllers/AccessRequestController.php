@@ -38,6 +38,7 @@ class AccessRequestController
         }
 
         $title = 'Solicitar Acesso - SGQ OTI DJ';
+        $authCardMaxWidth = '700px';
         $viewFile = __DIR__ . '/../../views/pages/auth/request-access.php';
         include __DIR__ . '/../../views/layouts/auth.php';
     }

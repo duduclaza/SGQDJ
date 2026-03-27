@@ -175,8 +175,8 @@ $title = $title ?? 'SGQ - Login';
   <div class="grid-overlay"></div>
 
   <!-- Auth Card -->
-  <div class="auth-card mx-4" style="max-width:420px; width:100%;">
-    <div class="auth-card-scroll flex flex-col min-h-full">
+  <div class="auth-card mx-4 relative z-10" style="max-width:<?= isset($authCardMaxWidth) ? $authCardMaxWidth : '420px' ?>; width:100%;">
+    <div class="auth-card-scroll flex flex-col min-h-full" <?= isset($authCardMaxWidth) ? 'style="max-height: 85vh;"' : '' ?>>
       <div class="flex-grow">
         <?php include $viewFile; ?>
       </div>
@@ -184,7 +184,7 @@ $title = $title ?? 'SGQ - Login';
   </div>
 
   <!-- Branding inferior externo -->
-  <div class="text-center mt-3 relative z-10 w-full max-w-[420px] mx-auto px-4 flex justify-center">
+  <div class="text-center mt-3 relative z-10 w-full mx-auto px-4 flex justify-center" style="max-width:<?= isset($authCardMaxWidth) ? $authCardMaxWidth : '420px' ?>">
     <a href="https://www.tiuai.com.br" target="_blank" rel="noopener noreferrer"
        class="inline-flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-300 transition-colors group">
       <span class="text-slate-600 group-hover:text-slate-400 transition-colors">Desenvolvido por</span>

@@ -12,32 +12,32 @@
 <!-- Form -->
 <form id="requestForm" class="space-y-4">
 
-  <!-- Nome -->
-  <div>
-    <label class="auth-label">Nome completo</label>
-    <div class="relative">
-      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-      </span>
-      <input id="name" name="name" type="text" required
-             class="auth-input" placeholder="Seu nome completo">
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
+    <!-- Nome -->
+    <div>
+      <label class="auth-label">Nome completo</label>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        </span>
+        <input id="name" name="name" type="text" required
+               class="auth-input" placeholder="Seu nome completo">
+      </div>
     </div>
-  </div>
 
-  <!-- Email -->
-  <div>
-    <label class="auth-label">E-mail corporativo</label>
-    <div class="relative">
-      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206"/></svg>
-      </span>
-      <input id="email" name="email" type="email" required
-             class="auth-input" placeholder="nome@empresa.com.br">
+    <!-- Email -->
+    <div>
+      <label class="auth-label">E-mail corporativo</label>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206"/></svg>
+        </span>
+        <input id="email" name="email" type="email" required
+               class="auth-input" placeholder="nome@empresa.com.br">
+      </div>
     </div>
-  </div>
 
-  <!-- Senha e Confirmar lado a lado -->
-  <div class="grid grid-cols-2 gap-3">
+    <!-- Senha -->
     <div>
       <label class="auth-label">Senha</label>
       <div class="relative">
@@ -52,8 +52,13 @@
         </button>
       </div>
     </div>
+
+    <!-- Confirmar -->
     <div>
-      <label class="auth-label">Confirmar</label>
+      <label class="auth-label flex justify-between">
+        Confirmar
+        <span id="pwdMatch" class="hidden text-[10px] font-bold px-1 ml-2 mt-0.5"></span>
+      </label>
       <div class="relative">
         <input id="password_confirm" name="password_confirm" type="password" required minlength="6"
                class="auth-input" placeholder="Repita a senha" style="padding-left:14px; padding-right:36px;">
@@ -66,12 +71,8 @@
         </button>
       </div>
     </div>
-  </div>
-  <!-- Match indicator -->
-  <div id="pwdMatch" class="hidden -mt-2 text-[11px] font-bold px-1"></div>
 
-  <!-- Departamento + Filial -->
-  <div class="grid grid-cols-2 gap-3">
+    <!-- Departamento -->
     <div>
       <label class="auth-label">Departamento</label>
       <select id="setor" name="setor" class="auth-input" style="padding-left:14px;">
@@ -81,6 +82,8 @@
         <?php endforeach; ?>
       </select>
     </div>
+
+    <!-- Filial -->
     <div>
       <label class="auth-label">Filial</label>
       <select id="filial" name="filial" class="auth-input" style="padding-left:14px;">
@@ -90,14 +93,14 @@
         <?php endforeach; ?>
       </select>
     </div>
-  </div>
 
-  <!-- Justificativa -->
-  <div>
-    <label class="auth-label">Justificativa</label>
-    <textarea id="justificativa" name="justificativa" required rows="3"
-              class="auth-input textarea-auth"
-              placeholder="Por que você precisa de acesso ao sistema?"></textarea>
+    <!-- Justificativa -->
+    <div class="sm:col-span-2">
+      <label class="auth-label">Justificativa</label>
+      <textarea id="justificativa" name="justificativa" required rows="2"
+                class="auth-input" style="height: 60px; resize: none; padding-left: 14px; padding-top: 10px;"
+                placeholder="Por que você precisa de acesso ao sistema?"></textarea>
+    </div>
   </div>
 
   <!-- Feedback -->
