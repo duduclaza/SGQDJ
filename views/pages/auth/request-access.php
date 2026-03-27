@@ -1,364 +1,176 @@
-<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="glass-effect rounded-2xl shadow-2xl p-8">
-        <!-- Header -->
-        <div class="text-center mb-6">
-            <h2 class="text-3xl font-bold text-white mb-2">
-                Solicitar Acesso
-            </h2>
-            <p class="mt-2 text-center text-sm text-blue-100">
-                Preencha os dados abaixo para solicitar acesso ao sistema
-            </p>
-        </div>
-        
-        <form id="requestForm" class="mt-8 space-y-6">
-            <div class="space-y-4">
-                <!-- Nome -->
-                <div>
-                    <label for="name" class="block text-white text-sm font-medium mb-2">Nome Completo *</label>
-                    <input id="name" name="name" type="text" required 
-                           class="w-full px-4 py-3 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 focus:border-transparent"
-                           placeholder="Seu nome completo">
-                </div>
-
-                <!-- Email -->
-                <div>
-                    <label for="email" class="block text-white text-sm font-medium mb-2">Email *</label>
-                    <input id="email" name="email" type="email" required 
-                           class="w-full px-4 py-3 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 focus:border-transparent"
-                           placeholder="seu.email@exemplo.com">
-                </div>
-
-                <!-- Senha -->
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Senha *</label>
-                    <div class="mt-1 relative">
-                        <input id="password" name="password" type="password" required minlength="6"
-                               class="appearance-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                               placeholder="Mínimo 6 caracteres">
-                        <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            <svg id="eyeIcon" class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Confirmar Senha -->
-                <div>
-                    <label for="password_confirm" class="block text-sm font-medium text-gray-700">Confirmar Senha *</label>
-                    <div class="mt-1 relative">
-                        <input id="password_confirm" name="password_confirm" type="password" required minlength="6"
-                               class="appearance-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                               placeholder="Repita a senha">
-                        <button type="button" id="togglePasswordConfirm" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            <svg id="eyeIconConfirm" class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    <div id="passwordMatch" class="mt-1 text-sm hidden">
-                        <span id="passwordMatchText"></span>
-                    </div>
-                </div>
-
-                <!-- Departamento -->
-                <div>
-                    <label for="setor" class="block text-sm font-medium text-gray-700">Departamento</label>
-                    <select id="setor" name="setor" 
-                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm">
-                        <option value="">Selecione um departamento</option>
-                        <?php foreach ($departamentos as $dept): ?>
-                            <option value="<?= htmlspecialchars($dept['nome']) ?>"><?= htmlspecialchars($dept['nome']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <!-- Filial -->
-                <div>
-                    <label for="filial" class="block text-sm font-medium text-gray-700">Filial</label>
-                    <select id="filial" name="filial" 
-                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm">
-                        <option value="">Selecione uma filial</option>
-                        <?php foreach ($filiais as $filial): ?>
-                            <option value="<?= htmlspecialchars($filial['nome']) ?>"><?= htmlspecialchars($filial['nome']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <!-- Justificativa -->
-                <div>
-                    <label for="justificativa" class="block text-sm font-medium text-gray-700">Justificativa *</label>
-                    <textarea id="justificativa" name="justificativa" rows="4" required
-                              class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                              placeholder="Explique por que você precisa de acesso ao sistema..."></textarea>
-                </div>
-            </div>
-
-            <div>
-                <button type="submit" id="submitBtn"
-                        class="btn-primary group relative w-full flex justify-center disabled:opacity-50 disabled:cursor-not-allowed">
-                    <span id="submitText">Enviar Solicitação</span>
-                    <span id="submitLoading" class="hidden">
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Enviando...
-                    </span>
-                </button>
-            </div>
-
-        </form>
-
-        <!-- Link para login -->
-        <div class="mt-6 text-center relative z-50">
-            <a href="/login" class="login-link" id="loginLink">
-                Já tem acesso? Faça login
-            </a>
-        </div>
-
-        <!-- Mensagens -->
-        <div id="message" class="hidden mt-4 p-4 rounded-md">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <svg id="messageIcon" class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                        <!-- Ícone será alterado via JavaScript -->
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p id="messageText" class="text-sm font-medium"></p>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- Cabeçalho -->
+<div class="text-center mb-7">
+  <div class="logo-badge">
+    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+    </svg>
+  </div>
+  <h1 class="text-xl font-bold text-white tracking-tight">Solicitar Acesso</h1>
+  <p class="text-slate-500 text-xs mt-1 font-medium">Preencha os dados abaixo para solicitar seu acesso</p>
 </div>
 
-<style>
-/* Estilos personalizados para formulário de solicitação */
-.request-form label {
-    color: white !important;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    display: block;
-    font-size: 0.875rem;
-}
+<!-- Form -->
+<form id="requestForm" class="space-y-4">
 
-.request-form input,
-.request-form select,
-.request-form textarea {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 0.5rem;
-    color: white;
-    font-size: 0.875rem;
-}
+  <!-- Nome -->
+  <div>
+    <label class="auth-label">Nome completo</label>
+    <div class="relative">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+      </span>
+      <input id="name" name="name" type="text" required
+             class="auth-input" placeholder="Seu nome completo">
+    </div>
+  </div>
 
-.request-form input::placeholder,
-.request-form textarea::placeholder {
-    color: rgba(255, 255, 255, 0.7);
-}
+  <!-- Email -->
+  <div>
+    <label class="auth-label">E-mail corporativo</label>
+    <div class="relative">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206"/></svg>
+      </span>
+      <input id="email" name="email" type="email" required
+             class="auth-input" placeholder="nome@empresa.com.br">
+    </div>
+  </div>
 
-.request-form input:focus,
-.request-form select:focus,
-.request-form textarea:focus {
-    outline: none;
-    ring: 2px;
-    ring-color: rgba(255, 255, 255, 0.5);
-    border-color: transparent;
-}
+  <!-- Senha e Confirmar lado a lado -->
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <label class="auth-label">Senha</label>
+      <div class="relative">
+        <input id="password" name="password" type="password" required minlength="6"
+               class="auth-input" placeholder="Min. 6 caracteres" style="padding-left:14px; padding-right:36px;">
+        <button type="button" onclick="togglePwd('password','eyePwd')"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1 transition-colors">
+          <svg id="eyePwd" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div>
+      <label class="auth-label">Confirmar</label>
+      <div class="relative">
+        <input id="password_confirm" name="password_confirm" type="password" required minlength="6"
+               class="auth-input" placeholder="Repita a senha" style="padding-left:14px; padding-right:36px;">
+        <button type="button" onclick="togglePwd('password_confirm','eyeConf')"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1 transition-colors">
+          <svg id="eyeConf" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- Match indicator -->
+  <div id="pwdMatch" class="hidden -mt-2 text-[11px] font-bold px-1"></div>
 
-.request-form select option {
-    background: #1e40af;
-    color: white;
-}
+  <!-- Departamento + Filial -->
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <label class="auth-label">Departamento</label>
+      <select id="setor" name="setor" class="auth-input" style="padding-left:14px;">
+        <option value="">Selecione...</option>
+        <?php foreach ($departamentos as $dept): ?>
+          <option value="<?= htmlspecialchars($dept['nome']) ?>"><?= htmlspecialchars($dept['nome']) ?></option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+    <div>
+      <label class="auth-label">Filial</label>
+      <select id="filial" name="filial" class="auth-input" style="padding-left:14px;">
+        <option value="">Selecione...</option>
+        <?php foreach ($filiais as $filial): ?>
+          <option value="<?= htmlspecialchars($filial['nome']) ?>"><?= htmlspecialchars($filial['nome']) ?></option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+  </div>
 
-.request-form .btn-primary {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    border: none;
-    box-shadow: 0 4px 15px 0 rgba(37, 99, 235, 0.3);
-    color: white;
-    font-weight: 600;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    width: 100%;
-    transition: all 0.2s;
-}
+  <!-- Justificativa -->
+  <div>
+    <label class="auth-label">Justificativa</label>
+    <textarea id="justificativa" name="justificativa" required rows="3"
+              class="auth-input textarea-auth"
+              placeholder="Por que você precisa de acesso ao sistema?"></textarea>
+  </div>
 
-.request-form .btn-primary:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 25px 0 rgba(37, 99, 235, 0.4);
-}
+  <!-- Feedback -->
+  <div id="message" class="hidden text-xs font-semibold px-3 py-2.5 rounded-xl border"></div>
 
-.request-form .btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
+  <div class="pt-1">
+    <button type="submit" id="submitBtn" class="btn-auth">
+      <span id="submitText">Enviar Solicitação</span>
+    </button>
+  </div>
+</form>
 
-/* Link para login */
-.login-link {
-    position: relative !important;
-    z-index: 9999 !important;
-    display: inline-block !important;
-    color: #93c5fd !important;
-    text-decoration: underline !important;
-    font-weight: 500 !important;
-    padding: 0.5rem 1rem !important;
-    margin: 1rem 0 !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-}
-
-.login-link:hover {
-    color: #dbeafe !important;
-    transform: translateY(-1px) !important;
-}
-</style>
+<!-- Rodapé -->
+<div class="mt-5 flex items-center justify-center">
+  <a href="/login" class="text-slate-500 hover:text-slate-300 text-xs font-medium transition-colors inline-flex items-center gap-1.5">
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+    Já tenho acesso — fazer login
+  </a>
+</div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Adicionar classe ao formulário
-    document.getElementById('requestForm').classList.add('request-form');
-    
-    // Garantir que o link de login funcione
-    const loginLink = document.getElementById('loginLink');
-    if (loginLink) {
-        loginLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Clicou no link de login');
-            window.location.href = '/login';
-        });
+function togglePwd(inputId, iconId) {
+  const inp = document.getElementById(inputId);
+  const ico = document.getElementById(iconId);
+  const isHidden = inp.type === 'password';
+  inp.type = isHidden ? 'text' : 'password';
+  ico.innerHTML = isHidden
+    ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>`
+    : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>`;
+}
+
+// Live password match
+const pwd = document.getElementById('password');
+const pwdC = document.getElementById('password_confirm');
+const pwdMatch = document.getElementById('pwdMatch');
+[pwd, pwdC].forEach(el => el.addEventListener('input', () => {
+  if (!pwdC.value) { pwdMatch.className = 'hidden'; return; }
+  pwdMatch.classList.remove('hidden');
+  const ok = pwd.value === pwdC.value;
+  pwdMatch.className = 'text-[11px] font-bold px-1 ' + (ok ? 'text-emerald-400' : 'text-red-400');
+  pwdMatch.textContent  = ok ? '✓ Senhas coincidem' : '✕ Senhas não coincidem';
+}));
+
+document.getElementById('requestForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (pwd.value !== pwdC.value) {
+    const msg = document.getElementById('message');
+    msg.className = 'text-xs font-semibold px-3 py-2.5 rounded-xl border text-red-400 bg-red-400/10 border-red-400/20';
+    msg.textContent = '✕ As senhas não coincidem';
+    return;
+  }
+  const btn = document.getElementById('submitBtn');
+  const msg = document.getElementById('message');
+  setButtonLoading(btn, true);
+  msg.className = 'hidden';
+
+  try {
+    const res = await fetch('/access-request/process', { method: 'POST', body: new FormData(this) });
+    const result = await res.json();
+    if (result.success) {
+      msg.className = 'text-xs font-semibold px-3 py-2.5 rounded-xl border text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+      msg.textContent = '✓ ' + result.message;
+      this.reset();
+      pwdMatch.className = 'hidden';
+    } else {
+      msg.className = 'text-xs font-semibold px-3 py-2.5 rounded-xl border text-red-400 bg-red-400/10 border-red-400/20';
+      msg.textContent = '✕ ' + result.message;
     }
-    const form = document.getElementById('requestForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const submitText = document.getElementById('submitText');
-    const submitLoading = document.getElementById('submitLoading');
-    const messageDiv = document.getElementById('message');
-    const messageText = document.getElementById('messageText');
-    const messageIcon = document.getElementById('messageIcon');
-
-    // Toggle password visibility
-    function setupPasswordToggle(toggleId, inputId, iconId) {
-        const toggle = document.getElementById(toggleId);
-        const input = document.getElementById(inputId);
-        const icon = document.getElementById(iconId);
-
-        toggle.addEventListener('click', function() {
-            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-            input.setAttribute('type', type);
-            
-            if (type === 'text') {
-                icon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
-                `;
-            } else {
-                icon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                `;
-            }
-        });
-    }
-
-    setupPasswordToggle('togglePassword', 'password', 'eyeIcon');
-    setupPasswordToggle('togglePasswordConfirm', 'password_confirm', 'eyeIconConfirm');
-
-    // Password match validation
-    const password = document.getElementById('password');
-    const passwordConfirm = document.getElementById('password_confirm');
-    const passwordMatch = document.getElementById('passwordMatch');
-    const passwordMatchText = document.getElementById('passwordMatchText');
-
-    function checkPasswordMatch() {
-        if (passwordConfirm.value.length > 0) {
-            passwordMatch.classList.remove('hidden');
-            if (password.value === passwordConfirm.value) {
-                passwordMatchText.textContent = '✓ Senhas coincidem';
-                passwordMatchText.className = 'text-green-600';
-            } else {
-                passwordMatchText.textContent = '✗ Senhas não coincidem';
-                passwordMatchText.className = 'text-red-600';
-            }
-        } else {
-            passwordMatch.classList.add('hidden');
-        }
-    }
-
-    password.addEventListener('input', checkPasswordMatch);
-    passwordConfirm.addEventListener('input', checkPasswordMatch);
-
-    // Form submission
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        // Validate passwords match
-        if (password.value !== passwordConfirm.value) {
-            showMessage('As senhas não coincidem', 'error');
-            return;
-        }
-
-        // Show loading state
-        submitBtn.disabled = true;
-        submitText.classList.add('hidden');
-        submitLoading.classList.remove('hidden');
-
-        try {
-            const formData = new FormData(form);
-            const response = await fetch('/access-request/process', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                showMessage(result.message, 'success');
-                form.reset();
-                passwordMatch.classList.add('hidden');
-            } else {
-                showMessage(result.message, 'error');
-            }
-        } catch (error) {
-            showMessage('Erro ao enviar solicitação. Tente novamente.', 'error');
-        } finally {
-            // Hide loading state
-            submitBtn.disabled = false;
-            submitText.classList.remove('hidden');
-            submitLoading.classList.add('hidden');
-        }
-    });
-
-    function showMessage(message, type) {
-        messageText.textContent = message;
-        messageDiv.classList.remove('hidden');
-
-        if (type === 'success') {
-            messageDiv.className = 'mt-4 p-4 rounded-md bg-green-50 border border-green-200';
-            messageText.className = 'text-sm font-medium text-green-800';
-            messageIcon.className = 'h-5 w-5 text-green-400';
-            messageIcon.innerHTML = `
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-            `;
-        } else {
-            messageDiv.className = 'mt-4 p-4 rounded-md bg-red-50 border border-red-200';
-            messageText.className = 'text-sm font-medium text-red-800';
-            messageIcon.className = 'h-5 w-5 text-red-400';
-            messageIcon.innerHTML = `
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-            `;
-        }
-
-        // Auto-hide success messages after 5 seconds
-        if (type === 'success') {
-            setTimeout(() => {
-                messageDiv.classList.add('hidden');
-            }, 5000);
-        }
-    }
+  } catch {
+    msg.className = 'text-xs font-semibold px-3 py-2.5 rounded-xl border text-red-400 bg-red-400/10 border-red-400/20';
+    msg.textContent = '✕ Erro de conexão. Tente novamente.';
+  } finally {
+    setButtonLoading(btn, false);
+  }
 });
 </script>

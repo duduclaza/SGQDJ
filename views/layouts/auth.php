@@ -15,11 +15,12 @@ $title = $title ?? 'SGQ - Login';
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    * { font-family: 'Inter', sans-serif; }
+    * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
 
-    /* ─── Background Premium ─── */
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
+
     body {
-      background-color: #0f1117;
+      background-color: #0a0c12;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -28,79 +29,49 @@ $title = $title ?? 'SGQ - Login';
       position: relative;
     }
 
+    /* ─── Neural Canvas ─── */
+    #neural-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
     /* Grade geométrica sutil */
-    body::before {
-      content: '';
+    .grid-overlay {
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 48px 48px;
+        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+      background-size: 56px 56px;
       pointer-events: none;
-      z-index: 0;
+      z-index: 1;
     }
 
-    /* Glow orbs decorativos */
-    .orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(80px);
-      pointer-events: none;
-      animation: orb-float 10s ease-in-out infinite;
-    }
-    .orb-1 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
-      top: -100px; left: -150px;
-      animation-delay: 0s;
-    }
-    .orb-2 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%);
-      bottom: -80px; right: -120px;
-      animation-delay: 5s;
-    }
-    .orb-3 {
-      width: 300px; height: 300px;
-      background: radial-gradient(circle, rgba(20,184,166,0.04) 0%, transparent 70%);
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      animation-delay: 3s;
-    }
-
-    @keyframes orb-float {
-      0%, 100% { transform: scale(1) translate(0, 0); }
-      33% { transform: scale(1.05) translate(10px, -15px); }
-      66% { transform: scale(0.97) translate(-8px, 10px); }
-    }
-
-    /* ─── Card ─── */
+    /* ─── Auth Card ─── */
     .auth-card {
       position: relative;
       z-index: 10;
       width: 100%;
-      max-width: 400px;
       background: rgba(255,255,255,0.04);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255,255,255,0.07);
       border-radius: 24px;
       padding: 40px 36px;
       box-shadow:
         0 0 0 1px rgba(255,255,255,0.04) inset,
-        0 32px 64px rgba(0,0,0,0.4),
-        0 2px 4px rgba(0,0,0,0.3);
+        0 32px 80px rgba(0,0,0,0.5);
     }
 
-    /* Linha de brilho no topo do card */
+    /* Linha de brilho no topo */
     .auth-card::before {
       content: '';
       position: absolute;
-      top: 0; left: 20%; right: 20%;
+      top: 0; left: 15%; right: 15%;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-      border-radius: 50%;
+      background: linear-gradient(90deg, transparent, rgba(99,120,255,0.3), transparent);
     }
 
     /* ─── Inputs ─── */
@@ -116,14 +87,16 @@ $title = $title ?? 'SGQ - Login';
       outline: none;
       transition: all 0.2s ease;
     }
-    .auth-input::placeholder { color: rgba(148,163,184,0.5); }
+    .auth-input::placeholder { color: rgba(148,163,184,0.45); }
     .auth-input:focus {
       background: rgba(255,255,255,0.08);
-      border-color: rgba(99,120,255,0.5);
-      box-shadow: 0 0 0 3px rgba(99,120,255,0.1);
+      border-color: rgba(99,120,255,0.4);
+      box-shadow: 0 0 0 3px rgba(99,120,255,0.08);
     }
+    /* Selects */
+    .auth-input option { background: #1a1d2e; color: #e2e8f0; }
 
-    /* ─── Botão ─── */
+    /* ─── Botão principal ─── */
     .btn-auth {
       width: 100%;
       padding: 12px;
@@ -136,28 +109,29 @@ $title = $title ?? 'SGQ - Login';
       letter-spacing: 0.01em;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+      box-shadow: 0 4px 20px rgba(99,102,241,0.3);
       position: relative;
       overflow: hidden;
     }
-    .btn-auth::before {
+    .btn-auth::after {
       content: '';
       position: absolute;
       top: 0; left: -100%;
       width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
       transition: left 0.5s ease;
     }
-    .btn-auth:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(99,102,241,0.4); }
-    .btn-auth:hover::before { left: 100%; }
+    .btn-auth:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(99,102,241,0.45); }
+    .btn-auth:hover::after { left: 100%; }
     .btn-auth:active { transform: translateY(0); }
+    .btn-auth.loading { opacity: 0.7; cursor: not-allowed; transform: none !important; }
 
-    /* ─── Label ─── */
+    /* ─── Labels ─── */
     .auth-label {
       display: block;
       font-size: 11px;
       font-weight: 700;
-      color: rgba(148,163,184,0.8);
+      color: rgba(148,163,184,0.75);
       text-transform: uppercase;
       letter-spacing: 0.08em;
       margin-bottom: 6px;
@@ -173,41 +147,176 @@ $title = $title ?? 'SGQ - Login';
       margin: 0 auto 20px;
     }
 
-    /* Badge de status online */
+    /* ─── Status dot ─── */
     .status-dot {
       display: inline-block;
       width: 6px; height: 6px;
       background: #22c55e;
       border-radius: 50%;
       animation: pulse-green 2s ease-in-out infinite;
-      box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
     }
     @keyframes pulse-green {
       0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); transform: scale(1); }
       50% { box-shadow: 0 0 0 4px rgba(34,197,94,0); transform: scale(1.1); }
     }
 
-    /* Loading state */
-    .btn-auth.loading { opacity: 0.7; cursor: not-allowed; transform: none !important; }
+    /* ─── Textarea ─── */
+    .auth-input.textarea-auth { height: 90px; resize: none; padding-left: 14px; padding-top: 10px; }
+
+    /* ─── Scroll thin ─── */
+    .auth-card-scroll { max-height: 90vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(99,102,241,0.3) transparent; }
   </style>
 </head>
 <body>
 
-  <!-- Orbs de fundo -->
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-
-  <!-- Noise texture overlay -->
-  <div style="position:fixed;inset:0;z-index:1;opacity:0.025;background-image:url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E');background-repeat:repeat;background-size:128px 128px;pointer-events:none;"></div>
+  <!-- Neural Particle Canvas -->
+  <canvas id="neural-canvas"></canvas>
+  <div class="grid-overlay"></div>
 
   <!-- Auth Card -->
-  <div class="auth-card mx-4">
-    <?php include $viewFile; ?>
+  <div class="auth-card mx-4" style="max-width:420px; width:100%;">
+    <div class="auth-card-scroll">
+      <?php include $viewFile; ?>
+    </div>
   </div>
 
   <?php include __DIR__ . '/../partials/ui-feedback.php'; ?>
   <?php include __DIR__ . '/../partials/ui-scripts.php'; ?>
+
+  <script>
+  // ═══════════════════════════════════════════════════════
+  //  NEURAL PARTICLE SYSTEM — Mouse Interactive
+  // ═══════════════════════════════════════════════════════
+  (function() {
+    const canvas = document.getElementById('neural-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W, H, mouse = { x: -9999, y: -9999 };
+    let particles = [];
+    let animFrame;
+
+    const CONFIG = {
+      count: 80,
+      connectDistance: 140,
+      mouseRadius: 180,
+      mouseForce: 0.06,
+      speed: 0.35,
+      nodeSize: { min: 1.5, max: 3.5 },
+      colors: ['#6366f1','#3b82f6','#22d3ee','#818cf8','#a78bfa'],
+    };
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+      constructor() { this.reset(true); }
+      reset(init = false) {
+        this.x  = Math.random() * W;
+        this.y  = init ? Math.random() * H : (Math.random() < 0.5 ? -10 : H + 10);
+        this.vx = (Math.random() - 0.5) * CONFIG.speed;
+        this.vy = (Math.random() - 0.5) * CONFIG.speed;
+        this.r  = CONFIG.nodeSize.min + Math.random() * (CONFIG.nodeSize.max - CONFIG.nodeSize.min);
+        this.color = CONFIG.colors[Math.floor(Math.random() * CONFIG.colors.length)];
+        this.alpha = 0.4 + Math.random() * 0.5;
+        this.pulseOffset = Math.random() * Math.PI * 2;
+      }
+      update(t) {
+        // Mouse attraction / repulsion
+        const dx = mouse.x - this.x, dy = mouse.y - this.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < CONFIG.mouseRadius && dist > 1) {
+          const force = (1 - dist / CONFIG.mouseRadius) * CONFIG.mouseForce;
+          this.vx += (dx / dist) * force;
+          this.vy += (dy / dist) * force;
+        }
+
+        // Damping
+        this.vx *= 0.985;
+        this.vy *= 0.985;
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Wrap edges
+        if (this.x < -20) this.x = W + 20;
+        if (this.x > W + 20) this.x = -20;
+        if (this.y < -20) this.y = H + 20;
+        if (this.y > H + 20) this.y = -20;
+
+        // Pulse alpha
+        this.currentAlpha = this.alpha * (0.7 + 0.3 * Math.sin(t * 0.002 + this.pulseOffset));
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.currentAlpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function init() {
+      particles = Array.from({ length: CONFIG.count }, () => new Particle());
+    }
+
+    function drawConnections() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i], b = particles[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < CONFIG.connectDistance) {
+            const opacity = (1 - dist / CONFIG.connectDistance) * 0.25;
+            // Highlight connections near mouse
+            const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+            const md = Math.sqrt((mx - mouse.x)**2 + (my - mouse.y)**2);
+            const boost = md < CONFIG.mouseRadius ? (1 - md / CONFIG.mouseRadius) * 0.5 : 0;
+
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+            grad.addColorStop(0, a.color);
+            grad.addColorStop(1, b.color);
+            ctx.strokeStyle = grad;
+            ctx.globalAlpha = opacity + boost;
+            ctx.lineWidth = 0.6 + boost;
+            ctx.stroke();
+          }
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    let t = 0;
+    function loop() {
+      t++;
+      ctx.clearRect(0, 0, W, H);
+      particles.forEach(p => p.update(t));
+      drawConnections();
+      particles.forEach(p => p.draw());
+      animFrame = requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('resize', () => { resize(); });
+    window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    window.addEventListener('touchmove', e => {
+      mouse.x = e.touches[0].clientX;
+      mouse.y = e.touches[0].clientY;
+    }, { passive: true });
+    window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+
+    resize();
+    init();
+    loop();
+  })();
+  </script>
 
 </body>
 </html>
