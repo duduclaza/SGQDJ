@@ -206,7 +206,6 @@
 </section>
 
 <script>
-const isMasterUser = <?= (isset($_SESSION['user_role']) && in_array(strtolower($_SESSION['user_role']), ['super_admin', 'superadmin'])) ? 'true' : 'false' ?>;
 let currentProfileId = null;
 const modulesByCategory = {
   'Ecossistema Geral': [
@@ -299,7 +298,7 @@ const modules = Object.values(modulesByCategory).flat();
 
 // Master User Detection (God Mode)
 const currentUserEmail = '<?= $_SESSION['user_email'] ?? '' ?>';
-const isMasterUser = currentUserEmail.toLowerCase() === 'du.claza@gmail.com';
+const isMasterUser = currentUserEmail.toLowerCase() === 'du.claza@gmail.com' || <?= (isset($_SESSION['user_role']) && in_array(strtolower($_SESSION['user_role']), ['super_admin', 'superadmin'])) ? 'true' : 'false' ?>;
 
 // Load profiles on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -310,12 +309,16 @@ document.addEventListener('DOMContentLoaded', function() {
 function loadProfiles() {
   fetch('/admin/profiles', {
     method: 'GET',
-    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
   })
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
   .then(result => {
     if (result.success) {
-      const profiles = Array.isArray(result.profiles) ? result.profiles.filter(p => !(String(p.name).toLowerCase() === 'super administrador' && !isMasterUser)) : [];
+      const profilesList = Array.isArray(result.data) ? result.data : (Array.isArray(result.profiles) ? result.profiles : []);
+      const profiles = profilesList.filter(p => !(String(p.name).toLowerCase() === 'super administrador' && !isMasterUser));
       displayProfiles(profiles);
       
       const totalSpan = document.getElementById('profilesTotal');
@@ -325,19 +328,9 @@ function loadProfiles() {
     }
   })
   .catch(error => {
-    console.error('Error:', error);
-    showToast('Erro de conexão ao carregar perfis', 'error');
-  });
-}
-istrador' && !isMasterUser)) : [];
-      displayProfiles(profiles);
-    } else {
-      alert('Erro ao carregar perfis: ' + result.message);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Erro de conexão');
+    console.error('Error fetching profiles:', error);
+    showToast('Erro de conexão ao carregar perfis, verifique se o Endpoint existe', 'error');
+    document.getElementById('profilesTableBody').innerHTML = `<tr><td colspan="5" class="px-8 py-20 text-center text-red-500 font-bold">Falha ao carregar (Endpoint retornou HTML/Erro)</td></tr>`;
   });
 }
 
