@@ -272,7 +272,6 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
 
   <?php include __DIR__ . '/../partials/ui-feedback.php'; ?>
 
-  <script>
   <?php include __DIR__ . '/../partials/ui-scripts.php'; ?>
 
   <script>
@@ -281,7 +280,6 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
       const pageContent = document.querySelector('.page-transition');
       if (pageContent) setTimeout(() => pageContent.classList.add('loaded'), 100);
     });
-  </script>
   </script>
   
   <!-- Debug Panel (só se debug estiver ativo) -->

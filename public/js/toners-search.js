@@ -1,6 +1,11 @@
 // ===== BUSCA INTELIGENTE NO GRID DE TONERS =====
 // Arquivo separado para evitar conflitos e SyntaxErrors
 
+// Variáveis de paginação globais
+window.currentPage = 1;
+window.itemsPerPage = 50;
+window.currentMatchedRows = [];
+
 // Função para limpar a busca
 window.clearSearch = function() {
     console.log('🧽 Limpando busca...');
@@ -49,49 +54,140 @@ window.searchToners = function() {
     // Remover possível linha de mensagem antiga
     const emptyMsg = tbody.querySelector('.no-results-row');
     if (emptyMsg) emptyMsg.remove();
+    
+    window.currentMatchedRows = [];
 
     rows.forEach((row, index) => {
+      let isMatch = false;
+
       // Se não há termos de busca, mostrar tudo
       if (tokens.length === 0) {
-        row.style.display = '';
-        visibleCount++;
-        return;
+        isMatch = true;
+      } else {
+        let haystack = '';
+        if (searchColumn === 'all') {
+          haystack = Array.from(row.cells).map(td => td.textContent || '').join(' ');
+        } else {
+          const columnIndex = parseInt(searchColumn);
+          haystack = row.cells[columnIndex]?.textContent || '';
+        }
+
+        let norm = haystack.toLowerCase();
+        norm = norm.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        isMatch = tokens.every(tok => norm.includes(tok));
       }
 
-      let haystack = '';
-      if (searchColumn === 'all') {
-        haystack = Array.from(row.cells).map(td => td.textContent || '').join(' ');
-      } else {
-        const columnIndex = parseInt(searchColumn);
-        haystack = row.cells[columnIndex]?.textContent || '';
-      }
-
-      let norm = haystack.toLowerCase();
-      norm = norm.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
-      const match = tokens.every(tok => norm.includes(tok));
-      if (match) {
-        row.style.display = '';
-        visibleCount++;
-      } else {
-        row.style.display = 'none';
+      if (isMatch) {
+         window.currentMatchedRows.push(row);
       }
     });
 
-    // Mostrar mensagem de nenhum resultado
-    if (visibleCount === 0 && rows.length > 0 && tokens.length > 0) {
-      const tr = document.createElement('tr');
-      tr.className = 'no-results-row';
-      const td = document.createElement('td');
-      td.colSpan = 12;
-      td.className = 'px-4 py-6 text-center text-gray-500';
-      td.innerHTML = '<div class="flex flex-col items-center gap-2"><svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="font-medium">🔍 Nenhum resultado encontrado</span><span class="text-xs">Tente buscar com outros termos</span></div>';
-      tr.appendChild(td);
-      tbody.appendChild(tr);
-    }
+    // Reset pagination to page 1 on search
+    window.currentPage = 1;
+    window.renderPage();
+};
 
-    console.log(`✅ Busca concluída: ${visibleCount} de ${rows.length} linhas visíveis`);
-    window.updateResultsCount(visibleCount, rows.length);
+window.renderPage = function() {
+    const tbody = document.getElementById('tonersTbody');
+    const allRows = Array.from(tbody.querySelectorAll('tr:not(.no-results-row)'));
+    
+    // Esconder tudo primeiro
+    allRows.forEach(row => row.style.display = 'none');
+    
+    const total = window.currentMatchedRows.length;
+    
+    // Remover mensagem vazia
+    const emptyMsg = tbody.querySelector('.no-results-row');
+    if (emptyMsg) emptyMsg.remove();
+    
+    if (total === 0) {
+      if (allRows.length > 0) {
+          const tr = document.createElement('tr');
+          tr.className = 'no-results-row';
+          const td = document.createElement('td');
+          td.colSpan = 12;
+          td.className = 'px-4 py-8 text-center text-gray-500';
+          td.innerHTML = '<div class="flex flex-col items-center gap-2"><svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="font-medium">🔍 Nenhum resultado encontrado</span><span class="text-xs">Tente buscar com outros termos</span></div>';
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+      }
+      window.updatePaginationUI(0, 0);
+      window.updateResultsCount(0, allRows.length);
+      return;
+    }
+    
+    const totalPages = Math.ceil(total / window.itemsPerPage);
+    if (window.currentPage > totalPages) window.currentPage = totalPages;
+    
+    const startIndex = (window.currentPage - 1) * window.itemsPerPage;
+    const endIndex = Math.min(startIndex + window.itemsPerPage, total);
+    
+    // Mostrar as da página atual
+    const pageRows = window.currentMatchedRows.slice(startIndex, endIndex);
+    pageRows.forEach(row => row.style.display = '');
+    
+    window.updatePaginationUI(startIndex, endIndex, total, totalPages);
+    window.updateResultsCount(total, allRows.length);
+};
+
+window.goToPage = function(page) {
+    const totalPages = Math.ceil(window.currentMatchedRows.length / window.itemsPerPage);
+    if (page >= 1 && page <= totalPages) {
+        window.currentPage = page;
+        window.renderPage();
+    }
+};
+
+window.updatePaginationUI = function(startIndex, endIndex, total, totalPages) {
+    const infoSpan = document.getElementById('paginationInfo');
+    const controls = document.getElementById('paginationControls');
+    
+    if (infoSpan) {
+        if (total === 0) {
+            infoSpan.innerHTML = 'Nenhum resultado';
+        } else {
+            infoSpan.innerHTML = `Mostrando <span class="font-bold">${startIndex + 1}</span> a <span class="font-bold">${endIndex}</span> de <span class="font-bold">${total}</span> resultados`;
+        }
+    }
+    
+    if (controls) {
+        controls.innerHTML = '';
+        if (totalPages > 1) {
+            // AnteriorBtn
+            const prevBtn = document.createElement('button');
+            prevBtn.className = `px-3 py-1.5 text-sm font-medium rounded-lg border transition-all ${window.currentPage === 1 ? 'border-slate-100 text-slate-300 cursor-not-allowed' : 'border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'}`;
+            prevBtn.textContent = 'Anterior';
+            if (window.currentPage > 1) prevBtn.onclick = () => window.goToPage(window.currentPage - 1);
+            controls.appendChild(prevBtn);
+            
+            // Números
+            for (let p = 1; p <= totalPages; p++) {
+                if (totalPages > 7) {
+                    if (p !== 1 && p !== totalPages && Math.abs(p - window.currentPage) > 1) {
+                        if (p === 2 || p === totalPages - 1) {
+                            const dots = document.createElement('span');
+                            dots.className = 'px-2 py-1 text-slate-400 text-sm';
+                            dots.textContent = '...';
+                            controls.appendChild(dots);
+                        }
+                        continue;
+                    }
+                }
+                const btn = document.createElement('button');
+                btn.className = `min-w-[32px] px-2 py-1.5 mx-0.5 text-sm font-bold rounded-lg border transition-all ${p === window.currentPage ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-blue-600'}`;
+                btn.textContent = p;
+                if (p !== window.currentPage) btn.onclick = () => window.goToPage(p);
+                controls.appendChild(btn);
+            }
+            
+            // ProximaBtn
+            const nextBtn = document.createElement('button');
+            nextBtn.className = `px-3 py-1.5 text-sm font-medium rounded-lg border transition-all ${window.currentPage === totalPages ? 'border-slate-100 text-slate-300 cursor-not-allowed' : 'border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'}`;
+            nextBtn.textContent = 'Próxima';
+            if (window.currentPage < totalPages) nextBtn.onclick = () => window.goToPage(window.currentPage + 1);
+            controls.appendChild(nextBtn);
+        }
+    }
 };
 
 // Função para atualizar contador de resultados

@@ -350,6 +350,16 @@
         </tbody>
       </table>
     </div>
+    
+    <!-- Controles de Paginação -->
+    <div id="tonersPagination" class="px-6 py-4 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-slate-500" id="paginationInfo">
+        Mostrando <span class="font-bold">1</span> a <span class="font-bold">50</span> de <span class="font-bold">...</span> resultados
+      </div>
+      <div class="flex flex-wrap gap-1" id="paginationControls">
+        <!-- Botões injetados via JS -->
+      </div>
+    </div>
   </div>
 
   <!-- Import Modal -->

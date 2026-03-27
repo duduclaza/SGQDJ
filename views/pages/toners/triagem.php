@@ -607,8 +607,8 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
 <script>
 // ===== DADOS PHP → JS =====
-const TONERS_LIST = <?= json_encode($toners) ?>;
-const PARAMETROS_INIT = <?= json_encode($parametros) ?>;
+const TONERS_LIST = <?= json_encode($toners, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?: '[]' ?>;
+const PARAMETROS_INIT = <?= json_encode($parametros, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?: '[]' ?>;
 const CAN_EDIT   = <?= $canEdit   ? 'true' : 'false' ?>;
 const CAN_DELETE = <?= $canDelete ? 'true' : 'false' ?>;
 const IS_ADMIN   = <?= $isAdmin   ? 'true' : 'false' ?>;
@@ -925,18 +925,22 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   [searchInput, filialInput, modeloInput, clienteInput, colaboradorInput, defeitoInput, fornecedorInput, codigoReqInput].forEach((el) => {
-    el.addEventListener('input', filtrarComDebounce);
-    el.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        clearTimeout(filtrosDebounce);
-        carregarRegistros(1);
-      }
-    });
+    if (el) {
+      el.addEventListener('input', filtrarComDebounce);
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          clearTimeout(filtrosDebounce);
+          carregarRegistros(1);
+        }
+      });
+    }
   });
 
   [destinoSelect, modoSelect, percentualMinInput, percentualMaxInput, dataInicioInput, dataFimInput].forEach((el) => {
-    el.addEventListener('change', filtrarComDebounce);
+    if (el) {
+      el.addEventListener('change', filtrarComDebounce);
+    }
   });
 
   loadColumnPreferences();
