@@ -100,35 +100,9 @@ if ($u['perfil'] !== 'compras' && $u['perfil'] !== 'admin' && $u['perfil'] !== '
                             </a>
                             
                             <?php if ($h['status'] !== 'concluida' && $h['status'] !== 'cancelada'): ?>
-                                <button type="button" onclick="openModal('cancelModal<?= $h['id'] ?>')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:hover:bg-rose-800/50 rounded-lg p-2 transition-colors" title="Cancelar Procresso">
+                                <button type="button" onclick="openCancelModal(<?= $h['id'] ?>, '<?= $h['codigo'] ?>')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:hover:bg-rose-800/50 rounded-lg p-2 transition-colors" title="Cancelar Processo">
                                     <i class="ph-bold ph-x text-lg"></i>
                                 </button>
-    
-                                <!-- Modal Cancelamento Oculto pelo Tailwind customizado do SGQ (temos a func openModal do sgq) -->
-                                <div id="cancelModal<?= $h['id'] ?>" class="modal-backend hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 text-left">
-                                    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-md overflow-hidden animate-modal">
-                                        <div class="p-5 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-rose-50 dark:bg-rose-900/20">
-                                            <h5 class="text-lg font-bold text-rose-800 dark:text-rose-400 flex items-center gap-2">
-                                                <i class="ph-fill ph-warning-octagon"></i> Cancelar Processo
-                                            </h5>
-                                            <button type="button" onclick="closeModal('cancelModal<?= $h['id'] ?>')" class="text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 transition-colors"><i class="ph flex ph-x text-xl"></i></button>
-                                        </div>
-                                        <form method="POST" action="" class="p-6">
-                                            <input type="hidden" name="cancelar_id" value="<?= $h['id'] ?>">
-                                            <p class="mb-4 text-sm text-slate-600 dark:text-slate-300">Tem certeza que deseja inutilizar permanentemente a homologação <strong><?= $h['codigo'] ?></strong>? O envio das amostras será pausado.</p>
-                                            
-                                            <div class="mb-5">
-                                                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Motivo do Cancelamento</label>
-                                                <textarea name="motivo_cancelamento" rows="2" required placeholder="A compra foi suspensa?" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-rose-500 focus:border-rose-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white"></textarea>
-                                            </div>
-                                            
-                                            <div class="flex justify-end gap-3">
-                                                <button type="button" onclick="closeModal('cancelModal<?= $h['id'] ?>')" class="px-5 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 focus:ring-4 focus:outline-none focus:ring-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700">Manter Ativa</button>
-                                                <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-rose-600 rounded-lg hover:bg-rose-700 focus:ring-4 focus:outline-none focus:ring-rose-300 dark:bg-rose-600 dark:hover:bg-rose-700 shadow-sm">Confirmar Baixa</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
                             <?php endif; ?>
                         </div>
                     </td>
@@ -139,7 +113,77 @@ if ($u['perfil'] !== 'compras' && $u['perfil'] !== 'admin' && $u['perfil'] !== '
     </div>
 </div>
 
+<!-- Modal de Cancelamento -->
+<div id="cancelModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeCancelModal()"></div>
+    <div class="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden transform transition-all">
+        <div class="p-6">
+            <div class="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full flex items-center justify-center mb-4 mx-auto">
+                <i class="ph-fill ph-warning text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 dark:text-white text-center mb-2">Cancelar Homologação</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm text-center mb-6">Você está prestes a cancelar a <strong id="cancelCode"></strong>. Como deseja proceder?</p>
+            
+            <form id="cancelForm" method="POST" action="">
+                <input type="hidden" name="acao" value="cancelar_homologacao">
+                <input type="hidden" name="id" id="cancelId">
+                
+                <div class="space-y-3 mb-8">
+                    <label class="flex items-center gap-3 p-4 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                        <input type="radio" name="excluir_definitivo" value="0" checked class="w-4 h-4 text-rose-600 focus:ring-rose-500">
+                        <div class="flex-1">
+                            <span class="block text-sm font-bold text-slate-700 dark:text-slate-200">Apenas Cancelar</span>
+                            <span class="block text-[10px] text-slate-500">Mantém o registro na fila com status "Cancelado".</span>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 p-4 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                        <input type="radio" name="excluir_definitivo" value="1" class="w-4 h-4 text-rose-600 focus:ring-rose-500">
+                        <div class="flex-1">
+                            <span class="block text-sm font-bold text-rose-600">Excluir da Fila Geral</span>
+                            <span class="block text-[10px] text-slate-500">Remove permanentemente esta homologação do sistema.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeCancelModal()" class="flex-1 px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-700">Manter Ativa</button>
+                    <button type="button" onclick="processCancellation()" class="flex-1 px-4 py-2.5 text-sm font-bold text-white bg-rose-600 rounded-lg hover:bg-rose-700 shadow-lg shadow-rose-200 dark:shadow-none">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Overlay de Notificação (Simulação) -->
+<div id="notifOverlay" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-md">
+    <div class="text-center">
+        <div class="relative w-24 h-24 mb-6 mx-auto">
+            <div class="absolute inset-0 bg-rose-500/20 rounded-full animate-ping"></div>
+            <div class="relative w-24 h-24 bg-rose-600 rounded-full flex items-center justify-center text-white shadow-2xl">
+                <i class="ph-fill ph-paper-plane-tilt text-4xl"></i>
+            </div>
+        </div>
+        <h2 class="text-2xl font-black text-white mb-2 tracking-tight uppercase">Enviando Alertas...</h2>
+        <p class="text-rose-200 text-sm font-medium">Notificando todos os setores envolvidos sobre o cancelamento.</p>
+    </div>
+</div>
+
 <script>
-function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function openCancelModal(id, code) {
+    document.getElementById('cancelId').value = id;
+    document.getElementById('cancelCode').innerText = code;
+    document.getElementById('cancelModal').classList.remove('hidden');
+}
+
+function closeCancelModal() {
+    document.getElementById('cancelModal').classList.add('hidden');
+}
+
+function processCancellation() {
+    closeCancelModal();
+    document.getElementById('notifOverlay').classList.remove('hidden');
+    setTimeout(() => {
+        document.getElementById('cancelForm').submit();
+    }, 800);
+}
 </script>

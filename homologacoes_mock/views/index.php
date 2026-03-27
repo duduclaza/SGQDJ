@@ -164,7 +164,7 @@
             <h3 class="text-xl font-bold text-slate-800 dark:text-white text-center mb-2">Cancelar Homologação</h3>
             <p class="text-slate-500 dark:text-slate-400 text-sm text-center mb-6">Você está prestes a cancelar a <strong id="cancelCode"></strong>. Como deseja proceder?</p>
             
-            <form id="cancelForm" method="POST" action="index.php">
+            <form id="cancelForm" method="POST" action="">
                 <input type="hidden" name="acao" value="cancelar_homologacao">
                 <input type="hidden" name="id" id="cancelId">
                 
@@ -228,7 +228,7 @@ function processCancellation() {
     // Pequeno delay para simular o envio antes do submit
     setTimeout(() => {
         document.getElementById('cancelForm').submit();
-    }, 2500);
+    }, 800);
 }
 </script>
 

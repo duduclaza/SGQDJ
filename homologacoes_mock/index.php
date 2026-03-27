@@ -1,30 +1,7 @@
 <?php
 require_once __DIR__ . '/init.php';
 
-// Tratar a troca de usuário no mock (Global para o módulo mock)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trocar_usuario'])) {
-    $_SESSION['usuario_logado_id'] = (int)$_POST['usuario_logado_id'];
-    header("Location: " . $_SERVER['REQUEST_URI']);
-    exit;
-}
-
-// Ações de Cancelamento/Exclusão do Mock
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
-    if ($_POST['acao'] === 'cancelar_homologacao') {
-        $id = (int)$_POST['id'];
-        $excluir = isset($_POST['excluir_definitivo']) && $_POST['excluir_definitivo'] === '1';
-        
-        if ($excluir) {
-            excluirHomologacaoMock($id);
-            $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Homologação excluída permanentemente. Todos os envolvidos foram notificados do cancelamento via e-mail e canais sistêmicos."];
-        } else {
-            atualizarHomologacaoMock($id, ['status' => 'cancelada']);
-            $_SESSION['flash_message'] = ['type' => 'warning', 'text' => "Homologação cancelada. O registro agora aparece como inválido para auditoria."];
-        }
-        header("Location: index.php");
-        exit;
-    }
-}
+require_once __DIR__ . '/init.php';
 
 $data = getMockData();
 $homologacoes = $data['homologacoes'];
