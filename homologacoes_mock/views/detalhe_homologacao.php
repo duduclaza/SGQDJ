@@ -154,19 +154,45 @@
                         
                         <form method="POST" class="bg-amber-50 dark:bg-amber-900/10 p-5 rounded-xl border border-amber-100 dark:border-amber-800/50">
                             <input type="hidden" name="acao" value="confirmar_recebimento">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                            <div class="grid grid-cols-1 gap-5 mb-5">
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Data Real do Recebimento</label>
                                     <input type="date" name="data_recebimento" value="<?= date('Y-m-d') ?>" required class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-amber-500 focus:border-amber-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                                 </div>
+                                
                                 <div>
-                                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Observações da Carga Física</label>
-                                    <input type="text" name="observacoes_entrega" placeholder="Caixa rasgada, via sedex..." class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-amber-500 focus:border-amber-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-slate-500 dark:text-white">
+                                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Observações Detalhadas da Carga</label>
+                                    <textarea name="observacoes_logistica" rows="3" placeholder="Ex: Volume 1 de 2, caixa com pequeno rasgo na lateral, fita de lacre original." class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-amber-500 focus:border-amber-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-slate-500 dark:text-white"></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Foto da Carga / Evidência (Simulado)</label>
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <label class="relative cursor-pointer group">
+                                            <input type="radio" name="foto_carga" value="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=400&h=300" checked class="peer sr-only">
+                                            <div class="border-2 border-transparent peer-checked:border-primary-500 rounded-lg overflow-hidden grayscale peer-checked:grayscale-0 transition-all">
+                                                <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=150&h=100" class="w-full h-16 object-cover" alt="Foto 1">
+                                            </div>
+                                        </label>
+                                        <label class="relative cursor-pointer group">
+                                            <input type="radio" name="foto_carga" value="https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?auto=format&fit=crop&w=400&h=300" class="peer sr-only">
+                                            <div class="border-2 border-transparent peer-checked:border-primary-500 rounded-lg overflow-hidden grayscale peer-checked:grayscale-0 transition-all">
+                                                <img src="https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?auto=format&fit=crop&w=150&h=100" class="w-full h-16 object-cover" alt="Foto 2">
+                                            </div>
+                                        </label>
+                                        <label class="relative cursor-pointer group">
+                                            <input type="radio" name="foto_carga" value="https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=400&h=300" class="peer sr-only">
+                                            <div class="border-2 border-transparent peer-checked:border-primary-500 rounded-lg overflow-hidden grayscale peer-checked:grayscale-0 transition-all">
+                                                <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=150&h=100" class="w-full h-16 object-cover" alt="Foto 3">
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 mt-2 italic">* Selecione uma foto acima para simular o upload da logística.</p>
                                 </div>
                             </div>
                             <div class="flex">
-                                <button type="submit" class="bg-amber-500 hover:bg-amber-600 focus:ring-4 focus:ring-amber-300 text-amber-950 font-bold rounded-lg text-sm px-6 py-3 transition-colors shadow-sm flex items-center gap-2">
-                                    <i class="ph-bold ph-package"></i> Registrar Chegada da Peça
+                                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 focus:ring-4 focus:ring-amber-300 text-amber-950 font-bold rounded-lg text-sm px-6 py-3 transition-colors shadow-sm flex items-center justify-center gap-2">
+                                    <i class="ph-bold ph-package"></i> Registrar Chegada e Evidências
                                 </button>
                             </div>
                         </form>
@@ -181,6 +207,49 @@
                     <p class="text-slate-500 dark:text-slate-400 text-sm max-w-md">O processo físico está aguardando o time de Logística dar a baixa na peça. O Checklist técnico será exposto somente quando o Status da doca mudar. (Mude para "Fernanda" para simular).</p>
                 </div>
             <?php endif; ?>
+        <?php endif; ?>
+
+        <!-- ================= EVIDÊNCIAS DE LOGÍSTICA (Pós-Recebimento) ================= -->
+        <?php if ($h['data_recebimento']): ?>
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow border border-slate-200 dark:border-slate-700/50 overflow-hidden">
+                <div class="p-5 border-b border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/80 flex items-center justify-between">
+                    <h5 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 uppercase tracking-wider">
+                        <i class="ph-fill ph-camera text-amber-500"></i> Evidências de Recebimento (Logística)
+                    </h5>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400">Recebido em <?= date('d/m/Y', strtotime($h['data_recebimento'])) ?> por <?= getUserById($h['recebido_por'])['nome'] ?></span>
+                </div>
+                <div class="p-6">
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="md:w-1/3">
+                            <?php if ($h['foto_carga']): ?>
+                                <div class="relative group cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg bg-slate-900">
+                                    <img src="<?= $h['foto_carga'] ?>" class="w-full h-auto object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" alt="Foto da Carga">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span class="text-white text-[10px] font-bold flex items-center gap-1"><i class="ph-bold ph-magnifying-glass-plus"></i> Ampliar Foto</span>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="w-full aspect-video bg-slate-100 dark:bg-slate-900/50 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 text-xs">
+                                    <i class="ph ph-image-square text-3xl mb-1 opacity-50"></i>
+                                    Sem foto anexada
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="md:w-2/3 space-y-4">
+                            <div class="bg-amber-50 dark:bg-amber-900/10 border-l-4 border-amber-400 p-4 rounded-r-xl">
+                                <h6 class="text-[10px] font-bold text-amber-700 dark:text-amber-500 uppercase tracking-widest mb-1">Notas da Logística</h6>
+                                <p class="text-sm text-slate-700 dark:text-slate-300 font-medium italic">
+                                    <?= !empty($h['observacoes_logistica']) ? htmlspecialchars($h['observacoes_logistica']) : "Nenhuma observação técnica registrada durante o desembarque físico." ?>
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-4 text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/30 p-2 rounded-lg">
+                                <span class="flex items-center gap-1"><i class="ph-bold ph-check-circle text-emerald-500"></i> Conferido</span>
+                                <span class="flex items-center gap-1"><i class="ph-bold ph-shield-check text-blue-500"></i> Integridade do Volume OK</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         <?php endif; ?>
 
         <!-- ================= FASE 2: TI INICIA TESTES ================= -->

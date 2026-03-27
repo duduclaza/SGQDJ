@@ -80,18 +80,25 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
                         <input type="date" name="data_recebimento" value="<?= date('Y-m-d') ?>" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-amber-500 focus:border-amber-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Anotações Relevantes</label>
-                        <textarea name="observacoes" rows="2" placeholder="Caixa rasgada? Entregue via sedex?" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-amber-500 focus:border-amber-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white"></textarea>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Anotações da Carga (Doca)</label>
+                        <textarea name="observacoes_logistica" rows="3" placeholder="Caixa amassada? Lacre rompido? Volume extra?" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-amber-500 focus:border-amber-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white"></textarea>
                     </div>
                     <div class="mb-6">
-                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Anexar Fotos</label>
-                        <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:border-slate-600 dark:hover:bg-slate-800 transition-colors">
-                            <div class="flex flex-col items-center justify-center pt-3 pb-3">
-                                <i class="ph ph-camera text-2xl text-slate-400 dark:text-slate-500 mb-1"></i>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Clique para anexar fotos da entrega</p>
-                            </div>
-                            <input type="file" name="fotos[]" multiple accept="image/*" class="hidden">
-                        </label>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Foto da Carga (Simulado)</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="foto_carga" value="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=400&h=300" checked class="peer sr-only">
+                                <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=150&h=100" class="rounded border-2 border-transparent peer-checked:border-amber-500 opacity-60 peer-checked:opacity-100 h-12 w-full object-cover">
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="foto_carga" value="https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?auto=format&fit=crop&w=400&h=300" class="peer sr-only">
+                                <img src="https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?auto=format&fit=crop&w=150&h=100" class="rounded border-2 border-transparent peer-checked:border-amber-500 opacity-60 peer-checked:opacity-100 h-12 w-full object-cover">
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="foto_carga" value="https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=400&h=300" class="peer sr-only">
+                                <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=150&h=100" class="rounded border-2 border-transparent peer-checked:border-amber-500 opacity-60 peer-checked:opacity-100 h-12 w-full object-cover">
+                            </label>
+                        </div>
                     </div>
                     
                     <div class="flex justify-end gap-3">
@@ -118,10 +125,10 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
                 <tr>
                     <th class="px-5 py-3">Código</th>
                     <th class="px-5 py-3">Item</th>
+                    <th class="px-5 py-3 text-center">Evidências</th>
                     <th class="px-5 py-3">Fornecedor</th>
                     <th class="px-5 py-3">Prev. Chegada</th>
-                    <th class="px-5 py-3">Data Recebimento</th>
-                    <th class="px-5 py-3">Recebido por</th>
+                    <th class="px-5 py-3 text-center">Data Receb.</th>
                     <th class="px-5 py-3">Status</th>
                 </tr>
             </thead>
@@ -145,15 +152,30 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
                         <div class="font-medium text-slate-800 dark:text-slate-200"><?= $h['modelo'] ?></div>
                         <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1"><?= $h['titulo'] ?></div>
                     </td>
+                    <td class="px-5 py-3 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <?php if (!empty($h['foto_carga'])): ?>
+                                <i class="ph-fill ph-camera text-amber-500 text-lg" title="Foto disponível"></i>
+                            <?php endif; ?>
+                            <?php if (!empty($h['observacoes_logistica'])): ?>
+                                <i class="ph-fill ph-chat-centered-text text-blue-500 text-lg" title="<?= htmlspecialchars($h['observacoes_logistica']) ?>"></i>
+                            <?php endif; ?>
+                            <?php if (empty($h['foto_carga']) && empty($h['observacoes_logistica']) && $h['status'] !== 'aguardando_chegada'): ?>
+                                <span class="text-slate-300 dark:text-slate-600">-</span>
+                            <?php endif; ?>
+                        </div>
+                    </td>
                     <td class="px-5 py-3 whitespace-nowrap"><?= $h['fornecedor'] ?></td>
                     <td class="px-5 py-3 whitespace-nowrap"><?= $h['data_prevista_chegada'] ? date('d/m/Y', strtotime($h['data_prevista_chegada'])) : '-' ?></td>
-                    <td class="px-5 py-3 whitespace-nowrap"><?= $h['data_recebimento'] ? date('d/m/Y', strtotime($h['data_recebimento'])) : '-' ?></td>
-                    <td class="px-5 py-3 whitespace-nowrap"><?= $h['recebido_por'] ? getUserById($h['recebido_por'])['nome'] : '-' ?></td>
+                    <td class="px-5 py-3 text-center">
+                        <div class="text-slate-800 dark:text-slate-200 font-medium"><?= $h['data_recebimento'] ? date('d/m/Y', strtotime($h['data_recebimento'])) : '-' ?></div>
+                        <div class="text-[10px] text-slate-500"><?= $h['recebido_por'] ? getUserById($h['recebido_por'])['nome'] : '' ?></div>
+                    </td>
                     <td class="px-5 py-3">
                         <?php if ($h['status'] === 'aguardando_chegada'): ?>
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">Pendente</span>
                         <?php else: ?>
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">Recebido</span>
+                            <a href="detalhe_homologacao.php?id=<?= $h['id'] ?>" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 transition-colors">Recebido <i class="ph ph-arrow-square-out ml-1"></i></a>
                         <?php endif; ?>
                     </td>
                 </tr>

@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Versão dos dados mock - incrementar para forçar reset dos dados antigos
-$MOCK_DATA_VERSION = 6;
+$MOCK_DATA_VERSION = 7;
 
 // Inicializar os dados mockados na sessão, se ainda não existirem ou se a versão mudou
 if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $MOCK_DATA_VERSION) {
@@ -37,6 +37,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'dias_vencimento_notif' => 5,
             'setor_responsavel'     => 'tecnico',
             'dados_comercial'       => [],
+            'observacoes_logistica' => 'Item recebido na doca B, embalagem intacta.',
+            'foto_carga'            => 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=400&h=300',
             'status'                => 'concluida',
             'criado_por'            => 1,
             'responsaveis'          => [3, 4],
@@ -81,6 +83,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'dias_vencimento_notif' => 5,
             'setor_responsavel'     => 'tecnico',
             'dados_comercial'       => [],
+            'observacoes_logistica' => 'Recebido via transportadora Jadlog.',
+            'foto_carga'            => 'https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?auto=format&fit=crop&w=400&h=300',
             'status'                => 'concluida',
             'criado_por'            => 1,
             'responsaveis'          => [5],
@@ -125,6 +129,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'dias_vencimento_notif' => 10,
             'setor_responsavel'     => 'qualidade',
             'dados_comercial'       => [],
+            'observacoes_logistica' => 'Lote com 5 caixas conforme NF.',
+            'foto_carga'            => 'https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=400&h=300',
             'status'                => 'concluida',
             'criado_por'            => 1,
             'responsaveis'          => [3, 5],
@@ -165,6 +171,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'dias_vencimento_notif' => 5,
             'setor_responsavel'     => 'tecnico',
             'dados_comercial'       => [],
+            'observacoes_logistica' => 'Aguardando retirada pelo Rafael da TI.',
+            'foto_carga'            => 'https://images.unsplash.com/photo-1590639880812-1f44a30e461a?auto=format&fit=crop&w=400&h=300',
             'status'                => 'item_recebido',
             'criado_por'            => 1,
             'responsaveis'          => [4],
@@ -202,6 +210,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
                 'vendedor_email' => 'marcos@comercial.com',
                 'supervisor_email' => 'joao.supervisor@comercial.com'
             ],
+            'observacoes_logistica' => '',
+            'foto_carga'            => '',
             'status'                => 'aguardando_chegada',
             'criado_por'            => 1,
             'responsaveis'          => [3, 4, 5],

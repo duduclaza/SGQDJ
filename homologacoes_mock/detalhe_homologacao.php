@@ -28,6 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             atualizarHomologacaoMock($id, [
                 'status' => 'item_recebido',
                 'data_recebimento' => $_POST['data_recebimento'],
+                'observacoes_logistica' => $_POST['observacoes_logistica'] ?? '',
+                'foto_carga' => $_POST['foto_carga'] ?? '',
                 'recebido_por' => $u['id']
             ]);
             $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Item recebido registrado com sucesso!'];
