@@ -31,16 +31,21 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
 }
 ?>
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-br" class="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Meta tags de cache (reforço) -->
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="icon" href="data:,">
   <title><?= e($title) ?></title>
+
+  <!-- Google Fonts: Outfit (ERP SAP 2025 Look) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <script>if(window.console){const o=console.warn;console.warn=(...a)=>{if(a[0]&&String(a[0]).includes('cdn.tail'))return;o.apply(console,a)}}</script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -100,7 +105,13 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
   <script>
     tailwind.config = {
       darkMode: 'class',
-      theme: { extend: {} }
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+          }
+        }
+      }
     }
   </script>
   <style>
@@ -123,10 +134,10 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
     /* Loading overlay removido - causava problemas globais */
   </style>
 </head>
-<body class="bg-slate-100 text-slate-900 min-h-screen">
-  <!-- Textura de fundo sutil -->
-  <div class="fixed inset-0 z-0 pointer-events-none" style="background-color:#f1f4f8;
-    background-image: linear-gradient(rgba(15,23,42,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.025) 1px, transparent 1px);
+<body class="bg-slate-950 text-slate-200 min-h-screen selection:bg-blue-500/30 selection:text-white font-sans antialiased">
+  <!-- Textura de fundo sutil (Neural grid for ERP 2025 vibe) -->
+  <div class="fixed inset-0 z-0 pointer-events-none opacity-20" style="background-color:#020617;
+    background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
     background-size: 40px 40px;"></div>
 
   <div class="flex h-screen bg-transparent relative z-10">

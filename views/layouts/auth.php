@@ -12,10 +12,10 @@ $title = $title ?? 'SGQ - Login';
   <title><?= e($title) ?></title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+    * { font-family: 'Outfit', sans-serif; box-sizing: border-box; }
 
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
 

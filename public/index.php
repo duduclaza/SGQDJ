@@ -110,6 +110,18 @@ $router->get('/', function () {
 // Home/Início route - acessível a todos os usuários autenticados
 $router->get('/inicio', [App\Controllers\HomeController::class , 'index']);
 
+// Módulo Premium Locked (Upsell WhatsApp)
+$router->get('/premium-locked', function () {
+    if (!isset($_SESSION['user_id'])) {
+        header('Location: /login');
+        exit;
+    }
+
+    $title = 'Módulo Exclusivo | SGI OTI DJ';
+    $viewFile = __DIR__ . '/../views/pages/upsell-premium.php';
+    include __DIR__ . '/../views/layouts/main.php';
+});
+
 // Dashboard em manutenção - página informativa bonita
 $router->get('/dashboard-manutencao', function () {
     if (!isset($_SESSION['user_id'])) {
