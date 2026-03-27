@@ -1,5 +1,5 @@
 <?php
-$title = $title ?? 'OTI - Login';
+$title = $title ?? 'SGQ - Login';
 ?>
 <!doctype html>
 <html lang="pt-br">
@@ -10,401 +10,204 @@ $title = $title ?? 'OTI - Login';
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title><?= e($title) ?></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .btn-primary {
-      background: #1d4ed8;
-      box-shadow: 0 4px 14px 0 rgba(29, 78, 216, 0.39);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    * { font-family: 'Inter', sans-serif; }
+
+    /* ─── Background Premium ─── */
+    body {
+      background-color: #0f1117;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
     }
-    .btn-primary:hover {
-      background: #1e40af;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(29, 78, 216, 0.23);
-    }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    }
-    .text-shadow-premium {
-      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .typing-effect {
-      border-right: 2px solid #6b7280;
-      animation: blink 0.7s step-end infinite;
-      display: inline-block;
-      min-height: 1.5rem;
-    }
-    @keyframes blink {
-      from, to { border-color: transparent; }
-      50% { border-color: #6b7280; }
-    }
-    @media (max-width: 768px) {
-      .right-panel {
-        display: none;
-      }
-      .left-panel {
-        min-height: 100vh;
-      }
-    }
-    
-    /* ===== TEMA DE NATAL ===== */
-    
-    /* Container da neve */
-    .snow-container {
+
+    /* Grade geométrica sutil */
+    body::before {
+      content: '';
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 48px 48px;
       pointer-events: none;
-      z-index: 9999;
+      z-index: 0;
+    }
+
+    /* Glow orbs decorativos */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      animation: orb-float 10s ease-in-out infinite;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+      top: -100px; left: -150px;
+      animation-delay: 0s;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%);
+      bottom: -80px; right: -120px;
+      animation-delay: 5s;
+    }
+    .orb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(20,184,166,0.04) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: 3s;
+    }
+
+    @keyframes orb-float {
+      0%, 100% { transform: scale(1) translate(0, 0); }
+      33% { transform: scale(1.05) translate(10px, -15px); }
+      66% { transform: scale(0.97) translate(-8px, 10px); }
+    }
+
+    /* ─── Card ─── */
+    .auth-card {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 400px;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 40px 36px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04) inset,
+        0 32px 64px rgba(0,0,0,0.4),
+        0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* Linha de brilho no topo do card */
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 20%; right: 20%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      border-radius: 50%;
+    }
+
+    /* ─── Inputs ─── */
+    .auth-input {
+      width: 100%;
+      padding: 11px 14px 11px 42px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .auth-input::placeholder { color: rgba(148,163,184,0.5); }
+    .auth-input:focus {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(99,120,255,0.5);
+      box-shadow: 0 0 0 3px rgba(99,120,255,0.1);
+    }
+
+    /* ─── Botão ─── */
+    .btn-auth {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+      position: relative;
       overflow: hidden;
     }
-    
-    /* Flocos de neve */
-    .snowflake {
+    .btn-auth::before {
+      content: '';
       position: absolute;
-      top: -10px;
-      color: white;
-      font-size: 1em;
-      text-shadow: 0 0 5px rgba(255,255,255,0.7);
-      animation: fall linear infinite;
-      opacity: 0.8;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+      transition: left 0.5s ease;
     }
-    
-    @keyframes fall {
-      0% {
-        transform: translateY(-10px) rotate(0deg);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(100vh) rotate(360deg);
-        opacity: 0.3;
-      }
+    .btn-auth:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(99,102,241,0.4); }
+    .btn-auth:hover::before { left: 100%; }
+    .btn-auth:active { transform: translateY(0); }
+
+    /* ─── Label ─── */
+    .auth-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(148,163,184,0.8);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
     }
-    
-    /* Papai Noel voando (da Direita para Esquerda) */
-    .santa-container {
-      position: fixed;
-      top: 12%;
-      z-index: 100;
-      pointer-events: none;
-      animation: fly-santa 25s linear infinite; /* Mais lento para ser mais majestoso */
+
+    /* ─── Logo badge ─── */
+    .logo-badge {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 24px rgba(59,130,246,0.3);
+      margin: 0 auto 20px;
     }
-    
-    @keyframes fly-santa {
-      0% {
-        left: 110%; /* Começa fora da tela na direita */
-        top: 12%;
-      }
-      50% {
-        top: 8%;
-      }
-      100% {
-        left: -300px; /* Termina fora da tela na esquerda */
-        top: 15%;
-      }
+
+    /* Badge de status online */
+    .status-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse-green 2s ease-in-out infinite;
+      box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
     }
-    
-    .santa-sleigh {
-      width: 200px; /* Aumentei um pouco pois PNG costuma ter margem */
-      height: auto;
-      filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); transform: scale(1); }
+      50% { box-shadow: 0 0 0 4px rgba(34,197,94,0); transform: scale(1.1); }
     }
-    
-    /* Montanhas de fundo */
-    .mountains-container {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 30%;
-      z-index: 1;
-      pointer-events: none;
-    }
-    
-    .mountain {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      height: 100%;
-    }
-    
-    .mountain-back {
-      fill: rgba(100, 116, 139, 0.3);
-    }
-    
-    .mountain-front {
-      fill: rgba(71, 85, 105, 0.4);
-    }
-    
-    .mountain-snow {
-      fill: rgba(255, 255, 255, 0.6);
-    }
+
+    /* Loading state */
+    .btn-auth.loading { opacity: 0.7; cursor: not-allowed; transform: none !important; }
   </style>
 </head>
-<body class="min-h-screen">
-  <div class="flex min-h-screen">
-    <!-- Painel Esquerdo - Background IA + Glassmorphism -->
-    <div class="left-panel w-full md:w-1/2 relative flex items-center justify-center p-4 md:p-8 overflow-hidden">
-      <!-- Background Image -->
-      <div class="absolute inset-0 z-0">
-        <img src="/assets/auth-bg.png" alt="Background" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-brightness-75"></div>
-      </div>
-      
-      <div class="w-full max-w-md my-8 relative z-10">
-        <?php include $viewFile; ?>
-      </div>
-    </div>
-    
-    <!-- Painel Direito - Clean Design -->
-    <div class="right-panel hidden md:flex md:w-1/2 items-center justify-center p-12" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%);">
-      <div class="text-center flex flex-col items-center">
-        <!-- Logo OTI com efeitos premium -->
-        <div class="oti-logo-container">
-          <h1 class="oti-logo">
-            <span class="oti-letter" data-letter="S">S</span>
-            <span class="oti-letter" data-letter="G">G</span>
-            <span class="oti-letter" data-letter="I">I</span>
-          </h1>
-          <div class="oti-glow"></div>
-          <div class="oti-reflection"></div>
-        </div>
-        
-        <!-- Frase abaixo do logo -->
-        <p class="text-lg text-gray-500 font-light tracking-wide typing-effect mt-8 block w-full" id="typingText"></p>
-        
-        <!-- Elemento decorativo animado -->
-        <div class="mt-12 flex justify-center gap-3">
-          <div class="dot-pulse" style="animation-delay: 0s;"></div>
-          <div class="dot-pulse" style="animation-delay: 0.3s;"></div>
-          <div class="dot-pulse" style="animation-delay: 0.6s;"></div>
-        </div>
-      </div>
-      
-      <style>
-        /* ===== LOGO OTI - EFEITOS PREMIUM ===== */
-        .oti-logo-container {
-          position: relative;
-          display: block;
-          margin-bottom: 2rem;
-          width: 100%;
-        }
-        
-        .oti-logo {
-          font-size: 8rem;
-          font-weight: 900;
-          letter-spacing: -0.02em;
-          margin: 0;
-          position: relative;
-          z-index: 2;
-          display: flex;
-          justify-content: center;
-          gap: 0.1em;
-        }
-        
-        .oti-letter {
-          display: inline-block;
-          background: linear-gradient(135deg, #1e40af 0%, #3b82f6 25%, #60a5fa 50%, #3b82f6 75%, #1e40af 100%);
-          background-size: 200% 200%;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: gradient-shift 4s ease-in-out infinite;
-          position: relative;
-          text-shadow: none;
-          filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        .oti-letter:nth-child(1) { animation-delay: 0s; }
-        .oti-letter:nth-child(2) { animation-delay: 0.15s; }
-        .oti-letter:nth-child(3) { animation-delay: 0.3s; }
-        
-        .oti-letter:hover {
-          transform: translateY(-10px) scale(1.1);
-          filter: drop-shadow(0 8px 20px rgba(59, 130, 246, 0.5));
-        }
-        
-        @keyframes gradient-shift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        
-        /* Brilho pulsante atrás */
-        .oti-glow {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 300px;
-          height: 150px;
-          background: radial-gradient(ellipse, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
-          border-radius: 50%;
-          z-index: 1;
-          animation: glow-pulse 3s ease-in-out infinite;
-        }
-        
-        @keyframes glow-pulse {
-          0%, 100% { 
-            opacity: 0.6; 
-            transform: translate(-50%, -50%) scale(1);
-          }
-          50% { 
-            opacity: 1; 
-            transform: translate(-50%, -50%) scale(1.2);
-          }
-        }
-        
-        /* Reflexo suave abaixo */
-        .oti-reflection {
-          position: absolute;
-          bottom: -30px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 200px;
-          height: 20px;
-          background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.15), transparent);
-          border-radius: 50%;
-          filter: blur(8px);
-          animation: reflection-pulse 3s ease-in-out infinite;
-        }
-        
-        @keyframes reflection-pulse {
-          0%, 100% { opacity: 0.5; width: 200px; }
-          50% { opacity: 0.8; width: 250px; }
-        }
-        
-        /* Pontos decorativos pulsantes */
-        .dot-pulse {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-          animation: dot-bounce 1.5s ease-in-out infinite;
-          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
-        }
-        
-        @keyframes dot-bounce {
-          0%, 100% { 
-            transform: translateY(0) scale(1); 
-            opacity: 0.6;
-          }
-          50% { 
-            transform: translateY(-8px) scale(1.2); 
-            opacity: 1;
-          }
-        }
-        
-        /* Efeito de borda luminosa ao redor das letras */
-        .oti-logo-container::before {
-          content: '';
-          position: absolute;
-          top: -20px;
-          left: -40px;
-          right: -40px;
-          bottom: -20px;
-          border-radius: 20px;
-          background: linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.05), transparent);
-          z-index: 0;
-        }
-      </style>
-    </div>
+<body>
+
+  <!-- Orbs de fundo -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Noise texture overlay -->
+  <div style="position:fixed;inset:0;z-index:1;opacity:0.025;background-image:url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E');background-repeat:repeat;background-size:128px 128px;pointer-events:none;"></div>
+
+  <!-- Auth Card -->
+  <div class="auth-card mx-4">
+    <?php include $viewFile; ?>
   </div>
-  
-  <?php 
-  // ===== TEMA DE NATAL - Apenas em Dezembro =====
-  $isDecember = (int)date('n') === 12;
-  if ($isDecember): 
-  ?>
-  
-  <!-- Neve caindo -->
-  <div class="snow-container" id="snowContainer"></div>
-  
-  <!-- Papai Noel voando -->
-  <div class="santa-container">
-    <img src="/assets/papai.png" alt="Papai Noel" class="santa-sleigh">
-  </div>
-  
-  <!-- Montanhas de fundo -->
-  <div class="mountains-container">
-    <svg class="mountain" viewBox="0 0 1440 320" preserveAspectRatio="none">
-      <!-- Montanha traseira -->
-      <path class="mountain-back" d="M0,320 L0,200 L200,100 L350,180 L500,80 L650,160 L800,60 L950,150 L1100,50 L1250,140 L1440,70 L1440,320 Z"/>
-      
-      <!-- Neve no topo traseira -->
-      <path class="mountain-snow" d="M200,100 L180,115 L200,110 L220,115 Z M500,80 L475,100 L500,92 L525,100 Z M800,60 L770,85 L800,75 L830,85 Z M1100,50 L1065,80 L1100,68 L1135,80 Z"/>
-      
-      <!-- Montanha frontal -->
-      <path class="mountain-front" d="M0,320 L0,220 L150,140 L300,200 L450,120 L600,190 L750,100 L900,180 L1050,90 L1200,170 L1350,110 L1440,160 L1440,320 Z"/>
-      
-      <!-- Neve no topo frontal -->
-      <path class="mountain-snow" d="M150,140 L125,160 L150,150 L175,160 Z M450,120 L420,145 L450,132 L480,145 Z M750,100 L715,130 L750,115 L785,130 Z M1050,90 L1010,125 L1050,108 L1090,125 Z M1350,110 L1315,140 L1350,125 L1385,140 Z"/>
-    </svg>
-  </div>
-  
-  <script>
-    // Criar flocos de neve
-    function createSnowflakes() {
-      const container = document.getElementById('snowContainer');
-      const snowflakes = ['❄', '❅', '❆', '•'];
-      
-      for (let i = 0; i < 50; i++) {
-        const snowflake = document.createElement('div');
-        snowflake.className = 'snowflake';
-        snowflake.innerHTML = snowflakes[Math.floor(Math.random() * snowflakes.length)];
-        snowflake.style.left = Math.random() * 100 + '%';
-        snowflake.style.fontSize = (Math.random() * 10 + 8) + 'px';
-        snowflake.style.opacity = Math.random() * 0.6 + 0.4;
-        snowflake.style.animationDuration = (Math.random() * 5 + 8) + 's';
-        snowflake.style.animationDelay = (Math.random() * 10) + 's';
-        container.appendChild(snowflake);
-      }
-    }
-    createSnowflakes();
-  </script>
-  
-  <?php endif; // Fim do tema de Natal ?>
-  
-  
+
   <?php include __DIR__ . '/../partials/ui-feedback.php'; ?>
   <?php include __DIR__ . '/../partials/ui-scripts.php'; ?>
 
-  <script>
-    // Efeito de digitação
-    const text = 'Sistema de Gestão Integrada';
-    const typingElement = document.getElementById('typingText');
-    let index = 0;
-    let isDeleting = false;
-    
-    function typeWriter() {
-      if (!typingElement) return;
-      if (!isDeleting && index <= text.length) {
-        typingElement.textContent = text.substring(0, index);
-        index++;
-        setTimeout(typeWriter, 100);
-      } else if (isDeleting && index >= 0) {
-        typingElement.textContent = text.substring(0, index);
-        index--;
-        setTimeout(typeWriter, 50);
-      } else if (index > text.length) {
-        setTimeout(() => {
-          isDeleting = true;
-          typeWriter();
-        }, 2000);
-      } else {
-        isDeleting = false;
-        index = 0;
-        setTimeout(typeWriter, 500);
-      }
-    }
-    
-    typeWriter();
-  </script>
 </body>
 </html>
