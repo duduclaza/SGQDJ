@@ -433,9 +433,38 @@
                         </div>
                         <div class="md:w-2/3">
                             <span class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Relato Conclusivo / Laudo Final</span>
-                            <div class="bg-slate-50 dark:bg-slate-900/50 border-l-2 border-slate-300 dark:border-slate-600 p-4 rounded-r-lg text-slate-800 dark:text-slate-200 font-medium whitespace-pre-wrap">
+                            <div class="bg-slate-50 dark:bg-slate-900/50 border-l-2 border-slate-300 dark:border-slate-600 p-4 rounded-r-lg text-slate-800 dark:text-slate-200 font-medium whitespace-pre-wrap mb-4">
                                 <?= $h['parecer_final'] ?>
                             </div>
+
+                            <?php if (!empty($h['laudo_anexos'])): ?>
+                                <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/50">
+                                    <h6 class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                        <i class="ph-bold ph-paperclip-horizontal"></i> Anexos e Evidências do Laudo
+                                    </h6>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                        <?php foreach ($h['laudo_anexos'] as $anexo): ?>
+                                            <?php 
+                                                $isPdf = strtolower(pathinfo($anexo, PATHINFO_EXTENSION)) === 'pdf';
+                                                $path = '../' . $anexo; // Ajuste de path para o mock
+                                            ?>
+                                            <?php if ($isPdf): ?>
+                                                <a href="<?= $path ?>" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all hover:shadow-md group">
+                                                    <i class="ph ph-file-pdf text-3xl text-rose-500 mb-1 group-hover:scale-110 transition-transform"></i>
+                                                    <span class="text-[9px] text-slate-500 dark:text-slate-400 font-bold truncate w-full text-center">Abrir PDF</span>
+                                                </a>
+                                            <?php else: ?>
+                                                <div class="relative group cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 shadow-sm">
+                                                    <img src="<?= $path ?>" class="w-full h-20 object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" alt="Anexo">
+                                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                                        <i class="ph-bold ph-eye text-white"></i>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -455,7 +484,7 @@
             <button type="button" onclick="closeModal('modalFinalizar')" class="text-primary-100 hover:text-white transition-colors"><i class="ph-bold ph-x text-xl"></i></button>
         </div>
         
-        <form method="POST" id="formFinalizar" class="p-6" onsubmit="prepararFormularioFinal()">
+        <form method="POST" id="formFinalizar" class="p-6" onsubmit="return prepararFormularioFinal()" enctype="multipart/form-data">
             <input type="hidden" name="acao" value="finalizar_homologacao">
             <div id="hiddenChecklistData" class="hidden"></div>
             
@@ -483,7 +512,19 @@
                     <div class="bg-indigo-50/50 dark:bg-slate-900/50 border-l-2 border-indigo-300 dark:border-indigo-600 p-4 rounded-r-lg text-slate-800 dark:text-slate-200 text-sm mb-3 max-h-40 overflow-y-auto whitespace-pre-wrap font-mono"><?= htmlspecialchars($h['parecer_final']) ?></div>
                 <?php endif; ?>
 
-                <textarea name="novo_parecer_final" rows="3" <?= empty($h['parecer_final']) ? 'required' : '' ?> placeholder="<?= empty($h['parecer_final']) ? 'Disserte motivos práticos indicando a viabilidade...' : 'Adicionar novo comentário ao laudo...' ?>" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-3 dark:bg-slate-900 dark:border-slate-600 dark:text-white"></textarea>
+                <textarea name="novo_parecer_final" rows="2" <?= empty($h['parecer_final']) ? 'required' : '' ?> placeholder="<?= empty($h['parecer_final']) ? 'Disserte motivos práticos indicando a viabilidade...' : 'Adicionar novo comentário ao laudo...' ?>" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-3 dark:bg-slate-900 dark:border-slate-600 dark:text-white mb-4"></textarea>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                        <i class="ph-bold ph-paperclip"></i> Anexar Evidências (Máx. 10 files)
+                        <span class="text-[10px] font-normal text-slate-500 dark:text-slate-400 opacity-70">PNG, JPG ou PDF</span>
+                    </label>
+                    <div class="relative group">
+                        <input type="file" name="laudo_anexos[]" id="input_laudo_anexos" multiple accept=".png,.jpg,.jpeg,.pdf" onchange="validarLimiteArquivos(this)" 
+                               class="block w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 dark:file:bg-slate-700 dark:file:text-slate-200 cursor-pointer border border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-4 transition-all hover:border-primary-400 dark:hover:border-primary-500">
+                        <div id="file_list_preview" class="mt-2 text-[10px] flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
             </div>
             
             <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -533,6 +574,25 @@
         }
         
         openModal('modalFinalizar');
+    }
+
+    function validarLimiteArquivos(input) {
+        const preview = document.getElementById('file_list_preview');
+        preview.innerHTML = '';
+        
+        if (input.files.length > 10) {
+            alert("Você só pode selecionar no máximo 10 arquivos.");
+            input.value = '';
+            return;
+        }
+
+        Array.from(input.files).forEach(file => {
+            const span = document.createElement('span');
+            span.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600";
+            const icon = file.type.includes('pdf') ? '<i class="ph ph-file-pdf text-rose-500"></i>' : '<i class="ph ph-image text-emerald-500"></i>';
+            span.innerHTML = `${icon} ${file.name.substring(0, 15)}${file.name.length > 15 ? '...' : ''}`;
+            preview.appendChild(span);
+        });
     }
 
     function prepararFormularioFinal() {

@@ -108,13 +108,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $parecer_atual = $parecer_atual === '' ? $bloco : $parecer_atual . "\n\n" . $bloco;
             }
 
+            // Tratar Anexos de Laudo (Máx 10)
+            $anexos_finais = $h['laudo_anexos'] ?? [];
+            if (isset($_FILES['laudo_anexos']) && !empty($_FILES['laudo_anexos']['name'][0])) {
+                $upload_dir = __DIR__ . '/../uploads/homologacoes/';
+                if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+                
+                foreach ($_FILES['laudo_anexos']['name'] as $key => $name) {
+                    if (count($anexos_finais) >= 10) break; // Limite global de 10 por enquanto
+                    
+                    $tmp_name = $_FILES['laudo_anexos']['tmp_name'][$key];
+                    $error = $_FILES['laudo_anexos']['error'][$key];
+                    
+                    if ($error === UPLOAD_ERR_OK) {
+                        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                        if (in_array($ext, ['png', 'jpg', 'jpeg', 'pdf'])) {
+                            $filename = "LAUDO_" . $id . "_" . time() . "_" . $key . "." . $ext;
+                            if (move_uploaded_file($tmp_name, $upload_dir . $filename)) {
+                                $anexos_finais[] = 'uploads/homologacoes/' . $filename;
+                            }
+                        }
+                    }
+                }
+            }
+
             atualizarHomologacaoMock($id, [
                 'status' => $novo_status,
                 'data_fim_homologacao' => $_POST['data_fim_homologacao'],
                 'resultado' => $resultado,
                 'parecer_final' => $parecer_atual,
                 'checklist_respostas' => $booleadas,
-                'observacoes_checklist' => $obs_atual
+                'observacoes_checklist' => $obs_atual,
+                'laudo_anexos' => $anexos_finais
             ]);
             
             if ($novo_status === 'em_homologacao') {
