@@ -90,9 +90,6 @@
                 <?php endif; ?>
                 <?php foreach ($lista as $h): ?>
                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td class="px-6 py-4">
-                        <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"><?= getRotuloVersao(getVersaoHomologacao($h['id'])) ?></div>
-                    </td>
                     <td class="px-6 py-4 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap"><?= $h['codigo'] ?></td>
                     <td class="px-6 py-4">
                         <div class="flex items-center">
