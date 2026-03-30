@@ -115,15 +115,15 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   .chart-fullscreen-overlay .fs-close:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.25); }
 </style>
 
-<!-- Fullscreen Overlay -->
+<!-- Fullscreen Overlay (Will be moved to <body> on load) -->
 <div id="chartFullscreen" class="chart-fullscreen-overlay">
   <div class="fs-inner">
     <div class="fs-header">
       <div>
-        <h2 id="fsTitle" class="text-2xl font-bold text-white">Gráfico</h2>
-        <p id="fsSubtitle" class="text-sm text-slate-400 mt-1">Detalhes do indicador selecionado</p>
+        <h2 id="fsTitle" class="text-2xl font-bold text-white tracking-tight">Gráfico</h2>
+        <p id="fsSubtitle" class="text-sm text-slate-400 mt-1">Visão detalhada do indicador</p>
       </div>
-      <button onclick="fecharFullscreen()" class="fs-close">Fechar Esc</button>
+      <button onclick="window.fecharFullscreen()" class="fs-close">Fechar Esc</button>
     </div>
     <div class="flex-1 min-h-0 bg-white/[0.02] rounded-2xl p-6 border border-white/5">
       <canvas id="chartFullscreenCanvas"></canvas>
@@ -159,7 +159,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           <span class="text-xs font-bold uppercase">Exportar</span>
         </button>
         <button onclick="fetchTonersDefeitoDashboard()" class="p-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition shadow-lg shadow-rose-500/20" title="Atualizar dados">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357-2H15"></path></svg>
         </button>
       </div>
     </div>
@@ -167,27 +167,16 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     <!-- Filtros Globais Organizados -->
     <div class="dash-card p-5 relative z-50 overflow-visible">
       <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
-        <!-- Ícone + Título pequeno (Opcional, mas dá elegância) -->
         <div class="md:col-span-1 hidden lg:flex items-center gap-2">
           <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
           <span class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Filtros</span>
         </div>
         
         <div class="md:col-span-12 lg:col-span-11 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-          <div class="relative">
-            <select id="filtroCliente" class="filter-input" onchange="fetchTonersDefeitoDashboard()">
-              <option value="">Cliente (Todos)</option>
-            </select>
-          </div>
-          <div class="relative">
-            <select id="filtroFilial" class="filter-input" onchange="fetchTonersDefeitoDashboard()">
-              <option value="">Filial (Todas)</option>
-            </select>
-          </div>
+          <div class="relative"><select id="filtroCliente" class="filter-input" onchange="fetchTonersDefeitoDashboard()"><option value="">Cliente (Todos)</option></select></div>
+          <div class="relative"><select id="filtroFilial" class="filter-input" onchange="fetchTonersDefeitoDashboard()"><option value="">Filial (Todas)</option></select></div>
           <div class="relative flex items-center gap-3">
-            <select id="filtroStatus" class="filter-input" onchange="fetchTonersDefeitoDashboard()">
-              <option value="">Classificação (Todas)</option>
-            </select>
+            <select id="filtroStatus" class="filter-input" onchange="fetchTonersDefeitoDashboard()"><option value="">Classificação (Todas)</option></select>
             <button onclick="cleanFilters()" class="text-[10px] font-bold text-rose-400 hover:text-rose-100 transition whitespace-nowrap uppercase tracking-widest bg-rose-500/10 px-3 py-2 rounded-lg border border-rose-500/20">Limpar</button>
           </div>
         </div>
@@ -201,9 +190,6 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           <div class="kpi-label mb-2">Total Registros</div>
           <div class="flex items-end gap-3 justify-between mt-auto">
             <div class="kpi-value text-white !text-xl" id="kpi_registros">-</div>
-            <div class="p-2 rounded-xl bg-white/5 text-rose-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            </div>
           </div>
         </div>
       </div>
@@ -214,9 +200,6 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           <div class="kpi-label mb-2">Qtd Itens</div>
           <div class="flex items-end gap-3 justify-between mt-auto">
             <div class="kpi-value text-white !text-xl" id="kpi_quantidade">-</div>
-            <div class="p-2 rounded-xl bg-white/5 text-orange-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-            </div>
           </div>
         </div>
       </div>
@@ -227,9 +210,6 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           <div class="kpi-label mb-2">Pendentes</div>
           <div class="flex items-end gap-3 justify-between mt-auto">
             <div class="kpi-value text-white !text-xl" id="kpi_pendentes">-</div>
-            <div class="p-2 rounded-xl bg-white/5 text-yellow-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
           </div>
         </div>
       </div>
@@ -240,9 +220,6 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           <div class="kpi-label mb-2">Classificados</div>
           <div class="flex items-end gap-3 justify-between mt-auto">
             <div class="kpi-value text-white !text-xl" id="kpi_classificados">-</div>
-            <div class="p-2 rounded-xl bg-white/5 text-emerald-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
           </div>
         </div>
       </div>
@@ -253,9 +230,6 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           <div class="kpi-label mb-2">Falsos Positivos</div>
           <div class="flex items-end gap-3 justify-between mt-auto">
             <div class="kpi-value text-white !text-xl" id="kpi_falsos_positivos">-</div>
-            <div class="p-2 rounded-xl bg-white/5 text-blue-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
           </div>
         </div>
       </div>
@@ -263,12 +237,9 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       <div class="dash-card p-5 dash-card-glow relative overflow-hidden group">
         <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition-all"></div>
         <div class="kpi-card-inner relative z-10">
-          <div class="kpi-label mb-2">Taxa Falso Positivo</div>
+          <div class="kpi-label mb-2">Taxa FP</div>
           <div class="flex items-end gap-3 justify-between mt-auto">
             <div class="kpi-value text-white !text-xl" id="kpi_taxa_falso">-</div>
-            <div class="p-2 rounded-xl bg-white/5 text-indigo-400">
-              <span class="text-xs font-bold">%</span>
-            </div>
           </div>
         </div>
       </div>
@@ -279,27 +250,20 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       <div class="dash-card p-5">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Quantidade por Modelo (Top 15)</h3>
-          <button onclick="abrirFullscreen('chartModelos', 'Quantidade por Modelo', 'Top 15 modelos com mais defeitos')" class="chart-expand-btn">
+          <button onclick="window.expandirDefeitosGrafico('modelos', 'Quantidade por Modelo', 'Top 15 modelos com mais defeitos')" class="chart-expand-btn">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
           </button>
         </div>
-        <div class="chart-wrapper h-[280px]">
-          <canvas id="chartModelos"></canvas>
-        </div>
+        <div class="chart-wrapper h-[280px]"><canvas id="chartModelos"></canvas></div>
       </div>
-      
       <div class="dash-card p-5">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Quantidade por Filial</h3>
-          <button onclick="abrirFullscreen('chartFiliais', 'Quantidade por Filial', 'Distribuição de defeitos por unidade')" class="chart-expand-btn">
+          <button onclick="window.expandirDefeitosGrafico('filiais', 'Quantidade por Filial', 'Distribuição de defeitos por unidade')" class="chart-expand-btn">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
           </button>
         </div>
-         <div class="chart-wrapper h-[280px] flex justify-center">
-            <div class="w-full max-w-[280px]">
-              <canvas id="chartFiliais"></canvas>
-            </div>
-         </div>
+         <div class="chart-wrapper h-[280px] flex justify-center"><div class="w-full max-w-[280px]"><canvas id="chartFiliais"></canvas></div></div>
       </div>
     </div>
 
@@ -307,26 +271,21 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="dash-card p-5">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-semibold text-white uppercase tracking-wider text-green-400">Evolução Mensal de Defeitos</h3>
-          <button onclick="abrirFullscreen('chartEvolucao', 'Evolução Mensal', 'Tendência temporal de registros de defeitos')" class="chart-expand-btn">
+          <h3 class="text-sm font-semibold text-white uppercase tracking-wider text-green-400">Evolução Mensal</h3>
+          <button onclick="window.expandirDefeitosGrafico('evolucao', 'Evolução Mensal', 'Tendência temporal de registros de defeitos')" class="chart-expand-btn">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
           </button>
         </div>
-        <div class="chart-wrapper h-[320px]">
-          <canvas id="chartEvolucao"></canvas>
-        </div>
+        <div class="chart-wrapper h-[320px]"><canvas id="chartEvolucao"></canvas></div>
       </div>
-      
       <div class="dash-card p-5">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-semibold text-white uppercase tracking-wider text-orange-400">Pareto de Defeitos (Classificação)</h3>
-          <button onclick="abrirFullscreen('chartParetoDefeitos', 'Pareto de Defeitos', 'Ranking das principais causas/classificações')" class="chart-expand-btn">
+          <h3 class="text-sm font-semibold text-white uppercase tracking-wider text-orange-400">Pareto de Defeitos</h3>
+          <button onclick="window.expandirDefeitosGrafico('pareto', 'Pareto de Defeitos', 'Ranking das principais causas/classificações')" class="chart-expand-btn">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
           </button>
         </div>
-        <div class="chart-wrapper h-[320px]">
-          <canvas id="chartParetoDefeitos"></canvas>
-        </div>
+        <div class="chart-wrapper h-[320px]"><canvas id="chartParetoDefeitos"></canvas></div>
       </div>
     </div>
 
@@ -335,27 +294,20 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       <div class="dash-card p-5">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Quantidade por Cliente (Top 15)</h3>
-          <button onclick="abrirFullscreen('chartClientes', 'Quantidade por Cliente', 'Ranking de clientes com mais reportes de defeitos')" class="chart-expand-btn">
+          <button onclick="window.expandirDefeitosGrafico('clientes', 'Quantidade por Cliente', 'Ranking de clientes com mais reportes')" class="chart-expand-btn">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
           </button>
         </div>
-        <div class="chart-wrapper h-[280px]">
-          <canvas id="chartClientes"></canvas>
-        </div>
+        <div class="chart-wrapper h-[280px]"><canvas id="chartClientes"></canvas></div>
       </div>
-      
       <div class="dash-card p-5">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Devolutivas (Feitas x Pendentes)</h3>
-          <button onclick="abrirFullscreen('chartDevolutivas', 'Status de Devolutivas', 'Proporção de respostas da qualidade')" class="chart-expand-btn">
+          <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Devolutivas</h3>
+          <button onclick="window.expandirDefeitosGrafico('devolutivas', 'Status de Devolutivas', 'Proporção de respostas da qualidade')" class="chart-expand-btn">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
           </button>
         </div>
-        <div class="chart-wrapper h-[280px] flex justify-center">
-           <div class="w-full max-w-[280px]">
-             <canvas id="chartDevolutivas"></canvas>
-           </div>
-        </div>
+        <div class="chart-wrapper h-[280px] flex justify-center"><div class="w-full max-w-[280px]"><canvas id="chartDevolutivas"></canvas></div></div>
       </div>
     </div>
 
@@ -400,6 +352,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
 
 <script>
 let charts = {};
+let tsCliente, tsFilial, tsStatus;
 
 function initCharts() {
   Chart.defaults.color = '#94a3b8';
@@ -449,57 +402,19 @@ function initCharts() {
   charts.pareto = new Chart(document.getElementById('chartParetoDefeitos'), { type: 'bar', data: { labels: [], datasets: [] }, options: commonBarOptions });
 }
 
-let tsCliente, tsFilial, tsStatus;
 function initTomSelects() {
-    tsCliente = new TomSelect('#filtroCliente', {
-        create: false,
-        placeholder: 'Cliente (Todos)',
-        onChange: function() { fetchTonersDefeitoDashboard(); }
-    });
-    tsFilial = new TomSelect('#filtroFilial', {
-        create: false,
-        placeholder: 'Filial (Todas)',
-        onChange: function() { fetchTonersDefeitoDashboard(); }
-    });
-    tsStatus = new TomSelect('#filtroStatus', {
-        create: false,
-        placeholder: 'Classificação (Todas)',
-        onChange: function() { fetchTonersDefeitoDashboard(); }
-    });
+    tsCliente = new TomSelect('#filtroCliente', { create: false, placeholder: 'Cliente (Todos)', onChange: fetchTonersDefeitoDashboard });
+    tsFilial = new TomSelect('#filtroFilial', { create: false, placeholder: 'Filial (Todas)', onChange: fetchTonersDefeitoDashboard });
+    tsStatus = new TomSelect('#filtroStatus', { create: false, placeholder: 'Classificação (Todas)', onChange: fetchTonersDefeitoDashboard });
 }
 
-function updateSelectOptions(selectId, options, keepSelected = true) {
-  const ts = selectId === 'filtroCliente' ? tsCliente : (selectId === 'filtroFilial' ? tsFilial : (selectId === 'filtroStatus' ? tsStatus : null));
-  
-  if (ts) {
-    const currentVal = ts.getValue();
-    ts.clearOptions();
-    const placeholders = { 'filtroCliente': 'Cliente (Todos)', 'filtroFilial': 'Filial (Todas)', 'filtroStatus': 'Classificação (Todas)' };
-    ts.addOption({value: '', text: placeholders[selectId] || 'Todos'});
-    options.forEach(opt => {
-      ts.addOption({value: opt, text: opt.replace(/_/g, ' ')});
-    });
-    if (keepSelected && options.includes(currentVal)) {
-      ts.setValue(currentVal, true);
-    } else {
-      ts.setValue('', true);
-    }
-    return;
-  }
-
-  const el = document.getElementById(selectId);
-  const currentVal = el.value;
-  const oldText = el.options[0] ? el.options[0].text : 'Selecione';
-  el.innerHTML = `<option value="">${oldText}</option>`;
-  options.forEach(opt => {
-    let optEl = document.createElement('option');
-    optEl.value = opt;
-    optEl.textContent = opt;
-    el.appendChild(optEl);
-  });
-  if (keepSelected && options.includes(currentVal)) {
-    el.value = currentVal;
-  }
+function updateSelectOptions(ts, options) {
+  if (!ts) return;
+  const currentVal = ts.getValue();
+  ts.clearOptions();
+  ts.addOption({value: '', text: 'Todos'});
+  options.forEach(opt => ts.addOption({value: opt, text: opt.replace(/_/g, ' ')}));
+  if (options.includes(currentVal)) ts.setValue(currentVal, true);
 }
 
 function cleanFilters() {
@@ -515,15 +430,15 @@ async function fetchTonersDefeitoDashboard() {
   const params = new URLSearchParams({
     data_inicio: document.getElementById('filtroDataInicio').value,
     data_fim: document.getElementById('filtroDataFim').value,
-    cliente: document.getElementById('filtroCliente').value,
-    filial: document.getElementById('filtroFilial').value,
-    status: document.getElementById('filtroStatus').value,
+    cliente: tsCliente ? tsCliente.getValue() : '',
+    filial: tsFilial ? tsFilial.getValue() : '',
+    status: tsStatus ? tsStatus.getValue() : '',
   });
 
   try {
     const res = await fetch('/dashboard-2/toners-defeito/data?' + params.toString());
     const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'Erro desconhecido');
+    if (!data.success) return;
 
     // Update KPIs
     document.getElementById('kpi_registros').innerText = data.kpis.total_registros;
@@ -535,84 +450,22 @@ async function fetchTonersDefeitoDashboard() {
 
     // Update Filter Options
     if (data.filter_options) {
-      updateSelectOptions('filtroCliente', data.filter_options.clientes);
-      updateSelectOptions('filtroFilial', data.filter_options.filiais);
-      updateSelectOptions('filtroStatus', data.filter_options.classificacoes);
+      updateSelectOptions(tsCliente, data.filter_options.clientes);
+      updateSelectOptions(tsFilial, data.filter_options.filiais);
+      updateSelectOptions(tsStatus, data.filter_options.classificacoes);
     }
 
-    // Update Chart: Modelos
-    charts.modelos.data = {
-      labels: data.charts.modelos.map(item => item.label),
-      datasets: [{
-        data: data.charts.modelos.map(item => item.total),
-        backgroundColor: '#f43f5e',
-        borderRadius: 4
-      }]
-    };
-    charts.modelos.update();
-
-    // Update Chart: Filiais
-    charts.filiais.data = {
-      labels: data.charts.filiais.map(item => item.label),
-      datasets: [{
-        data: data.charts.filiais.map(item => item.total),
-        backgroundColor: ['#22d3ee','#818cf8','#34d399','#f43f5e','#fbbf24','#c084fc','#fb923c','#a3e635','#f472b6','#60a5fa'],
-        borderWidth: 0,
-        hoverOffset: 4
-      }]
-    };
-    charts.filiais.update();
-
-    // Update Chart: Clientes
-    charts.clientes.data = {
-      labels: data.charts.clientes.map(item => item.label),
-      datasets: [{
-        data: data.charts.clientes.map(item => item.total),
-        backgroundColor: '#818cf8',
-        borderRadius: 4
-      }]
-    };
-    charts.clientes.update();
-
-    // Update Chart: Devolutivas
+    // Update Charts
+    charts.modelos.data = { labels: data.charts.modelos.map(i => i.label), datasets: [{ data: data.charts.modelos.map(i => i.total), backgroundColor: '#f43f5e', borderRadius: 4 }] }; charts.modelos.update();
+    charts.filiais.data = { labels: data.charts.filiais.map(i => i.label), datasets: [{ data: data.charts.filiais.map(i => i.total), backgroundColor: ['#22d3ee','#818cf8','#34d399','#f43f5e','#fbbf24','#c084fc','#fb923c','#a3e635','#f472b6','#60a5fa'], borderWidth: 0, hoverOffset: 4 }] }; charts.filiais.update();
+    charts.clientes.data = { labels: data.charts.clientes.map(i => i.label), datasets: [{ data: data.charts.clientes.map(i => i.total), backgroundColor: '#818cf8', borderRadius: 4 }] }; charts.clientes.update();
+    
     const colorsDev = { 'Feitas': '#34d399', 'Pendentes': '#fbbf24' };
-    charts.devolutivas.data = {
-      labels: data.charts.devolutivas.map(item => item.label),
-      datasets: [{
-        data: data.charts.devolutivas.map(item => item.total),
-        backgroundColor: data.charts.devolutivas.map(item => colorsDev[item.label] || '#94a3b8'),
-        borderWidth: 0,
-        hoverOffset: 4
-      }]
-    };
-    charts.devolutivas.update();
+    charts.devolutivas.data = { labels: data.charts.devolutivas.map(i => i.label), datasets: [{ data: data.charts.devolutivas.map(i => i.total), backgroundColor: data.charts.devolutivas.map(i => colorsDev[i.label] || '#94a3b8'), borderWidth: 0, hoverOffset: 4 }] }; charts.devolutivas.update();
+    charts.evolucao.data = { labels: data.charts.evolucao_mensal.map(i => i.label), datasets: [{ data: data.charts.evolucao_mensal.map(i => i.total), borderColor: '#34d399', backgroundColor: 'rgba(52, 211, 153, 0.1)', fill: true, pointBackgroundColor: '#34d399', borderWidth: 2 }] }; charts.evolucao.update();
+    charts.pareto.data = { labels: data.charts.pareto_defeitos.map(i => i.label.replace(/_/g, ' ')), datasets: [{ data: data.charts.pareto_defeitos.map(i => i.total), backgroundColor: '#fb923c', borderRadius: 4 }] }; charts.pareto.update();
 
-    // Update Chart: Evolução
-    charts.evolucao.data = {
-      labels: data.charts.evolucao_mensal.map(item => item.label),
-      datasets: [{
-        data: data.charts.evolucao_mensal.map(item => item.total),
-        borderColor: '#34d399',
-        backgroundColor: 'rgba(52, 211, 153, 0.1)',
-        fill: true,
-        pointBackgroundColor: '#34d399',
-        borderWidth: 2
-      }]
-    };
-    charts.evolucao.update();
-
-    // Update Pareto
-    charts.pareto.data = {
-      labels: data.charts.pareto_defeitos.map(item => item.label.replace(/_/g, ' ')),
-      datasets: [{
-        data: data.charts.pareto_defeitos.map(item => item.total),
-        backgroundColor: '#fb923c',
-        borderRadius: 4
-      }]
-    };
-    charts.pareto.update();
-
-    // Update Table: Últimos Registros
+    // Update Table
     const tbody = document.getElementById('tabelaUltimosDefeitos');
     if (data.ultimos_registros && data.ultimos_registros.length > 0) {
       tbody.innerHTML = data.ultimos_registros.map(reg => `
@@ -623,104 +476,113 @@ async function fetchTonersDefeitoDashboard() {
           <td class="text-xs text-slate-300">${reg.filial_nome || 'Matriz'}</td>
           <td class="text-center font-bold text-slate-200">${reg.quantidade}</td>
           <td>${formatarStatus(reg.devolutiva_resultado)}</td>
-          <td class="text-right">
-            <a href="/toners/defeitos?id=${reg.id}" target="_blank" class="p-2 text-rose-400 hover:text-white transition" title="Ver no módulo">
+          <td class="text-right px-4">
+            <a href="/toners/defeitos?id=${reg.id}" target="_blank" class="text-rose-400 hover:text-white transition" title="Ver no módulo">
               <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
             </a>
           </td>
-        </tr>
-      `).join('');
+        </tr>`).join('');
     } else {
       tbody.innerHTML = '<tr><td colspan="7" class="py-12 text-center text-slate-500 uppercase text-xs font-semibold tracking-widest">Nenhum registro encontrado</td></tr>';
     }
-
-  } catch (err) {
-    console.error('Erro fetching toners defeito dashboard:', err);
-  }
+  } catch (err) { console.error('Error fetching dashboard data:', err); }
 }
 
 function formatarStatus(status) {
   if (!status) return '<span class="px-2 py-0.5 rounded-full bg-slate-500/10 text-slate-400 text-[10px] font-bold uppercase">Pendente</span>';
-  
   let color = 'bg-slate-500/10 text-slate-400';
   if (status.includes('REPROVADO')) color = 'bg-rose-500/10 text-rose-400';
   if (status.includes('APROVADO') || status === 'TONER_OK') color = 'bg-emerald-500/10 text-emerald-400';
   if (status === 'TONER_SEM_DEFEITO') color = 'bg-blue-500/10 text-blue-400';
-  
   return `<span class="px-2 py-0.5 rounded-full ${color} text-[10px] font-bold uppercase">${status.replace(/_/g, ' ')}</span>`;
 }
 
 function exportDefeitosCsv() {
-  const table = document.querySelector('.dash-table');
-  if (!table) return;
-  
-  let csv = [];
-  const rows = table.querySelectorAll('tr');
-  
-  for (let i = 0; i < rows.length; i++) {
-    const row = [], cols = rows[i].querySelectorAll('td, th');
-    for (let j = 0; j < cols.length - 1; j++) { // Skip "Ação" column
-      row.push('"' + cols[j].innerText.trim() + '"');
-    }
-    csv.push(row.join(','));
-  }
-  
-  const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + csv.join("\n");
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `toners_defeitos_${new Date().toISOString().split('T')[0]}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
-let chartFS = null;
-function abrirFullscreen(chartId, title, subtitle) {
-  const canvasOriginal = document.getElementById(chartId);
-  const canvasFS = document.getElementById('chartFullscreenCanvas');
-  const overlay = document.getElementById('chartFullscreen');
-  
-  document.getElementById('fsTitle').innerText = title;
-  document.getElementById('fsSubtitle').innerText = subtitle;
-  overlay.classList.add('active');
-  
-  if (chartFS) chartFS.destroy();
-  
-  const tipo = charts[chartId.replace('chart', '').toLowerCase()]?.config.type || 'bar';
-  const dados = JSON.parse(JSON.stringify(charts[chartId.replace('chart', '').toLowerCase()]?.data || {}));
-  
-  chartFS = new Chart(canvasFS, {
-    type: tipo,
-    data: dados,
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: (tipo === 'doughnut'), position: 'bottom', labels: { color: '#fff', font: { size: 14 } } }
-      },
-      scales: (tipo !== 'doughnut') ? {
-        y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8', font: { size: 12 } } },
-        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 12 } } }
-      } : {}
-    }
+  let csv = [['Data','Modelo','Cliente','Filial','Qtd','Classificacao']];
+  document.querySelectorAll('#tabelaUltimosDefeitos tr').forEach(row => {
+    let line = [];
+    row.querySelectorAll('td:not(:last-child)').forEach(td => line.push('"' + td.innerText.trim() + '"'));
+    if (line.length) csv.push(line);
   });
+  const link = document.createElement("a");
+  link.setAttribute("href", encodeURI("data:text/csv;charset=utf-8,\uFEFF" + csv.map(e => e.join(",")).join("\n")));
+  link.setAttribute("download", `toners_defeitos_${new Date().toISOString().split('T')[0]}.csv`);
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 
-function fecharFullscreen() {
-  document.getElementById('chartFullscreen').classList.remove('active');
-  if (chartFS) chartFS.destroy();
-  chartFS = null;
-}
+// Fullscreen management (Sync with Triagem logic)
+let fullscreenChart = null;
+window.expandirDefeitosGrafico = function(chartKey, title, subtitle) {
+    const source = charts[chartKey];
+    if (!source) return;
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') fecharFullscreen();
-});
+    const overlay = document.getElementById('chartFullscreen');
+    document.getElementById('fsTitle').textContent = title;
+    document.getElementById('fsSubtitle').textContent = subtitle;
+
+    if (fullscreenChart) { fullscreenChart.destroy(); }
+
+    const srcConfig = source.config;
+    const clonedData = JSON.parse(JSON.stringify(srcConfig.data));
+    const clonedOptions = JSON.parse(JSON.stringify(srcConfig.options || {}));
+
+    // Presentation scaling
+    clonedOptions.plugins = clonedOptions.plugins || {};
+    clonedOptions.plugins.legend = clonedOptions.plugins.legend || {};
+    clonedOptions.plugins.legend.labels = clonedOptions.plugins.legend.labels || { color: '#e2e8f0', font: { size: 14 }, padding: 20 };
+    if (srcConfig.type === 'doughnut') clonedOptions.plugins.legend.display = true;
+    
+    if (clonedOptions.scales) {
+      Object.values(clonedOptions.scales).forEach(s => {
+        s.ticks = s.ticks || {}; s.ticks.font = { size: 13 };
+        if (s.title) s.title.font = { size: 14, weight: '600' };
+      });
+    }
+    
+    clonedOptions.plugins.tooltip = clonedOptions.plugins.tooltip || {};
+    clonedOptions.plugins.tooltip.titleFont = { size: 14 };
+    clonedOptions.plugins.tooltip.bodyFont = { size: 13 };
+
+    // Restore dataset properties lost in JSON clone
+    clonedData.datasets.forEach((ds, i) => {
+      const orig = srcConfig.data.datasets[i];
+      if (orig.backgroundColor) ds.backgroundColor = orig.backgroundColor;
+      if (orig.borderColor) ds.borderColor = orig.borderColor;
+    });
+
+    fullscreenChart = new Chart(document.getElementById('chartFullscreenCanvas'), {
+      type: srcConfig.type, 
+      data: clonedData,
+      options: { ...clonedOptions, responsive: true, maintainAspectRatio: false }
+    });
+
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+
+window.fecharFullscreen = function() {
+  const overlay = document.getElementById('chartFullscreen');
+  if (overlay) overlay.classList.remove('active');
+  document.body.style.overflow = '';
+  if (fullscreenChart) { fullscreenChart.destroy(); fullscreenChart = null; }
+};
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharFullscreen(); });
 
 document.addEventListener('DOMContentLoaded', () => {
-  initCharts();
-  initTomSelects();
-  fetchTonersDefeitoDashboard();
+    initCharts();
+    initTomSelects();
+    
+    // Move modal to body
+    const fs = document.getElementById('chartFullscreen');
+    if (fs && fs.parentElement !== document.body) { document.body.appendChild(fs); }
+
+    fetchTonersDefeitoDashboard();
+
+    const dIni = document.getElementById('filtroDataInicio');
+    const dFim = document.getElementById('filtroDataFim');
+    if (dIni) dIni.addEventListener('change', fetchTonersDefeitoDashboard);
+    if (dFim) dFim.addEventListener('change', fetchTonersDefeitoDashboard);
 });
 </script>
 <?php else: ?>
@@ -1717,8 +1579,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ===== Fullscreen =====
   let fullscreenChart = null;
 
-  window.expandirGrafico = function(chartKey, title, subtitle) {
-    const source = chartInstances[chartKey];
+  window.expandirDefeitosGrafico = function(chartKey, title, subtitle) {
+    const source = charts[chartKey];
     if (!source) return;
 
     const overlay = document.getElementById('chartFullscreen');
@@ -1733,12 +1595,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const clonedData = JSON.parse(JSON.stringify(srcConfig.data));
     const clonedOptions = JSON.parse(JSON.stringify(srcConfig.options || {}));
 
-    // Bigger fonts for presentation
+    // Bigger fonts for presentation (Alignment with Triagem)
     clonedOptions.plugins = clonedOptions.plugins || {};
     clonedOptions.plugins.legend = clonedOptions.plugins.legend || {};
     clonedOptions.plugins.legend.labels = clonedOptions.plugins.legend.labels || {};
     clonedOptions.plugins.legend.labels.font = { size: 14 };
     clonedOptions.plugins.legend.labels.padding = 20;
+    
     if (clonedOptions.scales) {
       Object.values(clonedOptions.scales).forEach(s => {
         s.ticks = s.ticks || {};
