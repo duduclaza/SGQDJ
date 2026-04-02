@@ -325,13 +325,12 @@ class Homologacoes2Service
     {
         $tiposReais = $this->getTiposProduto();
         $fornecedoresReais = $this->getFornecedores();
-        $responsaveisPorSetor = $this->getResponsaveisDisponiveisPorSetor();
         $ultimasHomologacoes = $this->getUltimasHomologacoesPorProduto(
             array_values(array_filter($this->getHomologacoes(), fn ($h) => $h['status'] === 'concluida'))
         );
         $tipoHomologacao = $currentUser['perfil'] === 'qualidade' ? 'rehomologacao' : 'primeira';
 
-        return compact('tiposReais', 'fornecedoresReais', 'responsaveisPorSetor', 'ultimasHomologacoes', 'tipoHomologacao');
+        return compact('tiposReais', 'fornecedoresReais', 'ultimasHomologacoes', 'tipoHomologacao');
     }
 
     public function createHomologacao(array $input, int $userId): int
