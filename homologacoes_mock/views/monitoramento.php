@@ -99,7 +99,7 @@ if ($u['perfil'] !== 'compras' && $u['perfil'] !== 'admin' && $u['perfil'] !== '
                     </td>
                     <td class="px-6 py-4 text-right whitespace-nowrap">
                         <div class="flex items-center justify-end gap-2">
-                            <a href="detalhe_homologacao.php?id=<?= $h['id'] ?>" class="text-primary-600 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/30 dark:text-primary-400 dark:hover:bg-primary-800/50 rounded-lg p-2 transition-colors" title="Ver Relatório">
+                            <a href="/homologacoes-2/<?= $h['id'] ?>" class="text-primary-600 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/30 dark:text-primary-400 dark:hover:bg-primary-800/50 rounded-lg p-2 transition-colors" title="Ver Relatório">
                                 <i class="ph-bold ph-eye text-lg"></i>
                             </a>
                             

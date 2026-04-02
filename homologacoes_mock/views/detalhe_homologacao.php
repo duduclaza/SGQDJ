@@ -494,7 +494,7 @@
                     <select name="resultado" required class="bg-slate-50 border border-primary-300 text-slate-900 font-bold text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                         <option value="">Julgamento...</option>
                         <option value="aprovado" <?= ($h['resultado']??'') === 'aprovado' ? 'selected' : '' ?>>Aprovado</option>
-                        <option value="aprovado com restrições" <?= ($h['resultado']??'') === 'aprovado com restrições' ? 'selected' : '' ?>>Aprovado com restrições</option>
+                        <option value="aprovado_restricoes" <?= ($h['resultado']??'') === 'aprovado_restricoes' ? 'selected' : '' ?>>Aprovado com restrições</option>
                         <option value="reprovado" <?= ($h['resultado']??'') === 'reprovado' ? 'selected' : '' ?>>Reprovado</option>
                         <option value="pendente" <?= ($h['resultado']??'') === 'pendente' ? 'selected' : '' ?>>Pendente</option>
                     </select>
@@ -556,7 +556,7 @@
         } else if (!hasPass && hasFail) {
             resultado = 'reprovado';
         } else if (hasPass && hasFail) {
-            resultado = 'aprovado com restrições';
+            resultado = 'aprovado_restricoes';
         }
         
         const selectElement = document.querySelector('select[name="resultado"]');
@@ -623,7 +623,7 @@
     }
 
     function copiarLinkPublico(token) {
-        const url = window.location.origin + window.location.pathname.replace('detalhe_homologacao.php', 'checklist_publico.php') + '?token=' + token;
+        const url = window.location.origin + '/homologacoes-2/public/' + token;
         navigator.clipboard.writeText(url).then(() => {
             alert("Link público copiado para a área de transferência!\nEnvie este link para quem fará os testes em campo.");
         }).catch(err => {

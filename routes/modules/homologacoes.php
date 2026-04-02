@@ -7,6 +7,7 @@
 
 use App\Controllers\HomologacoesKanbanController;
 use App\Controllers\ChecklistsController;
+use App\Controllers\Homologacoes2Controller;
 
 // ===== HOMOLOGAÇÕES =====
 
@@ -28,6 +29,24 @@ $router->post('/homologacoes/registrar-dados-etapa', [HomologacoesKanbanControll
 $router->get('/homologacoes/{id}/relatorio', [HomologacoesKanbanController::class, 'gerarRelatorio']);
 $router->get('/homologacoes/{id}/logs', [HomologacoesKanbanController::class, 'buscarLogs']);
 $router->get('/homologacoes/{id}/logs/export', [HomologacoesKanbanController::class, 'exportarLogs']);
+
+// ===== HOMOLOGAÇÕES 2.0 =====
+
+$router->get('/homologacoes-2', [Homologacoes2Controller::class, 'index']);
+$router->post('/homologacoes-2', [Homologacoes2Controller::class, 'index']);
+$router->get('/homologacoes-2/nova', [Homologacoes2Controller::class, 'create']);
+$router->post('/homologacoes-2/nova', [Homologacoes2Controller::class, 'create']);
+$router->get('/homologacoes-2/minha-fila', [Homologacoes2Controller::class, 'queue']);
+$router->get('/homologacoes-2/logistica', [Homologacoes2Controller::class, 'logistics']);
+$router->post('/homologacoes-2/logistica', [Homologacoes2Controller::class, 'logistics']);
+$router->get('/homologacoes-2/monitoramento', [Homologacoes2Controller::class, 'monitoring']);
+$router->post('/homologacoes-2/monitoramento', [Homologacoes2Controller::class, 'monitoring']);
+$router->get('/homologacoes-2/gerenciar', [Homologacoes2Controller::class, 'manage']);
+$router->post('/homologacoes-2/gerenciar', [Homologacoes2Controller::class, 'manage']);
+$router->get('/homologacoes-2/public/{token}', [Homologacoes2Controller::class, 'publicChecklist']);
+$router->post('/homologacoes-2/public/{token}', [Homologacoes2Controller::class, 'publicChecklist']);
+$router->get('/homologacoes-2/{id}', [Homologacoes2Controller::class, 'detail']);
+$router->post('/homologacoes-2/{id}', [Homologacoes2Controller::class, 'detail']);
 
 // ===== CHECKLISTS =====
 

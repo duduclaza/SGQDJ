@@ -640,6 +640,26 @@ $router->get('/homologacoes/{id}/details', [App\Controllers\HomologacoesKanbanCo
 
 // ===== MÓDULO HOMOLOGAÇÕES 2.0 =====
 $router->get('/homologacoes-2', [App\Controllers\Homologacoes2Controller::class , 'index']);
+$router->post('/homologacoes-2', [App\Controllers\Homologacoes2Controller::class , 'index']);
+$router->get('/homologacoes-2/nova', [App\Controllers\Homologacoes2Controller::class , 'create']);
+$router->post('/homologacoes-2/nova', [App\Controllers\Homologacoes2Controller::class , 'create']);
+$router->get('/homologacoes-2/minha-fila', [App\Controllers\Homologacoes2Controller::class , 'queue']);
+$router->get('/homologacoes-2/logistica', [App\Controllers\Homologacoes2Controller::class , 'logistics']);
+$router->post('/homologacoes-2/logistica', [App\Controllers\Homologacoes2Controller::class , 'logistics']);
+$router->get('/homologacoes-2/monitoramento', [App\Controllers\Homologacoes2Controller::class , 'monitoring']);
+$router->post('/homologacoes-2/monitoramento', [App\Controllers\Homologacoes2Controller::class , 'monitoring']);
+$router->get('/homologacoes-2/gerenciar', [App\Controllers\Homologacoes2Controller::class , 'manage']);
+$router->post('/homologacoes-2/gerenciar', [App\Controllers\Homologacoes2Controller::class , 'manage']);
+$router->get('/homologacoes-2/public/{token}', [App\Controllers\Homologacoes2Controller::class , 'publicChecklist']);
+$router->post('/homologacoes-2/public/{token}', [App\Controllers\Homologacoes2Controller::class , 'publicChecklist']);
+$router->get('/homologacoes-2/{id}', [App\Controllers\Homologacoes2Controller::class , 'detail']);
+$router->post('/homologacoes-2/{id}', [App\Controllers\Homologacoes2Controller::class , 'detail']);
+
+$router->get('/api/homologacoes-2/tipos', [App\Controllers\Homologacoes2Controller::class , 'apiTipos']);
+$router->get('/api/homologacoes-2/fornecedores', [App\Controllers\Homologacoes2Controller::class , 'apiFornecedores']);
+$router->get('/api/homologacoes-2/clientes', [App\Controllers\Homologacoes2Controller::class , 'apiClientes']);
+$router->get('/api/homologacoes-2/checklists', [App\Controllers\Homologacoes2Controller::class , 'apiChecklists']);
+$router->get('/api/homologacoes-2/{id}', [App\Controllers\Homologacoes2Controller::class , 'apiHomologacao']);
 
 // Rotas de Checklists
 $router->post('/homologacoes/checklists/create', [App\Controllers\ChecklistsController::class , 'create']);
@@ -794,6 +814,7 @@ try {
         strpos($currentRoute, '/nps/responder/') === 0 || // Formulário público NPS
         strpos($currentRoute, '/nps/salvar-resposta') === 0 || // Salvar resposta pública NPS
         strpos($currentRoute, '/area-tecnica/checklist') === 0 || // Checklist Virtual público
+        strpos($currentRoute, '/homologacoes-2/public/') === 0 || // Checklist público Homologações 2.0
         $currentRoute === '/teste-smtp-debug' // Teste debug email
         );
 

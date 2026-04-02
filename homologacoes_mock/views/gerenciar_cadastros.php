@@ -109,7 +109,7 @@
             <!-- Lista de Checklists -->
             <div class="p-6">
                 <?php
-                    $todosChecklists = $_SESSION['mock_checklists_por_tipo'] ?? [];
+                    $todosChecklists = $checklistsPorTipo ?? [];
                     $temChecklist = false;
                     foreach ($todosChecklists as $tipoNome => $itens) {
                         if (!empty($itens)) $temChecklist = true;
@@ -251,7 +251,7 @@
 
 <!-- Dados dos checklists existentes para o JS -->
 <script>
-const checklistsPorTipo = <?= json_encode($_SESSION['mock_checklists_por_tipo'] ?? [], JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+const checklistsPorTipo = <?= json_encode($checklistsPorTipo ?? [], JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
 function toggleNovoChecklist() {
     document.getElementById('formChecklistArea').classList.toggle('hidden');

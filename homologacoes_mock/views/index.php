@@ -65,7 +65,7 @@
                 <option value="Suprimento de Impressora" <?= $filtroTipo == 'Suprimento de Impressora' ? 'selected' : '' ?>>Suprimento</option>
                 <option value="Peça de Impressora" <?= $filtroTipo == 'Peça de Impressora' ? 'selected' : '' ?>>Peça</option>
             </select>
-            <a href="index.php" class="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white p-2">Limpar</a>
+            <a href="/homologacoes-2" class="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white p-2">Limpar</a>
         </form>
     </div>
     
@@ -146,7 +146,7 @@
                                     <i class="ph-fill ph-x-circle text-xl group-hover:scale-110 transition-transform"></i>
                                 </button>
                             <?php endif; ?>
-                            <a href="detalhe_homologacao.php?id=<?= $h['id'] ?>" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg transition-colors">
+                            <a href="/homologacoes-2/<?= $h['id'] ?>" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg transition-colors">
                                 Abrir
                             </a>
                         </div>
