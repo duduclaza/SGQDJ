@@ -14,7 +14,7 @@ class Homologacoes2Service
     public function getCurrentUser(int $userId): ?array
     {
         $stmt = $this->db->prepare(
-            "SELECT u.id, u.name, u.email, u.department, u.role, u.profile_id, p.name AS profile_name
+            "SELECT u.id, u.name, u.email, u.setor, u.department, u.role, u.profile_id, p.name AS profile_name
              FROM users u
              LEFT JOIN profiles p ON p.id = u.profile_id
              WHERE u.id = ?"
@@ -28,7 +28,7 @@ class Homologacoes2Service
     public function getActiveUsers(): array
     {
         $stmt = $this->db->query(
-            "SELECT u.id, u.name, u.email, u.department, u.role, u.profile_id, p.name AS profile_name
+            "SELECT u.id, u.name, u.email, u.setor, u.department, u.role, u.profile_id, p.name AS profile_name
              FROM users u
              LEFT JOIN profiles p ON p.id = u.profile_id
              WHERE COALESCE(u.status, 'active') = 'active'
@@ -325,12 +325,13 @@ class Homologacoes2Service
     {
         $tiposReais = $this->getTiposProduto();
         $fornecedoresReais = $this->getFornecedores();
+        $responsaveisPorSetor = $this->getResponsaveisDisponiveisPorSetor();
         $ultimasHomologacoes = $this->getUltimasHomologacoesPorProduto(
             array_values(array_filter($this->getHomologacoes(), fn ($h) => $h['status'] === 'concluida'))
         );
         $tipoHomologacao = $currentUser['perfil'] === 'qualidade' ? 'rehomologacao' : 'primeira';
 
-        return compact('tiposReais', 'fornecedoresReais', 'ultimasHomologacoes', 'tipoHomologacao');
+        return compact('tiposReais', 'fornecedoresReais', 'responsaveisPorSetor', 'ultimasHomologacoes', 'tipoHomologacao');
     }
 
     public function createHomologacao(array $input, int $userId): int
@@ -1010,7 +1011,7 @@ class Homologacoes2Service
             'id' => (int) $row['id'],
             'nome' => $row['name'],
             'email' => $row['email'] ?? '',
-            'setor' => $row['department'] ?: ($row['profile_name'] ?? ''),
+            'setor' => ($row['setor'] ?? '') ?: (($row['department'] ?? '') ?: ($row['profile_name'] ?? '')),
             'perfil' => $perfil,
             'role' => $row['role'] ?? '',
             'profile_name' => $row['profile_name'] ?? '',
@@ -1025,6 +1026,7 @@ class Homologacoes2Service
         }
 
         $haystack = strtolower(trim(
+            ($row['setor'] ?? '') . ' ' .
             ($row['department'] ?? '') . ' ' .
             ($row['profile_name'] ?? '') . ' ' .
             ($row['role'] ?? '')
