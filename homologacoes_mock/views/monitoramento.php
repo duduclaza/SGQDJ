@@ -104,8 +104,8 @@ if ($u['perfil'] !== 'compras' && $u['perfil'] !== 'admin' && $u['perfil'] !== '
                             </a>
                             
                             <?php if (in_array($u['perfil'], ['admin', 'super_admin', 'compras'])): ?>
-                                <button type="button" onclick="openCancelModal(<?= $h['id'] ?>, '<?= $h['codigo'] ?>')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:hover:bg-rose-800/50 rounded-lg p-2 transition-colors" title="Excluir/Cancelar Processo">
-                                    <i class="ph-bold ph-x text-lg"></i>
+                                <button type="button" onclick="window.openCancelModal(<?= $h['id'] ?>, '<?= $h['codigo'] ?>')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:hover:bg-rose-800/50 rounded-lg p-2 transition-colors group" title="Excluir/Cancelar Processo">
+                                    <i class="ph-fill ph-trash text-lg group-hover:scale-110 transition-transform"></i>
                                 </button>
                             <?php endif; ?>
                         </div>
@@ -173,21 +173,29 @@ if ($u['perfil'] !== 'compras' && $u['perfil'] !== 'admin' && $u['perfil'] !== '
 </div>
 
 <script>
-function openCancelModal(id, code) {
-    document.getElementById('cancelId').value = id;
-    document.getElementById('cancelCode').innerText = code;
-    document.getElementById('cancelModal').classList.remove('hidden');
-}
+window.openCancelModal = function(id, code) {
+    console.log('Abrindo modal para:', id, code);
+    const modal = document.getElementById('cancelModal');
+    if (modal) {
+        document.getElementById('cancelId').value = id;
+        document.getElementById('cancelCode').innerText = code;
+        modal.classList.remove('hidden');
+    } else {
+        console.error('Modal de cancelamento não encontrado!');
+    }
+};
 
-function closeCancelModal() {
+window.closeCancelModal = function() {
     document.getElementById('cancelModal').classList.add('hidden');
-}
+};
 
-function processCancellation() {
+window.processCancellation = function() {
     closeCancelModal();
-    document.getElementById('notifOverlay').classList.remove('hidden');
+    const overlay = document.getElementById('notifOverlay');
+    if (overlay) overlay.classList.remove('hidden');
+    
     setTimeout(() => {
         document.getElementById('cancelForm').submit();
     }, 800);
-}
+};
 </script>

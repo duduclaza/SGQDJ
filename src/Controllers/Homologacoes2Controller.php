@@ -301,17 +301,12 @@ class Homologacoes2Controller
                     throw new \RuntimeException('Você não tem permissão para cancelar ou excluir esta homologação.');
                 }
 
-                $this->service->cancelHomologacao(
-                    (int) ($_POST['id'] ?? 0),
-                    (($_POST['excluir_definitivo'] ?? '0') === '1'),
-                    $u
-                );
+                $isExcluir = ($_POST['excluir_definitivo'] ?? '0') === '1';
+                $this->service->cancelHomologacao((int)$_POST['id'], $isExcluir, $u);
 
                 $_SESSION['flash_message'] = [
-                    'type' => (($_POST['excluir_definitivo'] ?? '0') === '1') ? 'success' : 'warning',
-                    'text' => (($_POST['excluir_definitivo'] ?? '0') === '1')
-                        ? 'Homologação removida da fila geral.'
-                        : 'Homologação cancelada com sucesso.',
+                    'type' => 'success',
+                    'text' => $isExcluir ? 'Homologação excluída permanentemente.' : 'Homologação cancelada com sucesso.'
                 ];
             }
         } catch (\Throwable $e) {

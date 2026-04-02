@@ -142,7 +142,7 @@
                     <td class="px-6 py-4 text-right whitespace-nowrap">
                         <div class="flex items-center justify-end gap-2">
                             <?php if (in_array($u['perfil'], ['admin', 'super_admin', 'compras'])): ?>
-                                <button type="button" onclick="openCancelModal(<?= $h['id'] ?>, '<?= $h['codigo'] ?>')" class="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors group" title="Excluir/Cancelar Homologação">
+                                <button type="button" onclick="window.openCancelModal(<?= $h['id'] ?>, '<?= $h['codigo'] ?>')" class="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors group" title="Excluir/Cancelar Homologação">
                                     <i class="ph-fill ph-trash text-xl group-hover:scale-110 transition-transform"></i>
                                 </button>
                             <?php endif; ?>
@@ -213,10 +213,17 @@
 </div>
 
 <script>
+// Usando definições globais para compatibilidade absoluta
 function openCancelModal(id, code) {
-    document.getElementById('cancelId').value = id;
-    document.getElementById('cancelCode').innerText = code;
-    document.getElementById('cancelModal').classList.remove('hidden');
+    console.log('Abrindo modal para:', id, code);
+    const modal = document.getElementById('cancelModal');
+    if (modal) {
+        document.getElementById('cancelId').value = id;
+        document.getElementById('cancelCode').innerText = code;
+        modal.classList.remove('hidden');
+    } else {
+        console.error('Modal de cancelamento não encontrado!');
+    }
 }
 
 function closeCancelModal() {
@@ -224,16 +231,19 @@ function closeCancelModal() {
 }
 
 function processCancellation() {
-    // Esconder modal
     closeCancelModal();
-    // Mostrar animação de notificação
-    document.getElementById('notifOverlay').classList.remove('hidden');
+    const overlay = document.getElementById('notifOverlay');
+    if (overlay) overlay.classList.remove('hidden');
     
-    // Pequeno delay para simular o envio antes do submit
     setTimeout(() => {
         document.getElementById('cancelForm').submit();
     }, 800);
 }
+
+// Também expõe no window
+window.openCancelModal = openCancelModal;
+window.closeCancelModal = closeCancelModal;
+window.processCancellation = processCancellation;
 </script>
 
 <style>
