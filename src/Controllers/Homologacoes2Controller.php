@@ -26,6 +26,7 @@ class Homologacoes2Controller
         }
 
         $dados = $this->service->getDashboardData($_GET);
+        $dados['u'] = $u;
         $homologacoes = $dados['homologacoes'];
         $this->prepareViewContext($homologacoes);
 
